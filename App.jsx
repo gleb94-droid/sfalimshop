@@ -105,17 +105,17 @@ const PRODUCTS = (t) => [
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
 const PLACEMENTS = {
   tshirt:  [
-    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 162, cy: 145 },
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 238, cy: 145, smallOnly: true },
     { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
     { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 190 },
   ],
   oversized: [
-    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 158, cy: 145 },
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 242, cy: 145, smallOnly: true },
     { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
     { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 195 },
   ],
   dryfit: [
-    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 162, cy: 145 },
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 238, cy: 145, smallOnly: true },
     { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
     { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 190 },
   ],
@@ -135,18 +135,18 @@ const PLACEMENTS = {
 const SIZE_OPTIONS = {
   tshirt:  [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
-    { id: "medium", px: 95,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
-    { id: "large",  px: 135, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+    { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 110, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   oversized: [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
-    { id: "medium", px: 95,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
-    { id: "large",  px: 135, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+    { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 110, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   dryfit: [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
-    { id: "medium", px: 95,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
-    { id: "large",  px: 135, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+    { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 110, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   mug: [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
@@ -649,8 +649,16 @@ function OrderPage({ lang, user, setPage }) {
   };
 
   const handleSelectPlacement = (placementId) => {
+    const placements = PLACEMENTS[product.id] || PLACEMENTS.tshirt;
+    const pl = placements.find(p => p.id === placementId);
     setSelectedPlacement(placementId);
-    if (selectedSize) applyPlacementAndSize(placementId, selectedSize);
+    // Left chest is small only — auto-select small
+    if (pl?.smallOnly) {
+      setSelectedSize("small");
+      applyPlacementAndSize(placementId, "small");
+    } else if (selectedSize) {
+      applyPlacementAndSize(placementId, selectedSize);
+    }
   };
 
   const handleSelectSize = (sizeId) => {
@@ -859,13 +867,18 @@ function OrderPage({ lang, user, setPage }) {
                     </div>
                     <label style={labelStyle}>{lang === "he" ? "גודל הדפסה" : lang === "ru" ? "Размер печати" : "Print Size"}</label>
                     <div style={{ display: "flex", gap: 8 }}>
-                      {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => (
-                        <button key={sz.id} onClick={() => handleSelectSize(sz.id)}
-                          style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "10px 6px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s", textAlign: "center" }}>
-                          <div style={{ fontWeight: 700, fontSize: 13 }}>{sz.label[lang] || sz.label.en}</div>
-                          <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2 }}>{sz.cm}</div>
-                        </button>
-                      ))}
+                      {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => {
+                        const placements = PLACEMENTS[product.id] || PLACEMENTS.tshirt;
+                        const currentPl = placements.find(p => p.id === selectedPlacement);
+                        const isDisabled = currentPl?.smallOnly && sz.id !== "small";
+                        return (
+                          <button key={sz.id} onClick={() => !isDisabled && handleSelectSize(sz.id)}
+                            style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: isDisabled ? COLORS.border : selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "10px 6px", cursor: isDisabled ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s", textAlign: "center", opacity: isDisabled ? 0.4 : 1 }}>
+                            <div style={{ fontWeight: 700, fontSize: 13 }}>{sz.label[lang] || sz.label.en}</div>
+                            <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2 }}>{sz.cm}</div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
