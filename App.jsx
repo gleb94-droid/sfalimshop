@@ -138,52 +138,61 @@ const SIZE_OPTIONS = {
   ],
 };
 
-// SVG Mockups
-function TShirtMockup({ color, imageUrl, imagePos }) {
+// Supabase mockup image URLs
+const MOCKUP_URLS = {
+  tshirt:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
+  mug:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/white%20mug.png",
+  sticker: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
+};
+
+function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlaceholder }) {
+  const isWhite = !color || color === "#ffffff";
   return (
-    <svg viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      <defs>
-        <linearGradient id="ts-hl" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="white" stopOpacity="0.15" /><stop offset="100%" stopColor="black" stopOpacity="0.1" /></linearGradient>
-        <clipPath id="ts-clip"><path d="M150,40 L80,80 L40,140 L90,160 L90,380 L310,380 L310,160 L360,140 L320,80 L250,40 C240,70 200,80 200,80 C200,80 160,70 150,40Z" /></clipPath>
-        <filter id="ts-shadow"><feDropShadow dx="0" dy="4" stdDeviation="12" floodOpacity="0.4" /></filter>
-      </defs>
-      <ellipse cx="200" cy="400" rx="120" ry="12" fill="rgba(0,0,0,0.3)" />
-      <path d="M150,40 L80,80 L40,140 L90,160 L90,380 L310,380 L310,160 L360,140 L320,80 L250,40 C240,70 200,80 200,80 C200,80 160,70 150,40Z" fill={color} filter="url(#ts-shadow)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-      {imageUrl ? <image href={imageUrl} x={imagePos.x} y={imagePos.y} width={imagePos.size} height={imagePos.size} clipPath="url(#ts-clip)" preserveAspectRatio="xMidYMid meet" /> : <g clipPath="url(#ts-clip)"><rect x="145" y="110" width="110" height="130" rx="6" fill="rgba(255,107,53,0.12)" stroke="rgba(255,107,53,0.3)" strokeWidth="1.5" strokeDasharray="5,4" /><text x="200" y="175" textAnchor="middle" fill="rgba(255,107,53,0.6)" fontSize="11" fontFamily="monospace">↑ Upload design</text></g>}
-      <path d="M150,40 L80,80 L40,140 L90,160 L90,380 L310,380 L310,160 L360,140 L320,80 L250,40 C240,70 200,80 200,80 C200,80 160,70 150,40Z" fill="url(#ts-hl)" opacity="0.3" />
-    </svg>
+    <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "#f8f8f8" }}>
+      {/* Product image */}
+      <img src={mockupUrl} alt="product" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 1 }} />
+      {/* Color tint overlay */}
+      {!isWhite && (
+        <div style={{ position: "absolute", inset: 0, background: color, mixBlendMode: "multiply", zIndex: 2, borderRadius: 12 }} />
+      )}
+      {/* Customer design */}
+      {imageUrl ? (
+        <img src={imageUrl} alt="design" style={{
+          position: "absolute",
+          left: `${(imagePos.x / 400) * 100}%`,
+          top: `${(imagePos.y / 400) * 100}%`,
+          width: `${(imagePos.size / 400) * 100}%`,
+          height: `${(imagePos.size / 400) * 100}%`,
+          objectFit: "contain",
+          zIndex: 3,
+          pointerEvents: "none",
+        }} />
+      ) : showPlaceholder && (
+        <div style={{
+          position: "absolute",
+          left: "30%", top: "25%", width: "40%", height: "40%",
+          border: "1.5px dashed rgba(255,107,53,0.5)",
+          borderRadius: 6, zIndex: 3, display: "flex", alignItems: "center",
+          justifyContent: "center", flexDirection: "column", gap: 4,
+        }}>
+          <span style={{ fontSize: 20 }}>📁</span>
+          <span style={{ fontSize: 10, color: "rgba(255,107,53,0.7)", fontFamily: "monospace" }}>Upload design</span>
+        </div>
+      )}
+    </div>
   );
+}
+
+function TShirtMockup({ color, imageUrl, imagePos }) {
+  return <ProductMockupBase mockupUrl={MOCKUP_URLS.tshirt} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
 
 function MugMockup({ color, imageUrl, imagePos }) {
-  return (
-    <svg viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      <defs>
-        <linearGradient id="mug-grad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="rgba(0,0,0,0.25)" /><stop offset="30%" stopColor="rgba(0,0,0,0)" /><stop offset="70%" stopColor="rgba(0,0,0,0)" /><stop offset="100%" stopColor="rgba(0,0,0,0.3)" /></linearGradient>
-        <clipPath id="mug-clip"><path d="M80,80 Q80,60 200,60 Q320,60 320,80 L310,320 Q310,340 200,340 Q90,340 90,320Z" /></clipPath>
-      </defs>
-      <ellipse cx="200" cy="355" rx="130" ry="14" fill="rgba(0,0,0,0.35)" />
-      <path d="M80,80 Q80,60 200,60 Q320,60 320,80 L310,320 Q310,340 200,340 Q90,340 90,320Z" fill={color} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-      <path d="M315,140 Q370,140 370,200 Q370,260 315,260" fill="none" stroke={color} strokeWidth="22" strokeLinecap="round" />
-      <ellipse cx="200" cy="72" rx="118" ry="15" fill={color} stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-      {imageUrl ? <image href={imageUrl} x={imagePos.x} y={imagePos.y} width={imagePos.size} height={imagePos.size} clipPath="url(#mug-clip)" preserveAspectRatio="xMidYMid meet" /> : <g clipPath="url(#mug-clip)"><rect x="110" y="120" width="160" height="120" rx="6" fill="rgba(255,107,53,0.12)" stroke="rgba(255,107,53,0.3)" strokeWidth="1.5" strokeDasharray="5,4" /><text x="190" y="185" textAnchor="middle" fill="rgba(255,107,53,0.6)" fontSize="11" fontFamily="monospace">↑ Upload design</text></g>}
-      <path d="M80,80 Q80,60 200,60 Q320,60 320,80 L310,320 Q310,340 200,340 Q90,340 90,320Z" fill="url(#mug-grad)" />
-    </svg>
-  );
+  return <ProductMockupBase mockupUrl={MOCKUP_URLS.mug} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
 
 function StickerMockup({ color, imageUrl, imagePos }) {
-  return (
-    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      <defs>
-        <filter id="stk-shadow"><feDropShadow dx="0" dy="6" stdDeviation="15" floodOpacity="0.5" /></filter>
-        <clipPath id="stk-clip"><circle cx="200" cy="200" r="155" /></clipPath>
-      </defs>
-      <circle cx="200" cy="198" r="162" fill="white" filter="url(#stk-shadow)" />
-      <circle cx="200" cy="198" r="155" fill={color} />
-      {imageUrl ? <image href={imageUrl} x={imagePos.x} y={imagePos.y} width={imagePos.size} height={imagePos.size} clipPath="url(#stk-clip)" preserveAspectRatio="xMidYMid meet" /> : <g clipPath="url(#stk-clip)"><circle cx="200" cy="198" r="100" fill="rgba(255,107,53,0.12)" stroke="rgba(255,107,53,0.3)" strokeWidth="1.5" strokeDasharray="5,4" /><text x="200" y="202" textAnchor="middle" fill="rgba(255,107,53,0.6)" fontSize="11" fontFamily="monospace">↑ Upload design</text></g>}
-    </svg>
-  );
+  return <ProductMockupBase mockupUrl={MOCKUP_URLS.sticker} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
 
 // Auth Page
@@ -757,33 +766,33 @@ function OrderPage({ lang, user, setPage }) {
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h2>
             <p style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-              <div style={{ flex: "1 1 280px" }}>
-                <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 12, position: "relative", userSelect: "none" }}
-                  onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
-                  onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
-                  {product.id === "tshirt" && <TShirtMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                  {product.id === "mug" && <MugMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                  {product.id === "sticker" && <StickerMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                <div style={{ flex: "1 1 280px" }}>
+                  <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 12, position: "relative", userSelect: "none" }}
+                    onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+                    onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
+                    {product.id === "tshirt" && <TShirtMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "mug" && <MugMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "sticker" && <StickerMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {uploadedImage && (
+                      <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
+                        style={{ position: "absolute", left: `calc(12px + ${(imagePos.x / 400) * 100}%)`, top: `calc(12px + ${(imagePos.y / 400) * 100}%)`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", border: "1.5px dashed rgba(255,107,53,0.7)", borderRadius: 4, boxSizing: "border-box", zIndex: 10 }} />
+                    )}
+                  </div>
                   {uploadedImage && (
-                    <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
-                      style={{ position: "absolute", left: `${(imagePos.x / 400) * 100}%`, top: `${(imagePos.y / 400) * 100}%`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", border: "1.5px dashed rgba(255,107,53,0.6)", borderRadius: 4, boxSizing: "border-box" }} />
+                    <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 6 }}>
+                      {lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для точной настройки" : "✋ Drag to fine-tune position"}
+                    </p>
+                  )}
+                  {uploadedImage && selectedPlacement && selectedSize && (
+                    <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginTop: 2 }}>✓ {
+                      (() => {
+                        const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
+                        const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
+                        return `${pl?.[lang] || pl?.en} · ${sz?.cm}`;
+                      })()
+                    }</p>
                   )}
                 </div>
-                {uploadedImage && (
-                  <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 6 }}>
-                    {lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для точной настройки" : "✋ Drag to fine-tune position"}
-                  </p>
-                )}
-                {uploadedImage && selectedPlacement && selectedSize && (
-                  <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginTop: 2 }}>✓ {
-                    (() => {
-                      const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
-                      const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
-                      return `${pl?.[lang] || pl?.en} · ${sz?.cm}`;
-                    })()
-                  }</p>
-                )}
-              </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
                   <label style={labelStyle}>{product.id === "tshirt" ? t.customize.size : t.customize.option}</label>
