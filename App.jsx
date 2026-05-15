@@ -584,9 +584,7 @@ function OrderPage({ lang, user, setPage }) {
 
     if (!error) {
       try {
-       await fetch("https://ubvgrxlxtelulwjtfudd.supabase.co/functions/v1/send-order-confirmation", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
+      await supabase.functions.invoke("send-order-confirmation", {
   body: JSON.stringify({
     customerName: form.name,
     customerEmail: form.email,
@@ -597,6 +595,7 @@ function OrderPage({ lang, user, setPage }) {
     orderId: orderData?.id || "unknown",
     language: lang,
   }),
+  headers: { "Content-Type": "application/json" },
 });
       } catch (emailErr) {
         console.error("Email send error:", emailErr);
