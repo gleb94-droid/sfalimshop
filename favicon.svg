@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="100%" style="stop-color:#ff8c5a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="200" rx="24" fill="#0f0f0f"/>
+  <rect x="1" y="1" width="198" height="198" rx="23" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+
+  <!-- Mug body -->
+  <path d="M52,65 L52,128 Q52,138 65,138 L118,138 Q131,138 131,128 L131,65 Z" 
+        fill="none" stroke="url(#grad3)" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Handle -->
+  <path d="M131,82 Q155,82 155,105 Q155,128 131,128" 
+        fill="none" stroke="url(#grad3)" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Steam -->
+  <path d="M76,57 Q80,47 76,37" fill="none" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+  <path d="M91,53 Q95,43 91,33" fill="none" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M106,57 Q110,47 106,37" fill="none" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- S letter inside mug subtle -->
+  <text x="91" y="114" 
+        font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="36"
+        font-weight="900"
+        text-anchor="middle"
+        fill="#FF6B35"
+        opacity="0.2">S</text>
+
+  <!-- Divider line -->
+  <line x1="40" y1="152" x2="160" y2="152" stroke="#2a2a2a" stroke-width="1"/>
+
+  <!-- SFALIM text -->
+  <text x="100" y="167"
+        font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="13"
+        font-weight="700"
+        letter-spacing="5"
+        text-anchor="middle"
+        fill="#ffffff">SFALIM</text>
+
+  <!-- SHOP text -->
+  <text x="100" y="184"
+        font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="9"
+        font-weight="400"
+        letter-spacing="8"
+        text-anchor="middle"
+        fill="#FF6B35">SHOP</text>
+</svg>
