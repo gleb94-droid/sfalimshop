@@ -583,20 +583,20 @@ function OrderPage({ lang, user, setPage }) {
     }).select().single();
 
     if (!error) {
-      try {
-      await supabase.functions.invoke("send-order-confirmation", {
-  body: JSON.stringify({
-    customerName: form.name,
-    customerEmail: form.email,
-    product: product.name,
-    variant: variant.label,
-    quantity: qty,
-    total,
-    orderId: orderData?.id || "unknown",
-    language: lang,
-  }),
-  headers: { "Content-Type": "application/json" },
-});
+   try {
+     console.log("Calling email function with:", form.name, form.email);
+ await supabase.functions.invoke("send-order-confirmation", {
+        body: {
+          customerName: form.name,
+          customerEmail: form.email,
+          product: product.name,
+          variant: variant.label,
+          quantity: qty,
+          total: total,
+          orderId: orderData?.id || "unknown",
+          language: lang,
+        },
+      });
       } catch (emailErr) {
         console.error("Email send error:", emailErr);
       }
