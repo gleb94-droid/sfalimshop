@@ -813,7 +813,7 @@ function OrderPage({ lang, user, setPage }) {
                     {product.id === "sticker"   && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {uploadedImage && (
                       <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
-                        style={{ position: "absolute", left: `calc(12px + ${(imagePos.x / 400) * 100}%)`, top: `calc(12px + ${(imagePos.y / 400) * 100}%)`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", border: "1.5px dashed rgba(255,107,53,0.7)", borderRadius: 4, boxSizing: "border-box", zIndex: 10 }} />
+                        style={{ position: "absolute", left: `calc(12px + ${(imagePos.x / 400) * 100}%)`, top: `calc(12px + ${(imagePos.y / 400) * 100}%)`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", zIndex: 10 }} />
                     )}
                   </div>
                   {uploadedImage && (
