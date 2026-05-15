@@ -582,7 +582,7 @@ function OrderPage({ lang, user, setPage }) {
       language: lang,
     }).select().single();
 
-    if (!error && orderData) {
+    if (!error) {
       try {
         await supabase.functions.invoke("send-order-confirmation", {
           body: {
@@ -592,7 +592,7 @@ function OrderPage({ lang, user, setPage }) {
             variant: variant.label,
             quantity: qty,
             total,
-            orderId: orderData.id,
+            orderId: orderData?.id || "unknown",
             language: lang,
           },
         });
