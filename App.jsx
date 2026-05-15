@@ -172,7 +172,7 @@ const MOCKUP_URLS = {
 function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlaceholder }) {
   const isWhite = !color || color === "#ffffff";
   return (
-    <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "#ffffff" }}>
+    <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "transparent" }}>
       {/* Color tint layer (behind product image) */}
       {!isWhite && (
         <div style={{ position: "absolute", inset: 0, background: color, zIndex: 0 }} />
