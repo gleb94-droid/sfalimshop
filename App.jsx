@@ -59,7 +59,7 @@ const LANGS = {
     auth: { login: "כניסה", register: "הרשמה", email: "אימייל", password: "סיסמה", name: "שם מלא", loginBtn: "כנס", registerBtn: "הירשם", noAccount: "אין לך חשבון?", hasAccount: "כבר רשום?", loginTitle: "ברוך הבא חזרה", registerTitle: "צור חשבון" },
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
-    products: { tshirt: "חולצת טי", mug: "ספל", sticker: "מדבקה" },
+    products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
   },
   en: {
@@ -74,7 +74,7 @@ const LANGS = {
     auth: { login: "Login", register: "Register", email: "Email", password: "Password", name: "Full Name", loginBtn: "Login", registerBtn: "Register", noAccount: "No account?", hasAccount: "Already registered?", loginTitle: "Welcome back", registerTitle: "Create account" },
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
-    products: { tshirt: "Custom T-Shirt", mug: "Custom Mug", sticker: "Custom Sticker" },
+    products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Custom Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
   },
   ru: {
@@ -89,20 +89,32 @@ const LANGS = {
     auth: { login: "Войти", register: "Регистрация", email: "Email", password: "Пароль", name: "Полное имя", loginBtn: "Войти", registerBtn: "Зарегистрироваться", noAccount: "Нет аккаунта?", hasAccount: "Уже есть аккаунт?", loginTitle: "С возвращением", registerTitle: "Создать аккаунт" },
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
-    products: { tshirt: "Футболка", mug: "Кружка", sticker: "Стикер" },
+    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
   },
 };
 
 const PRODUCTS = (t) => [
-  { id: "tshirt", name: t.products.tshirt, emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 130, y: 100, w: 140, h: 160 } },
-  { id: "mug", name: t.products.mug, emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }, { id: "large", label: t.variants.large, price: 79 }, { id: "magic", label: t.variants.magic, price: 89 }], colors: ["#ffffff", "#f5f5f4", "#1a1a1a", "#fef3c7", "#dbeafe", "#fce7f3", "#dcfce7", "#f3e8ff", "#fee2e2", "#e0f2fe"], printArea: { x: 90, y: 90, w: 180, h: 120 } },
-  { id: "sticker", name: t.products.sticker, emoji: "✨", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 75, y: 75, w: 250, h: 250 } },
+  { id: "tshirt",    name: t.products.tshirt,    emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 140, y: 110, w: 120, h: 130 } },
+  { id: "oversized", name: t.products.oversized, emoji: "🧥", variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 130, y: 105, w: 140, h: 140 } },
+  { id: "dryfit",    name: t.products.dryfit,    emoji: "⚡", variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#1e3a5f", "#2563eb", "#7f1d1d", "#14532d", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 140, y: 110, w: 120, h: 130 } },
+  { id: "mug",       name: t.products.mug,       emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }, { id: "large", label: t.variants.large, price: 79 }, { id: "magic", label: t.variants.magic, price: 89 }], colors: ["#ffffff", "#f5f5f4", "#1a1a1a", "#fef3c7", "#dbeafe", "#fce7f3", "#dcfce7", "#f3e8ff", "#fee2e2", "#e0f2fe"], printArea: { x: 110, y: 120, w: 160, h: 120 } },
+  { id: "sticker",   name: t.products.sticker,   emoji: "✨", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 100, y: 100, w: 200, h: 200 } },
 ];
 
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
 const PLACEMENTS = {
   tshirt:  [
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 162, cy: 145 },
+    { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
+    { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 190 },
+  ],
+  oversized: [
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 158, cy: 145 },
+    { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
+    { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 195 },
+  ],
+  dryfit: [
     { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 162, cy: 145 },
     { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
     { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 190 },
@@ -122,39 +134,55 @@ const PLACEMENTS = {
 // Print size options — px = SVG units, cm = displayed label
 const SIZE_OPTIONS = {
   tshirt:  [
-    { id: "small",  px: 80,  label: { he: "קטן",  en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
-    { id: "medium", px: 155, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
-    { id: "large",  px: 230, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+    { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
+    { id: "medium", px: 95,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 135, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+  ],
+  oversized: [
+    { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
+    { id: "medium", px: 95,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 135, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+  ],
+  dryfit: [
+    { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
+    { id: "medium", px: 95,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 135, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   mug: [
-    { id: "small",  px: 75,  label: { he: "קטן",  en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
-    { id: "medium", px: 120, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
-    { id: "large",  px: 175, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
+    { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
+    { id: "medium", px: 90,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
+    { id: "large",  px: 130, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
   ],
   sticker: [
-    { id: "small",  px: 80,  label: { he: "קטן",  en: "Small",  ru: "Мал." },  cm: "5×5 cm"  },
-    { id: "medium", px: 140, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"  },
-    { id: "large",  px: 200, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "10×10 cm"},
+    { id: "small",  px: 60,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
+    { id: "medium", px: 110, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "10×10 cm" },
   ],
 };
 
 // Supabase mockup image URLs
 const MOCKUP_URLS = {
-  tshirt:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
-  mug:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/white%20mug.png",
-  sticker: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
+  tshirt:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
+  oversized: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
+  dryfit:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
+  mug:       "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/white%20mug.png",
+  sticker:   "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
 };
 
 function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlaceholder }) {
   const isWhite = !color || color === "#ffffff";
   return (
-    <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "#f8f8f8" }}>
-      {/* Product image */}
-      <img src={mockupUrl} alt="product" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 1 }} />
-      {/* Color tint overlay */}
+    <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "#ffffff" }}>
+      {/* Color tint layer (behind product image) */}
       {!isWhite && (
-        <div style={{ position: "absolute", inset: 0, background: color, mixBlendMode: "multiply", zIndex: 2, borderRadius: 12 }} />
+        <div style={{ position: "absolute", inset: 0, background: color, zIndex: 0 }} />
       )}
+      {/* Product image — multiply blends white bg away on colored background */}
+      <img src={mockupUrl} alt="product" style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "contain", zIndex: 1,
+        mixBlendMode: isWhite ? "normal" : "multiply",
+      }} />
       {/* Customer design */}
       {imageUrl ? (
         <img src={imageUrl} alt="design" style={{
@@ -170,7 +198,7 @@ function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlacehold
       ) : showPlaceholder && (
         <div style={{
           position: "absolute",
-          left: "30%", top: "25%", width: "40%", height: "40%",
+          left: "30%", top: "28%", width: "38%", height: "35%",
           border: "1.5px dashed rgba(255,107,53,0.5)",
           borderRadius: 6, zIndex: 3, display: "flex", alignItems: "center",
           justifyContent: "center", flexDirection: "column", gap: 4,
@@ -186,11 +214,15 @@ function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlacehold
 function TShirtMockup({ color, imageUrl, imagePos }) {
   return <ProductMockupBase mockupUrl={MOCKUP_URLS.tshirt} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
-
+function OversizedMockup({ color, imageUrl, imagePos }) {
+  return <ProductMockupBase mockupUrl={MOCKUP_URLS.oversized} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
+}
+function DryfitMockup({ color, imageUrl, imagePos }) {
+  return <ProductMockupBase mockupUrl={MOCKUP_URLS.dryfit} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
+}
 function MugMockup({ color, imageUrl, imagePos }) {
   return <ProductMockupBase mockupUrl={MOCKUP_URLS.mug} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
-
 function StickerMockup({ color, imageUrl, imagePos }) {
   return <ProductMockupBase mockupUrl={MOCKUP_URLS.sticker} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
@@ -525,14 +557,10 @@ function AdminPage({ lang }) {
                               <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>Design Preview</div>
                               <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180, position: "relative" }}>
                                 {(() => {
-                                  const pos = { x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 };
-                                  const color = order.product_color || "#ffffff";
-                                  const pid = order.product?.toLowerCase().includes("mug") ? "mug" : order.product?.toLowerCase().includes("sticker") ? "sticker" : "tshirt";
-                                  return pid === "mug"
-                                    ? <MugMockup color={color} imageUrl={order.design_url} imagePos={pos} />
-                                    : pid === "sticker"
-                                    ? <StickerMockup color={color} imageUrl={order.design_url} imagePos={pos} />
-                                    : <TShirtMockup color={color} imageUrl={order.design_url} imagePos={pos} />;
+                                  const pname = order.product?.toLowerCase() || "";
+                                  const pid = pname.includes("mug") ? "mug" : pname.includes("sticker") ? "sticker" : pname.includes("oversize") ? "oversized" : pname.includes("dryfit") || pname.includes("dry") ? "dryfit" : "tshirt";
+                                  const mockupUrl = MOCKUP_URLS[pid] || MOCKUP_URLS.tshirt;
+                                  return <ProductMockupBase mockupUrl={mockupUrl} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={{ x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 }} />;
                                 })()}
                               </div>
                               <button onClick={async () => {
@@ -770,9 +798,11 @@ function OrderPage({ lang, user, setPage }) {
                   <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 12, position: "relative", userSelect: "none" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
-                    {product.id === "tshirt" && <TShirtMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                    {product.id === "mug" && <MugMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                    {product.id === "sticker" && <StickerMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "sticker"   && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {uploadedImage && (
                       <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
                         style={{ position: "absolute", left: `calc(12px + ${(imagePos.x / 400) * 100}%)`, top: `calc(12px + ${(imagePos.y / 400) * 100}%)`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", border: "1.5px dashed rgba(255,107,53,0.7)", borderRadius: 4, boxSizing: "border-box", zIndex: 10 }} />
@@ -795,7 +825,7 @@ function OrderPage({ lang, user, setPage }) {
                 </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
-                  <label style={labelStyle}>{product.id === "tshirt" ? t.customize.size : t.customize.option}</label>
+                  <label style={labelStyle}>{["tshirt","oversized","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {product.variants.map(v => <button key={v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
                   </div>
