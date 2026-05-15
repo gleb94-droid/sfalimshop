@@ -161,62 +161,53 @@ const SIZE_OPTIONS = {
 };
 
 // Supabase mockup image URLs
+// 1. הגדרת קישורים דינמיים לפי צבעים מתוך ה-Supabase שלכם
 const MOCKUP_URLS = {
-  tshirt:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
-  oversized: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
-  dryfit:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
-  mug:       "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/white%20mug.png",
-  sticker:   "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
+  tshirt: {
+    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
+    // כאן תוכל להוסיף את הקישורים לחולצות בצבעים האחרים שתעלה לסטורג' שלכם:
+    // "#1a1a1a": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t_shirt_black.png",
+    // "#16a34a": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t_shirt_green.png",
+  },
+  oversized: {
+    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
+  },
+  dryfit: {
+    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
+  },
+  mug: {
+    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/white%20mug.png",
+  },
+  sticker: {
+    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
+  }
 };
 
-function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlaceholder }) {
-  const isWhite = !color || color === "#ffffff";
+// 2. קומפוננטת הבסיס המתוקנת - נקייה ובלי פילטרים ששוברים את הרקע
+function ProductMockupBase({ productKey, color, imageUrl, imagePos, showPlaceholder }) {
+  // בדיקה אם קיים מוקאפ מוכן לצבע שנבחר, אם לא - משתמש בברירת המחדל (לבן)
+  const productMockups = MOCKUP_URLS[productKey] || {};
+  const mockupUrl = productMockups[color] || productMockups["#ffffff"] || "";
 
   return (
     <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "transparent" }}>
-      {/* קבוצה מבודדת כדי שמיזוג השכבות לא ישפיע על הרקע של האתר */}
       <div style={{ position: "absolute", inset: 0, isolation: "isolate" }}>
         
-        {/* שכבה 1: שכבת הצבע הבסיסית. משתמשת בתמונת המוקאפ כדי לצבוע בדיוק את צורת החולצה, מבלי לצאת לרקע */}
-        {!isWhite && (
-          <img 
-            src={mockupUrl} 
-            alt="product-color-base" 
-            style={{ 
-              position: "absolute", 
-              inset: 0, 
-              width: "100%", 
-              height: "100%", 
-              objectFit: "contain", 
-              zIndex: 1,
-              // הופך את תמונת החולצה לצללית בצבע שנבחר מבלי לפגוע בשקיפות מסביב
-              filter: `drop-shadow(0px 0px 0px ${color}) brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(${
-                // חישוב זווית צבע מותאמת במידת הצורך, או פשוט הזרקת הצבע ישירות
-                0
-              }deg)`,
-              backgroundColor: color,
-              mixBlendMode: "screen"
-            }} 
-          />
-        )}
-
-        {/* שכבה 2: המוקאפ המקורי עם הטקסטורה והקפלים */}
+        {/* תמונת המוקאפ המקורית נקייה לחלוטין */}
         <img 
           src={mockupUrl} 
-          alt="product-texture" 
+          alt="product" 
           style={{ 
             position: "absolute", 
             inset: 0, 
             width: "100%", 
             height: "100%", 
             objectFit: "contain", 
-            zIndex: 2,
-            // אם נבחר צבע, השכבה הזו מתמזגת איתו ומקבלת את הגוון שלו דרך הצללים
-            mixBlendMode: isWhite ? "normal" : "multiply",
+            zIndex: 1 
           }} 
         />
 
-        {/* שכבה 3: העיצוב של הלקוח (הלוגו שלכם) */}
+        {/* העיצוב של הלקוח (הלוגו) */}
         {imageUrl ? (
           <img src={imageUrl} alt="design" style={{
             position: "absolute",
@@ -244,22 +235,23 @@ function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlacehold
     </div>
   );
 }
+
+// 3. עדכון הקומפוננטות הספציפיות שיעבירו את ה-productKey במקום את ה-mockupUrl
 function TShirtMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase mockupUrl={MOCKUP_URLS.tshirt} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
+  return <ProductMockupBase productKey="tshirt" color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
 function OversizedMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase mockupUrl={MOCKUP_URLS.oversized} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
+  return <ProductMockupBase productKey="oversized" color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
 function DryfitMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase mockupUrl={MOCKUP_URLS.dryfit} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
+  return <ProductMockupBase productKey="dryfit" color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
 function MugMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase mockupUrl={MOCKUP_URLS.mug} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
+  return <ProductMockupBase productKey="mug" color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
 function StickerMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase mockupUrl={MOCKUP_URLS.sticker} color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
+  return <ProductMockupBase productKey="sticker" color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
 }
-
 // Auth Page
 function AuthPage({ lang, onAuth }) {
   const t = LANGS[lang];
