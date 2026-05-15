@@ -584,18 +584,20 @@ function OrderPage({ lang, user, setPage }) {
 
     if (!error) {
       try {
-        await supabase.functions.invoke("send-order-confirmation", {
-          body: {
-            customerName: form.name,
-            customerEmail: form.email,
-            product: product.name,
-            variant: variant.label,
-            quantity: qty,
-            total,
-            orderId: orderData?.id || "unknown",
-            language: lang,
-          },
-        });
+       await fetch("https://ubvgrxlxtelulwjtfudd.supabase.co/functions/v1/send-order-confirmation", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    customerName: form.name,
+    customerEmail: form.email,
+    product: product.name,
+    variant: variant.label,
+    quantity: qty,
+    total,
+    orderId: orderData?.id || "unknown",
+    language: lang,
+  }),
+});
       } catch (emailErr) {
         console.error("Email send error:", emailErr);
       }
