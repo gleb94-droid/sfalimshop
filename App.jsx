@@ -170,51 +170,53 @@ const MOCKUP_URLS = {
 };
 
 function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlaceholder }) {
-  // פונקציה שממירה קוד HEX לפילטר CSS שמחליף צבעים ושומר על שקיפות
-  const getColorFilter = (hexColor) => {
-    if (!hexColor || hexColor === "#ffffff") return "none";
-    
-    // מפות צבעים מוכנות מראש ל-HEX הקיים באתר שלך כדי להגיע לגוון המדויק
-    const colorFilters = {
-      "#e5e5e5": "brightness(0.9) grayscale(1)", // אפור בהיר
-      "#1a1a1a": "brightness(0.2) grayscale(1)", // שחור
-      "#3a3a3a": "brightness(0.4) grayscale(1)", // אפור כהה
-      "#1e3a5f": "hue-rotate(210deg) saturate(70%) brightness(0.5)", // כחול כהה
-      "#2563eb": "hue-rotate(220deg) saturate(100%) brightness(0.9)", // כחול
-      "#7f1d1d": "hue-rotate(0deg) saturate(80%) brightness(0.4)", // בורדו
-      "#dc2626": "hue-rotate(0deg) saturate(100%) brightness(0.8)", // אדום
-      "#14532d": "hue-rotate(120deg) saturate(80%) brightness(0.4)", // ירוק כהה
-      "#16a34a": "hue-rotate(120deg) saturate(90%) brightness(0.8)", // ירוק
-      "#78350f": "hue-rotate(30deg) saturate(80%) brightness(0.4)", // חום
-      "#4c1d95": "hue-rotate(270deg) saturate(80%) brightness(0.5)", // סגול
-      "#be185d": "hue-rotate(330deg) saturate(90%) brightness(0.7)", // ורוד מסטיק
-      "#FF6B35": "hue-rotate(15deg) saturate(100%) brightness(0.9)" // הכתום של המותג שלכם
-    };
-
-    return colorFilters[hexColor] || "none";
-  };
+  const isWhite = !color || color === "#ffffff";
 
   return (
     <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "transparent" }}>
+      {/* קבוצה מבודדת כדי שמיזוג השכבות לא ישפיע על הרקע של האתר */}
       <div style={{ position: "absolute", inset: 0, isolation: "isolate" }}>
         
-        {/* תמונת המוצר - הפילטר משנה לה את הצבע מבלי להוסיף רקע ריבועי */}
+        {/* שכבה 1: שכבת הצבע הבסיסית. משתמשת בתמונת המוקאפ כדי לצבוע בדיוק את צורת החולצה, מבלי לצאת לרקע */}
+        {!isWhite && (
+          <img 
+            src={mockupUrl} 
+            alt="product-color-base" 
+            style={{ 
+              position: "absolute", 
+              inset: 0, 
+              width: "100%", 
+              height: "100%", 
+              objectFit: "contain", 
+              zIndex: 1,
+              // הופך את תמונת החולצה לצללית בצבע שנבחר מבלי לפגוע בשקיפות מסביב
+              filter: `drop-shadow(0px 0px 0px ${color}) brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(${
+                // חישוב זווית צבע מותאמת במידת הצורך, או פשוט הזרקת הצבע ישירות
+                0
+              }deg)`,
+              backgroundColor: color,
+              mixBlendMode: "screen"
+            }} 
+          />
+        )}
+
+        {/* שכבה 2: המוקאפ המקורי עם הטקסטורה והקפלים */}
         <img 
           src={mockupUrl} 
-          alt="product" 
+          alt="product-texture" 
           style={{ 
             position: "absolute", 
             inset: 0, 
             width: "100%", 
             height: "100%", 
             objectFit: "contain", 
-            zIndex: 1,
-            filter: getColorFilter(color),
-            transition: "filter 0.3s ease" 
+            zIndex: 2,
+            // אם נבחר צבע, השכבה הזו מתמזגת איתו ומקבלת את הגוון שלו דרך הצללים
+            mixBlendMode: isWhite ? "normal" : "multiply",
           }} 
         />
 
-        {/* העיצוב שהלקוח העלה */}
+        {/* שכבה 3: העיצוב של הלקוח (הלוגו שלכם) */}
         {imageUrl ? (
           <img src={imageUrl} alt="design" style={{
             position: "absolute",
