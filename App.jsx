@@ -105,19 +105,19 @@ const PRODUCTS = (t) => [
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
 const PLACEMENTS = {
   tshirt:  [
-    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 238, cy: 145, smallOnly: true },
-    { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
-    { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 190 },
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest", ru: "Левый карман", cx: 238, cy: 145, smallOnly: true },
+    { id: "center_chest", he: "מרכז",       en: "Center",     ru: "Центр",        cx: 200, cy: 165 },
+    { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 270 },
   ],
   oversized: [
-    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 242, cy: 145, smallOnly: true },
-    { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
-    { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 195 },
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest", ru: "Левый карман", cx: 242, cy: 145, smallOnly: true },
+    { id: "center_chest", he: "מרכז",       en: "Center",     ru: "Центр",        cx: 200, cy: 165 },
+    { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 280 },
   ],
   dryfit: [
-    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 238, cy: 145, smallOnly: true },
-    { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
-    { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 190 },
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest", ru: "Левый карман", cx: 238, cy: 145, smallOnly: true },
+    { id: "center_chest", he: "מרכז",       en: "Center",     ru: "Центр",        cx: 200, cy: 165 },
+    { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 275 },
   ],
   mug: [
     { id: "left",   he: "שמאל",  en: "Left",   ru: "Слева",  cx: 130, cy: 150 },
@@ -173,40 +173,42 @@ function ProductMockupBase({ mockupUrl, color, imageUrl, imagePos, showPlacehold
   const isWhite = !color || color === "#ffffff";
   return (
     <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "transparent" }}>
-      {/* Color tint layer (behind product image) */}
-      {!isWhite && (
-        <div style={{ position: "absolute", inset: 0, background: color, zIndex: 0 }} />
-      )}
-      {/* Product image — multiply blends white bg away on colored background */}
-      <img src={mockupUrl} alt="product" style={{
-        position: "absolute", inset: 0, width: "100%", height: "100%",
-        objectFit: "contain", zIndex: 1,
-        mixBlendMode: isWhite ? "normal" : "multiply",
-      }} />
-      {/* Customer design */}
-      {imageUrl ? (
-        <img src={imageUrl} alt="design" style={{
-          position: "absolute",
-          left: `${(imagePos.x / 400) * 100}%`,
-          top: `${(imagePos.y / 400) * 100}%`,
-          width: `${(imagePos.size / 400) * 100}%`,
-          height: `${(imagePos.size / 400) * 100}%`,
-          objectFit: "contain",
-          zIndex: 3,
-          pointerEvents: "none",
-        }} />
-      ) : showPlaceholder && (
-        <div style={{
-          position: "absolute",
-          left: "30%", top: "28%", width: "38%", height: "35%",
-          border: "1.5px dashed rgba(255,107,53,0.5)",
-          borderRadius: 6, zIndex: 3, display: "flex", alignItems: "center",
-          justifyContent: "center", flexDirection: "column", gap: 4,
-        }}>
-          <span style={{ fontSize: 20 }}>📁</span>
-          <span style={{ fontSize: 10, color: "rgba(255,107,53,0.7)", fontFamily: "monospace" }}>Upload design</span>
-        </div>
-      )}
+      {/* Isolated group so blend mode stays contained */}
+      <div style={{ position: "absolute", inset: 0, isolation: "isolate" }}>
+        {/* White base needed for multiply to work */}
+        <div style={{ position: "absolute", inset: 0, background: "#ffffff", zIndex: 0 }} />
+        {/* Product image */}
+        <img src={mockupUrl} alt="product" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 1 }} />
+        {/* Color tint — multiply on white = color; transparent areas stay transparent */}
+        {!isWhite && (
+          <div style={{ position: "absolute", inset: 0, background: color, mixBlendMode: "multiply", zIndex: 2 }} />
+        )}
+        {/* Customer design */}
+        {imageUrl ? (
+          <img src={imageUrl} alt="design" style={{
+            position: "absolute",
+            left: `${(imagePos.x / 400) * 100}%`,
+            top: `${(imagePos.y / 400) * 100}%`,
+            width: `${(imagePos.size / 400) * 100}%`,
+            height: `${(imagePos.size / 400) * 100}%`,
+            objectFit: "contain",
+            zIndex: 4,
+            pointerEvents: "none",
+            mixBlendMode: "multiply",
+          }} />
+        ) : showPlaceholder && (
+          <div style={{
+            position: "absolute",
+            left: "30%", top: "28%", width: "38%", height: "35%",
+            border: "1.5px dashed rgba(255,107,53,0.5)",
+            borderRadius: 6, zIndex: 4, display: "flex", alignItems: "center",
+            justifyContent: "center", flexDirection: "column", gap: 4,
+          }}>
+            <span style={{ fontSize: 20 }}>📁</span>
+            <span style={{ fontSize: 10, color: "rgba(255,107,53,0.7)", fontFamily: "monospace" }}>Upload design</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -618,11 +620,13 @@ function OrderPage({ lang, user, setPage }) {
   const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", notes: "" });
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [backPrint, setBackPrint] = useState(false);
+  const BACK_PRINT_PRICE = 39;
   const fileRef = useRef();
 
   const product = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
   const variant = selectedVariant ? product?.variants.find(v => v.id === selectedVariant) : null;
-  const total = variant ? (variant.price * qty) + SHIPPING_PRICE : 0;
+  const total = variant ? (variant.price * qty) + SHIPPING_PRICE + (backPrint ? BACK_PRINT_PRICE : 0) : 0;
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
@@ -737,6 +741,7 @@ function OrderPage({ lang, user, setPage }) {
       design_x: imagePos.x, design_y: imagePos.y, design_size: imagePos.size,
       product_color: product.colors[selectedColor],
       language: lang,
+      back_print: backPrint,
     }).select().single();
 
     if (!error) {
@@ -854,6 +859,26 @@ function OrderPage({ lang, user, setPage }) {
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
                 </div>
+                {/* Back print option — shirts only */}
+                {["tshirt","oversized","dryfit"].includes(product.id) && (
+                  <div onClick={() => setBackPrint(p => !p)}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: backPrint ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `1px solid ${backPrint ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: "12px 16px", cursor: "pointer", transition: "all 0.2s" }}>
+                    <div>
+                      <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>
+                        {lang === "he" ? "🖨️ הדפסה גם על הגב" : lang === "ru" ? "🖨️ Печать на спине" : "🖨️ Add Back Print"}
+                      </div>
+                      <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>
+                        {lang === "he" ? "עיצוב נוסף מאחורה" : lang === "ru" ? "Дополнительный дизайн сзади" : "Additional design on the back"}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13 }}>+₪{BACK_PRINT_PRICE}</span>
+                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: backPrint ? COLORS.accent : "transparent", border: `2px solid ${backPrint ? COLORS.accent : COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {backPrint && <span style={{ color: "#fff", fontSize: 11 }}>✓</span>}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {uploadedImage && (
                   <div>
                     <label style={labelStyle}>{lang === "he" ? "מיקום עיצוב" : lang === "ru" ? "Расположение" : "Placement"}</label>
@@ -884,8 +909,9 @@ function OrderPage({ lang, user, setPage }) {
                 )}
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
-                  <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 8 }}><span>{t.customize.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
-                  <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{variant.price + SHIPPING_PRICE}</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{t.customize.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
+                  {backPrint && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "הדפסת גב" : "Back Print"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
+                  <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{variant.price + SHIPPING_PRICE + (backPrint ? BACK_PRINT_PRICE : 0)}</span></div>
                 </div>}
               </div>
             </div>
