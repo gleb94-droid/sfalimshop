@@ -95,10 +95,48 @@ const LANGS = {
 };
 
 const PRODUCTS = (t) => [
-  { id: "tshirt", name: t.products.tshirt, emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#1a1a1a", "#1e3a5f", "#7f1d1d", "#14532d"], printArea: { x: 130, y: 100, w: 140, h: 160 } },
-  { id: "mug", name: t.products.mug, emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }, { id: "large", label: t.variants.large, price: 79 }, { id: "magic", label: t.variants.magic, price: 89 }], colors: ["#ffffff", "#1a1a1a", "#fef3c7", "#dbeafe"], printArea: { x: 90, y: 90, w: 180, h: 120 } },
-  { id: "sticker", name: t.products.sticker, emoji: "✨", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8"], printArea: { x: 75, y: 75, w: 250, h: 250 } },
+  { id: "tshirt", name: t.products.tshirt, emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 130, y: 100, w: 140, h: 160 } },
+  { id: "mug", name: t.products.mug, emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }, { id: "large", label: t.variants.large, price: 79 }, { id: "magic", label: t.variants.magic, price: 89 }], colors: ["#ffffff", "#f5f5f4", "#1a1a1a", "#fef3c7", "#dbeafe", "#fce7f3", "#dcfce7", "#f3e8ff", "#fee2e2", "#e0f2fe"], printArea: { x: 90, y: 90, w: 180, h: 120 } },
+  { id: "sticker", name: t.products.sticker, emoji: "✨", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 75, y: 75, w: 250, h: 250 } },
 ];
+
+// Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
+const PLACEMENTS = {
+  tshirt:  [
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest",   ru: "Левый карман", cx: 162, cy: 145 },
+    { id: "center_chest", he: "מרכז חזה",  en: "Center Chest", ru: "Центр груди",  cx: 200, cy: 165 },
+    { id: "full_front",   he: "חזה מלא",   en: "Full Front",   ru: "Весь перед",   cx: 200, cy: 190 },
+  ],
+  mug: [
+    { id: "left",   he: "שמאל",  en: "Left",   ru: "Слева",  cx: 130, cy: 150 },
+    { id: "center", he: "מרכז",  en: "Center", ru: "Центр",  cx: 200, cy: 150 },
+    { id: "right",  he: "ימין",  en: "Right",  ru: "Справа", cx: 265, cy: 150 },
+  ],
+  sticker: [
+    { id: "center", he: "מרכז",  en: "Center", ru: "Центр", cx: 200, cy: 198 },
+    { id: "top",    he: "עליון", en: "Top",    ru: "Верх",  cx: 200, cy: 135 },
+    { id: "bottom", he: "תחתון", en: "Bottom", ru: "Низ",   cx: 200, cy: 265 },
+  ],
+};
+
+// Print size options — px = SVG units, cm = displayed label
+const SIZE_OPTIONS = {
+  tshirt:  [
+    { id: "small",  px: 80,  label: { he: "קטן",  en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
+    { id: "medium", px: 155, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 230, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+  ],
+  mug: [
+    { id: "small",  px: 75,  label: { he: "קטן",  en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
+    { id: "medium", px: 120, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
+    { id: "large",  px: 175, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
+  ],
+  sticker: [
+    { id: "small",  px: 80,  label: { he: "קטן",  en: "Small",  ru: "Мал." },  cm: "5×5 cm"  },
+    { id: "medium", px: 140, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"  },
+    { id: "large",  px: 200, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "10×10 cm"},
+  ],
+};
 
 // SVG Mockups
 function TShirtMockup({ color, imageUrl, imagePos }) {
@@ -473,22 +511,33 @@ function AdminPage({ lang }) {
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📱 {order.customer_phone}</div>}
                             {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>💬 {order.notes}</div>}
                           </div>
-                          {order.design_url && (
+                        {order.design_url && (
                             <div>
-                              <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>Design File</div>
-                              <img src={order.design_url} style={{ width: 80, height: 80, objectFit: "contain", borderRadius: 8, background: "#fff", padding: 4, display: "block", marginBottom: 8 }} />
+                              <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>Design Preview</div>
+                              <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180, position: "relative" }}>
+                                {(() => {
+                                  const pos = { x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 };
+                                  const color = order.product_color || "#ffffff";
+                                  const pid = order.product?.toLowerCase().includes("mug") ? "mug" : order.product?.toLowerCase().includes("sticker") ? "sticker" : "tshirt";
+                                  return pid === "mug"
+                                    ? <MugMockup color={color} imageUrl={order.design_url} imagePos={pos} />
+                                    : pid === "sticker"
+                                    ? <StickerMockup color={color} imageUrl={order.design_url} imagePos={pos} />
+                                    : <TShirtMockup color={color} imageUrl={order.design_url} imagePos={pos} />;
+                                })()}
+                              </div>
                               <button onClick={async () => {
-  const response = await fetch(order.design_url);
-  const blob = await response.blob();
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `design-${order.id}.png`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
-}} style={{ display: "inline-block", background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
+                                const response = await fetch(order.design_url);
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `design-${order.id}.png`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(url);
+                              }} style={{ display: "inline-block", marginTop: 8, background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
                             </div>
                           )}
                           <div>
@@ -525,6 +574,8 @@ function OrderPage({ lang, user, setPage }) {
   const [selectedColor, setSelectedColor] = useState(0);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imagePos, setImagePos] = useState({ x: 150, y: 130, size: 100 });
+  const [selectedPlacement, setSelectedPlacement] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [dragStart, setDragStart] = useState(null);
   const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", notes: "" });
@@ -539,13 +590,74 @@ function OrderPage({ lang, user, setPage }) {
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => { setUploadedImage(ev.target.result); const pa = product.printArea; setImagePos({ x: pa.x + pa.w / 2 - 50, y: pa.y + pa.h / 2 - 50, size: 100 }); };
+    reader.onload = (ev) => {
+      setUploadedImage(ev.target.result);
+      // Reset placement/size selection on new upload
+      setSelectedPlacement(null);
+      setSelectedSize(null);
+      const pa = product.printArea;
+      setImagePos({ x: pa.x + pa.w / 2 - 50, y: pa.y + pa.h / 2 - 50, size: 100 });
+    };
     reader.readAsDataURL(file);
   };
 
-  const handleMouseDown = (e) => { e.preventDefault(); setDragging(true); const rect = e.currentTarget.getBoundingClientRect(); setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height }); };
-  const handleMouseMove = useCallback((e) => { if (!dragging || !dragStart) return; setImagePos(p => ({ ...p, x: dragStart.ix + (e.clientX - dragStart.mx) * dragStart.scaleX, y: dragStart.iy + (e.clientY - dragStart.my) * dragStart.scaleY })); }, [dragging, dragStart]);
+  const applyPlacementAndSize = (placementId, sizeId) => {
+    const placements = PLACEMENTS[product.id] || PLACEMENTS.tshirt;
+    const sizes = SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt;
+    const pl = placements.find(p => p.id === placementId);
+    const sz = sizes.find(s => s.id === sizeId);
+    if (pl && sz) {
+      setImagePos({ x: pl.cx - sz.px / 2, y: pl.cy - sz.px / 2, size: sz.px });
+    }
+  };
+
+  const handleSelectPlacement = (placementId) => {
+    setSelectedPlacement(placementId);
+    if (selectedSize) applyPlacementAndSize(placementId, selectedSize);
+  };
+
+  const handleSelectSize = (sizeId) => {
+    setSelectedSize(sizeId);
+    if (selectedPlacement) applyPlacementAndSize(selectedPlacement, sizeId);
+  };
+
+  const clampToArea = (x, y, size, pa) => ({
+    x: Math.max(pa.x, Math.min(pa.x + pa.w - size, x)),
+    y: Math.max(pa.y, Math.min(pa.y + pa.h - size, y)),
+  });
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    setDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
+  };
+
+  const handleMouseMove = useCallback((e) => {
+    if (!dragging || !dragStart || !product) return;
+    const rawX = dragStart.ix + (e.clientX - dragStart.mx) * dragStart.scaleX;
+    const rawY = dragStart.iy + (e.clientY - dragStart.my) * dragStart.scaleY;
+    const { x, y } = clampToArea(rawX, rawY, imagePos.size, product.printArea);
+    setImagePos(p => ({ ...p, x, y }));
+  }, [dragging, dragStart, imagePos.size, product]);
+
   const handleMouseUp = () => setDragging(false);
+
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    setDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
+  };
+
+  const handleTouchMove = useCallback((e) => {
+    if (!dragging || !dragStart || !product) return;
+    const touch = e.touches[0];
+    const rawX = dragStart.ix + (touch.clientX - dragStart.mx) * dragStart.scaleX;
+    const rawY = dragStart.iy + (touch.clientY - dragStart.my) * dragStart.scaleY;
+    const { x, y } = clampToArea(rawX, rawY, imagePos.size, product.printArea);
+    setImagePos(p => ({ ...p, x, y }));
+  }, [dragging, dragStart, imagePos.size, product]);
 
   const handleSubmit = async () => {
     if (!form.name || !form.email) return;
@@ -583,20 +695,20 @@ function OrderPage({ lang, user, setPage }) {
     }).select().single();
 
     if (!error) {
-      try {
-        console.log("Calling email function with:", form.name, form.email);
-        await supabase.functions.invoke("send-order-confirmation", {
-          body: {
-            customerName: form.name,
-            customerEmail: form.email,
-            product: product.name,
-            variant: variant.label,
-            quantity: qty,
-            total: total,
-            orderId: orderData?.id || "unknown",
-            language: lang,
-          },
-        });
+   try {
+     console.log("Calling email function with:", form.name, form.email);
+ await supabase.functions.invoke("send-order-confirmation", {
+        body: {
+          customerName: form.name,
+          customerEmail: form.email,
+          product: product.name,
+          variant: variant.label,
+          quantity: qty,
+          total: total,
+          orderId: orderData?.id || "unknown",
+          language: lang,
+        },
+      });
       } catch (emailErr) {
         console.error("Email send error:", emailErr);
       }
@@ -646,13 +758,31 @@ function OrderPage({ lang, user, setPage }) {
             <p style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
               <div style={{ flex: "1 1 280px" }}>
-                <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 12, position: "relative", userSelect: "none" }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+                <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 12, position: "relative", userSelect: "none" }}
+                  onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+                  onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
                   {product.id === "tshirt" && <TShirtMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                   {product.id === "mug" && <MugMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                   {product.id === "sticker" && <StickerMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                  {uploadedImage && <div onMouseDown={handleMouseDown} style={{ position: "absolute", left: `${(imagePos.x / 400) * 100}%`, top: `${(imagePos.y / 400) * 100}%`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: "grab", border: "1px dashed rgba(255,107,53,0.5)", borderRadius: 4 }} />}
+                  {uploadedImage && (
+                    <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
+                      style={{ position: "absolute", left: `${(imagePos.x / 400) * 100}%`, top: `${(imagePos.y / 400) * 100}%`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", border: "1.5px dashed rgba(255,107,53,0.6)", borderRadius: 4, boxSizing: "border-box" }} />
+                  )}
                 </div>
-                {uploadedImage && <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 6 }}>{t.customize.dragHint}</p>}
+                {uploadedImage && (
+                  <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 6 }}>
+                    {lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для точной настройки" : "✋ Drag to fine-tune position"}
+                  </p>
+                )}
+                {uploadedImage && selectedPlacement && selectedSize && (
+                  <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginTop: 2 }}>✓ {
+                    (() => {
+                      const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
+                      const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
+                      return `${pl?.[lang] || pl?.en} · ${sz?.cm}`;
+                    })()
+                  }</p>
+                )}
               </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
@@ -663,8 +793,11 @@ function OrderPage({ lang, user, setPage }) {
                 </div>
                 <div>
                   <label style={labelStyle}>{t.customize.color}</label>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    {product.colors.map((c, i) => <div key={i} onClick={() => setSelectedColor(i)} style={{ width: 30, height: 30, borderRadius: "50%", background: c, cursor: "pointer", border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.1)" }} />)}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {product.colors.map((c, i) => (
+                      <div key={i} onClick={() => setSelectedColor(i)}
+                        style={{ width: 26, height: 26, borderRadius: "50%", background: c, cursor: "pointer", border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
+                    ))}
                   </div>
                 </div>
                 <div>
@@ -674,7 +807,29 @@ function OrderPage({ lang, user, setPage }) {
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
                 </div>
-                {uploadedImage && <div><label style={labelStyle}>{t.customize.designSize}</label><input type="range" min="40" max="220" value={imagePos.size} onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))} style={{ width: "100%", accentColor: COLORS.accent }} /></div>}
+                {uploadedImage && (
+                  <div>
+                    <label style={labelStyle}>{lang === "he" ? "מיקום עיצוב" : lang === "ru" ? "Расположение" : "Placement"}</label>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                      {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
+                        <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)}
+                          style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600, transition: "all 0.15s" }}>
+                          {pl[lang] || pl.en}
+                        </button>
+                      ))}
+                    </div>
+                    <label style={labelStyle}>{lang === "he" ? "גודל הדפסה" : lang === "ru" ? "Размер печати" : "Print Size"}</label>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => (
+                        <button key={sz.id} onClick={() => handleSelectSize(sz.id)}
+                          style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "10px 6px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s", textAlign: "center" }}>
+                          <div style={{ fontWeight: 700, fontSize: 13 }}>{sz.label[lang] || sz.label.en}</div>
+                          <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2 }}>{sz.cm}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 8 }}><span>{t.customize.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
