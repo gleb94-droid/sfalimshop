@@ -785,16 +785,17 @@ function OrderPage({ lang, user, setPage }) {
 
   const allowLeaveRef = useRef(false);
   const [cart, setCart] = useState([]);
+  const [currentItemCartId, setCurrentItemCartId] = useState(null);
+  const [showNextChoice, setShowNextChoice] = useState(false);
 
-  const addToCart = () => {
+  const commitCurrentItem = () => {
     if (!product || !variant || !uploadedImage) return false;
     const itemPrice = (variant.price * qty)
       + (backPrint ? BACK_PRINT_PRICE : 0)
       + (secondFront.enabled ? SECOND_FRONT_PRICE : 0)
       + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
       + (sleeveRight.enabled ? SLEEVE_PRICE : 0);
-    const newItem = {
-      id: Date.now() + Math.random(),
+    const itemData = {
       productId: selectedProduct,
       productName: product.name,
       variantId: selectedVariant,
@@ -811,9 +812,17 @@ function OrderPage({ lang, user, setPage }) {
       sleeveRight: { ...sleeveRight },
       itemPrice,
     };
-    setCart(c => [...c, newItem]);
+    if (currentItemCartId) {
+      setCart(c => c.map(it => it.id === currentItemCartId ? { ...it, ...itemData } : it));
+    } else {
+      const newId = Date.now() + Math.random();
+      setCart(c => [...c, { id: newId, ...itemData }]);
+      setCurrentItemCartId(newId);
+    }
     return true;
   };
+
+  const addToCart = () => commitCurrentItem();
 
   const resetForNewItem = () => {
     setSelectedProduct(null);
@@ -830,9 +839,13 @@ function OrderPage({ lang, user, setPage }) {
     setPositionLocked(false);
     setSecondPositionLocked(false);
     setActiveDesign('main');
+    setCurrentItemCartId(null);
   };
 
-  const removeFromCart = (id) => setCart(c => c.filter(it => it.id !== id));
+  const removeFromCart = (id) => {
+    setCart(c => c.filter(it => it.id !== id));
+    if (id === currentItemCartId) setCurrentItemCartId(null);
+  };
 
   const safeGo = (action) => {
     if (step >= 2 && step < 4) { setLeaveWarning(true); setPendingNav(() => action); }
@@ -1203,6 +1216,31 @@ function OrderPage({ lang, user, setPage }) {
           </div>
         )}
 
+        {showNextChoice && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 420, width: "100%", textAlign: "center" }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
+              <div style={{ color: COLORS.white, fontSize: 20, fontWeight: 700, marginBottom: 8, fontFamily: "'Playfair Display',serif" }}>
+                {lang === "he" ? "הפריט נוסף לסל!" : lang === "ru" ? "Товар добавлен в корзину!" : "Item added to cart!"}
+              </div>
+              <div style={{ color: COLORS.gray, fontSize: 14, marginBottom: 24 }}>
+                {lang === "he" ? "מה ברצונך לעשות?" : lang === "ru" ? "Что бы вы хотели сделать?" : "What would you like to do?"}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <button onClick={() => { if (addToCart()) { resetForNewItem(); setShowNextChoice(false); setStep(1); } }} style={{ background: COLORS.bgCard, border: `2px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>
+                  {lang === "he" ? "➕ הוסף עוד פריט" : lang === "ru" ? "➕ Добавить ещё товар" : "➕ Add another item"}
+                </button>
+                <button onClick={() => { if (addToCart()) { setShowNextChoice(false); setStep(3); } }} style={{ background: COLORS.accent, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
+                  {lang === "he" ? "💳 לתשלום ולסיום" : lang === "ru" ? "💳 К оплате" : "💳 Proceed to checkout"}
+                </button>
+                <button onClick={() => setShowNextChoice(false)} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+                  {lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {step === 1 && (
           <div>
             {cart.length > 0 && (
@@ -1519,11 +1557,8 @@ function OrderPage({ lang, user, setPage }) {
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
               <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
-              <button onClick={() => { if (addToCart()) { resetForNewItem(); setStep(1); } }} disabled={!uploadedImage} style={{ flex: "1 1 140px", background: uploadedImage ? COLORS.bgCard : COLORS.bgCard, color: uploadedImage ? COLORS.accent : COLORS.gray, border: `2px solid ${uploadedImage ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
-                {lang === "he" ? "🛒 הוסף ועוד פריט" : lang === "ru" ? "🛒 Добавить и ещё" : "🛒 Add & more items"}
-              </button>
-              <button onClick={() => { if (addToCart()) { resetForNewItem(); setStep(3); } }} disabled={!uploadedImage} style={{ flex: "1 1 140px", background: uploadedImage ? COLORS.accent : COLORS.bgCard, color: uploadedImage ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
-                {lang === "he" ? "💳 לתשלום" : lang === "ru" ? "💳 К оплате" : "💳 Checkout"}
+              <button onClick={() => uploadedImage && setShowNextChoice(true)} disabled={!uploadedImage} style={{ flex: 1, background: uploadedImage ? COLORS.accent : COLORS.bgCard, color: uploadedImage ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
+                {lang === "he" ? "המשך →" : lang === "ru" ? "Продолжить →" : "Continue →"}
               </button>
             </div>
           </div>
