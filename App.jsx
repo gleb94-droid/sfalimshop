@@ -896,6 +896,23 @@ function OrderPage({ lang, user, setPage }) {
   // Keep ref updated so native listeners always call latest version
   touchHandlersRef.current = { start: handleTouchStart, move: handleTouchMove };
 
+  // Pre-compute extra prints data OUTSIDE of JSX to avoid complex inline expressions
+  const handleBackPrintState = (fn) => {
+    const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image });
+    setBackPrint(v.enabled);
+    setBackDesign({ sameAsMain: v.sameAsMain, image: v.image });
+  };
+  const sfLabel = lang === "he" ? "עיצוב נוסף בחזית" : "Second Front Design";
+  const bpLabel = lang === "he" ? "הדפסה על הגב" : "Back Print";
+  const slLabel = lang === "he" ? "שרוול שמאל" : "Left Sleeve";
+  const srLabel = lang === "he" ? "שרוול ימין" : "Right Sleeve";
+  const extraPrintsData = [
+    { key: "sf", state: secondFront, setState: setSecondFront, ref: secondFileRef, label: "+ " + sfLabel, price: SECOND_FRONT_PRICE, isSecondFront: true },
+    { key: "bp", state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: handleBackPrintState, ref: backFileRef, label: sfLabel.includes("Second") ? "\uD83D\uDDA8 " + bpLabel : "\uD83D\uDDA8 " + bpLabel, price: BACK_PRINT_PRICE },
+    { key: "sl", state: sleeveLeft, setState: setSleeveLeft, ref: sleeveLeftRef, label: slLabel, price: SLEEVE_PRICE },
+    { key: "sr", state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: srLabel, price: SLEEVE_PRICE },
+  ];
+
   const handleSubmit = async () => {
     if (!form.name || !form.email) return;
     setSubmitting(true);
@@ -1174,12 +1191,7 @@ function OrderPage({ lang, user, setPage }) {
                   <div>
                     <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {[
-                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "➕ עיצוב נוסף בחזית" : "➕ Second Front Design", price: SECOND_FRONT_PRICE, isSecondFront: true },
-                        { key: "bp",  state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: (fn) => { const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }); setBackPrint(v.enabled); setBackDesign({ sameAsMain: v.sameAsMain, image: v.image }); }, ref: backFileRef, label: lang === "he" ? "🖨️ הדפסה על הגב" : "🖨️ Back Print", price: BACK_PRINT_PRICE },
-                        { key: "sl",  state: sleeveLeft,  setState: setSleeveLeft,  ref: sleeveLeftRef,  label: lang === "he" ? "👕 שרוול שמאל" : "👕 Left Sleeve",  price: SLEEVE_PRICE },
-                        { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "👕 שרוול ימין" : "👕 Right Sleeve", price: SLEEVE_PRICE },
-                      ].map(({ key, state, setState, ref, label, price, isSecondFront }) => (
+                      {extraPrintsData.map(({ key, state, setState, ref, label, price, isSecondFront }) => (
                         <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: `1px solid ${state.enabled ? COLORS.accent : COLORS.border}`, borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
                           <div onClick={() => {
                             const newEnabled = !state.enabled;
