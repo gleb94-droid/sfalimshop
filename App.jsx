@@ -685,6 +685,7 @@ function OrderPage({ lang, user, setPage }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const fileRef = useRef();
   const mockupRef = useRef();
+  const mockupImageRef = useRef();
   const pinchRef = useRef(null);
   // Refs for native touch handlers (needed for passive:false)
   const touchHandlersRef = useRef({});
@@ -698,7 +699,7 @@ function OrderPage({ lang, user, setPage }) {
   // Non-passive touch listeners — re-attach when step 2 renders (mockupRef becomes available)
   useEffect(() => {
     if (step !== 2) return;
-    const el = mockupRef.current;
+    const el = mockupImageRef.current;
     if (!el) return;
     const onStart = (e) => touchHandlersRef.current.start?.(e);
     const onMove = (e) => { e.preventDefault(); touchHandlersRef.current.move?.(e); };
@@ -831,7 +832,7 @@ function OrderPage({ lang, user, setPage }) {
     if (positionLocked) return;
     e.preventDefault();
     setDragging(true);
-    const rect = mockupRef.current.getBoundingClientRect();
+    const rect = mockupImageRef.current.getBoundingClientRect();
     const pos = getActivePos();
     setDragStart({ mx: e.clientX, my: e.clientY, ix: pos.x, iy: pos.y, size: pos.size, scaleX: 400 / rect.width, scaleY: 400 / rect.height, isSecond: activeDesign === 'second' });
   };
@@ -863,7 +864,7 @@ function OrderPage({ lang, user, setPage }) {
     }
     const touch = e.touches[0];
     setDragging(true);
-    const rect = mockupRef.current.getBoundingClientRect();
+    const rect = mockupImageRef.current.getBoundingClientRect();
     const pos = getActivePos();
     setDragStart({ mx: touch.clientX, my: touch.clientY, ix: pos.x, iy: pos.y, size: pos.size, scaleX: 400 / rect.width, scaleY: 400 / rect.height, isSecond: activeDesign === 'second' });
   };
@@ -1018,12 +1019,28 @@ function OrderPage({ lang, user, setPage }) {
                     style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer", maxWidth: 280, margin: "0 auto" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchEnd={handleMouseUp}>
+                    <div ref={mockupImageRef} style={{ position: "relative" }}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker"    && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker_sq" && <StickerSqMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {/* Drag overlay — inside shirt-only ref */}
+                    {uploadedImage && (
+                      <div onMouseDown={handleMouseDown}
+                        style={{ position: "absolute",
+                          left: `${(getActivePos().x / 400) * 100}%`,
+                          top: `${(getActivePos().y / 400) * 100}%`,
+                          width: `${(getActivePos().size / 400) * 100}%`,
+                          height: `${(getActivePos().size / 400) * 100}%`,
+                          cursor: dragging ? "grabbing" : "grab", zIndex: 10,
+                          touchAction: "none",
+                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
+                          borderRadius: 4,
+                        }} />
+                    )}
+                    </div>
                     <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", padding: "6px 0 4px" }}>
                       {uploadedImage
                         ? isMobile
@@ -1091,20 +1108,7 @@ function OrderPage({ lang, user, setPage }) {
                         </div>
                       </div>
                     )}
-                    {/* Drag overlay — follows active design */}
-                    {uploadedImage && (
-                      <div onMouseDown={handleMouseDown}
-                        style={{ position: "absolute",
-                          left: `${(getActivePos().x / 400) * 100}%`,
-                          top: `${(getActivePos().y / 400) * 100}%`,
-                          width: `${(getActivePos().size / 400) * 100}%`,
-                          height: `${(getActivePos().size / 400) * 100}%`,
-                          cursor: dragging ? "grabbing" : "grab", zIndex: 10,
-                          touchAction: "none",
-                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
-                          borderRadius: 4,
-                        }} />
-                    )}
+                    {/* Drag overlay moved to inside mockupImageRef above */}
                   </div>
                   {/* Lock position button — right below shirt, outside touch area */}
                   {uploadedImage && (
