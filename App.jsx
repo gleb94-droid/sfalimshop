@@ -1014,15 +1014,15 @@ function OrderPage({ lang, user, setPage }) {
                   <div>
                     <label style={labelStyle}>
                       {lang === "he" ? "גודל עיצוב" : lang === "ru" ? "Размер дизайна" : "Design Size"}
-                      <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 400) * 30)} cm</span>
+                      <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(20, p.size - 10) }))}
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(20, p.size - 7) }))}
                         style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
-                      <input type="range" min={20} max={200} value={imagePos.size}
+                      <input type="range" min={20} max={160} value={Math.min(160, imagePos.size)}
                         onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))}
                         style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(200, p.size + 10) }))}
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))}
                         style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
                     </div>
                   </div>
