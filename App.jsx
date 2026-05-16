@@ -697,7 +697,7 @@ function AdminPage({ lang }) {
                     )}
                   </div>
                 );
-              })}
+              })})()}
             </div>
           )
         }
