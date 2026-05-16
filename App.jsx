@@ -720,15 +720,18 @@ function OrderPage({ lang, user, setPage }) {
       setUploadedImage(ev.target.result);
       setSelectedPlacement(null); setSelectedSize(null);
       const pa = product.printArea;
-      setImagePos({ x: pa.x + pa.w / 2 - 21, y: pa.y + pa.h / 2 - 21, size: 43 });
+      setImagePos({ x: pa.x + pa.w / 2 - 42, y: pa.y + pa.h / 2 - 42, size: 85 });
     };
     reader.readAsDataURL(file);
   };
 
-  const handleExtraUpload = (e, setter) => {
+  const handleExtraUpload = (e, setter, isSecondFront = false) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => setter(prev => ({ ...prev, image: ev.target.result, sameAsMain: false }));
+    reader.onload = (ev) => {
+      setter(prev => ({ ...prev, image: ev.target.result, sameAsMain: false }));
+      if (isSecondFront) setActiveDesign('second');
+    };
     reader.readAsDataURL(file);
   };
 
@@ -824,6 +827,7 @@ function OrderPage({ lang, user, setPage }) {
   const handleMouseUp = () => setDragging(false);
 
   const handleTouchStart = (e) => {
+    if (!uploadedImage) return;
     if (e.touches.length === 2) {
       // 2 fingers — pinch to resize
       const dist = Math.hypot(
@@ -835,6 +839,7 @@ function OrderPage({ lang, user, setPage }) {
       return;
     }
     // 1 finger — drag
+    e.preventDefault();
     const touch = e.touches[0];
     setDragging(true);
     const rect = mockupRef.current.getBoundingClientRect();
@@ -987,8 +992,9 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ flex: "1 1 280px" }}>
                   <div ref={mockupRef}
                     onClick={() => !uploadedImage && fileRef.current.click()}
-                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "default" : "pointer", touchAction: "none" }}
+                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+                    onTouchStart={uploadedImage ? handleTouchStart : undefined}
                     onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
@@ -1065,13 +1071,14 @@ function OrderPage({ lang, user, setPage }) {
                     )}
                     {/* Drag overlay — follows active design */}
                     {uploadedImage && (
-                      <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
+                      <div onMouseDown={handleMouseDown}
                         style={{ position: "absolute",
                           left: `${(getActivePos().x / 400) * 100}%`,
                           top: `${(getActivePos().y / 400) * 100}%`,
                           width: `${(getActivePos().size / 400) * 100}%`,
                           height: `${(getActivePos().size / 400) * 100}%`,
                           cursor: dragging ? "grabbing" : "grab", zIndex: 10,
+                          touchAction: "none",
                           outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
                           borderRadius: 4,
                         }} />
@@ -1162,13 +1169,23 @@ function OrderPage({ lang, user, setPage }) {
                     <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {[
-                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "➕ עיצוב נוסף בחזית" : "➕ Second Front Design", price: SECOND_FRONT_PRICE },
+                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "➕ עיצוב נוסף בחזית" : "➕ Second Front Design", price: SECOND_FRONT_PRICE, isSecondFront: true },
                         { key: "bp",  state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: (fn) => { const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }); setBackPrint(v.enabled); setBackDesign({ sameAsMain: v.sameAsMain, image: v.image }); }, ref: backFileRef, label: lang === "he" ? "🖨️ הדפסה על הגב" : "🖨️ Back Print", price: BACK_PRINT_PRICE },
                         { key: "sl",  state: sleeveLeft,  setState: setSleeveLeft,  ref: sleeveLeftRef,  label: lang === "he" ? "👕 שרוול שמאל" : "👕 Left Sleeve",  price: SLEEVE_PRICE },
                         { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "👕 שרוול ימין" : "👕 Right Sleeve", price: SLEEVE_PRICE },
-                      ].map(({ key, state, setState, ref, label, price }) => (
+                      ].map(({ key, state, setState, ref, label, price, isSecondFront }) => (
                         <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: `1px solid ${state.enabled ? COLORS.accent : COLORS.border}`, borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
-                          <div onClick={() => setState(p => ({ ...p, enabled: !p.enabled }))} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", cursor: "pointer" }}>
+                          <div onClick={() => {
+                            const newEnabled = !state.enabled;
+                            setState(p => ({ ...p, enabled: newEnabled }));
+                            if (isSecondFront && newEnabled && product) {
+                              // Reset second design to left-chest position when enabled
+                              const pa = product.printArea;
+                              setSecondFront(p => ({ ...p, enabled: true, pos: { x: pa.x + 10, y: pa.y + 10, size: 43 } }));
+                              setActiveDesign('second');
+                            }
+                            if (isSecondFront && !newEnabled) setActiveDesign('main');
+                          }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", cursor: "pointer" }}>
                             <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{label}</span>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13 }}>+₪{price}</span>
@@ -1193,7 +1210,7 @@ function OrderPage({ lang, user, setPage }) {
                                   <span style={{ color: COLORS.accent, fontSize: 12 }}>✓ {lang === "he" ? "עיצוב הועלה" : "Uploaded"}</span>
                                 </div>
                               )}
-                              <input ref={ref} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleExtraUpload(e, setState)} />
+                              <input ref={ref} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleExtraUpload(e, setState, isSecondFront)} />
                             </div>
                           )}
                         </div>
