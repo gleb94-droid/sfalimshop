@@ -762,7 +762,7 @@ function OrderPage({ lang, user, setPage }) {
     e.preventDefault();
     setDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
-    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.5, scaleY: (400 / rect.height) * 0.5 });
+    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
   };
 
   const handleMouseMove = useCallback((e) => {
@@ -779,7 +779,7 @@ function OrderPage({ lang, user, setPage }) {
     const touch = e.touches[0];
     setDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
-    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.5, scaleY: (400 / rect.height) * 0.5 });
+    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
   };
 
   const handleTouchMove = useCallback((e) => {
@@ -982,7 +982,7 @@ function OrderPage({ lang, user, setPage }) {
                     )}
                     {uploadedImage && (
                       <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
-                        style={{ position: "absolute", left: `calc(12px + ${(imagePos.x / 400) * 100}%)`, top: `calc(12px + ${(imagePos.y / 400) * 100}%)`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", zIndex: 10 }} />
+                        style={{ position: "absolute", left: `${(imagePos.x / 400) * 100}%`, top: `${(imagePos.y / 400) * 100}%`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", zIndex: 10 }} />
                     )}
                   </div>
                 </div>
