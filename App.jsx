@@ -277,11 +277,11 @@ function AuthPage({ lang, onAuth }) {
     setLoading(false);
   };
 
-  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
+  const inputStyle = { width: "100%", background: "#111", border: "1px solid " + (COLORS.border), borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
-      <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
+      <div style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>☕</div>
           <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{mode === "login" ? t.auth.loginTitle : t.auth.registerTitle}</h2>
@@ -361,7 +361,7 @@ function TrackPage({ lang, user }) {
                 const stage = ORDER_STAGES[si] || ORDER_STAGES[0];
                 const isOpen = selected === order.id;
                 return (
-                  <div key={order.id} style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
+                  <div key={order.id} style={{ background: COLORS.bgCard, border: "1px solid " + (isOpen ? COLORS.accent : COLORS.border), borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
                     <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div onClick={() => setSelected(isOpen ? null : order.id)} style={{ flex: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div>
@@ -375,11 +375,11 @@ function TrackPage({ lang, user }) {
                         <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4 }}>{stage.emoji} {stage[lang] || stage.en}</div>
                       </div>
                       </div>
-                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(order.id); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
+                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(order.id); }} style={{ background: "transparent", border: "1px solid " + (COLORS.border), color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
                     </div>
 
                     {isOpen && (
-                      <div style={{ padding: "0 24px 24px", borderTop: `1px solid ${COLORS.border}` }}>
+                      <div style={{ padding: "0 24px 24px", borderTop: "1px solid " + (COLORS.border) }}>
                         <div style={{ marginTop: 20 }}>
                           {ORDER_STAGES.map((s, i) => {
                             const done = i <= si;
@@ -387,7 +387,7 @@ function TrackPage({ lang, user }) {
                             return (
                               <div key={s.key} style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: i < ORDER_STAGES.length - 1 ? 0 : 0 }}>
                                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                  <div style={{ width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: done ? COLORS.accent : COLORS.bg, border: `2px solid ${done ? COLORS.accent : COLORS.border}`, fontSize: 16, transition: "all 0.3s", boxShadow: active ? `0 0 12px ${COLORS.accent}` : "none" }}>
+                                  <div style={{ width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: done ? COLORS.accent : COLORS.bg, border: "2px solid " + (done ? COLORS.accent : COLORS.border), fontSize: 16, transition: "all 0.3s", boxShadow: active ? "0 0 12px " + (COLORS.accent) : "none" }}>
                                     {done ? (i === si ? s.emoji : "✓") : ""}
                                   </div>
                                   {i < ORDER_STAGES.length - 1 && <div style={{ width: 2, height: 32, background: done && i < si ? COLORS.accent : COLORS.border, transition: "background 0.3s" }} />}
@@ -481,7 +481,7 @@ function AdminPage({ lang }) {
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {ORDER_STAGES.map(s => (
-              <div key={s.key} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "8px 14px", textAlign: "center" }}>
+              <div key={s.key} style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), borderRadius: 8, padding: "8px 14px", textAlign: "center" }}>
                 <div style={{ color: statusColors[s.key] || COLORS.accent, fontWeight: 700, fontSize: 18 }}>{orders.filter(o => o.status === s.key).length}</div>
                 <div style={{ color: COLORS.gray, fontSize: 11 }}>{s.emoji}</div>
               </div>
@@ -497,13 +497,13 @@ function AdminPage({ lang }) {
             return (
               <button key={key} onClick={() => setFilterStatus(key)} style={{
                 background: filterStatus === key ? (key === "all" ? COLORS.accent : statusColors[key] || COLORS.accent) : COLORS.bgCard,
-                border: `1px solid ${filterStatus === key ? (key === "all" ? COLORS.accent : statusColors[key] || COLORS.accent) : COLORS.border}`,
+                border: "1px solid " + (filterStatus === key ? (key === "all" ? COLORS.accent : statusColors[key] || COLORS.accent) : COLORS.border),
                 color: filterStatus === key ? "#000" : COLORS.gray,
                 borderRadius: 8, padding: "8px 16px", cursor: "pointer",
                 fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
                 transition: "all 0.2s",
               }}>
-                {key === "all" ? (`📋 ${lang === "he" ? "הכל" : lang === "ru" ? "Все" : "All"}`) : (stage.emoji + ` ${stage[lang] || stage.en}`)} ({count})
+                {key === "all" ? ("📋 " + (lang === "he" ? "הכל" : lang === "ru" ? "Все" : "All")) : (stage.emoji + " " + (stage[lang] || stage.en))} ({count})
               </button>
             );
           })}
@@ -512,7 +512,7 @@ function AdminPage({ lang }) {
         {/* Delete confirmation modal */}
         {deleteConfirm && (
           <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 400, width: "90%", textAlign: "center" }}>
+            <div style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), borderRadius: 16, padding: 32, maxWidth: 400, width: "90%", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🗑️</div>
               <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
                 {lang === "he" ? "למחוק את ההזמנה?" : lang === "ru" ? "Удалить заказ?" : "Delete this order?"}
@@ -521,7 +521,7 @@ function AdminPage({ lang }) {
                 {lang === "he" ? "לא ניתן לשחזר פעולה זו" : lang === "ru" ? "Это действие нельзя отменить" : "This action cannot be undone"}
               </div>
               <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-                <button onClick={() => setDeleteConfirm(null)} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+                <button onClick={() => setDeleteConfirm(null)} style={{ background: "transparent", border: "1px solid " + (COLORS.border), color: COLORS.gray, borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
                   {lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}
                 </button>
                 <button onClick={() => deleteOrder(deleteConfirm)} style={{ background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
@@ -548,11 +548,11 @@ function AdminPage({ lang }) {
                 const ipos = { x: order.design_x || 150, y: order.design_y || 130, size: order.design_size || 100 };
                 return (
                   <div key={order.id}
-                    style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "16px 20px", transition: "border-color 0.2s" }}>
+                    style={{ background: COLORS.bgCard, border: "1px solid " + (isOpen ? COLORS.accent : COLORS.border), borderRadius: 12, padding: "16px 20px", transition: "border-color 0.2s" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div onClick={() => setSelected(isOpen ? null : order.id)} style={{ flex: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColors[order.status] || COLORS.accent, boxShadow: `0 0 8px ${statusColors[order.status] || COLORS.accent}`, flexShrink: 0 }} />
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColors[order.status] || COLORS.accent, boxShadow: "0 0 8px " + (statusColors[order.status] || COLORS.accent), flexShrink: 0 }} />
                           <div>
                             <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13 }}>{order.product} · {order.variant} · ×{order.quantity}</div>
@@ -565,11 +565,11 @@ function AdminPage({ lang }) {
                           {order.completed_at && <div style={{ color: COLORS.success, fontSize: 11, marginTop: 2 }}>✅ {timeBetween(order.created_at, order.completed_at, lang)}</div>}
                         </div>
                       </div>
-                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(order.id); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
+                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(order.id); }} style={{ background: "transparent", border: "1px solid " + (COLORS.border), color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
                     </div>
 
                     {isOpen && (
-                      <div onClick={e => e.stopPropagation()} style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }}>
+                      <div onClick={e => e.stopPropagation()} style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid " + (COLORS.border) }}>
                         <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                           <div style={{ flex: 1 }}>
                             <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.customer}</div>
@@ -588,7 +588,7 @@ function AdminPage({ lang }) {
                         {order.design_url && (
                             <div>
                               <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>Design Preview</div>
-                              <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180, position: "relative" }}>
+                              <div style={{ background: COLORS.bg, borderRadius: 12, border: "1px solid " + (COLORS.border), padding: 8, width: 180, position: "relative" }}>
                                 <ProductMockupBase productKey={pid} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={ipos} />
                               </div>
                               <button onClick={async () => {
@@ -626,7 +626,7 @@ function AdminPage({ lang }) {
                             <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.updateStatus}</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                               {ORDER_STAGES.map(s => (
-                                <button key={s.key} onClick={() => updateStatus(order.id, s.key, order.created_at)} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
+                                <button key={s.key} onClick={() => updateStatus(order.id, s.key, order.created_at)} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: "1px solid " + (order.status === s.key ? statusColors[s.key] : COLORS.border), color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
                                   {s.emoji} {s[lang] || s.en}
                                 </button>
                               ))}
@@ -693,17 +693,20 @@ function OrderPage({ lang, user, setPage }) {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  // Non-passive touchmove listener — preventDefault only when actively dragging/pinching
+  // Non-passive touch listeners — preventDefault only when actively dragging/pinching
   useEffect(() => {
     if (step !== 2) return;
     const el = mockupRef.current;
     if (!el) return;
+    const onStart = (e) => touchHandlersRef.current.start?.(e);
     const onMove = (e) => {
       if (draggingRef.current || pinchRef.current) e.preventDefault();
       touchHandlersRef.current.move?.(e);
     };
+    el.addEventListener('touchstart', onStart, { passive: false });
     el.addEventListener('touchmove', onMove, { passive: false });
     return () => {
+      el.removeEventListener('touchstart', onStart);
       el.removeEventListener('touchmove', onMove);
     };
   }, [step]);
@@ -963,7 +966,7 @@ function OrderPage({ lang, user, setPage }) {
     setSubmitting(false);
   };
 
-  const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none" };
+  const inputStyle = { width: "100%", background: COLORS.bgCard, border: "1px solid " + (COLORS.border), borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none" };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", display: "block", marginBottom: 8 };
 
   return (
@@ -972,7 +975,7 @@ function OrderPage({ lang, user, setPage }) {
         <div style={{ display: "flex", marginBottom: 40 }}>
           {t.steps.map((s, i) => (
             <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: step >= i + 1 ? COLORS.accent : COLORS.bgCard, border: `2px solid ${step >= i + 1 ? COLORS.accent : COLORS.border}`, color: step >= i + 1 ? "#fff" : COLORS.gray, fontSize: 13, fontWeight: 600 }}>{step > i + 1 ? "✓" : i + 1}</div>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: step >= i + 1 ? COLORS.accent : COLORS.bgCard, border: "2px solid " + (step >= i + 1 ? COLORS.accent : COLORS.border), color: step >= i + 1 ? "#fff" : COLORS.gray, fontSize: 13, fontWeight: 600 }}>{step > i + 1 ? "✓" : i + 1}</div>
               <div style={{ fontSize: 11, color: step === i + 1 ? COLORS.accent : COLORS.gray, marginTop: 6 }}>{s}</div>
             </div>
           ))}
@@ -981,7 +984,7 @@ function OrderPage({ lang, user, setPage }) {
         {/* Leave warning modal */}
         {leaveWarning && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 360, width: "100%", textAlign: "center" }}>
+            <div style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), borderRadius: 16, padding: 32, maxWidth: 360, width: "100%", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
               <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
                 {lang === "he" ? "לעזוב את ההזמנה?" : lang === "ru" ? "Покинуть заказ?" : "Leave order?"}
@@ -990,7 +993,7 @@ function OrderPage({ lang, user, setPage }) {
                 {lang === "he" ? "הפרטים שהזנת יאבדו" : lang === "ru" ? "Введённые данные будут потеряны" : "Your progress will be lost"}
               </div>
               <div style={{ display: "flex", gap: 12 }}>
-                <button onClick={() => setLeaveWarning(false)} style={{ flex: 1, background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                <button onClick={() => setLeaveWarning(false)} style={{ flex: 1, background: "transparent", border: "1px solid " + (COLORS.border), color: COLORS.gray, borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                   {lang === "he" ? "המשך הזמנה" : lang === "ru" ? "Продолжить" : "Keep ordering"}
                 </button>
                 <button onClick={() => { setLeaveWarning(false); pendingNav && pendingNav(); }} style={{ flex: 1, background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
@@ -1008,7 +1011,7 @@ function OrderPage({ lang, user, setPage }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {products.map(p => (
                 <div key={p.id} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
-                  style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
+                  style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: "2px solid " + (selectedProduct === p.id ? COLORS.accent : COLORS.border), borderRadius: 12, padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                     <span style={{ fontSize: 32 }}>{p.emoji}</span>
                     <div><div style={{ color: COLORS.white, fontWeight: 600 }}>{p.name}</div><div style={{ color: COLORS.gray, fontSize: 13 }}>{p.variants.length} {t.product.options} · {t.product.from}{Math.min(...p.variants.map(v => v.price))}</div></div>
@@ -1029,7 +1032,7 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ flex: "1 1 280px" }}>
                   <div ref={mockupRef}
                     onClick={() => !uploadedImage && fileRef.current.click()}
-                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none" }}
+                    style={{ background: COLORS.bgCard, borderRadius: 16, border: "1px solid " + (COLORS.border), padding: 0, position: "relative", userSelect: "none", maxWidth: 300, margin: "0 auto" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchEnd={handleMouseUp}>
                     {/* Mockup renders directly — touch handled by native listeners on mockupRef */}
@@ -1040,14 +1043,14 @@ function OrderPage({ lang, user, setPage }) {
                     {product.id === "sticker"    && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker_sq" && <StickerSqMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {uploadedImage && (
-                      <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
+                      <div onMouseDown={handleMouseDown}
                         style={{ position: "absolute",
                           left: (getActivePos().x / 400 * 100) + "%",
                           top: (getActivePos().y / 400 * 100) + "%",
                           width: (getActivePos().size / 400 * 100) + "%",
                           height: (getActivePos().size / 400 * 100) + "%",
                           cursor: dragging ? "grabbing" : "grab", zIndex: 10,
-                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
+                          outline: activeDesign === 'second' ? "2px dashed " + COLORS.accent : 'none',
                           borderRadius: 4,
                         }} />
                     )}
@@ -1061,10 +1064,10 @@ function OrderPage({ lang, user, setPage }) {
                     {/* Design selector — shown when two designs exist */}
                     {uploadedImage && secondFront.enabled && secondFront.image && (
                       <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
-                        <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'main' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                        <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accent : COLORS.bgCard, border: "1px solid " + (activeDesign === 'main' ? COLORS.accent : COLORS.border), color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                           {lang === "he" ? "🎯 עיצוב ראשי" : "🎯 Main Design"}
                         </button>
-                        <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'second' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                        <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accent : COLORS.bgCard, border: "1px solid " + (activeDesign === 'second' ? COLORS.accent : COLORS.border), color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                           {lang === "he" ? "➕ עיצוב שני" : "➕ 2nd Design"}
                         </button>
                       </div>
@@ -1083,15 +1086,15 @@ function OrderPage({ lang, user, setPage }) {
                         </div>
                         {showNudge && <div>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "4px auto 12px" }}>
-                            <div /><button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>U</button><div />
-                            <button onClick={() => nudge(-15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>L</button>
+                            <div /><button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>U</button><div />
+                            <button onClick={() => nudge(-15, 0)} style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>L</button>
                             <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>+</span></div>
-                            <button onClick={() => nudge(15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>R</button>
-                            <div /><button onClick={() => nudge(0, 15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>D</button><div />
+                            <button onClick={() => nudge(15, 0)} style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>R</button>
+                            <div /><button onClick={() => nudge(0, 15)} style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>D</button><div />
                           </div>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                             {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
-                              <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                              <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: "1px solid " + (selectedPlacement === pl.id ? COLORS.accent : COLORS.border), color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                                 {lang === "he" ? pl.he : pl.en}
                               </button>
                             ))}
@@ -1107,9 +1110,9 @@ function OrderPage({ lang, user, setPage }) {
                         <span style={{ color: COLORS.accent, fontWeight: 700 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                       </label>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0 }}>−</button>
+                        <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0 }}>−</button>
                         <input type="range" min={43} max={160} value={Math.min(160, Math.max(43, imagePos.size))} onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))} style={{ flex: 1, accentColor: COLORS.accent }} />
-                        <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0 }}>+</button>
+                        <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0 }}>+</button>
                       </div>
                     </div>
                   )}
@@ -1118,7 +1121,7 @@ function OrderPage({ lang, user, setPage }) {
                 <div>
                   <label style={labelStyle}>{["tshirt","oversized","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {product.variants.map(v => <button key={v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
+                    {product.variants.map(v => <button key={v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accent : COLORS.bgCard, border: "1px solid " + (selectedVariant === v.id ? COLORS.accent : COLORS.border), color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
                   </div>
                 </div>
                 <div>
@@ -1126,13 +1129,13 @@ function OrderPage({ lang, user, setPage }) {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {product.colors.map((c, i) => (
                       <div key={i} onClick={() => setSelectedColor(i)}
-                        style={{ width: 26, height: 26, borderRadius: "50%", background: c, cursor: "pointer", border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
+                        style={{ width: 26, height: 26, borderRadius: "50%", background: c, cursor: "pointer", border: "3px solid " + (selectedColor === i ? COLORS.accent : "transparent"), boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
                     ))}
                   </div>
                 </div>
                 <div>
                   <label style={labelStyle}>{t.customize.design}</label>
-                  <div onClick={() => fileRef.current.click()} style={{ border: `2px dashed ${uploadedImage ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: "16px", textAlign: "center", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.borderColor = COLORS.accent} onMouseOut={e => e.currentTarget.style.borderColor = uploadedImage ? COLORS.accent : COLORS.border}>
+                  <div onClick={() => fileRef.current.click()} style={{ border: "2px dashed " + (uploadedImage ? COLORS.accent : COLORS.border), borderRadius: 10, padding: "16px", textAlign: "center", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.borderColor = COLORS.accent} onMouseOut={e => e.currentTarget.style.borderColor = uploadedImage ? COLORS.accent : COLORS.border}>
                     {uploadedImage ? <div><img src={uploadedImage} style={{ width: 50, height: 50, objectFit: "contain", borderRadius: 6, marginBottom: 6 }} /><div style={{ color: COLORS.accent, fontSize: 12 }}>{t.customize.uploaded}</div><div style={{ color: COLORS.gray, fontSize: 11 }}>{t.customize.changeFile}</div></div> : <div><div style={{ fontSize: 24, marginBottom: 6 }}>📁</div><div style={{ color: COLORS.white, fontSize: 13 }}>{t.customize.uploadTitle}</div><div style={{ color: COLORS.gray, fontSize: 11 }}>{t.customize.uploadSub}</div></div>}
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
@@ -1145,9 +1148,9 @@ function OrderPage({ lang, user, setPage }) {
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
                       <input type="range" min={43} max={160} value={Math.min(160, Math.max(43, imagePos.size))} onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))} style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
                     </div>
                   </div>
                 )}
@@ -1159,23 +1162,23 @@ function OrderPage({ lang, user, setPage }) {
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((secondFront.pos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.max(43, p.pos.size - 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
+                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.max(43, p.pos.size - 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
                       <input type="range" min={43} max={160} value={secondFront.pos.size} onChange={e => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Number(e.target.value) } }))} style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
-                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.min(160, p.pos.size + 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
+                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.min(160, p.pos.size + 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
                     </div>
                   </div>
                 )}
                 {/* Placement — collapsible, desktop, shirts only */}
                 {!isMobile && uploadedImage && !["mug"].includes(product.id) && (
-                  <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 10, overflow: "hidden" }}>
+                  <div style={{ border: "1px solid " + (COLORS.border), borderRadius: 10, overflow: "hidden" }}>
                     <div onClick={() => setShowPlacement(p => !p)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", background: showPlacement ? "rgba(255,107,53,0.08)" : COLORS.bgCard }}>
                       <label style={{ ...labelStyle, marginBottom: 0, cursor: "pointer" }}>{lang === "he" ? "מיקום עיצוב" : "Placement"}</label>
                       <span style={{ color: COLORS.gray, fontSize: 14 }}>{showPlacement ? "(-)" : "(+)"}</span>
                     </div>
-                    {showPlacement && <div style={{ padding: "10px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
+                    {showPlacement && <div style={{ padding: "10px 14px 14px", borderTop: "1px solid " + (COLORS.border) }}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                           {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
-                            <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                            <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: "1px solid " + (selectedPlacement === pl.id ? COLORS.accent : COLORS.border), color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                               {lang === "he" ? pl.he : pl.en}
                             </button>
                           ))}
@@ -1189,7 +1192,7 @@ function OrderPage({ lang, user, setPage }) {
                     <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {extraPrintsData.map(({ key, state, setState, ref, label, price, isSecondFront }) => (
-                        <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: `1px solid ${state.enabled ? COLORS.accent : COLORS.border}`, borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
+                        <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: "1px solid " + (state.enabled ? COLORS.accent : COLORS.border), borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
                           <div onClick={() => {
                             const newEnabled = !state.enabled;
                             setState(p => ({ ...p, enabled: newEnabled }));
@@ -1206,13 +1209,13 @@ function OrderPage({ lang, user, setPage }) {
                             <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{label}</span>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13 }}>+₪{price}</span>
-                              <div style={{ width: 20, height: 20, borderRadius: "50%", background: state.enabled ? COLORS.accent : "transparent", border: `2px solid ${state.enabled ? COLORS.accent : COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <div style={{ width: 20, height: 20, borderRadius: "50%", background: state.enabled ? COLORS.accent : "transparent", border: "2px solid " + (state.enabled ? COLORS.accent : COLORS.border), display: "flex", alignItems: "center", justifyContent: "center" }}>
                                 {state.enabled && <span style={{ color: "#fff", fontSize: 11 }}>✓</span>}
                               </div>
                             </div>
                           </div>
                           {state.enabled && (
-                            <div style={{ padding: "0 16px 14px", borderTop: `1px solid ${COLORS.border}` }}>
+                            <div style={{ padding: "0 16px 14px", borderTop: "1px solid " + (COLORS.border) }}>
                               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                                 <button onClick={() => {
                                   setState(p => ({ ...p, sameAsMain: true, image: null }));
@@ -1221,16 +1224,16 @@ function OrderPage({ lang, user, setPage }) {
                                     setSecondFront(p => ({ ...p, sameAsMain: true, image: uploadedImage, pos: { ...p.pos, size: imagePos.size } }));
                                     setActiveDesign('second');
                                   }
-                                }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: "1px solid " + (state.sameAsMain ? COLORS.accent : COLORS.border), color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
                                   {lang === "he" ? "אותו עיצוב" : "Same design"}
                                 </button>
-                                <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: "1px solid " + (!state.sameAsMain ? COLORS.accent : COLORS.border), color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
                                   {lang === "he" ? "העלה עיצוב שונה" : "Upload different"}
                                 </button>
                               </div>
                               {!state.sameAsMain && state.image && (
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-                                  <img src={state.image} style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 4, border: `1px solid ${COLORS.border}` }} />
+                                  <img src={state.image} style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 4, border: "1px solid " + (COLORS.border) }} />
                                   <span style={{ color: COLORS.accent, fontSize: 12 }}>✓ {lang === "he" ? "עיצוב הועלה" : "Uploaded"}</span>
                                 </div>
                               )}
@@ -1245,21 +1248,21 @@ function OrderPage({ lang, user, setPage }) {
                 {/* Notes */}
                 <div>
                   <label style={labelStyle}>{t.form.notes}</label>
-                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: "1px solid " + (COLORS.border), borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
-                {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
+                {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: "1px solid " + (COLORS.border) }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{t.customize.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
                   {backPrint && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "גב" : "Back"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
                   {secondFront.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "עיצוב נוסף בחזית" : "2nd Front"}</span><span>+₪{SECOND_FRONT_PRICE}</span></div>}
                   {sleeveLeft.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול שמאל" : "Left Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
                   {sleeveRight.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול ימין" : "Right Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
-                  <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{total}</span></div>
+                  <div style={{ borderTop: "1px solid " + (COLORS.border), paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{total}</span></div>
                 </div>}
               </div>
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-              <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
+              <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: "1px solid " + (COLORS.border), borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
               <button onClick={() => setStep(3)} style={{ flex: 1, background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.continue}</button>
             </div>
           </div>
@@ -1275,7 +1278,7 @@ function OrderPage({ lang, user, setPage }) {
               <div>
                 <label style={labelStyle}>{t.form.phone}</label>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
-                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
+                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: "1px solid " + (form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"), color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
                 </div>
                 <input type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { const v = e.target.value; const digits = v.split("").filter(function(c){return c>="0"&&c<="9";}).join(""); setForm(p => ({ ...p, phoneNumber: digits })); }} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
               </div>
@@ -1283,24 +1286,24 @@ function OrderPage({ lang, user, setPage }) {
               <div>
                 <label style={labelStyle}>{t.form.qty}</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, direction: "ltr" }}>
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 36, height: 36, borderRadius: 6, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18 }}>−</button>
+                  <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 36, height: 36, borderRadius: 6, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18 }}>−</button>
                   <span style={{ color: COLORS.white, fontSize: 18, fontWeight: 600, minWidth: 30, textAlign: "center" }}>{qty}</span>
-                  <button onClick={() => setQty(q => q + 1)} style={{ width: 36, height: 36, borderRadius: 6, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18 }}>+</button>
+                  <button onClick={() => setQty(q => q + 1)} style={{ width: 36, height: 36, borderRadius: 6, background: COLORS.bgCard, border: "1px solid " + (COLORS.border), color: COLORS.white, cursor: "pointer", fontSize: 18 }}>+</button>
                 </div>
               </div>
-              <div style={{ background: COLORS.bgCard, borderRadius: 12, padding: 20, border: `1px solid ${COLORS.border}` }}>
+              <div style={{ background: COLORS.bgCard, borderRadius: 12, padding: 20, border: "1px solid " + (COLORS.border) }}>
                 <div style={{ color: COLORS.white, fontWeight: 600, marginBottom: 12 }}>{t.form.summary}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 14, marginBottom: 8 }}><span>{product?.name} × {qty}</span><span>₪{(variant?.price || 0) * qty}</span></div>
                 <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 14, marginBottom: 12 }}><span>{t.form.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
-                <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 12, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 700 }}>{t.form.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 20 }}>₪{total}</span></div>
+                <div style={{ borderTop: "1px solid " + (COLORS.border), paddingTop: 12, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 700 }}>{t.form.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 20 }}>₪{total}</span></div>
               </div>
-              <div style={{ background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.2)", borderRadius: 8, padding: 0 }}>
+              <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: 0 }}>
                 <div style={{ color: COLORS.accent, fontSize: 13 }}>{t.form.paymentNote}</div>
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{t.form.paymentSub}</div>
               </div>
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-              <button onClick={() => setStep(2)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
+              <button onClick={() => setStep(2)} style={{ background: "transparent", color: COLORS.gray, border: "1px solid " + (COLORS.border), borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
               <button onClick={handleSubmit} disabled={!form.name || !form.email || submitting} style={{ flex: 1, background: form.name && form.email ? COLORS.accent : COLORS.bgCard, color: form.name && form.email ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: form.name && form.email ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
                 {submitting ? "..." : (t.form.place + " \u00B7 \u20AA" + total)}
               </button>
@@ -1315,7 +1318,7 @@ function OrderPage({ lang, user, setPage }) {
             <p style={{ color: COLORS.gray, fontSize: 16, maxWidth: 400, margin: "0 auto 32px", lineHeight: 1.7 }}>{t.confirm.sub1} {form.name}! {t.confirm.sub2} <span style={{ color: COLORS.accent }}>{form.email}</span></p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
-              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", notes: "" }); setQty(1); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
+              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", notes: "" }); setQty(1); }} style={{ background: "transparent", color: COLORS.white, border: "1px solid " + (COLORS.border), borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
             </div>
           </div>
         )}
@@ -1505,7 +1508,7 @@ function Hero({ setPage, lang }) {
   const products = PRODUCTS(t);
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 60px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
-      <div style={{ display: "inline-block", background: COLORS.accentDim, border: "1px solid rgba(255,107,53,0.3)", borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Varela Round',sans-serif" }}>{t.hero.badge}</div>
+      <div style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Varela Round',sans-serif" }}>{t.hero.badge}</div>
       <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
         {t.hero.h1line1}<br /><span style={{ color: COLORS.accent, fontStyle: "italic" }}>{t.hero.h1line2}</span>
       </h1>
@@ -1514,7 +1517,7 @@ function Hero({ setPage, lang }) {
       <div style={{ display: "flex", gap: 20, marginTop: 80, flexWrap: "wrap", justifyContent: "center" }}>
         {products.map((p, idx) => (
           <div key={p.id} onClick={() => setPage("order")}
-            style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: "24px 32px", cursor: "pointer", minWidth: 160, transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s", animation: `fadeUp 0.6s ${idx * 0.15}s ease forwards`, opacity: 0 }}
+            style={{ background: COLORS.bgCard, border: "1px solid " + (COLORS.border), borderRadius: 16, padding: "24px 32px", cursor: "pointer", minWidth: 160, transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s", animation: `fadeUp 0.6s ${idx * 0.15}s ease forwards`, opacity: 0 }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
             <div style={{ fontSize: 36, marginBottom: 8 }}>{p.emoji}</div>
@@ -1541,7 +1544,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
 
   return (
     <>
-    <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: "1px solid rgba(255,107,53,0.15)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
+    <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
       {/* Logo - LEFT */}
       <div style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => setPage("home")}>
         <img src="data:image/png;base64,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" alt="Sfalim Shop" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} /></div>
@@ -1551,7 +1554,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
         {["home", "order", "about"].map(p => (
           <button key={p} onClick={() => setPage(p)} style={{
             background: page === p ? COLORS.accentDim : "transparent",
-            border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
+            border: page === p ? "1px solid " + (COLORS.accent) : "1px solid transparent",
             color: page === p ? COLORS.accent : COLORS.gray,
             padding: "8px 18px", borderRadius: 8, cursor: "pointer",
             fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500,
@@ -1562,30 +1565,30 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
           >{t.nav[p]}</button>
         ))}
         {user && (
-          <button onClick={() => setPage("track")} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+          <button onClick={() => setPage("track")} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? "1px solid " + (COLORS.accent) : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "track") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
           onMouseOut={e => { if(page !== "track") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav.track}</button>
         )}
         {isAdmin && (
-          <button onClick={() => setPage("admin")} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>📋 {t.nav.admin}</button>
+          <button onClick={() => setPage("admin")} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? "1px solid " + (COLORS.accent) : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>📋 {t.nav.admin}</button>
         )}
       </div>}
 
       {/* Lang + Hamburger - MOBILE RIGHT */}
       {isMobile && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
+        <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: "1px solid " + (COLORS.border) }}>
           {Object.keys(LANGS).map(l => (
             <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
-        <button onClick={() => setMobileMenu(m => !m)} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
+        <button onClick={() => setMobileMenu(m => !m)} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: "1px solid " + (mobileMenu ? COLORS.accent : COLORS.border), color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
       </div>}
 
       {/* Auth + Lang - RIGHT (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
         {user ? (
-          <button onClick={onLogout} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, padding: "7px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, transition: "all 0.2s" }}
+          <button onClick={onLogout} style={{ background: "transparent", border: "1px solid " + (COLORS.border), color: COLORS.gray, padding: "7px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
           onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.gray; }}
           >{t.nav.logout}</button>
@@ -1595,7 +1598,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
           onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,107,53,0.3)"; e.currentTarget.style.transform = "translateY(0)"; }}
           >{t.nav.login}</button>
         )}
-        <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
+        <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: "1px solid " + (COLORS.border) }}>
           {Object.keys(LANGS).map(l => (
             <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
@@ -1605,12 +1608,12 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
 
     {/* Mobile dropdown */}
     {mobileMenu && (
-      <div style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: "1px solid " + (COLORS.border), padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
         {["home", "order", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "left", width: "100%" }}>{t.nav[p]}</button>
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? "1px solid " + (COLORS.accent) : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "left", width: "100%" }}>{t.nav[p]}</button>
         ))}
-        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.track}</button>}
-        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>📋 {t.nav.admin}</button>}
+        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? "1px solid " + (COLORS.accent) : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.track}</button>}
+        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? "1px solid " + (COLORS.accent) : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>📋 {t.nav.admin}</button>}
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
         {user
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
@@ -1618,7 +1621,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
         }
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accent : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
+            <button key={l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accent : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: "1px solid " + (lang === l ? COLORS.accent : COLORS.border), borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>
@@ -1710,12 +1713,12 @@ function AccessibilityMenu({ lang }) {
           </div>
 
           {/* High contrast */}
-          <button onClick={() => setHighContrast(!highContrast)} style={{ ...btnBase, background: highContrast ? 'rgba(255,107,53,0.15)' : '#111', border: `1px solid ${highContrast ? '#FF6B35' : '#2a2a2a'}`, color: highContrast ? '#FF6B35' : '#888', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button onClick={() => setHighContrast(!highContrast)} style={{ ...btnBase, background: highContrast ? 'rgba(255,107,53,0.15)' : '#111', border: "1px solid " + (highContrast ? '#FF6B35' : '#2a2a2a'), color: highContrast ? '#FF6B35' : '#888', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {t.contrast} <span>{highContrast ? '✓' : '○'}</span>
           </button>
 
           {/* Reduce motion */}
-          <button onClick={() => setReduceMotion(!reduceMotion)} style={{ ...btnBase, background: reduceMotion ? 'rgba(255,107,53,0.15)' : '#111', border: `1px solid ${reduceMotion ? '#FF6B35' : '#2a2a2a'}`, color: reduceMotion ? '#FF6B35' : '#888', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button onClick={() => setReduceMotion(!reduceMotion)} style={{ ...btnBase, background: reduceMotion ? 'rgba(255,107,53,0.15)' : '#111', border: "1px solid " + (reduceMotion ? '#FF6B35' : '#2a2a2a'), color: reduceMotion ? '#FF6B35' : '#888', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {t.motion} <span>{reduceMotion ? '✓' : '○'}</span>
           </button>
 
