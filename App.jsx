@@ -710,7 +710,7 @@ function OrderPage({ lang, user, setPage }) {
       setSelectedPlacement(null);
       setSelectedSize(null);
       const pa = product.printArea;
-      setImagePos({ x: pa.x + pa.w / 2 - 50, y: pa.y + pa.h / 2 - 50, size: 100 });
+      setImagePos({ x: pa.x + pa.w / 2 - 21, y: pa.y + pa.h / 2 - 21, size: 43 });
     };
     reader.readAsDataURL(file);
   };
@@ -762,7 +762,7 @@ function OrderPage({ lang, user, setPage }) {
     e.preventDefault();
     setDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
-    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.6, scaleY: (400 / rect.height) * 0.6 });
+    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.5, scaleY: (400 / rect.height) * 0.5 });
   };
 
   const handleMouseMove = useCallback((e) => {
@@ -779,7 +779,7 @@ function OrderPage({ lang, user, setPage }) {
     const touch = e.touches[0];
     setDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
-    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.6, scaleY: (400 / rect.height) * 0.6 });
+    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.5, scaleY: (400 / rect.height) * 0.5 });
   };
 
   const handleTouchMove = useCallback((e) => {
@@ -1017,9 +1017,9 @@ function OrderPage({ lang, user, setPage }) {
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(20, p.size - 7) }))}
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))}
                         style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
-                      <input type="range" min={20} max={160} value={Math.min(160, imagePos.size)}
+                      <input type="range" min={43} max={160} value={Math.min(160, Math.max(43, imagePos.size))}
                         onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))}
                         style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
                       <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))}
