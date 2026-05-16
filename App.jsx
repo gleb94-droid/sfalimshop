@@ -726,10 +726,42 @@ function OrderPage({ lang, user, setPage }) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [step]);
 
+  const allowLeaveRef = useRef(false);
   const safeGo = (action) => {
     if (step >= 2 && step < 4) { setLeaveWarning(true); setPendingNav(() => action); }
     else action();
   };
+
+  // Warn user before leaving order page (mobile back button, tab close, refresh)
+  useEffect(() => {
+    if (step < 2 || step >= 4) return;
+    allowLeaveRef.current = false;
+    // beforeunload — for tab close / refresh
+    const beforeUnload = (e) => {
+      if (allowLeaveRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    // popstate — for mobile/desktop browser back button within the SPA
+    window.history.pushState({ orderInProgress: true }, "");
+    const onPopState = () => {
+      if (allowLeaveRef.current) return;
+      // re-push state so we stay on this page; show modal
+      window.history.pushState({ orderInProgress: true }, "");
+      setLeaveWarning(true);
+      setPendingNav(() => () => {
+        allowLeaveRef.current = true;
+        window.history.back();
+      });
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnload);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [step]);
 
   const product = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
   const variant = selectedVariant ? product?.variants.find(v => v.id === selectedVariant) : null;
