@@ -1055,15 +1055,12 @@ function OrderPage({ lang, user, setPage }) {
                         </button>
                       </div>
                     )}
-                    {uploadedImage && selectedPlacement && selectedSize && (
-                      <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>✓ {
-                        (() => {
-                          const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
-                          const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
-                          return `${pl?.[lang] || pl?.en} · ${sz?.cm}`;
-                        })()
-                      }</p>
-                    )}
+                    {uploadedImage && selectedPlacement && selectedSize && (() => {
+                      const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
+                      const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
+                      if (!pl || !sz) return null;
+                      return <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>{"+ " + (pl[lang] || pl.en) + " · " + sz.cm}</p>;
+                    })()}
                     {/* Mobile nudge — collapsible */}
                     {isMobile && uploadedImage && !["mug"].includes(product.id) && (
                       <div style={{ padding: "4px 12px 8px" }}>
