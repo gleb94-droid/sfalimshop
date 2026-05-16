@@ -182,7 +182,7 @@ const MOCKUP_URLS = {
   sticker_sq: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/square%20sticker.png",
 };
 // 2. קומפוננטת הבסיס המתוקנת - נקייה ובלי פילטרים ששוברים את הרקע
-function ProductMockupBase({ productKey, color, imageUrl, imagePos }) {
+function ProductMockupBase({ productKey, color, imageUrl, imagePos, secondImageUrl, secondImagePos }) {
   const canvasRef = useRef(null);
   const [canvasOk, setCanvasOk] = useState(false);
   const mockupUrl = MOCKUP_URLS[productKey] || MOCKUP_URLS.tshirt;
@@ -219,39 +219,26 @@ function ProductMockupBase({ productKey, color, imageUrl, imagePos }) {
 
   return (
     <div style={{ position:"relative", width:"100%", paddingTop:"100%", borderRadius:12 }}>
-      {/* Fallback img — always visible, hidden when canvas renders OK */}
-      <img src={mockupUrl} alt="product" style={{
-        position:"absolute", inset:0, width:"100%", height:"100%",
-        objectFit:"contain", zIndex:0, opacity: canvasOk ? 0 : 1, transition:"opacity 0.2s"
-      }} />
-      {/* Canvas with color tinting */}
-      <canvas ref={canvasRef} style={{
-        position:"absolute", inset:0, width:"100%", height:"100%",
-        zIndex:1, opacity: canvasOk ? 1 : 0, transition:"opacity 0.2s"
-      }} />
-      {/* Customer design overlay */}
+      <img src={mockupUrl} alt="product" style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", zIndex:0, opacity: canvasOk ? 0 : 1, transition:"opacity 0.2s" }} />
+      <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%", zIndex:1, opacity: canvasOk ? 1 : 0, transition:"opacity 0.2s" }} />
       {imageUrl && (
-        <img src={imageUrl} alt="design" style={{
-          position:"absolute",
-          left:`${(imagePos.x/400)*100}%`,
-          top:`${(imagePos.y/400)*100}%`,
-          width:`${(imagePos.size/400)*100}%`,
-          height:`${(imagePos.size/400)*100}%`,
-          objectFit:"contain", zIndex:2, pointerEvents:"none",
-        }} />
+        <img src={imageUrl} alt="design" style={{ position:"absolute", left:`${(imagePos.x/400)*100}%`, top:`${(imagePos.y/400)*100}%`, width:`${(imagePos.size/400)*100}%`, height:`${(imagePos.size/400)*100}%`, objectFit:"contain", zIndex:2, pointerEvents:"none" }} />
+      )}
+      {secondImageUrl && secondImagePos && (
+        <img src={secondImageUrl} alt="design2" style={{ position:"absolute", left:`${(secondImagePos.x/400)*100}%`, top:`${(secondImagePos.y/400)*100}%`, width:`${(secondImagePos.size/400)*100}%`, height:`${(secondImagePos.size/400)*100}%`, objectFit:"contain", zIndex:3, pointerEvents:"none" }} />
       )}
     </div>
   );
 }
 
-function TShirtMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase productKey="tshirt" color={color} imageUrl={imageUrl} imagePos={imagePos} />;
+function TShirtMockup({ color, imageUrl, imagePos, secondImageUrl, secondImagePos }) {
+  return <ProductMockupBase productKey="tshirt" color={color} imageUrl={imageUrl} imagePos={imagePos} secondImageUrl={secondImageUrl} secondImagePos={secondImagePos} />;
 }
-function OversizedMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase productKey="oversized" color={color} imageUrl={imageUrl} imagePos={imagePos} />;
+function OversizedMockup({ color, imageUrl, imagePos, secondImageUrl, secondImagePos }) {
+  return <ProductMockupBase productKey="oversized" color={color} imageUrl={imageUrl} imagePos={imagePos} secondImageUrl={secondImageUrl} secondImagePos={secondImagePos} />;
 }
-function DryfitMockup({ color, imageUrl, imagePos }) {
-  return <ProductMockupBase productKey="dryfit" color={color} imageUrl={imageUrl} imagePos={imagePos} />;
+function DryfitMockup({ color, imageUrl, imagePos, secondImageUrl, secondImagePos }) {
+  return <ProductMockupBase productKey="dryfit" color={color} imageUrl={imageUrl} imagePos={imagePos} secondImageUrl={secondImageUrl} secondImagePos={secondImagePos} />;
 }
 function MugMockup({ color, imageUrl, imagePos }) {
   return <ProductMockupBase productKey="mug" color={color} imageUrl={imageUrl} imagePos={imagePos} />;
@@ -587,22 +574,12 @@ function AdminPage({ lang }) {
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📱 {order.customer_phone}</div>}
                             {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>💬 {order.notes}</div>}
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                              {order.product_color && (
-                                <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}>
-                                  <div style={{ width: 11, height: 11, borderRadius: "50%", background: order.product_color, border: "1px solid #555", flexShrink: 0 }} />
-                                  {order.product_color}
-                                </div>
-                              )}
-                              {order.design_size && (
-                                <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}>
-                                  📐 ~{Math.round((order.design_size / 400) * 30)}×{Math.round((order.design_size / 400) * 30)} cm
-                                </div>
-                              )}
-                              {order.back_print && (
-                                <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>
-                                  🖨️ Back print
-                                </div>
-                              )}
+                              {order.product_color && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: order.product_color, border: "1px solid #555", flexShrink: 0 }} />{order.product_color}</div>}
+                              {order.design_size && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}>📐 ~{Math.round((order.design_size / 160) * 30)} cm</div>}
+                              {order.back_print && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>🖨️ גב</div>}
+                              {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>➕ חזית נוספת</div>}
+                              {order.sleeve_left_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>👕 שרוול שמאל</div>}
+                              {order.sleeve_right_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>👕 שרוול ימין</div>}
                             </div>
                           </div>
                         {order.design_url && (
@@ -628,6 +605,23 @@ function AdminPage({ lang }) {
                                 document.body.removeChild(a);
                                 window.URL.revokeObjectURL(url);
                               }} style={{ display: "inline-block", marginTop: 8, background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
+                              {/* Extra design downloads */}
+                              {[
+                                { url: order.second_front_url, label: "2nd Front" },
+                                { url: order.back_design_url,  label: "Back" },
+                                { url: order.sleeve_left_url,  label: "Sleeve L" },
+                                { url: order.sleeve_right_url, label: "Sleeve R" },
+                              ].filter(d => d.url && d.url !== order.design_url).map(d => (
+                                <button key={d.label} onClick={async () => {
+                                  const response = await fetch(d.url);
+                                  const blob = await response.blob();
+                                  const url = window.URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url; a.download = `${d.label}-${order.id}.png`;
+                                  document.body.appendChild(a); a.click();
+                                  document.body.removeChild(a); window.URL.revokeObjectURL(url);
+                                }} style={{ display: "inline-block", marginTop: 8, marginRight: 4, background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ {d.label}</button>
+                              ))}
                             </div>
                           )}
                           <div>
@@ -673,6 +667,16 @@ function OrderPage({ lang, user, setPage }) {
   const [submitting, setSubmitting] = useState(false);
   const [backPrint, setBackPrint] = useState(false);
   const BACK_PRINT_PRICE = 39;
+  const SECOND_FRONT_PRICE = 20;
+  const SLEEVE_PRICE = 25;
+  const [secondFront, setSecondFront] = useState({ enabled: false, image: null, pos: { x: 210, y: 120, size: 43 } });
+  const [backDesign, setBackDesign] = useState({ enabled: false, sameAsMain: true, image: null });
+  const [sleeveLeft, setSleeveLeft] = useState({ enabled: false, sameAsMain: true, image: null });
+  const [sleeveRight, setSleeveRight] = useState({ enabled: false, sameAsMain: true, image: null });
+  const secondFileRef = useRef();
+  const backFileRef = useRef();
+  const sleeveLeftRef = useRef();
+  const sleeveRightRef = useRef();
   const [leaveWarning, setLeaveWarning] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -700,20 +704,46 @@ function OrderPage({ lang, user, setPage }) {
 
   const product = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
   const variant = selectedVariant ? product?.variants.find(v => v.id === selectedVariant) : null;
-  const total = variant ? (variant.price * qty) + SHIPPING_PRICE + (backPrint ? BACK_PRINT_PRICE : 0) : 0;
+  const total = variant ? (variant.price * qty) + SHIPPING_PRICE
+    + (backPrint ? BACK_PRINT_PRICE : 0)
+    + (secondFront.enabled ? SECOND_FRONT_PRICE : 0)
+    + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
+    + (sleeveRight.enabled ? SLEEVE_PRICE : 0)
+    : 0;
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       setUploadedImage(ev.target.result);
-      // Reset placement/size selection on new upload
-      setSelectedPlacement(null);
-      setSelectedSize(null);
+      setSelectedPlacement(null); setSelectedSize(null);
       const pa = product.printArea;
       setImagePos({ x: pa.x + pa.w / 2 - 21, y: pa.y + pa.h / 2 - 21, size: 43 });
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleExtraUpload = (e, setter) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setter(prev => ({ ...prev, image: ev.target.result, sameAsMain: false }));
+    reader.readAsDataURL(file);
+  };
+
+  const uploadDesignImage = async (dataUrl) => {
+    if (!dataUrl) return null;
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const ext = blob.type.includes('png') ? 'png' : 'jpg';
+      const fileName = `design-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error } = await supabase.storage.from('designs').upload(fileName, blob, { contentType: blob.type, upsert: false });
+      if (data && !error) {
+        const { data: urlData } = supabase.storage.from('designs').getPublicUrl(fileName);
+        return urlData.publicUrl;
+      }
+    } catch (e) { console.log('Upload error:', e); }
+    return null;
   };
 
   const applyPlacementAndSize = (placementId, sizeId) => {
@@ -796,36 +826,30 @@ function OrderPage({ lang, user, setPage }) {
     if (!form.name || !form.email) return;
     setSubmitting(true);
     const phone = form.phoneNumber ? `${form.phonePrefix}-${form.phoneNumber}` : "";
-    
-    let design_url = null;
-    if (uploadedImage) {
-      try {
-        const res = await fetch(uploadedImage);
-        const blob = await res.blob();
-        const ext = blob.type.includes('png') ? 'png' : blob.type.includes('jpg') || blob.type.includes('jpeg') ? 'jpg' : 'png';
-        const fileName = `design-${Date.now()}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('designs')
-          .upload(fileName, blob, { contentType: blob.type, upsert: false });
-        if (uploadData && !uploadError) {
-          const { data: urlData } = supabase.storage.from('designs').getPublicUrl(fileName);
-          design_url = urlData.publicUrl;
-        } else {
-          console.log('Upload error:', uploadError);
-        }
-      } catch (e) { console.log('Image upload error:', e); }
-    }
+
+    const [design_url, second_front_url, back_design_url, sleeve_left_url, sleeve_right_url] = await Promise.all([
+      uploadDesignImage(uploadedImage),
+      secondFront.enabled && !secondFront.sameAsMain ? uploadDesignImage(secondFront.image) : Promise.resolve(null),
+      backPrint && backDesign.image && !backDesign.sameAsMain ? uploadDesignImage(backDesign.image) : Promise.resolve(null),
+      sleeveLeft.enabled && sleeveLeft.image && !sleeveLeft.sameAsMain ? uploadDesignImage(sleeveLeft.image) : Promise.resolve(null),
+      sleeveRight.enabled && sleeveRight.image && !sleeveRight.sameAsMain ? uploadDesignImage(sleeveRight.image) : Promise.resolve(null),
+    ]);
 
     const { data: orderData, error } = await supabase.from("orders").insert({
       customer_name: form.name, customer_email: form.email, customer_phone: phone,
       product: product.name, variant: variant.label, color: product.colors[selectedColor],
       quantity: qty, total, notes: form.notes, status: "received",
-      user_id: user?.id || null,
-      design_url,
+      user_id: user?.id || null, design_url,
       design_x: imagePos.x, design_y: imagePos.y, design_size: imagePos.size,
-      product_color: product.colors[selectedColor],
-      language: lang,
+      product_color: product.colors[selectedColor], language: lang,
       back_print: backPrint,
+      second_front_url: secondFront.enabled ? (secondFront.sameAsMain ? design_url : second_front_url) : null,
+      second_front_x: secondFront.enabled ? secondFront.pos.x : null,
+      second_front_y: secondFront.enabled ? secondFront.pos.y : null,
+      second_front_size: secondFront.enabled ? secondFront.pos.size : null,
+      back_design_url: backPrint ? (backDesign.sameAsMain ? design_url : back_design_url) : null,
+      sleeve_left_url: sleeveLeft.enabled ? (sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
+      sleeve_right_url: sleeveRight.enabled ? (sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
     }).select().single();
 
     if (!error) {
@@ -920,9 +944,9 @@ function OrderPage({ lang, user, setPage }) {
                     style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "default" : "pointer" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
-                    {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                    {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                    {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
+                    {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
+                    {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker"    && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker_sq" && <StickerSqMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
@@ -1010,83 +1034,98 @@ function OrderPage({ lang, user, setPage }) {
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
                 </div>
-                {/* Free size control — shown when design is uploaded */}
+                {/* Free size control */}
                 {uploadedImage && (
                   <div>
                     <label style={labelStyle}>
-                      {lang === "he" ? "גודל עיצוב" : lang === "ru" ? "Размер дизайна" : "Design Size"}
+                      {lang === "he" ? "גודל עיצוב" : "Design Size"}
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))}
-                        style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
-                      <input type="range" min={43} max={160} value={Math.min(160, Math.max(43, imagePos.size))}
-                        onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))}
-                        style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))}
-                        style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
+                      <input type="range" min={43} max={160} value={Math.min(160, Math.max(43, imagePos.size))} onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))} style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
                     </div>
                   </div>
                 )}
-                {/* Back print option — shirts only */}
-                {["tshirt","oversized","dryfit"].includes(product.id) && (
-                  <div onClick={() => setBackPrint(p => !p)}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: backPrint ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `1px solid ${backPrint ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: "12px 16px", cursor: "pointer", transition: "all 0.2s" }}>
-                    <div>
-                      <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>
-                        {lang === "he" ? "🖨️ הדפסה גם על הגב" : lang === "ru" ? "🖨️ Печать на спине" : "🖨️ Add Back Print"}
-                      </div>
-                      <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>
-                        {lang === "he" ? "עיצוב נוסף מאחורה" : lang === "ru" ? "Дополнительный дизайн сзади" : "Additional design on the back"}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13 }}>+₪{BACK_PRINT_PRICE}</span>
-                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: backPrint ? COLORS.accent : "transparent", border: `2px solid ${backPrint ? COLORS.accent : COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {backPrint && <span style={{ color: "#fff", fontSize: 11 }}>✓</span>}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {/* Notes in step 2 */}
-                <div>
-                  <label style={labelStyle}>{t.form.notes}</label>
-                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
-                </div>
-                {/* Desktop-only: placement & size */}
+                {/* Placement below size — desktop, shirts only */}
                 {!isMobile && uploadedImage && !["mug"].includes(product.id) && (
                   <div>
-                    <label style={labelStyle}>{lang === "he" ? "מיקום עיצוב" : lang === "ru" ? "Расположение" : "Placement"}</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                    <label style={labelStyle}>{lang === "he" ? "מיקום עיצוב" : "Placement"}</label>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                       {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
-                        <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)}
-                          style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600, transition: "all 0.15s" }}>
+                        <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                           {pl[lang] || pl.en}
                         </button>
                       ))}
                     </div>
-                    <label style={labelStyle}>{lang === "he" ? "גודל הדפסה" : lang === "ru" ? "Размер печати" : "Print Size"}</label>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => {
-                        const placements = PLACEMENTS[product.id] || PLACEMENTS.tshirt;
-                        const currentPl = placements.find(p => p.id === selectedPlacement);
-                        const isDisabled = currentPl?.smallOnly && sz.id !== "small";
-                        return (
-                          <button key={sz.id} onClick={() => !isDisabled && handleSelectSize(sz.id)}
-                            style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: isDisabled ? COLORS.border : selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "10px 6px", cursor: isDisabled ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s", textAlign: "center", opacity: isDisabled ? 0.4 : 1 }}>
-                            <div style={{ fontWeight: 700, fontSize: 13 }}>{sz.label[lang] || sz.label.en}</div>
-                            <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2 }}>{sz.cm}</div>
-                          </button>
-                        );
-                      })}
+                  </div>
+                )}
+                {/* Extra prints — shirts only */}
+                {["tshirt","oversized","dryfit"].includes(product.id) && (
+                  <div>
+                    <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : "Additional Prints"}</label>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {[
+                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "➕ עיצוב נוסף בחזית" : "➕ Second Front Design", price: SECOND_FRONT_PRICE },
+                        { key: "bp",  state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: (fn) => { const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }); setBackPrint(v.enabled); setBackDesign({ sameAsMain: v.sameAsMain, image: v.image }); }, ref: backFileRef, label: lang === "he" ? "🖨️ הדפסה על הגב" : "🖨️ Back Print", price: BACK_PRINT_PRICE },
+                        { key: "sl",  state: sleeveLeft,  setState: setSleeveLeft,  ref: sleeveLeftRef,  label: lang === "he" ? "👕 שרוול שמאל" : "👕 Left Sleeve",  price: SLEEVE_PRICE },
+                        { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "👕 שרוול ימין" : "👕 Right Sleeve", price: SLEEVE_PRICE },
+                      ].map(({ key, state, setState, ref, label, price }) => (
+                        <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: `1px solid ${state.enabled ? COLORS.accent : COLORS.border}`, borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
+                          <div onClick={() => setState(p => ({ ...p, enabled: !p.enabled }))} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", cursor: "pointer" }}>
+                            <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{label}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13 }}>+₪{price}</span>
+                              <div style={{ width: 20, height: 20, borderRadius: "50%", background: state.enabled ? COLORS.accent : "transparent", border: `2px solid ${state.enabled ? COLORS.accent : COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {state.enabled && <span style={{ color: "#fff", fontSize: 11 }}>✓</span>}
+                              </div>
+                            </div>
+                          </div>
+                          {state.enabled && (
+                            <div style={{ padding: "0 16px 14px", borderTop: `1px solid ${COLORS.border}` }}>
+                              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                                <button onClick={() => setState(p => ({ ...p, sameAsMain: true, image: null }))} style={{ flex: 1, background: state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                  {lang === "he" ? "אותו עיצוב" : "Same design"}
+                                </button>
+                                <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                  {lang === "he" ? "העלה עיצוב שונה" : "Upload different"}
+                                </button>
+                              </div>
+                              {!state.sameAsMain && state.image && (
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                                  <img src={state.image} style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 4, border: `1px solid ${COLORS.border}` }} />
+                                  <span style={{ color: COLORS.accent, fontSize: 12 }}>✓ {lang === "he" ? "עיצוב הועלה" : "Uploaded"}</span>
+                                </div>
+                              )}
+                              <input ref={ref} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleExtraUpload(e, setState)} />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {/* Second front size slider */}
+                      {secondFront.enabled && secondFront.image && (
+                        <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: "10px 14px", border: `1px solid ${COLORS.border}` }}>
+                          <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", display: "block", marginBottom: 6 }}>{lang === "he" ? "גודל עיצוב שני" : "2nd Design Size"} <span style={{ color: COLORS.accent }}>{Math.round((secondFront.pos.size / 160) * 30)} cm</span></label>
+                          <input type="range" min={43} max={160} value={secondFront.pos.size} onChange={e => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Number(e.target.value) } }))} style={{ width: "100%", accentColor: COLORS.accent }} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
+                {/* Notes */}
+                <div>
+                  <label style={labelStyle}>{t.form.notes}</label>
+                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                </div>
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{t.customize.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
-                  {backPrint && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "הדפסת גב" : "Back Print"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
-                  <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{variant.price + SHIPPING_PRICE + (backPrint ? BACK_PRINT_PRICE : 0)}</span></div>
+                  {backPrint && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "גב" : "Back"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
+                  {secondFront.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "עיצוב נוסף בחזית" : "2nd Front"}</span><span>+₪{SECOND_FRONT_PRICE}</span></div>}
+                  {sleeveLeft.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול שמאל" : "Left Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
+                  {sleeveRight.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול ימין" : "Right Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
+                  <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{total}</span></div>
                 </div>}
               </div>
             </div>
