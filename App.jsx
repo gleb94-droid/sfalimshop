@@ -1180,6 +1180,32 @@ function OrderPage({ lang, user, setPage }) {
                     </div>
                   </div>
                 )}
+                {/* Desktop manual fine-tune — collapsible, same as mobile */}
+                {!isMobile && uploadedImage && (
+                  <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 10, overflow: "hidden" }}>
+                    <div onClick={() => setShowNudge(s => !s)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", background: showNudge ? "rgba(255,107,53,0.08)" : COLORS.bgCard }}>
+                      <label style={{ ...labelStyle, marginBottom: 0, cursor: "pointer" }}>
+                        {lang === "he" ? "🎛️ כיוונון ידני" : lang === "ru" ? "🎛️ Ручная настройка" : "🎛️ Manual fine-tune"}
+                      </label>
+                      <span style={{ color: COLORS.gray, fontSize: 14 }}>{showNudge ? "▲" : "▼"}</span>
+                    </div>
+                    {showNudge && (
+                      <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, width: 140, margin: "0 auto" }}>
+                          <div />
+                          <button onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
+                          <div />
+                          <button onClick={() => nudge(-5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>←</button>
+                          <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 12, color: COLORS.gray }}>✛</span></div>
+                          <button onClick={() => nudge(5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>→</button>
+                          <div />
+                          <button onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
+                          <div />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
                 {/* Second design size slider — right below first */}
                 {!isMobile && secondFront.enabled && secondFront.image && (
                   <div>
