@@ -1031,16 +1031,6 @@ function OrderPage({ lang, user, setPage }) {
                           : (lang === "he" ? "✋ גרור לכוונון מיקום" : "✋ Drag to position")
                         : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : "👆 Tap to upload design")}
                     </p>
-                    {/* Lock position button — right below shirt */}
-                    {uploadedImage && (
-                      <div style={{ padding: "4px 12px 10px" }}>
-                        <button onClick={() => setPositionLocked(p => !p)} style={{ width: "100%", background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
-                          {positionLocked
-                            ? (lang === "he" ? "✏️ ערוך מיקום מחדש" : lang === "ru" ? "✏️ Редактировать" : "✏️ Edit position")
-                            : (lang === "he" ? "✓ אישור מיקום — סיימתי" : lang === "ru" ? "✓ Сохранить" : "✓ Lock position")}
-                        </button>
-                      </div>
-                    )}
                     {/* Design selector — shown when two designs exist */}
                     {uploadedImage && secondFront.enabled && secondFront.image && (
                       <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
@@ -1116,6 +1106,14 @@ function OrderPage({ lang, user, setPage }) {
                         }} />
                     )}
                   </div>
+                  {/* Lock position button — right below shirt, outside touch area */}
+                  {uploadedImage && (
+                    <button onClick={() => setPositionLocked(p => !p)} style={{ width: "100%", marginTop: 8, background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
+                      {positionLocked
+                        ? (lang === "he" ? "✏️ ערוך מיקום מחדש" : lang === "ru" ? "✏️ Редактировать" : "✏️ Edit position")
+                        : (lang === "he" ? "✓ אישור מיקום — סיימתי" : lang === "ru" ? "✓ Сохранить" : "✓ Lock position")}
+                    </button>
+                  )}
                   {/* Mobile size slider — below mockup */}
                   {isMobile && uploadedImage && (
                     <div style={{ padding: "10px 4px 4px" }}>
