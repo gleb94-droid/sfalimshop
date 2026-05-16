@@ -1701,10 +1701,28 @@ function AboutPage({ lang, setPage }) {
 }
 
 export default function App() {
-  const [page, setPage] = useState("home");
+  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about'];
+
+  const getPageFromHash = () => {
+    const hash = window.location.hash.replace('#', '');
+    return VALID_PAGES.includes(hash) ? hash : 'home';
+  };
+
+  const [page, setPageState] = useState(getPageFromHash);
   const [lang, setLang] = useState("he");
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const setPage = (newPage) => {
+    window.location.hash = newPage === 'home' ? '' : newPage;
+    setPageState(newPage);
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => setPageState(getPageFromHash());
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
