@@ -661,6 +661,7 @@ function OrderPage({ lang, user, setPage }) {
   const [selectedPlacement, setSelectedPlacement] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [positionLocked, setPositionLocked] = useState(false);
   const [dragStart, setDragStart] = useState(null);
   const [activeDesign, setActiveDesign] = useState('main');
   const [showPlacement, setShowPlacement] = useState(false);
@@ -827,6 +828,7 @@ function OrderPage({ lang, user, setPage }) {
   });
 
   const handleMouseDown = (e) => {
+    if (positionLocked) return;
     e.preventDefault();
     setDragging(true);
     const rect = mockupRef.current.getBoundingClientRect();
@@ -849,7 +851,7 @@ function OrderPage({ lang, user, setPage }) {
   const handleMouseUp = () => setDragging(false);
 
   const handleTouchStart = (e) => {
-    if (!uploadedImage) return;
+    if (!uploadedImage || positionLocked) return;
     if (e.touches.length === 2) {
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
@@ -1013,7 +1015,7 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ flex: "1 1 280px" }}>
                   <div ref={mockupRef}
                     onClick={() => !uploadedImage && fileRef.current.click()}
-                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer", maxWidth: 300, margin: "0 auto" }}
+                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchEnd={handleMouseUp}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
@@ -1104,6 +1106,14 @@ function OrderPage({ lang, user, setPage }) {
                         }} />
                     )}
                   </div>
+                  {/* Lock position button — visible when image uploaded */}
+                  {uploadedImage && (
+                    <button onClick={() => setPositionLocked(p => !p)} style={{ width: "100%", marginTop: 10, background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+                      {positionLocked
+                        ? (lang === "he" ? "✏️ ערוך מיקום מחדש" : lang === "ru" ? "✏️ Редактировать позицию" : "✏️ Edit position")
+                        : (lang === "he" ? "✓ אישור מיקום — סיימתי" : lang === "ru" ? "✓ Сохранить позицию" : "✓ Lock position")}
+                    </button>
+                  )}
                   {/* Mobile size slider — below mockup */}
                   {isMobile && uploadedImage && (
                     <div style={{ padding: "10px 4px 4px" }}>
