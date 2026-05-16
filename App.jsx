@@ -862,9 +862,10 @@ function OrderPage({ lang, user, setPage }) {
     }
     const touch = e.touches[0];
     const rect = mockupRef.current.getBoundingClientRect();
-    // Only start drag if touch is actually on the design image
-    const touchX = (touch.clientX - rect.left) / rect.width * 400;
-    const touchY = (touch.clientY - rect.top) / rect.height * 400;
+    const scaleX = 400 / rect.width;
+    const scaleY = 400 / rect.height;
+    const touchX = touch.clientX * scaleX - rect.left * scaleX;
+    const touchY = touch.clientY * scaleY - rect.top * scaleY;
     const pos = getActivePos();
     const PAD = 24;
     const onDesign = touchX >= pos.x - PAD && touchX <= pos.x + pos.size + PAD &&
