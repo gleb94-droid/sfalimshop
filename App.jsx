@@ -204,8 +204,7 @@ function ProductMockupBase({ productKey, color, imageUrl, imagePos, showPlacehol
 
 return (
   <div
-    onClick={() => fileRef.current.click()}
-    style={{ position:"relative", width:"100%", paddingTop:"100%", borderRadius:12, cursor:"pointer" }}>
+    style={{ position:"relative", width:"100%", paddingTop:"100%", borderRadius:12 }}>
     <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} />
     {imageUrl && (
       <img src={imageUrl} alt="design" style={{
@@ -219,7 +218,7 @@ return (
     )}
   </div>
 );
-      
+}      
 // 3. עדכון הקומפוננטות הספציפיות שיעבירו את ה-productKey במקום את ה-mockupUrl
 function TShirtMockup({ color, imageUrl, imagePos }) {
   return <ProductMockupBase productKey="tshirt" color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
