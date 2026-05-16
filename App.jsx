@@ -572,6 +572,7 @@ function AdminPage({ lang }) {
                             <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.customer}</div>
                             <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📧 {order.customer_email}</div>
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📱 {order.customer_phone}</div>}
+                            {(order.customer_street || order.customer_city) && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📍 {[order.customer_street, order.customer_city, order.customer_postal_code].filter(Boolean).join(", ")}</div>}
                             {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>💬 {order.notes}</div>}
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                               {order.product_color && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: order.product_color, border: "1px solid #555", flexShrink: 0 }} />{order.product_color}</div>}
@@ -667,7 +668,11 @@ function OrderPage({ lang, user, setPage }) {
   const [dragStart, setDragStart] = useState(null);
   const [activeDesign, setActiveDesign] = useState('main');
   const [showPlacement, setShowPlacement] = useState(false);
-  const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", notes: "" });
+  const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" });
+  const [addrSuggestions, setAddrSuggestions] = useState([]);
+  const [showAddrSugg, setShowAddrSugg] = useState(false);
+  const [addrLoading, setAddrLoading] = useState(false);
+  const addrTimerRef = useRef();
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [backPrint, setBackPrint] = useState(false);
@@ -911,8 +916,42 @@ function OrderPage({ lang, user, setPage }) {
   // Keep ref updated so native listeners always call latest version
   touchHandlersRef.current = { start: handleTouchStart, move: handleTouchMove };
 
+  const fetchAddrSuggestions = (query) => {
+    if (addrTimerRef.current) clearTimeout(addrTimerRef.current);
+    if (!query || query.trim().length < 3) {
+      setAddrSuggestions([]);
+      setShowAddrSugg(false);
+      return;
+    }
+    addrTimerRef.current = setTimeout(async () => {
+      try {
+        setAddrLoading(true);
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&countrycodes=il&limit=6&addressdetails=1&accept-language=${lang === "he" ? "he" : lang === "ru" ? "ru" : "en"}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        setAddrSuggestions(Array.isArray(data) ? data : []);
+        setShowAddrSugg(true);
+      } catch (e) {
+        console.error("Nominatim error:", e);
+      }
+      setAddrLoading(false);
+    }, 400);
+  };
+
+  const selectAddress = (item) => {
+    const a = item.address || {};
+    const houseNumber = a.house_number ? `${a.house_number} ` : "";
+    const street = a.road || a.pedestrian || a.suburb || "";
+    const fullStreet = (street ? `${street} ${houseNumber}`.trim() : item.display_name.split(",")[0]).trim();
+    const city = a.city || a.town || a.village || a.municipality || "";
+    const postalCode = a.postcode || "";
+    setForm(p => ({ ...p, street: fullStreet, city, postalCode }));
+    setShowAddrSugg(false);
+    setAddrSuggestions([]);
+  };
+
   const handleSubmit = async () => {
-    if (!form.name || !form.email) return;
+    if (!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode) return;
     setSubmitting(true);
     const phone = form.phoneNumber ? `${form.phonePrefix}-${form.phoneNumber}` : "";
 
@@ -926,6 +965,7 @@ function OrderPage({ lang, user, setPage }) {
 
     const { data: orderData, error } = await supabase.from("orders").insert({
       customer_name: form.name, customer_email: form.email, customer_phone: phone,
+      customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
       product: product.name, variant: variant.label, color: product.colors[selectedColor],
       quantity: qty, total, notes: form.notes, status: "received",
       user_id: user?.id || null, design_url,
@@ -1322,6 +1362,31 @@ function OrderPage({ lang, user, setPage }) {
                 </div>
                 <input type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") }))} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
               </div>
+              <div style={{ position: "relative" }}>
+                <label style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
+                <input type="text" value={form.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(v + (form.city ? ", " + form.city : ", Israel")); }} onBlur={() => setTimeout(() => setShowAddrSugg(false), 200)} placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" />
+                {addrLoading && <div style={{ position: "absolute", left: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</div>}
+                {showAddrSugg && addrSuggestions.length > 0 && (
+                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
+                    {addrSuggestions.map((s, i) => (
+                      <div key={i} onMouseDown={(e) => { e.preventDefault(); selectAddress(s); }} style={{ padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <div style={{ color: COLORS.accent, fontWeight: 600 }}>📍 {s.display_name.split(",").slice(0, 2).join(",")}</div>
+                        <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.display_name.split(",").slice(2).join(",").trim()}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
+                  <input type="text" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
+                  <input type="text" value={form.postalCode} maxLength={7} onChange={e => setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") }))} placeholder="1234567" style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                </div>
+              </div>
               <div><label style={labelStyle}>{t.form.notes}</label><textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div>
                 <label style={labelStyle}>{t.form.qty}</label>
@@ -1344,7 +1409,7 @@ function OrderPage({ lang, user, setPage }) {
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
               <button onClick={() => setStep(2)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
-              <button onClick={handleSubmit} disabled={!form.name || !form.email || submitting} style={{ flex: 1, background: form.name && form.email ? COLORS.accent : COLORS.bgCard, color: form.name && form.email ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: form.name && form.email ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
+              <button onClick={handleSubmit} disabled={!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode || submitting} style={{ flex: 1, background: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? COLORS.accent : COLORS.bgCard, color: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
                 {submitting ? "..." : `${t.form.place} · ₪${total}`}
               </button>
             </div>
