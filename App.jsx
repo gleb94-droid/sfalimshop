@@ -559,6 +559,24 @@ function AdminPage({ lang }) {
                             <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📧 {order.customer_email}</div>
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📱 {order.customer_phone}</div>}
                             {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>💬 {order.notes}</div>}
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                              {order.product_color && (
+                                <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}>
+                                  <div style={{ width: 11, height: 11, borderRadius: "50%", background: order.product_color, border: "1px solid #555", flexShrink: 0 }} />
+                                  {order.product_color}
+                                </div>
+                              )}
+                              {order.design_size && (
+                                <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}>
+                                  📐 ~{Math.round((order.design_size / 400) * 30)}×{Math.round((order.design_size / 400) * 30)} cm
+                                </div>
+                              )}
+                              {order.back_print && (
+                                <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>
+                                  🖨️ Back print
+                                </div>
+                              )}
+                            </div>
                           </div>
                         {order.design_url && (
                             <div>
@@ -628,7 +646,29 @@ function OrderPage({ lang, user, setPage }) {
   const [submitting, setSubmitting] = useState(false);
   const [backPrint, setBackPrint] = useState(false);
   const BACK_PRINT_PRICE = 39;
+  const [leaveWarning, setLeaveWarning] = useState(false);
+  const [pendingNav, setPendingNav] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const fileRef = useRef();
+
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handle);
+    return () => window.removeEventListener('resize', handle);
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (step >= 2 && step < 4) { e.preventDefault(); e.returnValue = ''; }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [step]);
+
+  const safeGo = (action) => {
+    if (step >= 2 && step < 4) { setLeaveWarning(true); setPendingNav(() => action); }
+    else action();
+  };
 
   const product = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
   const variant = selectedVariant ? product?.variants.find(v => v.id === selectedVariant) : null;
@@ -788,6 +828,29 @@ function OrderPage({ lang, user, setPage }) {
           ))}
         </div>
 
+        {/* Leave warning modal */}
+        {leaveWarning && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 360, width: "100%", textAlign: "center" }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+              <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+                {lang === "he" ? "לעזוב את ההזמנה?" : lang === "ru" ? "Покинуть заказ?" : "Leave order?"}
+              </div>
+              <div style={{ color: COLORS.gray, fontSize: 14, marginBottom: 24 }}>
+                {lang === "he" ? "הפרטים שהזנת יאבדו" : lang === "ru" ? "Введённые данные будут потеряны" : "Your progress will be lost"}
+              </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button onClick={() => setLeaveWarning(false)} style={{ flex: 1, background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                  {lang === "he" ? "המשך הזמנה" : lang === "ru" ? "Продолжить" : "Keep ordering"}
+                </button>
+                <button onClick={() => { setLeaveWarning(false); pendingNav && pendingNav(); }} style={{ flex: 1, background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                  {lang === "he" ? "עזוב" : lang === "ru" ? "Уйти" : "Leave"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {step === 1 && (
           <div>
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h2>
@@ -814,7 +877,9 @@ function OrderPage({ lang, user, setPage }) {
             <p style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
-                  <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none" }}
+                  <div
+                    onClick={() => !uploadedImage && fileRef.current.click()}
+                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "default" : "pointer" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
@@ -822,28 +887,53 @@ function OrderPage({ lang, user, setPage }) {
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker"   && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
-                    <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 6 }}>
-  {lang === "he" ? "👆 לחץ על התמונה להעלאת עיצוב" : "👆 Tap image to upload your design"}
-</p>
+                    <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", padding: "6px 0 4px" }}>
+                      {uploadedImage
+                        ? (lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для точной настройки" : "✋ Drag to fine-tune position")
+                        : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : "👆 Tap to upload design")}
+                    </p>
+                    {uploadedImage && selectedPlacement && selectedSize && (
+                      <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>✓ {
+                        (() => {
+                          const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
+                          const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
+                          return `${pl?.[lang] || pl?.en} · ${sz?.cm}`;
+                        })()
+                      }</p>
+                    )}
+                    {/* Mobile-only: placement & size below mockup */}
+                    {isMobile && uploadedImage && (
+                      <div style={{ padding: "8px 12px 12px" }}>
+                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "מיקום" : "Placement"}</label>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                          {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
+                            <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)}
+                              style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                              {pl[lang] || pl.en}
+                            </button>
+                          ))}
+                        </div>
+                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "גודל" : "Size"}</label>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => {
+                            const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
+                            const isDisabled = pl?.smallOnly && sz.id !== "small";
+                            return (
+                              <button key={sz.id} onClick={() => !isDisabled && handleSelectSize(sz.id)}
+                                style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: isDisabled ? COLORS.border : selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: isDisabled ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", textAlign: "center", opacity: isDisabled ? 0.4 : 1 }}>
+                                <div style={{ fontWeight: 700, fontSize: 12 }}>{sz.label[lang] || sz.label.en}</div>
+                                <div style={{ fontSize: 10, opacity: 0.8 }}>{sz.cm}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                     {uploadedImage && (
                       <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
                         style={{ position: "absolute", left: `calc(12px + ${(imagePos.x / 400) * 100}%)`, top: `calc(12px + ${(imagePos.y / 400) * 100}%)`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", zIndex: 10 }} />
                     )}
                   </div>
-                  {uploadedImage && (
-                    <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 6 }}>
-                      {lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для точной настройки" : "✋ Drag to fine-tune position"}
-                    </p>
-                  )}
-                  {uploadedImage && selectedPlacement && selectedSize && (
-                    <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginTop: 2 }}>✓ {
-                      (() => {
-                        const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
-                        const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
-                        return `${pl?.[lang] || pl?.en} · ${sz?.cm}`;
-                      })()
-                    }</p>
-                  )}
                 </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
@@ -888,7 +978,13 @@ function OrderPage({ lang, user, setPage }) {
                     </div>
                   </div>
                 )}
-                {uploadedImage && (
+                {/* Notes in step 2 */}
+                <div>
+                  <label style={labelStyle}>{t.form.notes}</label>
+                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                </div>
+                {/* Desktop-only: placement & size */}
+                {!isMobile && uploadedImage && (
                   <div>
                     <label style={labelStyle}>{lang === "he" ? "מיקום עיצוב" : lang === "ru" ? "Расположение" : "Placement"}</label>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
@@ -925,7 +1021,7 @@ function OrderPage({ lang, user, setPage }) {
               </div>
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-              <button onClick={() => setStep(1)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
+              <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
               <button onClick={() => setStep(3)} style={{ flex: 1, background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.continue}</button>
             </div>
           </div>
