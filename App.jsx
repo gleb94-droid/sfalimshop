@@ -1071,7 +1071,8 @@ function OrderPage({ lang, user, setPage }) {
                           <span style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>{lang === "he" ? "כוונון ידני" : "Fine-tune"}</span>
                           <span style={{ color: COLORS.gray, fontSize: 12 }}>{showNudge ? "▲" : "▼"}</span>
                         </div>
-                        {showNudge && (<>
+                        {showNudge && (
+                        <div>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "4px auto 12px" }}>
                           <div />
                           <button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
@@ -1091,7 +1092,7 @@ function OrderPage({ lang, user, setPage }) {
                             </button>
                           ))}
                         </div>
-                        </>)}
+                        </div>)}
                       </div>
                     )}
                   {/* Mobile size slider — below mockup */}
