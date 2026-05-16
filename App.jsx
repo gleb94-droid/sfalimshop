@@ -577,7 +577,7 @@ function AdminPage({ lang }) {
                               {order.product_color && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: order.product_color, border: "1px solid #555", flexShrink: 0 }} />{order.product_color}</div>}
                               {order.design_size && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}>📐 ~{Math.round((order.design_size / 160) * 30)} cm</div>}
                               {order.back_print && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>🖨️ גב</div>}
-                              {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>➕ חזית נוספת</div>}
+                              {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>➕ חזית נוספת{order.second_front_size ? ` · ~${Math.round((order.second_front_size / 160) * 30)} cm` : ""}</div>}
                               {order.sleeve_left_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>👕 שרוול שמאל</div>}
                               {order.sleeve_right_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>👕 שרוול ימין</div>}
                             </div>
