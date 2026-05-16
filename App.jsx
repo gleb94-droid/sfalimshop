@@ -683,12 +683,28 @@ function OrderPage({ lang, user, setPage }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const fileRef = useRef();
   const mockupRef = useRef();
-  const pinchRef = useRef(null); // { dist, size, isSecond }
+  const pinchRef = useRef(null);
+  // Refs for native touch handlers (needed for passive:false)
+  const touchHandlersRef = useRef({});
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handle);
     return () => window.removeEventListener('resize', handle);
+  }, []);
+
+  // Non-passive touch listeners — allows preventDefault to block scroll and browser zoom
+  useEffect(() => {
+    const el = mockupRef.current;
+    if (!el) return;
+    const onStart = (e) => touchHandlersRef.current.start?.(e);
+    const onMove = (e) => { e.preventDefault(); touchHandlersRef.current.move?.(e); };
+    el.addEventListener('touchstart', onStart, { passive: false });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    return () => {
+      el.removeEventListener('touchstart', onStart);
+      el.removeEventListener('touchmove', onMove);
+    };
   }, []);
 
   useEffect(() => {
@@ -730,7 +746,11 @@ function OrderPage({ lang, user, setPage }) {
     const reader = new FileReader();
     reader.onload = (ev) => {
       setter(prev => ({ ...prev, image: ev.target.result, sameAsMain: false }));
-      if (isSecondFront) setActiveDesign('second');
+      if (isSecondFront) {
+        // Start second design at same size as main, switch drag to second
+        setSecondFront(prev => ({ ...prev, image: ev.target.result, sameAsMain: false, pos: { ...prev.pos, size: imagePos.size } }));
+        setActiveDesign('second');
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -829,7 +849,6 @@ function OrderPage({ lang, user, setPage }) {
   const handleTouchStart = (e) => {
     if (!uploadedImage) return;
     if (e.touches.length === 2) {
-      // 2 fingers — pinch to resize
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
@@ -838,8 +857,6 @@ function OrderPage({ lang, user, setPage }) {
       pinchRef.current = { dist, size: currentSize, isSecond: activeDesign === 'second' };
       return;
     }
-    // 1 finger — drag
-    e.preventDefault();
     const touch = e.touches[0];
     setDragging(true);
     const rect = mockupRef.current.getBoundingClientRect();
@@ -849,7 +866,6 @@ function OrderPage({ lang, user, setPage }) {
 
   const handleTouchMove = useCallback((e) => {
     if (e.touches.length === 2 && pinchRef.current) {
-      // Pinch resize
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
@@ -872,6 +888,9 @@ function OrderPage({ lang, user, setPage }) {
     if (dragStart.isSecond) setSecondFront(p => ({ ...p, pos: { ...p.pos, x, y } }));
     else setImagePos(p => ({ ...p, x, y }));
   }, [dragging, dragStart, product]);
+
+  // Keep ref updated so native listeners always call latest version
+  touchHandlersRef.current = { start: handleTouchStart, move: handleTouchMove };
 
   const handleSubmit = async () => {
     if (!form.name || !form.email) return;
@@ -994,8 +1013,7 @@ function OrderPage({ lang, user, setPage }) {
                     onClick={() => !uploadedImage && fileRef.current.click()}
                     style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
-                    onTouchStart={uploadedImage ? handleTouchStart : undefined}
-                    onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
+                    onTouchEnd={handleMouseUp}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
@@ -1179,12 +1197,14 @@ function OrderPage({ lang, user, setPage }) {
                             const newEnabled = !state.enabled;
                             setState(p => ({ ...p, enabled: newEnabled }));
                             if (isSecondFront && newEnabled && product) {
-                              // Reset second design to left-chest position when enabled
+                              // Reset position but DON'T switch activeDesign yet (wait for image)
                               const pa = product.printArea;
-                              setSecondFront(p => ({ ...p, enabled: true, pos: { x: pa.x + 10, y: pa.y + 10, size: 43 } }));
-                              setActiveDesign('second');
+                              setSecondFront(p => ({ ...p, enabled: true, pos: { x: pa.x + 10, y: pa.y + 10, size: imagePos.size } }));
                             }
-                            if (isSecondFront && !newEnabled) setActiveDesign('main');
+                            if (isSecondFront && !newEnabled) {
+                              setActiveDesign('main');
+                              setSecondFront(p => ({ ...p, enabled: false, image: null, sameAsMain: true }));
+                            }
                           }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", cursor: "pointer" }}>
                             <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{label}</span>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1197,7 +1217,14 @@ function OrderPage({ lang, user, setPage }) {
                           {state.enabled && (
                             <div style={{ padding: "0 16px 14px", borderTop: `1px solid ${COLORS.border}` }}>
                               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                                <button onClick={() => setState(p => ({ ...p, sameAsMain: true, image: null }))} style={{ flex: 1, background: state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                <button onClick={() => {
+                                  setState(p => ({ ...p, sameAsMain: true, image: null }));
+                                  if (isSecondFront) {
+                                    // Copy main design image and size
+                                    setSecondFront(p => ({ ...p, sameAsMain: true, image: uploadedImage, pos: { ...p.pos, size: imagePos.size } }));
+                                    setActiveDesign('second');
+                                  }
+                                }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
                                   {lang === "he" ? "אותו עיצוב" : "Same design"}
                                 </button>
                                 <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
