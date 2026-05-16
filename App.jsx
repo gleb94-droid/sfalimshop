@@ -202,21 +202,24 @@ function ProductMockupBase({ productKey, color, imageUrl, imagePos, showPlacehol
     img.src = mockupUrl;
   }, [mockupUrl, color]);
 
-  return (
-    <div style={{ position:"relative", width:"100%", paddingTop:"100%", borderRadius:12 }}>
-      <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} />
-      {imageUrl ? (
-        <img src={imageUrl} alt="design" style={{ position:"absolute", left:`${(imagePos.x/400)*100}%`, top:`${(imagePos.y/400)*100}%`, width:`${(imagePos.size/400)*100}%`, height:`${(imagePos.size/400)*100}%`, objectFit:"contain", zIndex:2, pointerEvents:"none" }} />
-      ) : showPlaceholder && (
-        <div style={{ position:"absolute", left:"30%", top:"28%", width:"38%", height:"35%", border:"1.5px dashed rgba(255,107,53,0.5)", borderRadius:6, zIndex:2, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:4 }}>
-          <span style={{ fontSize:20 }}>📁</span>
-          <span style={{ fontSize:10, color:"rgba(255,107,53,0.7)", fontFamily:"monospace" }}>Upload design</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
+return (
+  <div
+    onClick={() => fileRef.current.click()}
+    style={{ position:"relative", width:"100%", paddingTop:"100%", borderRadius:12, cursor:"pointer" }}>
+    <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} />
+    {imageUrl && (
+      <img src={imageUrl} alt="design" style={{
+        position:"absolute",
+        left:`${(imagePos.x/400)*100}%`,
+        top:`${(imagePos.y/400)*100}%`,
+        width:`${(imagePos.size/400)*100}%`,
+        height:`${(imagePos.size/400)*100}%`,
+        objectFit:"contain", zIndex:2, pointerEvents:"none",
+      }} />
+    )}
+  </div>
+);
+      
 // 3. עדכון הקומפוננטות הספציפיות שיעבירו את ה-productKey במקום את ה-mockupUrl
 function TShirtMockup({ color, imageUrl, imagePos }) {
   return <ProductMockupBase productKey="tshirt" color={color} imageUrl={imageUrl} imagePos={imagePos} showPlaceholder />;
@@ -812,7 +815,7 @@ function OrderPage({ lang, user, setPage }) {
             <p style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
-                  <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 12, position: "relative", userSelect: "none" }}
+                  <div style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
@@ -820,6 +823,9 @@ function OrderPage({ lang, user, setPage }) {
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker"   && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 6 }}>
+  {lang === "he" ? "👆 לחץ על התמונה להעלאת עיצוב" : "👆 Tap image to upload your design"}
+</p>
                     {uploadedImage && (
                       <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
                         style={{ position: "absolute", left: `calc(12px + ${(imagePos.x / 400) * 100}%)`, top: `calc(12px + ${(imagePos.y / 400) * 100}%)`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", zIndex: 10 }} />
@@ -955,7 +961,7 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 14, marginBottom: 12 }}><span>{t.form.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
                 <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 12, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 700 }}>{t.form.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 20 }}>₪{total}</span></div>
               </div>
-              <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: 12 }}>
+              <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: 0 }}>
                 <div style={{ color: COLORS.accent, fontSize: 13 }}>{t.form.paymentNote}</div>
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{t.form.paymentSub}</div>
               </div>
