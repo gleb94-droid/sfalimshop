@@ -142,22 +142,22 @@ const SIZE_OPTIONS = {
   tshirt:  [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
     { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
-    { id: "large",  px: 110, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   oversized: [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
     { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
-    { id: "large",  px: 110, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   dryfit: [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
     { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
-    { id: "large",  px: 110, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   mug: [
     { id: "small",  px: 40,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
     { id: "medium", px: 65,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
-    { id: "large",  px: 100, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
   ],
   sticker: [
     { id: "small",  px: 60,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
@@ -662,6 +662,7 @@ function OrderPage({ lang, user, setPage }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [positionLocked, setPositionLocked] = useState(false);
+  const [showNudge, setShowNudge] = useState(false);
   const [dragStart, setDragStart] = useState(null);
   const [activeDesign, setActiveDesign] = useState('main');
   const [showPlacement, setShowPlacement] = useState(false);
@@ -820,7 +821,17 @@ function OrderPage({ lang, user, setPage }) {
 
   const handleSelectSize = (sizeId) => {
     setSelectedSize(sizeId);
-    if (selectedPlacement) applyPlacementAndSize(selectedPlacement, sizeId);
+    if (!product) return;
+    const sizes = SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt;
+    const sz = sizes.find(s => s.id === sizeId);
+    if (!sz) return;
+    const pa = product.printArea;
+    const newSize = Math.min(160, sz.px);
+    if (activeDesign === 'second') {
+      setSecondFront(p => ({ ...p, pos: { ...p.pos, size: newSize, x: Math.max(pa.x, Math.min(pa.x + pa.w - newSize, p.pos.x)), y: Math.max(pa.y, Math.min(pa.y + pa.h - newSize, p.pos.y)) } }));
+    } else {
+      setImagePos(p => ({ ...p, size: newSize, x: Math.max(pa.x, Math.min(pa.x + pa.w - newSize, p.x)), y: Math.max(pa.y, Math.min(pa.y + pa.h - newSize, p.y)) }));
+    }
   };
 
   const clampToArea = (x, y, size, pa) => ({
@@ -1059,52 +1070,42 @@ function OrderPage({ lang, user, setPage }) {
                         </button>
                       </div>
                     )}
-                    {uploadedImage && selectedPlacement && selectedSize && (
-                      <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>✓ {
-                        (() => {
-                          const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
-                          const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
-                          return `${pl?.[lang] || pl?.en} · ${sz?.cm}`;
-                        })()
-                      }</p>
-                    )}
-                    {/* Mobile-only: placement & size below mockup */}
+                    {/* Mobile-only: collapsible manual fine-tune + size */}
                     {isMobile && uploadedImage && !["mug"].includes(product.id) && (
                       <div style={{ padding: "8px 12px 12px" }}>
-                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "כוונון מיקום" : "Fine-tune position"}</label>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "0 auto 12px" }}>
-                          <div />
-                          <button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
-                          <div />
-                          <button onClick={() => nudge(-15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>←</button>
-                          <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>✛</span></div>
-                          <button onClick={() => nudge(15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>→</button>
-                          <div />
-                          <button onClick={() => nudge(0, 15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
-                          <div />
-                        </div>
-                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "מיקום" : "Placement"}</label>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-                          {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
-                            <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)}
-                              style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                              {pl[lang] || pl.en}
-                            </button>
-                          ))}
+                        {/* Collapsible manual fine-tune */}
+                        <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 8, overflow: "hidden", marginBottom: 10 }}>
+                          <div onClick={() => setShowNudge(s => !s)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", cursor: "pointer", background: showNudge ? "rgba(255,107,53,0.08)" : "transparent" }}>
+                            <span style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                              {lang === "he" ? "🎛️ כיוונון ידני" : lang === "ru" ? "🎛️ Ручная настройка" : "🎛️ Manual fine-tune"}
+                            </span>
+                            <span style={{ color: COLORS.gray, fontSize: 12 }}>{showNudge ? "▲" : "▼"}</span>
+                          </div>
+                          {showNudge && (
+                            <div style={{ padding: "10px", borderTop: `1px solid ${COLORS.border}` }}>
+                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "0 auto" }}>
+                                <div />
+                                <button onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
+                                <div />
+                                <button onClick={() => nudge(-5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>←</button>
+                                <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>✛</span></div>
+                                <button onClick={() => nudge(5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>→</button>
+                                <div />
+                                <button onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
+                                <div />
+                              </div>
+                            </div>
+                          )}
                         </div>
                         <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "גודל" : "Size"}</label>
                         <div style={{ display: "flex", gap: 6 }}>
-                          {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => {
-                            const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
-                            const isDisabled = pl?.smallOnly && sz.id !== "small";
-                            return (
-                              <button key={sz.id} onClick={() => !isDisabled && handleSelectSize(sz.id)}
-                                style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: isDisabled ? COLORS.border : selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: isDisabled ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", textAlign: "center", opacity: isDisabled ? 0.4 : 1 }}>
-                                <div style={{ fontWeight: 700, fontSize: 12 }}>{sz.label[lang] || sz.label.en}</div>
-                                <div style={{ fontSize: 10, opacity: 0.8 }}>{sz.cm}</div>
-                              </button>
-                            );
-                          })}
+                          {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => (
+                            <button key={sz.id} onClick={() => handleSelectSize(sz.id)}
+                              style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", textAlign: "center" }}>
+                              <div style={{ fontWeight: 700, fontSize: 12 }}>{sz.label[lang] || sz.label.en}</div>
+                              <div style={{ fontSize: 10, opacity: 0.8 }}>{sz.cm}</div>
+                            </button>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -1184,26 +1185,7 @@ function OrderPage({ lang, user, setPage }) {
                     </div>
                   </div>
                 )}
-                {/* Placement — collapsible, desktop, shirts only */}
-                {!isMobile && uploadedImage && !["mug"].includes(product.id) && (
-                  <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 10, overflow: "hidden" }}>
-                    <div onClick={() => setShowPlacement(p => !p)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", background: showPlacement ? "rgba(255,107,53,0.08)" : COLORS.bgCard }}>
-                      <label style={{ ...labelStyle, marginBottom: 0, cursor: "pointer" }}>{lang === "he" ? "מיקום עיצוב" : "Placement"}</label>
-                      <span style={{ color: COLORS.gray, fontSize: 14 }}>{showPlacement ? "▲" : "▼"}</span>
-                    </div>
-                    {showPlacement && (
-                      <div style={{ padding: "10px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                          {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
-                            <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                              {pl[lang] || pl.en}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Placement removed - users drag to position */}
                 {/* Extra prints — shirts only */}
                 {["tshirt","oversized","dryfit"].includes(product.id) && (
                   <div>
