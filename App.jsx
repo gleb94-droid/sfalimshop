@@ -683,6 +683,7 @@ function OrderPage({ lang, user, setPage }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const fileRef = useRef();
   const mockupRef = useRef();
+  const pinchRef = useRef(null); // { dist, size, isSecond }
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768);
@@ -823,6 +824,17 @@ function OrderPage({ lang, user, setPage }) {
   const handleMouseUp = () => setDragging(false);
 
   const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      // 2 fingers — pinch to resize
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const currentSize = activeDesign === 'second' ? secondFront.pos.size : imagePos.size;
+      pinchRef.current = { dist, size: currentSize, isSecond: activeDesign === 'second' };
+      return;
+    }
+    // 1 finger — drag
     const touch = e.touches[0];
     setDragging(true);
     const rect = mockupRef.current.getBoundingClientRect();
@@ -831,6 +843,22 @@ function OrderPage({ lang, user, setPage }) {
   };
 
   const handleTouchMove = useCallback((e) => {
+    if (e.touches.length === 2 && pinchRef.current) {
+      // Pinch resize
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const ratio = dist / pinchRef.current.dist;
+      const newSize = Math.min(160, Math.max(43, Math.round(pinchRef.current.size * ratio)));
+      if (pinchRef.current.isSecond) {
+        setSecondFront(p => ({ ...p, pos: { ...p.pos, size: newSize } }));
+      } else {
+        setImagePos(p => ({ ...p, size: newSize }));
+      }
+      return;
+    }
+    pinchRef.current = null;
     if (!dragging || !dragStart || !product) return;
     const touch = e.touches[0];
     const rawX = dragStart.ix + (touch.clientX - dragStart.mx) * dragStart.scaleX;
@@ -970,7 +998,9 @@ function OrderPage({ lang, user, setPage }) {
                     {product.id === "sticker_sq" && <StickerSqMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", padding: "6px 0 4px" }}>
                       {uploadedImage
-                        ? (lang === "he" ? "✋ גרור לכוונון מיקום" : "✋ Drag to position")
+                        ? isMobile
+                          ? (lang === "he" ? "✋ גרור להזזה · 🤏 צבוט לשינוי גודל" : "✋ Drag to move · 🤏 Pinch to resize")
+                          : (lang === "he" ? "✋ גרור לכוונון מיקום" : "✋ Drag to position")
                         : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : "👆 Tap to upload design")}
                     </p>
                     {/* Design selector — shown when two designs exist */}
@@ -1099,6 +1129,20 @@ function OrderPage({ lang, user, setPage }) {
                     </div>
                   </div>
                 )}
+                {/* Second design size slider — right below first */}
+                {!isMobile && secondFront.enabled && secondFront.image && (
+                  <div>
+                    <label style={labelStyle}>
+                      {lang === "he" ? "גודל עיצוב שני" : "2nd Design Size"}
+                      <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((secondFront.pos.size / 160) * 30)} cm</span>
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.max(43, p.pos.size - 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
+                      <input type="range" min={43} max={160} value={secondFront.pos.size} onChange={e => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Number(e.target.value) } }))} style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
+                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.min(160, p.pos.size + 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
+                    </div>
+                  </div>
+                )}
                 {/* Placement below size — desktop, shirts only */}
                 {!isMobile && uploadedImage && !["mug"].includes(product.id) && (
                   <div>
@@ -1154,13 +1198,6 @@ function OrderPage({ lang, user, setPage }) {
                           )}
                         </div>
                       ))}
-                      {/* Second front size slider */}
-                      {secondFront.enabled && secondFront.image && (
-                        <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: "10px 14px", border: `1px solid ${COLORS.border}` }}>
-                          <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", display: "block", marginBottom: 6 }}>{lang === "he" ? "גודל עיצוב שני" : "2nd Design Size"} <span style={{ color: COLORS.accent }}>{Math.round((secondFront.pos.size / 160) * 30)} cm</span></label>
-                          <input type="range" min={43} max={160} value={secondFront.pos.size} onChange={e => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Number(e.target.value) } }))} style={{ width: "100%", accentColor: COLORS.accent }} />
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
