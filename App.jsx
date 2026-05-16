@@ -1066,7 +1066,7 @@ function OrderPage({ lang, user, setPage }) {
                       <div style={{ padding: "4px 12px 8px" }}>
                         <div onClick={() => setShowNudge(p => !p)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", cursor: "pointer" }}>
                           <span style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>{lang === "he" ? "כוונון ידני" : "Fine-tune"}</span>
-                          <span style={{ color: COLORS.gray, fontSize: 12 }}>{showNudge ? "▲" : "▼"}</span>
+                          <span style={{ color: COLORS.gray, fontSize: 12 }}>{showNudge ? "(-)" : "(+)"}</span>
                         </div>
                         {showNudge && (
                         <div>
@@ -1075,7 +1075,7 @@ function OrderPage({ lang, user, setPage }) {
                           <button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
                           <div />
                           <button onClick={() => nudge(-15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>←</button>
-                          <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>✛</span></div>
+                          <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>+</span></div>
                           <button onClick={() => nudge(15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>→</button>
                           <div />
                           <button onClick={() => nudge(0, 15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
@@ -1163,7 +1163,7 @@ function OrderPage({ lang, user, setPage }) {
                   <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 10, overflow: "hidden" }}>
                     <div onClick={() => setShowPlacement(p => !p)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", background: showPlacement ? "rgba(255,107,53,0.08)" : COLORS.bgCard }}>
                       <label style={{ ...labelStyle, marginBottom: 0, cursor: "pointer" }}>{lang === "he" ? "מיקום עיצוב" : "Placement"}</label>
-                      <span style={{ color: COLORS.gray, fontSize: 14 }}>{showPlacement ? "▲" : "▼"}</span>
+                      <span style={{ color: COLORS.gray, fontSize: 14 }}>{showPlacement ? "(-)" : "(+)"}</span>
                     </div>
                     {showPlacement && (
                       <div style={{ padding: "10px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
