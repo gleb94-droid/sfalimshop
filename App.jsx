@@ -1132,7 +1132,7 @@ function OrderPage({ lang, user, setPage }) {
                   {isMobile && uploadedImage && (
                     <div style={{ padding: "10px 4px 4px" }}>
                       <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                        <span>{lang === "he" ? "גודל עיצוב" : "Design Size"}</span>
+                        <span>{lang === "he" ? "גודל עיצוב" : lang === "ru" ? "Размер дизайна" : "Design Size"}</span>
                         <span style={{ color: COLORS.accent, fontWeight: 700 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                       </label>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1170,7 +1170,7 @@ function OrderPage({ lang, user, setPage }) {
                 {!isMobile && uploadedImage && (
                   <div>
                     <label style={labelStyle}>
-                      {lang === "he" ? "גודל עיצוב" : "Design Size"}
+                      {lang === "he" ? "גודל עיצוב" : lang === "ru" ? "Размер дизайна" : "Design Size"}
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -1210,7 +1210,7 @@ function OrderPage({ lang, user, setPage }) {
                 {!isMobile && secondFront.enabled && secondFront.image && (
                   <div>
                     <label style={labelStyle}>
-                      {lang === "he" ? "גודל עיצוב שני" : "2nd Design Size"}
+                      {lang === "he" ? "גודל עיצוב שני" : lang === "ru" ? "Размер 2-го дизайна" : "2nd Design Size"}
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((secondFront.pos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -1224,13 +1224,13 @@ function OrderPage({ lang, user, setPage }) {
                 {/* Extra prints — shirts only */}
                 {["tshirt","oversized","dryfit"].includes(product.id) && (
                   <div>
-                    <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : "Additional Prints"}</label>
+                    <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : lang === "ru" ? "Дополнительные принты" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {[
-                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "➕ עיצוב נוסף בחזית" : "➕ Second Front Design", price: SECOND_FRONT_PRICE, isSecondFront: true },
-                        { key: "bp",  state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: (fn) => { const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }); setBackPrint(v.enabled); setBackDesign({ sameAsMain: v.sameAsMain, image: v.image }); }, ref: backFileRef, label: lang === "he" ? "🖨️ הדפסה על הגב" : "🖨️ Back Print", price: BACK_PRINT_PRICE },
-                        { key: "sl",  state: sleeveLeft,  setState: setSleeveLeft,  ref: sleeveLeftRef,  label: lang === "he" ? "👕 שרוול שמאל" : "👕 Left Sleeve",  price: SLEEVE_PRICE },
-                        { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "👕 שרוול ימין" : "👕 Right Sleeve", price: SLEEVE_PRICE },
+                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "➕ עיצוב נוסף בחזית" : lang === "ru" ? "➕ Дополнительный дизайн спереди" : "➕ Second Front Design", price: SECOND_FRONT_PRICE, isSecondFront: true },
+                        { key: "bp",  state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: (fn) => { const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }); setBackPrint(v.enabled); setBackDesign({ sameAsMain: v.sameAsMain, image: v.image }); }, ref: backFileRef, label: lang === "he" ? "🖨️ הדפסה על הגב" : lang === "ru" ? "🖨️ Принт на спине" : "🖨️ Back Print", price: BACK_PRINT_PRICE },
+                        { key: "sl",  state: sleeveLeft,  setState: setSleeveLeft,  ref: sleeveLeftRef,  label: lang === "he" ? "👕 שרוול שמאל" : lang === "ru" ? "👕 Левый рукав" : "👕 Left Sleeve",  price: SLEEVE_PRICE },
+                        { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "👕 שרוול ימין" : lang === "ru" ? "👕 Правый рукав" : "👕 Right Sleeve", price: SLEEVE_PRICE },
                       ].map(({ key, state, setState, ref, label, price, isSecondFront }) => (
                         <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: `1px solid ${state.enabled ? COLORS.accent : COLORS.border}`, borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
                           <div onClick={() => {
@@ -1265,10 +1265,10 @@ function OrderPage({ lang, user, setPage }) {
                                     setActiveDesign('second');
                                   }
                                 }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
-                                  {lang === "he" ? "אותו עיצוב" : "Same design"}
+                                  {lang === "he" ? "אותו עיצוב" : lang === "ru" ? "Тот же дизайн" : "Same design"}
                                 </button>
                                 <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
-                                  {lang === "he" ? "העלה עיצוב שונה" : "Upload different"}
+                                  {lang === "he" ? "העלה עיצוב שונה" : lang === "ru" ? "Загрузить другой" : "Upload different"}
                                 </button>
                               </div>
                               {!state.sameAsMain && state.image && (
