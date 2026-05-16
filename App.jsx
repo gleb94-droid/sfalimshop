@@ -762,7 +762,7 @@ function OrderPage({ lang, user, setPage }) {
     e.preventDefault();
     setDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
-    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
+    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.6, scaleY: (400 / rect.height) * 0.6 });
   };
 
   const handleMouseMove = useCallback((e) => {
@@ -779,7 +779,7 @@ function OrderPage({ lang, user, setPage }) {
     const touch = e.touches[0];
     setDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
-    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
+    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: (400 / rect.width) * 0.6, scaleY: (400 / rect.height) * 0.6 });
   };
 
   const handleTouchMove = useCallback((e) => {
