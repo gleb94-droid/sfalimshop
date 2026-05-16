@@ -662,6 +662,7 @@ function OrderPage({ lang, user, setPage }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [positionLocked, setPositionLocked] = useState(false);
+  const [secondPositionLocked, setSecondPositionLocked] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
   const [dragStart, setDragStart] = useState(null);
   const [activeDesign, setActiveDesign] = useState('main');
@@ -840,7 +841,8 @@ function OrderPage({ lang, user, setPage }) {
   });
 
   const handleMouseDown = (e) => {
-    if (positionLocked) return;
+    const lockForActive = activeDesign === 'second' ? secondPositionLocked : positionLocked;
+    if (lockForActive) return;
     e.preventDefault();
     setDragging(true);
     const rect = mockupImageRef.current.getBoundingClientRect();
@@ -863,7 +865,8 @@ function OrderPage({ lang, user, setPage }) {
   const handleMouseUp = () => setDragging(false);
 
   const handleTouchStart = (e) => {
-    if (!uploadedImage || positionLocked) return;
+    const lockForActive = activeDesign === 'second' ? secondPositionLocked : positionLocked;
+    if (!uploadedImage || lockForActive) return;
     if (e.touches.length === 2) {
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
@@ -1047,7 +1050,6 @@ function OrderPage({ lang, user, setPage }) {
                           height: `${(getActivePos().size / 400) * 100}%`,
                           cursor: dragging ? "grabbing" : "grab", zIndex: 10,
                           touchAction: "none",
-                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
                           borderRadius: 4,
                         }} />
                     )}
@@ -1111,12 +1113,19 @@ function OrderPage({ lang, user, setPage }) {
                     )}
                     {/* Drag overlay moved to inside mockupImageRef above */}
                   </div>
-                  {/* Lock position button — right below shirt, outside touch area */}
+                  {/* Lock position buttons — main + second design */}
                   {uploadedImage && (
-                    <button onClick={() => setPositionLocked(p => !p)} style={{ width: "100%", marginTop: 8, background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
+                    <button onClick={() => { setActiveDesign('main'); setPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
                       {positionLocked
-                        ? (lang === "he" ? "✏️ ערוך מיקום מחדש" : lang === "ru" ? "✏️ Редактировать" : "✏️ Edit position")
-                        : (lang === "he" ? "✓ אישור מיקום — סיימתי" : lang === "ru" ? "✓ Сохранить" : "✓ Lock position")}
+                        ? (lang === "he" ? "✏️ ערוך מיקום עיצוב ראשי" : lang === "ru" ? "✏️ Редактировать основной" : "✏️ Edit main position")
+                        : (lang === "he" ? "✓ אישור מיקום עיצוב ראשי" : lang === "ru" ? "✓ Сохранить основной" : "✓ Lock main position")}
+                    </button>
+                  )}
+                  {uploadedImage && secondFront.enabled && secondFront.image && (
+                    <button onClick={() => { setActiveDesign('second'); setSecondPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: secondPositionLocked ? COLORS.bgCard : "#a78bfa", color: secondPositionLocked ? "#a78bfa" : "#fff", border: `2px solid #a78bfa`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: secondPositionLocked ? "none" : "0 4px 12px rgba(167,139,250,0.3)" }}>
+                      {secondPositionLocked
+                        ? (lang === "he" ? "✏️ ערוך מיקום עיצוב שני" : lang === "ru" ? "✏️ Редактировать второй" : "✏️ Edit 2nd position")
+                        : (lang === "he" ? "➕ אישור מיקום עיצוב שני" : lang === "ru" ? "➕ Сохранить второй" : "➕ Lock 2nd position")}
                     </button>
                   )}
                   {/* Mobile size slider — below mockup */}
