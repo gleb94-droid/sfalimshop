@@ -434,9 +434,12 @@ function AdminPage({ lang }) {
     setLoading(false);
   };
 
-  const deleteOrder = async (orderId) => {
-    await supabase.from("order_status_history").delete().eq("order_id", orderId);
-    await supabase.from("orders").delete().eq("id", orderId);
+  const deleteOrder = async (orderIdOrIds) => {
+    const ids = Array.isArray(orderIdOrIds) ? orderIdOrIds : [orderIdOrIds];
+    for (const orderId of ids) {
+      await supabase.from("order_status_history").delete().eq("order_id", orderId);
+      await supabase.from("orders").delete().eq("id", orderId);
+    }
     setDeleteConfirm(null);
     setSelected(null);
     fetchOrders();
@@ -540,9 +543,22 @@ function AdminPage({ lang }) {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {(filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).map(order => {
-                const stage = ORDER_STAGES.find(s => s.key === order.status) || ORDER_STAGES[0];
-                const isOpen = selected === order.id;
+              {(() => {
+                const filtered = filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus);
+                // Group orders by order_group (or treat individual orders as their own group)
+                const groupsMap = {};
+                for (const o of filtered) {
+                  const key = o.order_group || `single-${o.id}`;
+                  if (!groupsMap[key]) groupsMap[key] = [];
+                  groupsMap[key].push(o);
+                }
+                const groups = Object.values(groupsMap).sort((a, b) => new Date(b[0].created_at) - new Date(a[0].created_at));
+                return groups.map(group => {
+                  const order = group[0]; // primary order — has customer info + first item
+                  const groupTotal = group.reduce((sum, o) => sum + (o.total || 0), 0);
+                  const stage = ORDER_STAGES.find(s => s.key === order.status) || ORDER_STAGES[0];
+                  const isOpen = selected === order.id;
+                  const isMulti = group.length > 1;
                 return (
                   <div key={order.id}
                     style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "16px 20px", transition: "border-color 0.2s" }}>
@@ -551,18 +567,18 @@ function AdminPage({ lang }) {
                         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                           <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColors[order.status] || COLORS.accent, boxShadow: `0 0 8px ${statusColors[order.status] || COLORS.accent}`, flexShrink: 0 }} />
                           <div>
-                            <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}</div>
-                            <div style={{ color: COLORS.gray, fontSize: 13 }}>{order.product} · {order.variant} · ×{order.quantity}</div>
+                            <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginLeft: 8, marginRight: 8, background: "rgba(255,107,53,0.15)", padding: "2px 8px", borderRadius: 10 }}>🛒 {group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
+                            <div style={{ color: COLORS.gray, fontSize: 13 }}>{isMulti ? group.map(o => `${o.product} ×${o.quantity}`).join(" · ") : `${order.product} · ${order.variant} · ×${order.quantity}`}</div>
                           </div>
                         </div>
                         <div style={{ textAlign: "right" }}>
-                          <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{order.total}</div>
+                          <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{groupTotal}</div>
                           <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 2 }}>{stage.emoji} {stage[lang] || stage.en}</div>
                           <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>⏱️ {timeAgo(order.created_at, lang)}</div>
                           {order.completed_at && <div style={{ color: COLORS.success, fontSize: 11, marginTop: 2 }}>✅ {timeBetween(order.created_at, order.completed_at, lang)}</div>}
                         </div>
                       </div>
-                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(order.id); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
+                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(group.map(o => o.id)); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
                     </div>
 
                     {isOpen && (
@@ -625,11 +641,52 @@ function AdminPage({ lang }) {
                               ))}
                             </div>
                           )}
+                          {isMulti && (
+                            <div style={{ flexBasis: "100%", marginTop: 8, paddingTop: 16, borderTop: `1px dashed ${COLORS.border}` }}>
+                              <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: "uppercase", marginBottom: 12, letterSpacing: "0.08em" }}>🛒 {lang === "he" ? "פריטים נוספים בהזמנה" : lang === "ru" ? "Другие товары в заказе" : "More items in this order"}</div>
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
+                                {group.slice(1).map(it => (
+                                  <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
+                                    <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{it.product} × {it.quantity}</div>
+                                    <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{it.variant} · ₪{it.total}</div>
+                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                                      {it.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: it.product_color, border: "1px solid #555" }} />{it.product_color}</div>}
+                                      {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>📐 ~{Math.round((it.design_size / 160) * 30)} cm</div>}
+                                      {it.back_print && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>🖨️</div>}
+                                      {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>➕</div>}
+                                      {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕L</div>}
+                                      {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕R</div>}
+                                    </div>
+                                    {it.design_url && (
+                                      <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
+                                        {(() => {
+                                          const pname = it.product?.toLowerCase() || "";
+                                          const pid = pname.includes("mug") ? "mug" : pname.includes("sticker") && pname.includes("מרובע" || "square") ? "sticker_sq" : pname.includes("sticker") ? "sticker" : pname.includes("oversize") ? "oversized" : pname.includes("dryfit") || pname.includes("dry") ? "dryfit" : "tshirt";
+                                          return <ProductMockupBase productKey={pid} color={it.product_color || "#ffffff"} imageUrl={it.design_url} imagePos={{ x: it.design_x ?? 150, y: it.design_y ?? 130, size: it.design_size ?? 100 }} secondImageUrl={it.second_front_url && it.second_front_url !== it.design_url ? it.second_front_url : (it.second_front_url ? it.design_url : null)} secondImagePos={it.second_front_url ? { x: it.second_front_x ?? 210, y: it.second_front_y ?? 120, size: it.second_front_size ?? 85 } : null} />;
+                                        })()}
+                                      </div>
+                                    )}
+                                    {it.design_url && (
+                                      <button onClick={async () => {
+                                        const response = await fetch(it.design_url);
+                                        const blob = await response.blob();
+                                        const url = window.URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url; a.download = `design-${it.id}.png`;
+                                        document.body.appendChild(a); a.click();
+                                        document.body.removeChild(a); window.URL.revokeObjectURL(url);
+                                      }} style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                           <div>
                             <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.updateStatus}</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                               {ORDER_STAGES.map(s => (
-                                <button key={s.key} onClick={() => updateStatus(order.id, s.key, order.created_at)} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
+                                <button key={s.key} onClick={() => { group.forEach(o => updateStatus(o.id, s.key, o.created_at)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
                                   {s.emoji} {s[lang] || s.en}
                                 </button>
                               ))}
@@ -727,6 +784,56 @@ function OrderPage({ lang, user, setPage }) {
   }, [step]);
 
   const allowLeaveRef = useRef(false);
+  const [cart, setCart] = useState([]);
+
+  const addToCart = () => {
+    if (!product || !variant || !uploadedImage) return false;
+    const itemPrice = (variant.price * qty)
+      + (backPrint ? BACK_PRINT_PRICE : 0)
+      + (secondFront.enabled ? SECOND_FRONT_PRICE : 0)
+      + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
+      + (sleeveRight.enabled ? SLEEVE_PRICE : 0);
+    const newItem = {
+      id: Date.now() + Math.random(),
+      productId: selectedProduct,
+      productName: product.name,
+      variantId: selectedVariant,
+      variantLabel: variant.label,
+      colorIdx: selectedColor,
+      color: product.colors[selectedColor],
+      qty,
+      uploadedImage,
+      imagePos: { ...imagePos },
+      backPrint,
+      backDesign: { ...backDesign },
+      secondFront: { enabled: secondFront.enabled, image: secondFront.image, sameAsMain: secondFront.sameAsMain, pos: { ...secondFront.pos } },
+      sleeveLeft: { ...sleeveLeft },
+      sleeveRight: { ...sleeveRight },
+      itemPrice,
+    };
+    setCart(c => [...c, newItem]);
+    return true;
+  };
+
+  const resetForNewItem = () => {
+    setSelectedProduct(null);
+    setSelectedVariant(null);
+    setSelectedColor(0);
+    setUploadedImage(null);
+    setImagePos({ x: 150, y: 130, size: 85 });
+    setQty(1);
+    setBackPrint(false);
+    setBackDesign({ enabled: false, sameAsMain: true, image: null });
+    setSecondFront({ enabled: false, image: null, pos: { x: 210, y: 120, size: 43 } });
+    setSleeveLeft({ enabled: false, sameAsMain: true, image: null });
+    setSleeveRight({ enabled: false, sameAsMain: true, image: null });
+    setPositionLocked(false);
+    setSecondPositionLocked(false);
+    setActiveDesign('main');
+  };
+
+  const removeFromCart = (id) => setCart(c => c.filter(it => it.id !== id));
+
   const safeGo = (action) => {
     if (step >= 2 && step < 4) { setLeaveWarning(true); setPendingNav(() => action); }
     else action();
@@ -734,7 +841,8 @@ function OrderPage({ lang, user, setPage }) {
 
   // Warn user before leaving order page (mobile back button, tab close, refresh)
   useEffect(() => {
-    if (step < 2 || step >= 4) return;
+    const inProgress = (step >= 2 && step < 4) || (cart.length > 0 && step !== 4);
+    if (!inProgress) return;
     allowLeaveRef.current = false;
     // beforeunload — for tab close / refresh
     const beforeUnload = (e) => {
@@ -761,16 +869,18 @@ function OrderPage({ lang, user, setPage }) {
       window.removeEventListener("beforeunload", beforeUnload);
       window.removeEventListener("popstate", onPopState);
     };
-  }, [step]);
+  }, [step, cart.length]);
 
   const product = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
   const variant = selectedVariant ? product?.variants.find(v => v.id === selectedVariant) : null;
-  const total = variant ? (variant.price * qty) + SHIPPING_PRICE
+  const cartItemsTotal = cart.reduce((sum, it) => sum + it.itemPrice, 0);
+  const currentItemTotal = variant ? (variant.price * qty)
     + (backPrint ? BACK_PRINT_PRICE : 0)
     + (secondFront.enabled ? SECOND_FRONT_PRICE : 0)
     + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
-    + (sleeveRight.enabled ? SLEEVE_PRICE : 0)
-    : 0;
+    + (sleeveRight.enabled ? SLEEVE_PRICE : 0) : 0;
+  const hasOrderInProgress = cart.length > 0 || (step === 2 && variant);
+  const total = (cartItemsTotal + currentItemTotal) + (hasOrderInProgress ? SHIPPING_PRICE : 0);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
@@ -984,54 +1094,73 @@ function OrderPage({ lang, user, setPage }) {
 
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode) return;
+    if (cart.length === 0) return;
     setSubmitting(true);
     const phone = form.phoneNumber ? `${form.phonePrefix}-${form.phoneNumber}` : "";
+    const orderGroupId = `grp-${Date.now()}`;
 
-    const [design_url, second_front_url, back_design_url, sleeve_left_url, sleeve_right_url] = await Promise.all([
-      uploadDesignImage(uploadedImage),
-      secondFront.enabled && !secondFront.sameAsMain ? uploadDesignImage(secondFront.image) : Promise.resolve(null),
-      backPrint && backDesign.image && !backDesign.sameAsMain ? uploadDesignImage(backDesign.image) : Promise.resolve(null),
-      sleeveLeft.enabled && sleeveLeft.image && !sleeveLeft.sameAsMain ? uploadDesignImage(sleeveLeft.image) : Promise.resolve(null),
-      sleeveRight.enabled && sleeveRight.image && !sleeveRight.sameAsMain ? uploadDesignImage(sleeveRight.image) : Promise.resolve(null),
-    ]);
+    try {
+      let firstOrderId = null;
+      for (let i = 0; i < cart.length; i++) {
+        const it = cart[i];
+        const itProduct = products.find(p => p.id === it.productId);
+        const itVariant = itProduct?.variants.find(v => v.id === it.variantId);
+        if (!itProduct || !itVariant) continue;
 
-    const { data: orderData, error } = await supabase.from("orders").insert({
-      customer_name: form.name, customer_email: form.email, customer_phone: phone,
-      customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
-      product: product.name, variant: variant.label, color: product.colors[selectedColor],
-      quantity: qty, total, notes: form.notes, status: "received",
-      user_id: user?.id || null, design_url,
-      design_x: imagePos.x, design_y: imagePos.y, design_size: imagePos.size,
-      product_color: product.colors[selectedColor], language: lang,
-      back_print: backPrint,
-      second_front_url: secondFront.enabled ? (secondFront.sameAsMain ? design_url : second_front_url) : null,
-      second_front_x: secondFront.enabled ? secondFront.pos.x : null,
-      second_front_y: secondFront.enabled ? secondFront.pos.y : null,
-      second_front_size: secondFront.enabled ? secondFront.pos.size : null,
-      back_design_url: backPrint ? (backDesign.sameAsMain ? design_url : back_design_url) : null,
-      sleeve_left_url: sleeveLeft.enabled ? (sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
-      sleeve_right_url: sleeveRight.enabled ? (sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
-    }).select().single();
+        const [design_url, second_front_url, back_design_url, sleeve_left_url, sleeve_right_url] = await Promise.all([
+          uploadDesignImage(it.uploadedImage),
+          it.secondFront.enabled && !it.secondFront.sameAsMain ? uploadDesignImage(it.secondFront.image) : Promise.resolve(null),
+          it.backPrint && it.backDesign.image && !it.backDesign.sameAsMain ? uploadDesignImage(it.backDesign.image) : Promise.resolve(null),
+          it.sleeveLeft.enabled && it.sleeveLeft.image && !it.sleeveLeft.sameAsMain ? uploadDesignImage(it.sleeveLeft.image) : Promise.resolve(null),
+          it.sleeveRight.enabled && it.sleeveRight.image && !it.sleeveRight.sameAsMain ? uploadDesignImage(it.sleeveRight.image) : Promise.resolve(null),
+        ]);
 
-    if (!error) {
-   try {
-     console.log("Calling email function with:", form.name, form.email);
- await supabase.functions.invoke("send-order-confirmation", {
-        body: {
-          customerName: form.name,
-          customerEmail: form.email,
-          product: product.name,
-          variant: variant.label,
-          quantity: qty,
-          total: total,
-          orderId: orderData?.id || "unknown",
-          language: lang,
-        },
-      });
+        const itemTotal = it.itemPrice + (i === 0 ? SHIPPING_PRICE : 0);
+
+        const { data: orderData, error } = await supabase.from("orders").insert({
+          customer_name: form.name, customer_email: form.email, customer_phone: phone,
+          customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
+          product: itProduct.name, variant: itVariant.label, color: it.color,
+          quantity: it.qty, total: itemTotal, notes: form.notes, status: "received",
+          user_id: user?.id || null, design_url,
+          design_x: it.imagePos.x, design_y: it.imagePos.y, design_size: it.imagePos.size,
+          product_color: it.color, language: lang,
+          back_print: it.backPrint,
+          second_front_url: it.secondFront.enabled ? (it.secondFront.sameAsMain ? design_url : second_front_url) : null,
+          second_front_x: it.secondFront.enabled ? it.secondFront.pos.x : null,
+          second_front_y: it.secondFront.enabled ? it.secondFront.pos.y : null,
+          second_front_size: it.secondFront.enabled ? it.secondFront.pos.size : null,
+          back_design_url: it.backPrint ? (it.backDesign.sameAsMain ? design_url : back_design_url) : null,
+          sleeve_left_url: it.sleeveLeft.enabled ? (it.sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
+          sleeve_right_url: it.sleeveRight.enabled ? (it.sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
+          order_group: orderGroupId,
+        }).select().single();
+        if (error) throw error;
+        if (i === 0) firstOrderId = orderData?.id;
+      }
+
+      try {
+        await supabase.functions.invoke("send-order-confirmation", {
+          body: {
+            customerName: form.name,
+            customerEmail: form.email,
+            product: cart.map(c => c.productName).join(", "),
+            variant: `${cart.length} items`,
+            quantity: cart.reduce((s, c) => s + c.qty, 0),
+            total: cartItemsTotal + SHIPPING_PRICE,
+            orderId: firstOrderId || "unknown",
+            language: lang,
+          },
+        });
       } catch (emailErr) {
         console.error("Email send error:", emailErr);
       }
+
+      allowLeaveRef.current = true;
       setStep(4);
+      setCart([]);
+    } catch (e) {
+      alert("Error: " + (e.message || e));
     }
     setSubmitting(false);
   };
@@ -1076,6 +1205,21 @@ function OrderPage({ lang, user, setPage }) {
 
         {step === 1 && (
           <div>
+            {cart.length > 0 && (
+              <div style={{ background: "rgba(255,107,53,0.1)", border: `2px solid ${COLORS.accent}`, borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                <div>
+                  <div style={{ color: COLORS.accent, fontSize: 14, fontWeight: 700 }}>
+                    🛒 {lang === "he" ? `${cart.length} פריטים בסל` : lang === "ru" ? `${cart.length} товаров в корзине` : `${cart.length} items in cart`}
+                  </div>
+                  <div style={{ color: COLORS.white, fontSize: 13, marginTop: 2 }}>
+                    {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + SHIPPING_PRICE}
+                  </div>
+                </div>
+                <button onClick={() => setStep(3)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+                  {lang === "he" ? "💳 לתשלום" : lang === "ru" ? "💳 К оплате" : "💳 Checkout"} →
+                </button>
+              </div>
+            )}
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h2>
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.product.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1373,9 +1517,14 @@ function OrderPage({ lang, user, setPage }) {
                 </div>}
               </div>
             </div>
-            <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+            <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
               <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
-              <button onClick={() => setStep(3)} style={{ flex: 1, background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.continue}</button>
+              <button onClick={() => { if (addToCart()) { resetForNewItem(); setStep(1); } }} disabled={!uploadedImage} style={{ flex: "1 1 140px", background: uploadedImage ? COLORS.bgCard : COLORS.bgCard, color: uploadedImage ? COLORS.accent : COLORS.gray, border: `2px solid ${uploadedImage ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
+                {lang === "he" ? "🛒 הוסף ועוד פריט" : lang === "ru" ? "🛒 Добавить и ещё" : "🛒 Add & more items"}
+              </button>
+              <button onClick={() => { if (addToCart()) { resetForNewItem(); setStep(3); } }} disabled={!uploadedImage} style={{ flex: "1 1 140px", background: uploadedImage ? COLORS.accent : COLORS.bgCard, color: uploadedImage ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
+                {lang === "he" ? "💳 לתשלום" : lang === "ru" ? "💳 К оплате" : "💳 Checkout"}
+              </button>
             </div>
           </div>
         )}
@@ -1429,10 +1578,21 @@ function OrderPage({ lang, user, setPage }) {
                 </div>
               </div>
               <div style={{ background: COLORS.bgCard, borderRadius: 12, padding: 20, border: `1px solid ${COLORS.border}` }}>
-                <div style={{ color: COLORS.white, fontWeight: 600, marginBottom: 12 }}>{t.form.summary}</div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 14, marginBottom: 8 }}><span>{product?.name} × {qty}</span><span>₪{(variant?.price || 0) * qty}</span></div>
+                <div style={{ color: COLORS.white, fontWeight: 600, marginBottom: 12 }}>{t.form.summary} ({cart.length} {lang === "he" ? "פריטים" : lang === "ru" ? "товаров" : "items"})</div>
+                {cart.map((it) => (
+                  <div key={it.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: COLORS.gray, fontSize: 13, marginBottom: 8, paddingBottom: 8, borderBottom: `1px solid ${COLORS.border}` }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13 }}>{it.productName} × {it.qty}</div>
+                      <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{it.variantLabel}{it.backPrint ? " · 🖨️" : ""}{it.secondFront.enabled ? " · ➕" : ""}{it.sleeveLeft.enabled ? " · 👕L" : ""}{it.sleeveRight.enabled ? " · 👕R" : ""}</div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ color: COLORS.white, fontWeight: 600 }}>₪{it.itemPrice}</span>
+                      <button onClick={() => removeFromCart(it.id)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 18, padding: 0 }}>×</button>
+                    </div>
+                  </div>
+                ))}
                 <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 14, marginBottom: 12 }}><span>{t.form.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
-                <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 12, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 700 }}>{t.form.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 20 }}>₪{total}</span></div>
+                <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 12, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 700 }}>{t.form.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 20 }}>₪{cartItemsTotal + SHIPPING_PRICE}</span></div>
               </div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: 0 }}>
                 <div style={{ color: COLORS.accent, fontSize: 13 }}>{t.form.paymentNote}</div>
