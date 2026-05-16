@@ -590,7 +590,7 @@ function AdminPage({ lang }) {
                                   const pname = order.product?.toLowerCase() || "";
                                   const pid = pname.includes("mug") ? "mug" : pname.includes("sticker") && pname.includes("מרובע" || "square") ? "sticker_sq" : pname.includes("sticker") ? "sticker" : pname.includes("oversize") ? "oversized" : pname.includes("dryfit") || pname.includes("dry") ? "dryfit" : "tshirt";
                                   const mockupUrl = MOCKUP_URLS[pid] || MOCKUP_URLS.tshirt;
-                                  return <ProductMockupBase productKey={pid} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={{ x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 }} />;
+                                  return <ProductMockupBase productKey={pid} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={{ x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 }} secondImageUrl={order.second_front_url && order.second_front_url !== order.design_url ? order.second_front_url : (order.second_front_url ? order.design_url : null)} secondImagePos={order.second_front_url ? { x: order.second_front_x ?? 210, y: order.second_front_y ?? 120, size: order.second_front_size ?? 85 } : null} />;
                                 })()}
                               </div>
                               <button onClick={async () => {
