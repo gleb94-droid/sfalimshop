@@ -1067,28 +1067,22 @@ function OrderPage({ lang, user, setPage }) {
                           <span style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>{lang === "he" ? "כוונון ידני" : "Fine-tune"}</span>
                           <span style={{ color: COLORS.gray, fontSize: 12 }}>{showNudge ? "(-)" : "(+)"}</span>
                         </div>
-                        {showNudge && (
-                        <div>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "4px auto 12px" }}>
-                          <div />
-                          <button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
-                          <div />
-                          <button onClick={() => nudge(-15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>←</button>
-                          <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>+</span></div>
-                          <button onClick={() => nudge(15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>→</button>
-                          <div />
-                          <button onClick={() => nudge(0, 15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
-                          <div />
-                        </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                          {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
-                            <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)}
-                              style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                              {pl[lang] || pl.en}
-                            </button>
-                          ))}
-                        </div>
-                        </div>)}
+                        {showNudge && <div>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "4px auto 12px" }}>
+                            <div /><button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>U</button><div />
+                            <button onClick={() => nudge(-15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>L</button>
+                            <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>+</span></div>
+                            <button onClick={() => nudge(15, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>R</button>
+                            <div /><button onClick={() => nudge(0, 15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>D</button><div />
+                          </div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                            {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
+                              <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                                {lang === "he" ? pl.he : pl.en}
+                              </button>
+                            ))}
+                          </div>
+                        </div>}
                       </div>
                     )}
                   {/* Mobile size slider — below mockup */}
@@ -1164,17 +1158,15 @@ function OrderPage({ lang, user, setPage }) {
                       <label style={{ ...labelStyle, marginBottom: 0, cursor: "pointer" }}>{lang === "he" ? "מיקום עיצוב" : "Placement"}</label>
                       <span style={{ color: COLORS.gray, fontSize: 14 }}>{showPlacement ? "(-)" : "(+)"}</span>
                     </div>
-                    {showPlacement && (
-                      <div style={{ padding: "10px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
+                    {showPlacement && <div style={{ padding: "10px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                           {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
                             <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                              {pl[lang] || pl.en}
+                              {lang === "he" ? pl.he : pl.en}
                             </button>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      </div>}
                   </div>
                 )}
                 {/* Extra prints — shirts only */}
