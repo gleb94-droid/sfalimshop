@@ -1407,6 +1407,27 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{t.form.paymentSub}</div>
               </div>
             </div>
+            {(() => {
+              const missing = [];
+              if (!form.name) missing.push(lang === "he" ? "שם" : lang === "ru" ? "Имя" : "Name");
+              if (!form.email) missing.push(lang === "he" ? "אימייל" : lang === "ru" ? "Email" : "Email");
+              if (!form.phoneNumber || form.phoneNumber.length !== 7) missing.push(lang === "he" ? "טלפון (7 ספרות)" : lang === "ru" ? "Телефон (7 цифр)" : "Phone (7 digits)");
+              if (!form.street) missing.push(lang === "he" ? "כתובת" : lang === "ru" ? "Адрес" : "Address");
+              if (!form.city) missing.push(lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City");
+              if (!form.postalCode) missing.push(lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code");
+              if (missing.length === 0) return null;
+              return (
+                <div style={{ background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: "12px 14px", marginTop: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>⚠️</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 700, marginBottom: 4 }}>
+                      {lang === "he" ? "שדות חסרים למילוי:" : lang === "ru" ? "Необходимо заполнить:" : "Please fill in:"}
+                    </div>
+                    <div style={{ color: COLORS.white, fontSize: 13, lineHeight: 1.6 }}>{missing.join(" · ")}</div>
+                  </div>
+                </div>
+              );
+            })()}
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
               <button onClick={() => setStep(2)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
               <button onClick={handleSubmit} disabled={!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode || submitting} style={{ flex: 1, background: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? COLORS.accent : COLORS.bgCard, color: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
