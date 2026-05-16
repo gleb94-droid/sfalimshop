@@ -95,12 +95,12 @@ const LANGS = {
 };
 
 const PRODUCTS = (t) => [
-  { id: "mug",        name: t.products.mug,       emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }, { id: "large", label: t.variants.large, price: 79 }, { id: "magic", label: t.variants.magic, price: 89 }], colors: ["#ffffff", "#f5f5f4", "#1a1a1a", "#fef3c7", "#dbeafe", "#fce7f3", "#dcfce7", "#f3e8ff", "#fee2e2", "#e0f2fe"], printArea: { x: 60, y: 60, w: 220, h: 260 } },
-  { id: "tshirt",     name: t.products.tshirt,    emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 80, y: 60, w: 240, h: 280 } },
-  { id: "oversized",  name: t.products.oversized, emoji: "🧥", variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 80, y: 60, w: 240, h: 280 } },
-  { id: "dryfit",     name: t.products.dryfit,    emoji: "⚡", variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#1e3a5f", "#2563eb", "#7f1d1d", "#14532d", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 80, y: 60, w: 240, h: 280 } },
-  { id: "sticker",    name: t.products.sticker,   emoji: "⭕", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 50, y: 50, w: 300, h: 300 } },
-  { id: "sticker_sq", name: t.products.sticker_sq, emoji: "⬜", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 50, y: 50, w: 300, h: 300 } },
+  { id: "mug",        name: t.products.mug,       emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }, { id: "large", label: t.variants.large, price: 79 }, { id: "magic", label: t.variants.magic, price: 89 }], colors: ["#ffffff", "#f5f5f4", "#1a1a1a", "#fef3c7", "#dbeafe", "#fce7f3", "#dcfce7", "#f3e8ff", "#fee2e2", "#e0f2fe"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "tshirt",     name: t.products.tshirt,    emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "oversized",  name: t.products.oversized, emoji: "🧥", variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "dryfit",     name: t.products.dryfit,    emoji: "⚡", variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#1e3a5f", "#2563eb", "#7f1d1d", "#14532d", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "sticker",    name: t.products.sticker,   emoji: "⭕", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
+  { id: "sticker_sq", name: t.products.sticker_sq, emoji: "⬜", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
 ];
 
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
@@ -959,7 +959,7 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ flex: "1 1 280px" }}>
                   <div ref={mockupRef}
                     onClick={() => !uploadedImage && fileRef.current.click()}
-                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "default" : "pointer" }}
+                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "default" : "pointer", touchAction: "none" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
@@ -1047,6 +1047,20 @@ function OrderPage({ lang, user, setPage }) {
                         }} />
                     )}
                   </div>
+                  {/* Mobile size slider — below mockup */}
+                  {isMobile && uploadedImage && (
+                    <div style={{ padding: "10px 4px 4px" }}>
+                      <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                        <span>{lang === "he" ? "גודל עיצוב" : "Design Size"}</span>
+                        <span style={{ color: COLORS.accent, fontWeight: 700 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
+                      </label>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0 }}>−</button>
+                        <input type="range" min={43} max={160} value={Math.min(160, Math.max(43, imagePos.size))} onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))} style={{ flex: 1, accentColor: COLORS.accent }} />
+                        <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0 }}>+</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
@@ -1071,8 +1085,8 @@ function OrderPage({ lang, user, setPage }) {
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
                 </div>
-                {/* Free size control */}
-                {uploadedImage && (
+                {/* Free size control — desktop only (mobile has it below mockup) */}
+                {!isMobile && uploadedImage && (
                   <div>
                     <label style={labelStyle}>
                       {lang === "he" ? "גודל עיצוב" : "Design Size"}
