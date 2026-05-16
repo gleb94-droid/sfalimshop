@@ -710,7 +710,7 @@ function OrderPage({ lang, user, setPage }) {
       setSelectedPlacement(null);
       setSelectedSize(null);
       const pa = product.printArea;
-      setImagePos({ x: pa.x + pa.w / 2 - 50, y: pa.y + pa.h / 2 - 50, size: 100 });
+      setImagePos({ x: pa.x + pa.w / 2 - 66, y: pa.y + pa.h / 2 - 66, size: 133 });
     };
     reader.readAsDataURL(file);
   };
@@ -1017,12 +1017,12 @@ function OrderPage({ lang, user, setPage }) {
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 400) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(20, p.size - 10) }))}
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(133, p.size - 13) }))}
                         style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
-                      <input type="range" min={20} max={200} value={imagePos.size}
+                      <input type="range" min={133} max={400} value={imagePos.size}
                         onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))}
                         style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(200, p.size + 10) }))}
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(400, p.size + 13) }))}
                         style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
                     </div>
                   </div>
