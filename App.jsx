@@ -1098,6 +1098,7 @@ function OrderPage({ lang, user, setPage }) {
                         </>)}
                       </div>
                     )}
+                  </div>{/* closes mockupRef card */}
                   {/* Mobile size slider — below mockup */}
                   {isMobile && uploadedImage && (
                     <div style={{ padding: "10px 4px 4px" }}>
