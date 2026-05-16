@@ -725,7 +725,9 @@ function OrderPage({ lang, user, setPage }) {
   };
 
   const product = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
-  const variant = selectedVariant ? product?.variants.find(v => v.id === selectedVariant) : null;
+  const variant = selectedVariant ? (product ? product.variants.find(v => v.id === selectedVariant) : null) : null;
+  const selectedPl = (product && selectedPlacement) ? (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement) : null;
+  const selectedSz = (product && selectedSize) ? (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize) : null;
   const total = variant ? (variant.price * qty) + SHIPPING_PRICE
     + (backPrint ? BACK_PRINT_PRICE : 0)
     + (secondFront.enabled ? SECOND_FRONT_PRICE : 0)
@@ -1053,12 +1055,9 @@ function OrderPage({ lang, user, setPage }) {
                         </button>
                       </div>
                     )}
-                    {uploadedImage && selectedPlacement && selectedSize && (
-                      (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement) &&
-                      (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize)
-                    ) && (
+                    {uploadedImage && selectedPl && selectedSz && (
                       <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>
-                        {"+ " + ((PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement)[lang] || (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement).en) + " · " + (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize).cm}
+                        {(selectedPl[lang] || selectedPl.en) + " \u00B7 " + selectedSz.cm}
                       </p>
                     )}
                     {/* Mobile nudge — collapsible */}
@@ -1302,7 +1301,7 @@ function OrderPage({ lang, user, setPage }) {
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
               <button onClick={() => setStep(2)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
               <button onClick={handleSubmit} disabled={!form.name || !form.email || submitting} style={{ flex: 1, background: form.name && form.email ? COLORS.accent : COLORS.bgCard, color: form.name && form.email ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: form.name && form.email ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
-                {submitting ? "..." : `${t.form.place} · ₪${total}`}
+                {submitting ? "..." : (t.form.place + " \u00B7 \u20AA" + total)}
               </button>
             </div>
           </div>
