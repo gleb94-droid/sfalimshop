@@ -861,10 +861,17 @@ function OrderPage({ lang, user, setPage }) {
       return;
     }
     const touch = e.touches[0];
+    const rect = mockupRef.current.getBoundingClientRect();
+    // Only start drag if touch is actually on the design image
+    const touchX = (touch.clientX - rect.left) / rect.width * 400;
+    const touchY = (touch.clientY - rect.top) / rect.height * 400;
+    const pos = getActivePos();
+    const PAD = 24;
+    const onDesign = touchX >= pos.x - PAD && touchX <= pos.x + pos.size + PAD &&
+                     touchY >= pos.y - PAD && touchY <= pos.y + pos.size + PAD;
+    if (!onDesign) return;
     draggingRef.current = true;
     setDragging(true);
-    const rect = mockupRef.current.getBoundingClientRect();
-    const pos = getActivePos();
     setDragStart({ mx: touch.clientX, my: touch.clientY, ix: pos.x, iy: pos.y, size: pos.size, scaleX: 400 / rect.width, scaleY: 400 / rect.height, isSecond: activeDesign === 'second' });
   };
 
