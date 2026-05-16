@@ -163,75 +163,56 @@ const SIZE_OPTIONS = {
 // Supabase mockup image URLs
 // 1. הגדרת קישורים דינמיים לפי צבעים מתוך ה-Supabase שלכם
 const MOCKUP_URLS = {
-  tshirt: {
-    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
-    // כאן תוכל להוסיף את הקישורים לחולצות בצבעים האחרים שתעלה לסטורג' שלכם:
-    // "#1a1a1a": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t_shirt_black.png",
-    // "#16a34a": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t_shirt_green.png",
-  },
-  oversized: {
-    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
-  },
-  dryfit: {
-    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
-  },
-  mug: {
-    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/white%20mug.png",
-  },
-  sticker: {
-    "#ffffff": "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
-  }
+  tshirt:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
+  oversized: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
+  dryfit:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
+  mug:       "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/white%20mug.png",
+  sticker:   "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
 };
-
 // 2. קומפוננטת הבסיס המתוקנת - נקייה ובלי פילטרים ששוברים את הרקע
 function ProductMockupBase({ productKey, color, imageUrl, imagePos, showPlaceholder }) {
-  // בדיקה אם קיים מוקאפ מוכן לצבע שנבחר, אם לא - משתמש בברירת המחדל (לבן)
-  const productMockups = MOCKUP_URLS[productKey] || {};
-  const mockupUrl = productMockups[color] || productMockups["#ffffff"] || "";
+  const canvasRef = useRef(null);
+  const mockupUrl = MOCKUP_URLS[productKey] || MOCKUP_URLS.tshirt;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const size = 600;
+    canvas.width = size; canvas.height = size;
+    ctx.clearRect(0, 0, size, size);
+    const draw = (img) => {
+      ctx.clearRect(0, 0, size, size);
+      if (!color || color === '#ffffff') {
+        ctx.drawImage(img, 0, 0, size, size);
+      } else {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, size, size);
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.drawImage(img, 0, 0, size, size);
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(img, 0, 0, size, size);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+    };
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => draw(img);
+    img.onerror = () => { const i2 = new Image(); i2.onload = () => { ctx.clearRect(0,0,size,size); ctx.drawImage(i2,0,0,size,size); }; i2.src = mockupUrl; };
+    img.src = mockupUrl;
+  }, [mockupUrl, color]);
 
   return (
-    <div style={{ position: "relative", width: "100%", paddingTop: "100%", borderRadius: 12, overflow: "hidden", background: "transparent" }}>
-      <div style={{ position: "absolute", inset: 0, isolation: "isolate" }}>
-        
-        {/* תמונת המוקאפ המקורית נקייה לחלוטין */}
-        <img 
-          src={mockupUrl} 
-          alt="product" 
-          style={{ 
-            position: "absolute", 
-            inset: 0, 
-            width: "100%", 
-            height: "100%", 
-            objectFit: "contain", 
-            zIndex: 1 
-          }} 
-        />
-
-        {/* העיצוב של הלקוח (הלוגו) */}
-        {imageUrl ? (
-          <img src={imageUrl} alt="design" style={{
-            position: "absolute",
-            left: `${(imagePos.x / 400) * 100}%`,
-            top: `${(imagePos.y / 400) * 100}%`,
-            width: `${(imagePos.size / 400) * 100}%`,
-            height: `${(imagePos.size / 400) * 100}%`,
-            objectFit: "contain",
-            zIndex: 4,
-            pointerEvents: "none",
-          }} />
-        ) : showPlaceholder && (
-          <div style={{
-            position: "absolute",
-            left: "30%", top: "28%", width: "38%", height: "35%",
-            border: "1.5px dashed rgba(255,107,53,0.5)",
-            borderRadius: 6, zIndex: 4, display: "flex", alignItems: "center",
-            justifyContent: "center", flexDirection: "column", gap: 4,
-          }}>
-            <span style={{ fontSize: 20 }}>📁</span>
-            <span style={{ fontSize: 10, color: "rgba(255,107,53,0.7)", fontFamily: "monospace" }}>Upload design</span>
-          </div>
-        )}
-      </div>
+    <div style={{ position:"relative", width:"100%", paddingTop:"100%", borderRadius:12 }}>
+      <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} />
+      {imageUrl ? (
+        <img src={imageUrl} alt="design" style={{ position:"absolute", left:`${(imagePos.x/400)*100}%`, top:`${(imagePos.y/400)*100}%`, width:`${(imagePos.size/400)*100}%`, height:`${(imagePos.size/400)*100}%`, objectFit:"contain", zIndex:2, pointerEvents:"none" }} />
+      ) : showPlaceholder && (
+        <div style={{ position:"absolute", left:"30%", top:"28%", width:"38%", height:"35%", border:"1.5px dashed rgba(255,107,53,0.5)", borderRadius:6, zIndex:2, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:4 }}>
+          <span style={{ fontSize:20 }}>📁</span>
+          <span style={{ fontSize:10, color:"rgba(255,107,53,0.7)", fontFamily:"monospace" }}>Upload design</span>
+        </div>
+      )}
     </div>
   );
 }
