@@ -693,20 +693,17 @@ function OrderPage({ lang, user, setPage }) {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  // Non-passive touch listeners — preventDefault only when actively dragging/pinching
+  // Non-passive touchmove listener — preventDefault only when actively dragging/pinching
   useEffect(() => {
     if (step !== 2) return;
     const el = mockupRef.current;
     if (!el) return;
-    const onStart = (e) => touchHandlersRef.current.start?.(e);
     const onMove = (e) => {
       if (draggingRef.current || pinchRef.current) e.preventDefault();
       touchHandlersRef.current.move?.(e);
     };
-    el.addEventListener('touchstart', onStart, { passive: false });
     el.addEventListener('touchmove', onMove, { passive: false });
     return () => {
-      el.removeEventListener('touchstart', onStart);
       el.removeEventListener('touchmove', onMove);
     };
   }, [step]);
@@ -861,18 +858,10 @@ function OrderPage({ lang, user, setPage }) {
       return;
     }
     const touch = e.touches[0];
-    const rect = mockupRef.current.getBoundingClientRect();
-    const scaleX = 400 / rect.width;
-    const scaleY = 400 / rect.height;
-    const touchX = touch.clientX * scaleX - rect.left * scaleX;
-    const touchY = touch.clientY * scaleY - rect.top * scaleY;
-    const pos = getActivePos();
-    const PAD = 24;
-    const onDesign = touchX >= pos.x - PAD && touchX <= pos.x + pos.size + PAD &&
-                     touchY >= pos.y - PAD && touchY <= pos.y + pos.size + PAD;
-    if (!onDesign) return;
     draggingRef.current = true;
     setDragging(true);
+    const rect = mockupRef.current.getBoundingClientRect();
+    const pos = getActivePos();
     setDragStart({ mx: touch.clientX, my: touch.clientY, ix: pos.x, iy: pos.y, size: pos.size, scaleX: 400 / rect.width, scaleY: 400 / rect.height, isSecond: activeDesign === 'second' });
   };
 
@@ -1051,7 +1040,7 @@ function OrderPage({ lang, user, setPage }) {
                     {product.id === "sticker"    && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker_sq" && <StickerSqMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {uploadedImage && (
-                      <div onMouseDown={handleMouseDown}
+                      <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
                         style={{ position: "absolute",
                           left: (getActivePos().x / 400 * 100) + "%",
                           top: (getActivePos().y / 400 * 100) + "%",
