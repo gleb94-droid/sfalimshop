@@ -677,6 +677,7 @@ function OrderPage({ lang, user, setPage }) {
   const [pendingNav, setPendingNav] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const fileRef = useRef();
+  const mockupRef = useRef();
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768);
@@ -761,7 +762,7 @@ function OrderPage({ lang, user, setPage }) {
   const handleMouseDown = (e) => {
     e.preventDefault();
     setDragging(true);
-    const rect = e.currentTarget.parentElement.getBoundingClientRect();
+    const rect = mockupRef.current.getBoundingClientRect();
     setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
   };
 
@@ -778,7 +779,7 @@ function OrderPage({ lang, user, setPage }) {
   const handleTouchStart = (e) => {
     const touch = e.touches[0];
     setDragging(true);
-    const rect = e.currentTarget.parentElement.getBoundingClientRect();
+    const rect = mockupRef.current.getBoundingClientRect();
     setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
   };
 
@@ -914,7 +915,7 @@ function OrderPage({ lang, user, setPage }) {
             <p style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
-                  <div
+                  <div ref={mockupRef}
                     onClick={() => !uploadedImage && fileRef.current.click()}
                     style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "default" : "pointer" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
