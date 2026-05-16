@@ -684,6 +684,8 @@ function OrderPage({ lang, user, setPage }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const fileRef = useRef();
   const mockupRef = useRef();
+  const imageAreaRef = useRef();
+  const [showNudge, setShowNudge] = useState(false);
   const pinchRef = useRef(null);
   // Refs for native touch handlers (needed for passive:false)
   const touchHandlersRef = useRef({});
@@ -694,10 +696,10 @@ function OrderPage({ lang, user, setPage }) {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  // Non-passive touch listeners — re-attach when step 2 renders (mockupRef becomes available)
+  // Non-passive touch listeners on image area only (not whole card)
   useEffect(() => {
     if (step !== 2) return;
-    const el = mockupRef.current;
+    const el = imageAreaRef.current;
     if (!el) return;
     const onStart = (e) => touchHandlersRef.current.start?.(e);
     const onMove = (e) => { e.preventDefault(); touchHandlersRef.current.move?.(e); };
@@ -1013,15 +1015,32 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ flex: "1 1 280px" }}>
                   <div ref={mockupRef}
                     onClick={() => !uploadedImage && fileRef.current.click()}
-                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer" }}
+                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchEnd={handleMouseUp}>
+                    {/* Touch area — only this square blocks scroll */}
+                    <div ref={imageAreaRef} style={{ position: "relative", cursor: uploadedImage ? "grab" : "pointer" }}
+                      onClick={() => !uploadedImage && fileRef.current.click()}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker"    && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker_sq" && <StickerSqMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
+                    {uploadedImage && (
+                      <div onMouseDown={handleMouseDown}
+                        style={{ position: "absolute",
+                          left: `${(getActivePos().x / 400) * 100}%`,
+                          top: `${(getActivePos().y / 400) * 100}%`,
+                          width: `${(getActivePos().size / 400) * 100}%`,
+                          height: `${(getActivePos().size / 400) * 100}%`,
+                          cursor: dragging ? "grabbing" : "grab", zIndex: 10,
+                          touchAction: "none",
+                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
+                          borderRadius: 4,
+                        }} />
+                    )}
+                    </div>
                     <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", padding: "6px 0 4px" }}>
                       {uploadedImage
                         ? isMobile
@@ -1049,11 +1068,15 @@ function OrderPage({ lang, user, setPage }) {
                         })()
                       }</p>
                     )}
-                    {/* Mobile-only: placement & size below mockup */}
+                    {/* Mobile nudge — collapsible */}
                     {isMobile && uploadedImage && !["mug"].includes(product.id) && (
-                      <div style={{ padding: "8px 12px 12px" }}>
-                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "כוונון מיקום" : "Fine-tune position"}</label>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "0 auto 12px" }}>
+                      <div style={{ padding: "4px 12px 8px" }}>
+                        <div onClick={() => setShowNudge(p => !p)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", cursor: "pointer" }}>
+                          <span style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>{lang === "he" ? "כוונון ידני" : "Fine-tune"}</span>
+                          <span style={{ color: COLORS.gray, fontSize: 12 }}>{showNudge ? "▲" : "▼"}</span>
+                        </div>
+                        {showNudge && (<>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "4px auto 12px" }}>
                           <div />
                           <button onClick={() => nudge(0, -15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
                           <div />
@@ -1064,8 +1087,7 @@ function OrderPage({ lang, user, setPage }) {
                           <button onClick={() => nudge(0, 15)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
                           <div />
                         </div>
-                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "מיקום" : "Placement"}</label>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
                             <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)}
                               style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "7px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
@@ -1073,37 +1095,9 @@ function OrderPage({ lang, user, setPage }) {
                             </button>
                           ))}
                         </div>
-                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "גודל" : "Size"}</label>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => {
-                            const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
-                            const isDisabled = pl?.smallOnly && sz.id !== "small";
-                            return (
-                              <button key={sz.id} onClick={() => !isDisabled && handleSelectSize(sz.id)}
-                                style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: isDisabled ? COLORS.border : selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: isDisabled ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", textAlign: "center", opacity: isDisabled ? 0.4 : 1 }}>
-                                <div style={{ fontWeight: 700, fontSize: 12 }}>{sz.label[lang] || sz.label.en}</div>
-                                <div style={{ fontSize: 10, opacity: 0.8 }}>{sz.cm}</div>
-                              </button>
-                            );
-                          })}
-                        </div>
+                        </>)}
                       </div>
                     )}
-                    {/* Drag overlay — follows active design */}
-                    {uploadedImage && (
-                      <div onMouseDown={handleMouseDown}
-                        style={{ position: "absolute",
-                          left: `${(getActivePos().x / 400) * 100}%`,
-                          top: `${(getActivePos().y / 400) * 100}%`,
-                          width: `${(getActivePos().size / 400) * 100}%`,
-                          height: `${(getActivePos().size / 400) * 100}%`,
-                          cursor: dragging ? "grabbing" : "grab", zIndex: 10,
-                          touchAction: "none",
-                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
-                          borderRadius: 4,
-                        }} />
-                    )}
-                  </div>
                   {/* Mobile size slider — below mockup */}
                   {isMobile && uploadedImage && (
                     <div style={{ padding: "10px 4px 4px" }}>
