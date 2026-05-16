@@ -1015,7 +1015,7 @@ function OrderPage({ lang, user, setPage }) {
                 <div style={{ flex: "1 1 280px" }}>
                   <div ref={mockupRef}
                     onClick={() => !uploadedImage && fileRef.current.click()}
-                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer" }}
+                    style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none", cursor: uploadedImage ? "grab" : "pointer", maxWidth: 280, margin: "0 auto" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchEnd={handleMouseUp}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
@@ -1031,6 +1031,16 @@ function OrderPage({ lang, user, setPage }) {
                           : (lang === "he" ? "✋ גרור לכוונון מיקום" : "✋ Drag to position")
                         : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : "👆 Tap to upload design")}
                     </p>
+                    {/* Lock position button — right below shirt */}
+                    {uploadedImage && (
+                      <div style={{ padding: "4px 12px 10px" }}>
+                        <button onClick={() => setPositionLocked(p => !p)} style={{ width: "100%", background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
+                          {positionLocked
+                            ? (lang === "he" ? "✏️ ערוך מיקום מחדש" : lang === "ru" ? "✏️ Редактировать" : "✏️ Edit position")
+                            : (lang === "he" ? "✓ אישור מיקום — סיימתי" : lang === "ru" ? "✓ Сохранить" : "✓ Lock position")}
+                        </button>
+                      </div>
+                    )}
                     {/* Design selector — shown when two designs exist */}
                     {uploadedImage && secondFront.enabled && secondFront.image && (
                       <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
@@ -1106,14 +1116,6 @@ function OrderPage({ lang, user, setPage }) {
                         }} />
                     )}
                   </div>
-                  {/* Lock position button — visible when image uploaded */}
-                  {uploadedImage && (
-                    <button onClick={() => setPositionLocked(p => !p)} style={{ width: "100%", marginTop: 10, background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
-                      {positionLocked
-                        ? (lang === "he" ? "✏️ ערוך מיקום מחדש" : lang === "ru" ? "✏️ Редактировать позицию" : "✏️ Edit position")
-                        : (lang === "he" ? "✓ אישור מיקום — סיימתי" : lang === "ru" ? "✓ Сохранить позицию" : "✓ Lock position")}
-                    </button>
-                  )}
                   {/* Mobile size slider — below mockup */}
                   {isMobile && uploadedImage && (
                     <div style={{ padding: "10px 4px 4px" }}>
