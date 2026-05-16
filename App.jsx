@@ -662,6 +662,7 @@ function OrderPage({ lang, user, setPage }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [dragStart, setDragStart] = useState(null);
+  const [activeDesign, setActiveDesign] = useState('main'); // 'main' | 'second'
   const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", notes: "" });
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -772,11 +773,21 @@ function OrderPage({ lang, user, setPage }) {
   const nudge = (dx, dy) => {
     if (!product) return;
     const pa = product.printArea;
-    setImagePos(p => ({
-      ...p,
-      x: Math.max(pa.x, Math.min(pa.x + pa.w - p.size, p.x + dx)),
-      y: Math.max(pa.y, Math.min(pa.y + pa.h - p.size, p.y + dy)),
-    }));
+    if (activeDesign === 'second') {
+      setSecondFront(p => ({
+        ...p, pos: {
+          ...p.pos,
+          x: Math.max(pa.x, Math.min(pa.x + pa.w - p.pos.size, p.pos.x + dx)),
+          y: Math.max(pa.y, Math.min(pa.y + pa.h - p.pos.size, p.pos.y + dy)),
+        }
+      }));
+    } else {
+      setImagePos(p => ({
+        ...p,
+        x: Math.max(pa.x, Math.min(pa.x + pa.w - p.size, p.x + dx)),
+        y: Math.max(pa.y, Math.min(pa.y + pa.h - p.size, p.y + dy)),
+      }));
+    }
   };
 
   const handleSelectSize = (sizeId) => {
@@ -793,16 +804,21 @@ function OrderPage({ lang, user, setPage }) {
     e.preventDefault();
     setDragging(true);
     const rect = mockupRef.current.getBoundingClientRect();
-    setDragStart({ mx: e.clientX, my: e.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
+    const pos = getActivePos();
+    setDragStart({ mx: e.clientX, my: e.clientY, ix: pos.x, iy: pos.y, size: pos.size, scaleX: 400 / rect.width, scaleY: 400 / rect.height, isSecond: activeDesign === 'second' });
   };
+
+  const getActivePos = () => activeDesign === 'second' ? secondFront.pos : imagePos;
+  const getActiveSize = () => activeDesign === 'second' ? secondFront.pos.size : imagePos.size;
 
   const handleMouseMove = useCallback((e) => {
     if (!dragging || !dragStart || !product) return;
     const rawX = dragStart.ix + (e.clientX - dragStart.mx) * dragStart.scaleX;
     const rawY = dragStart.iy + (e.clientY - dragStart.my) * dragStart.scaleY;
-    const { x, y } = clampToArea(rawX, rawY, imagePos.size, product.printArea);
-    setImagePos(p => ({ ...p, x, y }));
-  }, [dragging, dragStart, imagePos.size, product]);
+    const { x, y } = clampToArea(rawX, rawY, dragStart.size, product.printArea);
+    if (dragStart.isSecond) setSecondFront(p => ({ ...p, pos: { ...p.pos, x, y } }));
+    else setImagePos(p => ({ ...p, x, y }));
+  }, [dragging, dragStart, product]);
 
   const handleMouseUp = () => setDragging(false);
 
@@ -810,7 +826,8 @@ function OrderPage({ lang, user, setPage }) {
     const touch = e.touches[0];
     setDragging(true);
     const rect = mockupRef.current.getBoundingClientRect();
-    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: imagePos.x, iy: imagePos.y, scaleX: 400 / rect.width, scaleY: 400 / rect.height });
+    const pos = getActivePos();
+    setDragStart({ mx: touch.clientX, my: touch.clientY, ix: pos.x, iy: pos.y, size: pos.size, scaleX: 400 / rect.width, scaleY: 400 / rect.height, isSecond: activeDesign === 'second' });
   };
 
   const handleTouchMove = useCallback((e) => {
@@ -818,9 +835,10 @@ function OrderPage({ lang, user, setPage }) {
     const touch = e.touches[0];
     const rawX = dragStart.ix + (touch.clientX - dragStart.mx) * dragStart.scaleX;
     const rawY = dragStart.iy + (touch.clientY - dragStart.my) * dragStart.scaleY;
-    const { x, y } = clampToArea(rawX, rawY, imagePos.size, product.printArea);
-    setImagePos(p => ({ ...p, x, y }));
-  }, [dragging, dragStart, imagePos.size, product]);
+    const { x, y } = clampToArea(rawX, rawY, dragStart.size, product.printArea);
+    if (dragStart.isSecond) setSecondFront(p => ({ ...p, pos: { ...p.pos, x, y } }));
+    else setImagePos(p => ({ ...p, x, y }));
+  }, [dragging, dragStart, product]);
 
   const handleSubmit = async () => {
     if (!form.name || !form.email) return;
@@ -952,9 +970,20 @@ function OrderPage({ lang, user, setPage }) {
                     {product.id === "sticker_sq" && <StickerSqMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", padding: "6px 0 4px" }}>
                       {uploadedImage
-                        ? (lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для точной настройки" : "✋ Drag to fine-tune position")
+                        ? (lang === "he" ? "✋ גרור לכוונון מיקום" : "✋ Drag to position")
                         : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : "👆 Tap to upload design")}
                     </p>
+                    {/* Design selector — shown when two designs exist */}
+                    {uploadedImage && secondFront.enabled && secondFront.image && (
+                      <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
+                        <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'main' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                          {lang === "he" ? "🎯 עיצוב ראשי" : "🎯 Main Design"}
+                        </button>
+                        <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'second' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                          {lang === "he" ? "➕ עיצוב שני" : "➕ 2nd Design"}
+                        </button>
+                      </div>
+                    )}
                     {uploadedImage && selectedPlacement && selectedSize && (
                       <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>✓ {
                         (() => {
@@ -967,7 +996,6 @@ function OrderPage({ lang, user, setPage }) {
                     {/* Mobile-only: placement & size below mockup */}
                     {isMobile && uploadedImage && !["mug"].includes(product.id) && (
                       <div style={{ padding: "8px 12px 12px" }}>
-                        {/* Nudge buttons for fine positioning */}
                         <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "כוונון מיקום" : "Fine-tune position"}</label>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "0 auto 12px" }}>
                           <div />
@@ -1005,9 +1033,18 @@ function OrderPage({ lang, user, setPage }) {
                         </div>
                       </div>
                     )}
+                    {/* Drag overlay — follows active design */}
                     {uploadedImage && (
                       <div onMouseDown={handleMouseDown} onTouchStart={handleTouchStart}
-                        style={{ position: "absolute", left: `${(imagePos.x / 400) * 100}%`, top: `${(imagePos.y / 400) * 100}%`, width: `${(imagePos.size / 400) * 100}%`, height: `${(imagePos.size / 400) * 100}%`, cursor: dragging ? "grabbing" : "grab", zIndex: 10 }} />
+                        style={{ position: "absolute",
+                          left: `${(getActivePos().x / 400) * 100}%`,
+                          top: `${(getActivePos().y / 400) * 100}%`,
+                          width: `${(getActivePos().size / 400) * 100}%`,
+                          height: `${(getActivePos().size / 400) * 100}%`,
+                          cursor: dragging ? "grabbing" : "grab", zIndex: 10,
+                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
+                          borderRadius: 4,
+                        }} />
                     )}
                   </div>
                 </div>
@@ -1754,14 +1791,22 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const setPage = (newPage) => {
-    window.location.hash = newPage === 'home' ? '' : newPage;
+    const hash = newPage === 'home' ? '' : newPage;
+    window.history.pushState({ page: newPage }, '', '#' + hash);
     setPageState(newPage);
   };
 
   useEffect(() => {
-    const handleHashChange = () => setPageState(getPageFromHash());
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    // Handle browser back/forward button
+    const handlePopState = (e) => {
+      const newPage = e.state?.page || getPageFromHash();
+      setPageState(newPage);
+    };
+    window.addEventListener('popstate', handlePopState);
+    // Set initial history state
+    const current = getPageFromHash();
+    window.history.replaceState({ page: current }, '', window.location.href);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
