@@ -222,10 +222,10 @@ function ProductMockupBase({ productKey, color, imageUrl, imagePos, secondImageU
       <img src={mockupUrl} alt="product" style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", zIndex:0, opacity: canvasOk ? 0 : 1, transition:"opacity 0.2s" }} />
       <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%", zIndex:1, opacity: canvasOk ? 1 : 0, transition:"opacity 0.2s" }} />
       {imageUrl && (
-        <img src={imageUrl} alt="design" style={{ position:"absolute", left:`${(imagePos.x/400)*100}%`, top:`${(imagePos.y/400)*100}%`, width:`${(imagePos.size/400)*100}%`, height:`${(imagePos.size/400)*100}%`, objectFit:"contain", zIndex:2, pointerEvents:"none" }} />
+        <img src={imageUrl} alt="design" style={{ position:"absolute", left:(imagePos.x/400*100)+"%", top:(imagePos.y/400*100)+"%", width:(imagePos.size/400*100)+"%", height:(imagePos.size/400*100)+"%", objectFit:"contain", zIndex:2, pointerEvents:"none" }} />
       )}
       {secondImageUrl && secondImagePos && (
-        <img src={secondImageUrl} alt="design2" style={{ position:"absolute", left:`${(secondImagePos.x/400)*100}%`, top:`${(secondImagePos.y/400)*100}%`, width:`${(secondImagePos.size/400)*100}%`, height:`${(secondImagePos.size/400)*100}%`, objectFit:"contain", zIndex:3, pointerEvents:"none" }} />
+        <img src={secondImageUrl} alt="design2" style={{ position:"absolute", left:(secondImagePos.x/400*100)+"%", top:(secondImagePos.y/400*100)+"%", width:(secondImagePos.size/400*100)+"%", height:(secondImagePos.size/400*100)+"%", objectFit:"contain", zIndex:3, pointerEvents:"none" }} />
       )}
     </div>
   );
@@ -1045,12 +1045,12 @@ function OrderPage({ lang, user, setPage }) {
                     {uploadedImage && (
                       <div onMouseDown={handleMouseDown}
                         style={{ position: "absolute",
-                          left: `${(getActivePos().x / 400) * 100}%`,
-                          top: `${(getActivePos().y / 400) * 100}%`,
-                          width: `${(getActivePos().size / 400) * 100}%`,
-                          height: `${(getActivePos().size / 400) * 100}%`,
+                          left: (getActivePos().x / 400 * 100) + "%",
+                          top: (getActivePos().y / 400 * 100) + "%",
+                          width: (getActivePos().size / 400 * 100) + "%",
+                          height: (getActivePos().size / 400 * 100) + "%",
                           cursor: dragging ? "grabbing" : "grab", zIndex: 10,
-                          outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
+                          outline: activeDesign === 'second' ? "2px dashed " + COLORS.accent : 'none',
                           borderRadius: 4,
                         }} />
                     )}
