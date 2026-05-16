@@ -155,9 +155,9 @@ const SIZE_OPTIONS = {
     { id: "large",  px: 110, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
   mug: [
-    { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
-    { id: "medium", px: 90,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
-    { id: "large",  px: 130, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
+  { id: "small",  px: 40,  label: { he: "קטן",   en: "Small",  ru: "Мал." }, cm: "5×5 cm"   },
+  { id: "medium", px: 65,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"  },
+  { id: "large",  px: 95,  label: { he: "גדול",  en: "Large",  ru: "Бол." }, cm: "12×10 cm" },
   ],
   sticker: [
     { id: "small",  px: 60,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
