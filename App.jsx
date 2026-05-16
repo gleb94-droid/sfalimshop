@@ -684,11 +684,10 @@ function OrderPage({ lang, user, setPage }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const fileRef = useRef();
   const mockupRef = useRef();
-  const imageAreaRef = useRef();
-  const [showNudge, setShowNudge] = useState(false);
   const pinchRef = useRef(null);
-  // Refs for native touch handlers (needed for passive:false)
+  const draggingRef = useRef(false);
   const touchHandlersRef = useRef({});
+  const [showNudge, setShowNudge] = useState(false);
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768);
@@ -696,13 +695,16 @@ function OrderPage({ lang, user, setPage }) {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  // Non-passive touch listeners on image area only (not whole card)
+  // Non-passive touch listeners — preventDefault only when actively dragging/pinching
   useEffect(() => {
     if (step !== 2) return;
-    const el = imageAreaRef.current;
+    const el = mockupRef.current;
     if (!el) return;
     const onStart = (e) => touchHandlersRef.current.start?.(e);
-    const onMove = (e) => { e.preventDefault(); touchHandlersRef.current.move?.(e); };
+    const onMove = (e) => {
+      if (draggingRef.current || pinchRef.current) e.preventDefault();
+      touchHandlersRef.current.move?.(e);
+    };
     el.addEventListener('touchstart', onStart, { passive: false });
     el.addEventListener('touchmove', onMove, { passive: false });
     return () => {
@@ -848,20 +850,18 @@ function OrderPage({ lang, user, setPage }) {
     else setImagePos(p => ({ ...p, x, y }));
   }, [dragging, dragStart, product]);
 
-  const handleMouseUp = () => setDragging(false);
+  const handleMouseUp = () => { setDragging(false); draggingRef.current = false; pinchRef.current = null; };
 
   const handleTouchStart = (e) => {
     if (!uploadedImage) return;
     if (e.touches.length === 2) {
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
       const currentSize = activeDesign === 'second' ? secondFront.pos.size : imagePos.size;
       pinchRef.current = { dist, size: currentSize, isSecond: activeDesign === 'second' };
       return;
     }
     const touch = e.touches[0];
+    draggingRef.current = true;
     setDragging(true);
     const rect = mockupRef.current.getBoundingClientRect();
     const pos = getActivePos();
@@ -1018,9 +1018,7 @@ function OrderPage({ lang, user, setPage }) {
                     style={{ background: COLORS.bgCard, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 0, position: "relative", userSelect: "none" }}
                     onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
                     onTouchEnd={handleMouseUp}>
-                    {/* Touch area — only this square blocks scroll */}
-                    <div ref={imageAreaRef} style={{ position: "relative", cursor: uploadedImage ? "grab" : "pointer" }}
-                      onClick={() => !uploadedImage && fileRef.current.click()}>
+                    {/* Mockup renders directly — touch handled by native listeners on mockupRef */}
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
@@ -1035,12 +1033,10 @@ function OrderPage({ lang, user, setPage }) {
                           width: `${(getActivePos().size / 400) * 100}%`,
                           height: `${(getActivePos().size / 400) * 100}%`,
                           cursor: dragging ? "grabbing" : "grab", zIndex: 10,
-                          touchAction: "none",
                           outline: activeDesign === 'second' ? `2px dashed ${COLORS.accent}` : 'none',
                           borderRadius: 4,
                         }} />
                     )}
-                    </div>
                     <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", padding: "6px 0 4px" }}>
                       {uploadedImage
                         ? isMobile
@@ -1098,7 +1094,6 @@ function OrderPage({ lang, user, setPage }) {
                         </>)}
                       </div>
                     )}
-                  </div>{/* closes mockupRef card */}
                   {/* Mobile size slider — below mockup */}
                   {isMobile && uploadedImage && (
                     <div style={{ padding: "10px 4px 4px" }}>
