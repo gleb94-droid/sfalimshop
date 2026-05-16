@@ -662,7 +662,8 @@ function OrderPage({ lang, user, setPage }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [dragStart, setDragStart] = useState(null);
-  const [activeDesign, setActiveDesign] = useState('main'); // 'main' | 'second'
+  const [activeDesign, setActiveDesign] = useState('main');
+  const [showPlacement, setShowPlacement] = useState(false);
   const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", notes: "" });
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -693,8 +694,9 @@ function OrderPage({ lang, user, setPage }) {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  // Non-passive touch listeners — allows preventDefault to block scroll and browser zoom
+  // Non-passive touch listeners — re-attach when step 2 renders (mockupRef becomes available)
   useEffect(() => {
+    if (step !== 2) return;
     const el = mockupRef.current;
     if (!el) return;
     const onStart = (e) => touchHandlersRef.current.start?.(e);
@@ -705,7 +707,7 @@ function OrderPage({ lang, user, setPage }) {
       el.removeEventListener('touchstart', onStart);
       el.removeEventListener('touchmove', onMove);
     };
-  }, []);
+  }, [step]);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -1168,17 +1170,24 @@ function OrderPage({ lang, user, setPage }) {
                     </div>
                   </div>
                 )}
-                {/* Placement below size — desktop, shirts only */}
+                {/* Placement — collapsible, desktop, shirts only */}
                 {!isMobile && uploadedImage && !["mug"].includes(product.id) && (
-                  <div>
-                    <label style={labelStyle}>{lang === "he" ? "מיקום עיצוב" : "Placement"}</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
-                        <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                          {pl[lang] || pl.en}
-                        </button>
-                      ))}
+                  <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 10, overflow: "hidden" }}>
+                    <div onClick={() => setShowPlacement(p => !p)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", background: showPlacement ? "rgba(255,107,53,0.08)" : COLORS.bgCard }}>
+                      <label style={{ ...labelStyle, marginBottom: 0, cursor: "pointer" }}>{lang === "he" ? "מיקום עיצוב" : "Placement"}</label>
+                      <span style={{ color: COLORS.gray, fontSize: 14 }}>{showPlacement ? "▲" : "▼"}</span>
                     </div>
+                    {showPlacement && (
+                      <div style={{ padding: "10px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                          {(PLACEMENTS[product.id] || PLACEMENTS.tshirt).map(pl => (
+                            <button key={pl.id} onClick={() => handleSelectPlacement(pl.id)} style={{ background: selectedPlacement === pl.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedPlacement === pl.id ? COLORS.accent : COLORS.border}`, color: selectedPlacement === pl.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                              {pl[lang] || pl.en}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 {/* Extra prints — shirts only */}
