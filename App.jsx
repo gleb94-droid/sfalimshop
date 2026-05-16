@@ -543,6 +543,9 @@ function AdminPage({ lang }) {
               {(filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).map(order => {
                 const stage = ORDER_STAGES.find(s => s.key === order.status) || ORDER_STAGES[0];
                 const isOpen = selected === order.id;
+                const pname = (order.product || "").toLowerCase();
+                const pid = pname.includes("mug") ? "mug" : pname.includes("sticker") && pname.includes("square") ? "sticker_sq" : pname.includes("sticker") ? "sticker" : pname.includes("oversize") ? "oversized" : pname.includes("dryfit") ? "dryfit" : "tshirt";
+                const ipos = { x: order.design_x || 150, y: order.design_y || 130, size: order.design_size || 100 };
                 return (
                   <div key={order.id}
                     style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "16px 20px", transition: "border-color 0.2s" }}>
@@ -582,11 +585,7 @@ function AdminPage({ lang }) {
                               {order.sleeve_right_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>👕 שרוול ימין</div>}
                             </div>
                           </div>
-                        {order.design_url && (() => {
-                            const pname = (order.product || "").toLowerCase();
-                            const pid = pname.includes("mug") ? "mug" : pname.includes("sticker") && pname.includes("square") ? "sticker_sq" : pname.includes("sticker") ? "sticker" : pname.includes("oversize") ? "oversized" : pname.includes("dryfit") || pname.includes("dry") ? "dryfit" : "tshirt";
-                            const ipos = { x: order.design_x || 150, y: order.design_y || 130, size: order.design_size || 100 };
-                            return (
+                        {order.design_url && (
                             <div>
                               <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>Design Preview</div>
                               <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180, position: "relative" }}>
@@ -622,8 +621,7 @@ function AdminPage({ lang }) {
                                 }} style={{ display: "inline-block", marginTop: 8, marginRight: 4, background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ {d.label}</button>
                               ))}
                             </div>
-                            );
-                          })()}
+                          )}
                           <div>
                             <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.updateStatus}</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -1055,12 +1053,14 @@ function OrderPage({ lang, user, setPage }) {
                         </button>
                       </div>
                     )}
-                    {uploadedImage && selectedPlacement && selectedSize && (() => {
-                      const pl = (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement);
-                      const sz = (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize);
-                      if (!pl || !sz) return null;
-                      return <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>{"+ " + (pl[lang] || pl.en) + " · " + sz.cm}</p>;
-                    })()}
+                    {uploadedImage && selectedPlacement && selectedSize && (
+                      (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement) &&
+                      (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize)
+                    ) && (
+                      <p style={{ color: COLORS.accent, fontSize: 11, textAlign: "center", marginBottom: 4 }}>
+                        {"+ " + ((PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement)[lang] || (PLACEMENTS[product.id] || PLACEMENTS.tshirt).find(p => p.id === selectedPlacement).en) + " · " + (SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).find(s => s.id === selectedSize).cm}
+                      </p>
+                    )}
                     {/* Mobile nudge — collapsible */}
                     {isMobile && uploadedImage && !["mug"].includes(product.id) && (
                       <div style={{ padding: "4px 12px 8px" }}>
