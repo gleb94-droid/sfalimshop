@@ -340,8 +340,9 @@ function TrackPage({ lang, user }) {
   const saveCustomerMessage = async (orderId) => {
     setSavingMsg(s => ({ ...s, [orderId]: true }));
     const msg = msgDrafts[orderId] || "";
-    await supabase.from("orders").update({ customer_message: msg }).eq("id", orderId);
-    setOrders(os => os.map(o => o.id === orderId ? { ...o, customer_message: msg } : o));
+    const now = new Date().toISOString();
+    await supabase.from("orders").update({ customer_message: msg, customer_message_at: now }).eq("id", orderId);
+    setOrders(os => os.map(o => o.id === orderId ? { ...o, customer_message: msg, customer_message_at: now } : o));
     setSavingMsg(s => ({ ...s, [orderId]: false }));
   };
 
@@ -430,14 +431,19 @@ function TrackPage({ lang, user }) {
                                       {savingMsg[order.id] ? "..." : (lang === "he" ? "💾 שמור הערה" : lang === "ru" ? "💾 Сохранить" : "💾 Save note")}
                                     </button>
                                     {order.customer_message && (msgDrafts[order.id] || "") === order.customer_message && (
-                                      <span style={{ color: COLORS.success, fontSize: 12 }}>✓ {lang === "he" ? "נשמר" : lang === "ru" ? "Сохранено" : "Saved"}</span>
+                                      <span style={{ color: COLORS.success, fontSize: 12 }}>✓ {lang === "he" ? "נשמר" : lang === "ru" ? "Сохранено" : "Saved"}{order.customer_message_at ? ` · ${new Date(order.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ${timeAgo(order.customer_message_at, lang)}` : ""}</span>
                                     )}
                                   </div>
                                 </>
                               ) : (
                                 <>
                                   {order.customer_message ? (
-                                    <div style={{ background: COLORS.bg, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>{order.customer_message}</div>
+                                    <div style={{ background: COLORS.bg, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
+                                      {order.customer_message_at && (
+                                        <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 6 }}>📅 {new Date(order.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })} · ⏱️ {timeAgo(order.customer_message_at, lang)}</div>
+                                      )}
+                                      {order.customer_message}
+                                    </div>
                                   ) : (
                                     <div style={{ color: COLORS.gray, fontSize: 12, fontStyle: "italic" }}>
                                       {lang === "he" ? "לא ניתן להוסיף הערות אחרי שהפריט עבר לשלב הדפסה" : lang === "ru" ? "Невозможно добавить заметку после начала печати" : "Cannot add notes after item moved to printing"}
@@ -662,8 +668,15 @@ function AdminPage({ lang }) {
                               <div style={{ marginTop: 8 }}>
                                 {group.filter(o => o.customer_message).map(o => (
                                   <div key={`msg-${o.id}`} style={{ background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: "10px 12px", marginBottom: 6 }}>
-                                    <div style={{ color: COLORS.accent, fontSize: 10, fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>
-                                      📩 {lang === "he" ? `הערת לקוח על ${o.product}` : lang === "ru" ? `Заметка к ${o.product}` : `Note on ${o.product}`}
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 4 }}>
+                                      <div style={{ color: COLORS.accent, fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>
+                                        📩 {lang === "he" ? `הערת לקוח על ${o.product}` : lang === "ru" ? `Заметка к ${o.product}` : `Note on ${o.product}`}
+                                      </div>
+                                      {o.customer_message_at && (
+                                        <div style={{ color: COLORS.gray, fontSize: 10 }}>
+                                          📅 {new Date(o.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ⏱️ {timeAgo(o.customer_message_at, lang)}
+                                        </div>
+                                      )}
                                     </div>
                                     <div style={{ color: COLORS.white, fontSize: 13 }}>{o.customer_message}</div>
                                   </div>
