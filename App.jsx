@@ -548,14 +548,14 @@ function AdminPage({ lang }) {
     fetchOrders();
   };
 
-  const updateStatus = async (orderId, status, orderCreatedAt) => {
+  const updateStatus = async (orderId, status, orderCreatedAt, sendEmail = true) => {
     const updates = { status };
     if (status === "delivered") updates.completed_at = new Date().toISOString();
     await supabase.from("orders").update(updates).eq("id", orderId);
     await supabase.from("order_status_history").insert({ order_id: orderId, status });
 
     const order = orders.find(o => o.id === orderId);
-    if (order?.customer_email) {
+    if (sendEmail && order?.customer_email) {
       try {
         await supabase.functions.invoke("send-status-update", {
           body: {
@@ -776,7 +776,7 @@ function AdminPage({ lang }) {
                                     </div>
                                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                                       {ORDER_STAGES.map(s => (
-                                        <button key={s.key} onClick={() => updateStatus(it.id, s.key, it.created_at)} title={s[lang] || s.en} style={{ background: it.status === s.key ? statusColors[s.key] : COLORS.bgCard, border: `1px solid ${it.status === s.key ? statusColors[s.key] : COLORS.border}`, color: it.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "4px 8px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", flex: "1 1 auto", minWidth: 32 }}>
+                                        <button key={s.key} onClick={() => updateStatus(it.id, s.key, it.created_at, false)} title={s[lang] || s.en} style={{ background: it.status === s.key ? statusColors[s.key] : COLORS.bgCard, border: `1px solid ${it.status === s.key ? statusColors[s.key] : COLORS.border}`, color: it.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "4px 8px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", flex: "1 1 auto", minWidth: 32 }}>
                                           {s.emoji}
                                         </button>
                                       ))}
@@ -792,7 +792,7 @@ function AdminPage({ lang }) {
                             </div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                               {ORDER_STAGES.map(s => (
-                                <button key={s.key} onClick={() => { group.forEach(o => updateStatus(o.id, s.key, o.created_at)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
+                                <button key={s.key} onClick={() => { group.forEach((o, idx) => updateStatus(o.id, s.key, o.created_at, idx === 0)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
                                   {s.emoji} {s[lang] || s.en}
                                 </button>
                               ))}
