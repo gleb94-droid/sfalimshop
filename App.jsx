@@ -322,13 +322,30 @@ function TrackPage({ lang, user }) {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [msgDrafts, setMsgDrafts] = useState({});
+  const [savingMsg, setSavingMsg] = useState({});
 
   useEffect(() => {
     if (!user) return;
     supabase.from("orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => { setOrders(data || []); setLoading(false); });
+      .then(({ data }) => {
+        setOrders(data || []);
+        const drafts = {};
+        (data || []).forEach(o => { drafts[o.id] = o.customer_message || ""; });
+        setMsgDrafts(drafts);
+        setLoading(false);
+      });
   }, [user]);
+
+  const saveCustomerMessage = async (orderId) => {
+    setSavingMsg(s => ({ ...s, [orderId]: true }));
+    const msg = msgDrafts[orderId] || "";
+    await supabase.from("orders").update({ customer_message: msg }).eq("id", orderId);
+    setOrders(os => os.map(o => o.id === orderId ? { ...o, customer_message: msg } : o));
+    setSavingMsg(s => ({ ...s, [orderId]: false }));
+  };
+
+  const canEditMessage = (status) => status === "received" || status === "design";
 
   const getStageIndex = (status) => ORDER_STAGES.findIndex(s => s.key === status);
 
@@ -375,11 +392,62 @@ function TrackPage({ lang, user }) {
                         <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4 }}>{stage.emoji} {stage[lang] || stage.en}</div>
                       </div>
                       </div>
-                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(order.id); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
                     </div>
 
                     {isOpen && (
                       <div style={{ padding: "0 24px 24px", borderTop: `1px solid ${COLORS.border}` }}>
+                        {order.design_url && (
+                          <div style={{ marginTop: 20, display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+                            <div>
+                              <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 8 }}>
+                                {lang === "he" ? "העיצוב שלך" : lang === "ru" ? "Ваш дизайн" : "Your design"}
+                              </div>
+                              <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180 }}>
+                                {(() => {
+                                  const pname = order.product?.toLowerCase() || "";
+                                  const pid = (pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка")) ? "mug" : ((pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) && (pname.includes("square") || pname.includes("מרובע") || pname.includes("квадрат"))) ? "sticker_sq" : (pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) ? "sticker" : (pname.includes("oversize") || pname.includes("אוברסייז") || pname.includes("оверсайз")) ? "oversized" : (pname.includes("dryfit") || pname.includes("dry") || pname.includes("דרייפיט") || pname.includes("драйфит")) ? "dryfit" : "tshirt";
+                                  return <ProductMockupBase productKey={pid} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={{ x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 }} secondImageUrl={order.second_front_url && order.second_front_url !== order.design_url ? order.second_front_url : (order.second_front_url ? order.design_url : null)} secondImagePos={order.second_front_url ? { x: order.second_front_x ?? 210, y: order.second_front_y ?? 120, size: order.second_front_size ?? 85 } : null} />;
+                                })()}
+                              </div>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8, maxWidth: 180 }}>
+                                {order.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: order.product_color, border: "1px solid #555" }} />{order.product_color}</div>}
+                                {order.design_size && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>📐 ~{Math.round((order.design_size / 160) * 30)} cm</div>}
+                                {order.back_print && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>🖨️</div>}
+                                {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>➕</div>}
+                                {order.sleeve_left_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕L</div>}
+                                {order.sleeve_right_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕R</div>}
+                              </div>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 240 }}>
+                              <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 8 }}>
+                                {lang === "he" ? "הוסף הערה להזמנה" : lang === "ru" ? "Добавить заметку" : "Add a note"}
+                              </div>
+                              {canEditMessage(order.status) ? (
+                                <>
+                                  <textarea value={msgDrafts[order.id] || ""} onChange={e => setMsgDrafts(d => ({ ...d, [order.id]: e.target.value }))} placeholder={lang === "he" ? "הערה למפעיל ההזמנה — בקשות מיוחדות, שינויים וכו'" : lang === "ru" ? "Заметка для исполнителя — особые пожелания и т.п." : "Note to the producer — special requests, etc."} rows={4} style={{ width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} />
+                                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+                                    <button onClick={() => saveCustomerMessage(order.id)} disabled={savingMsg[order.id] || (msgDrafts[order.id] || "") === (order.customer_message || "")} style={{ background: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? COLORS.bgCard : COLORS.accent, color: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? COLORS.gray : "#fff", border: "none", borderRadius: 8, padding: "8px 16px", cursor: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600 }}>
+                                      {savingMsg[order.id] ? "..." : (lang === "he" ? "💾 שמור הערה" : lang === "ru" ? "💾 Сохранить" : "💾 Save note")}
+                                    </button>
+                                    {order.customer_message && (msgDrafts[order.id] || "") === order.customer_message && (
+                                      <span style={{ color: COLORS.success, fontSize: 12 }}>✓ {lang === "he" ? "נשמר" : lang === "ru" ? "Сохранено" : "Saved"}</span>
+                                    )}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  {order.customer_message ? (
+                                    <div style={{ background: COLORS.bg, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>{order.customer_message}</div>
+                                  ) : (
+                                    <div style={{ color: COLORS.gray, fontSize: 12, fontStyle: "italic" }}>
+                                      {lang === "he" ? "לא ניתן להוסיף הערות אחרי שהפריט עבר לשלב הדפסה" : lang === "ru" ? "Невозможно добавить заметку после начала печати" : "Cannot add notes after item moved to printing"}
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         <div style={{ marginTop: 20 }}>
                           {ORDER_STAGES.map((s, i) => {
                             const done = i <= si;
@@ -590,6 +658,18 @@ function AdminPage({ lang }) {
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📱 {order.customer_phone}</div>}
                             {(order.customer_street || order.customer_city) && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📍 {[order.customer_street, order.customer_city, order.customer_postal_code].filter(Boolean).join(", ")}</div>}
                             {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>💬 {order.notes}</div>}
+                            {group.some(o => o.customer_message) && (
+                              <div style={{ marginTop: 8 }}>
+                                {group.filter(o => o.customer_message).map(o => (
+                                  <div key={`msg-${o.id}`} style={{ background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: "10px 12px", marginBottom: 6 }}>
+                                    <div style={{ color: COLORS.accent, fontSize: 10, fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>
+                                      📩 {lang === "he" ? `הערת לקוח על ${o.product}` : lang === "ru" ? `Заметка к ${o.product}` : `Note on ${o.product}`}
+                                    </div>
+                                    <div style={{ color: COLORS.white, fontSize: 13 }}>{o.customer_message}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <div style={{ flexBasis: "100%", marginTop: 8, paddingTop: 16, borderTop: `1px dashed ${COLORS.border}` }}>
                             <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: "uppercase", marginBottom: 12, letterSpacing: "0.08em" }}>🛒 {lang === "he" ? "פריטים בהזמנה" : lang === "ru" ? "Товары в заказе" : "Items in order"}</div>
