@@ -590,100 +590,84 @@ function AdminPage({ lang }) {
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📱 {order.customer_phone}</div>}
                             {(order.customer_street || order.customer_city) && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📍 {[order.customer_street, order.customer_city, order.customer_postal_code].filter(Boolean).join(", ")}</div>}
                             {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>💬 {order.notes}</div>}
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                              {order.product_color && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: order.product_color, border: "1px solid #555", flexShrink: 0 }} />{order.product_color}</div>}
-                              {order.design_size && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.gray }}>📐 ~{Math.round((order.design_size / 160) * 30)} cm</div>}
-                              {order.back_print && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>🖨️ גב</div>}
-                              {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>➕ חזית נוספת{order.second_front_size ? ` · ~${Math.round((order.second_front_size / 160) * 30)} cm` : ""}</div>}
-                              {order.sleeve_left_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>👕 שרוול שמאל</div>}
-                              {order.sleeve_right_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: COLORS.accent }}>👕 שרוול ימין</div>}
-                            </div>
                           </div>
-                        {order.design_url && (
-                            <div>
-                              <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>Design Preview</div>
-                              <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180, position: "relative" }}>
-                                {(() => {
-                                  const pname = order.product?.toLowerCase() || "";
-                                  const pid = (pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка")) ? "mug" : ((pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) && (pname.includes("square") || pname.includes("מרובע") || pname.includes("квадрат"))) ? "sticker_sq" : (pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) ? "sticker" : (pname.includes("oversize") || pname.includes("אוברסייז") || pname.includes("оверсайз")) ? "oversized" : (pname.includes("dryfit") || pname.includes("dry") || pname.includes("דרייפיט") || pname.includes("драйфит")) ? "dryfit" : "tshirt";
-                                  const mockupUrl = MOCKUP_URLS[pid] || MOCKUP_URLS.tshirt;
-                                  return <ProductMockupBase productKey={pid} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={{ x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 }} secondImageUrl={order.second_front_url && order.second_front_url !== order.design_url ? order.second_front_url : (order.second_front_url ? order.design_url : null)} secondImagePos={order.second_front_url ? { x: order.second_front_x ?? 210, y: order.second_front_y ?? 120, size: order.second_front_size ?? 85 } : null} />;
-                                })()}
-                              </div>
-                              <button onClick={async () => {
-                                const response = await fetch(order.design_url);
-                                const blob = await response.blob();
-                                const url = window.URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `design-${order.id}.png`;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                window.URL.revokeObjectURL(url);
-                              }} style={{ display: "inline-block", marginTop: 8, background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
-                              {/* Extra design downloads */}
-                              {[
-                                { url: order.second_front_url, label: "2nd Front" },
-                                { url: order.back_design_url,  label: "Back" },
-                                { url: order.sleeve_left_url,  label: "Sleeve L" },
-                                { url: order.sleeve_right_url, label: "Sleeve R" },
-                              ].filter(d => d.url && d.url !== order.design_url).map(d => (
-                                <button key={d.label} onClick={async () => {
-                                  const response = await fetch(d.url);
-                                  const blob = await response.blob();
-                                  const url = window.URL.createObjectURL(blob);
-                                  const a = document.createElement('a');
-                                  a.href = url; a.download = `${d.label}-${order.id}.png`;
-                                  document.body.appendChild(a); a.click();
-                                  document.body.removeChild(a); window.URL.revokeObjectURL(url);
-                                }} style={{ display: "inline-block", marginTop: 8, marginRight: 4, background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ {d.label}</button>
+                          <div style={{ flexBasis: "100%", marginTop: 8, paddingTop: 16, borderTop: `1px dashed ${COLORS.border}` }}>
+                            <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: "uppercase", marginBottom: 12, letterSpacing: "0.08em" }}>🛒 {lang === "he" ? "פריטים בהזמנה" : lang === "ru" ? "Товары в заказе" : "Items in order"}</div>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
+                              {group.map(it => (
+                                <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
+                                  <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{it.product} × {it.quantity}</div>
+                                  <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{it.variant} · ₪{it.total}</div>
+                                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                                    {it.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: it.product_color, border: "1px solid #555" }} />{it.product_color}</div>}
+                                    {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>📐 ~{Math.round((it.design_size / 160) * 30)} cm</div>}
+                                    {it.back_print && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>🖨️</div>}
+                                    {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>➕</div>}
+                                    {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕L</div>}
+                                    {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕R</div>}
+                                  </div>
+                                  {it.design_url && (
+                                    <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
+                                      {(() => {
+                                        const pname = it.product?.toLowerCase() || "";
+                                        const pid = (pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка")) ? "mug" : ((pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) && (pname.includes("square") || pname.includes("מרובע") || pname.includes("квадрат"))) ? "sticker_sq" : (pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) ? "sticker" : (pname.includes("oversize") || pname.includes("אוברסייז") || pname.includes("оверсайз")) ? "oversized" : (pname.includes("dryfit") || pname.includes("dry") || pname.includes("דרייפיט") || pname.includes("драйфит")) ? "dryfit" : "tshirt";
+                                        return <ProductMockupBase productKey={pid} color={it.product_color || "#ffffff"} imageUrl={it.design_url} imagePos={{ x: it.design_x ?? 150, y: it.design_y ?? 130, size: it.design_size ?? 100 }} secondImageUrl={it.second_front_url && it.second_front_url !== it.design_url ? it.second_front_url : (it.second_front_url ? it.design_url : null)} secondImagePos={it.second_front_url ? { x: it.second_front_x ?? 210, y: it.second_front_y ?? 120, size: it.second_front_size ?? 85 } : null} />;
+                                      })()}
+                                    </div>
+                                  )}
+                                  {it.design_url && (
+                                    <button onClick={async () => {
+                                      const response = await fetch(it.design_url);
+                                      const blob = await response.blob();
+                                      const url = window.URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url; a.download = `design-${it.id}.png`;
+                                      document.body.appendChild(a); a.click();
+                                      document.body.removeChild(a); window.URL.revokeObjectURL(url);
+                                    }} style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
+                                  )}
+                                  {/* Extra design downloads */}
+                                  {[
+                                    { url: it.second_front_url, label: "2nd" },
+                                    { url: it.back_design_url,  label: "Back" },
+                                    { url: it.sleeve_left_url,  label: "SL" },
+                                    { url: it.sleeve_right_url, label: "SR" },
+                                  ].filter(d => d.url && d.url !== it.design_url).map(d => (
+                                    <button key={d.label} onClick={async () => {
+                                      const response = await fetch(d.url);
+                                      const blob = await response.blob();
+                                      const url = window.URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url; a.download = `${d.label}-${it.id}.png`;
+                                      document.body.appendChild(a); a.click();
+                                      document.body.removeChild(a); window.URL.revokeObjectURL(url);
+                                    }} style={{ background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 8px", fontSize: 10, fontWeight: 600, cursor: "pointer", marginLeft: 4, fontFamily: "'Varela Round',sans-serif" }}>⬇️ {d.label}</button>
+                                  ))}
+                                  {/* Per-item status */}
+                                  <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${COLORS.border}` }}>
+                                    <div style={{ color: COLORS.gray, fontSize: 10, fontWeight: 600, textTransform: "uppercase", marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                      <span>{lang === "he" ? "שלב הפריט" : lang === "ru" ? "Этап" : "Item stage"}</span>
+                                      {(() => {
+                                        const cur = ORDER_STAGES.find(s => s.key === it.status) || ORDER_STAGES[0];
+                                        return <span style={{ color: statusColors[it.status] || COLORS.accent, fontWeight: 700 }}>{cur.emoji} {cur[lang] || cur.en}</span>;
+                                      })()}
+                                    </div>
+                                    <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                      {ORDER_STAGES.map(s => (
+                                        <button key={s.key} onClick={() => updateStatus(it.id, s.key, it.created_at)} title={s[lang] || s.en} style={{ background: it.status === s.key ? statusColors[s.key] : COLORS.bgCard, border: `1px solid ${it.status === s.key ? statusColors[s.key] : COLORS.border}`, color: it.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "4px 8px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", flex: "1 1 auto", minWidth: 32 }}>
+                                          {s.emoji}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
                               ))}
                             </div>
-                          )}
-                          {isMulti && (
-                            <div style={{ flexBasis: "100%", marginTop: 8, paddingTop: 16, borderTop: `1px dashed ${COLORS.border}` }}>
-                              <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: "uppercase", marginBottom: 12, letterSpacing: "0.08em" }}>🛒 {lang === "he" ? "פריטים נוספים בהזמנה" : lang === "ru" ? "Другие товары в заказе" : "More items in this order"}</div>
-                              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
-                                {group.slice(1).map(it => (
-                                  <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
-                                    <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{it.product} × {it.quantity}</div>
-                                    <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{it.variant} · ₪{it.total}</div>
-                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
-                                      {it.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: it.product_color, border: "1px solid #555" }} />{it.product_color}</div>}
-                                      {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>📐 ~{Math.round((it.design_size / 160) * 30)} cm</div>}
-                                      {it.back_print && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>🖨️</div>}
-                                      {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>➕</div>}
-                                      {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕L</div>}
-                                      {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕R</div>}
-                                    </div>
-                                    {it.design_url && (
-                                      <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
-                                        {(() => {
-                                          const pname = it.product?.toLowerCase() || "";
-                                          const pid = (pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка")) ? "mug" : ((pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) && (pname.includes("square") || pname.includes("מרובע") || pname.includes("квадрат"))) ? "sticker_sq" : (pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) ? "sticker" : (pname.includes("oversize") || pname.includes("אוברסייז") || pname.includes("оверсайз")) ? "oversized" : (pname.includes("dryfit") || pname.includes("dry") || pname.includes("דרייפיט") || pname.includes("драйфит")) ? "dryfit" : "tshirt";
-                                          return <ProductMockupBase productKey={pid} color={it.product_color || "#ffffff"} imageUrl={it.design_url} imagePos={{ x: it.design_x ?? 150, y: it.design_y ?? 130, size: it.design_size ?? 100 }} secondImageUrl={it.second_front_url && it.second_front_url !== it.design_url ? it.second_front_url : (it.second_front_url ? it.design_url : null)} secondImagePos={it.second_front_url ? { x: it.second_front_x ?? 210, y: it.second_front_y ?? 120, size: it.second_front_size ?? 85 } : null} />;
-                                        })()}
-                                      </div>
-                                    )}
-                                    {it.design_url && (
-                                      <button onClick={async () => {
-                                        const response = await fetch(it.design_url);
-                                        const blob = await response.blob();
-                                        const url = window.URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url; a.download = `design-${it.id}.png`;
-                                        document.body.appendChild(a); a.click();
-                                        document.body.removeChild(a); window.URL.revokeObjectURL(url);
-                                      }} style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          </div>
                           <div>
-                            <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.updateStatus}</div>
+                            <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>
+                              {isMulti ? (lang === "he" ? "עדכן סטטוס לכל הפריטים" : lang === "ru" ? "Обновить статус всех" : "Update all items status") : t.admin.updateStatus}
+                            </div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                               {ORDER_STAGES.map(s => (
                                 <button key={s.key} onClick={() => { group.forEach(o => updateStatus(o.id, s.key, o.created_at)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
