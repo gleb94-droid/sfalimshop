@@ -94,6 +94,35 @@ const LANGS = {
   },
 };
 
+// Localization helpers - translate a saved product/variant name to target language
+const PRODUCT_IDS = ['tshirt', 'oversized', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
+const localizeProduct = (savedName, targetLang) => {
+  if (!savedName) return savedName;
+  for (const id of PRODUCT_IDS) {
+    for (const lng of ['he', 'en', 'ru']) {
+      if (LANGS[lng]?.products?.[id] === savedName) {
+        return LANGS[targetLang]?.products?.[id] || savedName;
+      }
+    }
+  }
+  return savedName;
+};
+
+const VARIANT_IDS = ['standard', 'large', 'magic', 'small', 'medium', 'largeS', 'sheet'];
+const localizeVariant = (savedLabel, targetLang) => {
+  if (!savedLabel) return savedLabel;
+  // T-shirt sizes (S, M, L, XL, XXL) are universal across languages
+  if (['S', 'M', 'L', 'XL', 'XXL'].includes(savedLabel)) return savedLabel;
+  for (const id of VARIANT_IDS) {
+    for (const lng of ['he', 'en', 'ru']) {
+      if (LANGS[lng]?.variants?.[id] === savedLabel) {
+        return LANGS[targetLang]?.variants?.[id] || savedLabel;
+      }
+    }
+  }
+  return savedLabel;
+};
+
 const PRODUCTS = (t) => [
   { id: "mug",        name: t.products.mug,       emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }, { id: "large", label: t.variants.large, price: 79 }, { id: "magic", label: t.variants.magic, price: 89 }], colors: ["#ffffff", "#f5f5f4", "#1a1a1a", "#fef3c7", "#dbeafe", "#fce7f3", "#dcfce7", "#f3e8ff", "#fee2e2", "#e0f2fe"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
   { id: "tshirt",     name: t.products.tshirt,    emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#e5e5e5", "#1a1a1a", "#3a3a3a", "#1e3a5f", "#2563eb", "#7f1d1d", "#dc2626", "#14532d", "#16a34a", "#78350f", "#4c1d95", "#be185d", "#FF6B35"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
@@ -383,7 +412,7 @@ function TrackPage({ lang, user }) {
                     <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div onClick={() => setSelected(isOpen ? null : order.id)} style={{ flex: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div>
-                        <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 16 }}>{order.product} — {order.variant}</div>
+                        <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 16 }}>{localizeProduct(order.product, lang)} — {localizeVariant(order.variant, lang)}</div>
                         <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4 }}>{new Date(order.created_at).toLocaleDateString()}</div>
                         <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 2 }}>⏱️ {timeAgo(order.created_at, lang)}</div>
                         {order.completed_at && <div style={{ color: COLORS.success, fontSize: 12, marginTop: 2 }}>✅ {lang === "he" ? "הושלם תוך" : lang === "ru" ? "Выполнен за" : "Completed in"} {timeBetween(order.created_at, order.completed_at, lang)}</div>}
@@ -642,7 +671,7 @@ function AdminPage({ lang }) {
                           <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColors[order.status] || COLORS.accent, boxShadow: `0 0 8px ${statusColors[order.status] || COLORS.accent}`, flexShrink: 0 }} />
                           <div>
                             <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginLeft: 8, marginRight: 8, background: "rgba(255,107,53,0.15)", padding: "2px 8px", borderRadius: 10 }}>🛒 {group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
-                            <div style={{ color: COLORS.gray, fontSize: 13 }}>{isMulti ? group.map(o => `${o.product} ×${o.quantity}`).join(" · ") : `${order.product} · ${order.variant} · ×${order.quantity}`}</div>
+                            <div style={{ color: COLORS.gray, fontSize: 13 }}>{isMulti ? group.map(o => `${localizeProduct(o.product, lang)} ×${o.quantity}`).join(" · ") : `${localizeProduct(order.product, lang)} · ${localizeVariant(order.variant, lang)} · ×${order.quantity}`}</div>
                           </div>
                         </div>
                         <div style={{ textAlign: "right" }}>
@@ -689,8 +718,8 @@ function AdminPage({ lang }) {
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
                               {group.map(it => (
                                 <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
-                                  <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{it.product} × {it.quantity}</div>
-                                  <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{it.variant} · ₪{it.total}</div>
+                                  <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{localizeProduct(it.product, lang)} × {it.quantity}</div>
+                                  <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{localizeVariant(it.variant, lang)} · ₪{it.total}</div>
                                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
                                     {it.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: it.product_color, border: "1px solid #555" }} />{it.product_color}</div>}
                                     {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>📐 ~{Math.round((it.design_size / 160) * 30)} cm</div>}
