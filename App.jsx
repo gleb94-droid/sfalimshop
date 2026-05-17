@@ -699,7 +699,7 @@ function AdminPage({ lang }) {
                                   <div key={`msg-${o.id}`} style={{ background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: "10px 12px", marginBottom: 6 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 4 }}>
                                       <div style={{ color: COLORS.accent, fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>
-                                        📩 {lang === "he" ? `הערת לקוח על ${o.product}` : lang === "ru" ? `Заметка к ${o.product}` : `Note on ${o.product}`}
+                                        📩 {lang === "he" ? `הערת לקוח על ${localizeProduct(o.product, lang)}` : lang === "ru" ? `Заметка к ${localizeProduct(o.product, lang)}` : `Note on ${localizeProduct(o.product, lang)}`}
                                       </div>
                                       {o.customer_message_at && (
                                         <div style={{ color: COLORS.gray, fontSize: 10 }}>
