@@ -11,6 +11,11 @@ const COLORS = {
 const SHIPPING_PRICE = 30;
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 
+// 🚧 MAINTENANCE MODE — set to true to show "Under Maintenance" page to all visitors.
+// Admin (gleb2009@gmail.com) bypasses this when logged in.
+// Visit ?staff=1 to access login during maintenance.
+const MAINTENANCE_MODE = true;
+
 const IL_PREFIXES = [
   { value: "050" }, { value: "052" }, { value: "053" },
   { value: "054" }, { value: "055" }, { value: "057" }, { value: "058" },
@@ -2399,15 +2404,57 @@ export default function App() {
       `}</style>
       <ParticlesBackground />
       <CursorGlow />
-      <AccessibilityMenu lang={lang} />
-      <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} />
-      {page === "home" && <Hero setPage={setPage} lang={lang} />}
-      {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-      {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} />}
-      {page === "track" && <TrackPage lang={lang} user={user} />}
-      {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
-      {page === "admin" && isAdmin && <AdminPage lang={lang} />}
-      {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
+      {(() => {
+        const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
+        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride) {
+          return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} />;
+        }
+        return (
+          <>
+            <AccessibilityMenu lang={lang} />
+            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} />
+            {page === "home" && <Hero setPage={setPage} lang={lang} />}
+            {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
+            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} />}
+            {page === "track" && <TrackPage lang={lang} user={user} />}
+            {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
+            {page === "admin" && isAdmin && <AdminPage lang={lang} />}
+            {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
+          </>
+        );
+      })()}
+    </div>
+  );
+}
+
+function MaintenancePage({ lang, setLang, setPage }) {
+  const messages = {
+    he: { title: "האתר בתחזוקה", sub: "אנחנו עובדים על שדרוגים מרגשים ✨", back: "נחזור בקרוב!", staff: "כניסת צוות" },
+    en: { title: "Under Maintenance", sub: "We're working on exciting upgrades ✨", back: "Back soon!", staff: "Staff login" },
+    ru: { title: "Сайт на обслуживании", sub: "Мы работаем над улучшениями ✨", back: "Скоро вернёмся!", staff: "Вход для персонала" },
+  };
+  const m = messages[lang] || messages.he;
+  return (
+    <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: 24, zIndex: 10, direction: lang === "he" ? "rtl" : "ltr" }}>
+      <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 8 }}>
+        {["he", "en", "ru"].map(l => (
+          <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? "#FF6B35" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
+      <div style={{ textAlign: "center", maxWidth: 520 }}>
+        <div style={{ fontSize: 80, marginBottom: 20 }}>🚧</div>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 48, color: "#fff", marginBottom: 16 }}>{m.title}</h1>
+        <p style={{ color: "#999", fontSize: 18, marginBottom: 8, fontFamily: "'Varela Round',sans-serif" }}>{m.sub}</p>
+        <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 36 }}>{m.back}</p>
+        <a href="https://www.instagram.com/sfalim/" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 14 }}>
+          📷 Instagram @sfalim
+        </a>
+      </div>
+      <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#555", fontFamily: "'Varela Round',sans-serif" }}>
+        <a href="?staff=1" style={{ color: "#555", textDecoration: "none" }}>· {m.staff} ·</a>
+      </div>
     </div>
   );
 }
