@@ -99,6 +99,237 @@ const LANGS = {
   },
 };
 
+// === Business info & legal policies ===
+const BUSINESS_INFO = {
+  name: { he: "ספלים שופ", en: "Sfalim Shop", ru: "Sfalim Shop" },
+  vatId: "321630279", // עוסק פטור
+  address: { he: "רח׳ י\"א הספורטאים 28, באר שבע", en: "11 HaSportaim St. 28, Be'er Sheva, Israel", ru: "ул. 11 Спортсменов 28, Беэр-Шева, Израиль" },
+  phone: "054-6841662",
+  email: "gleb2009@gmail.com",
+  website: "www.sfalimshop.com",
+};
+
+const POLICY_SECTIONS = [
+  { id: "refund",        emoji: "🔄", title: { he: "החזרים וביטולים", en: "Refunds & Cancellations", ru: "Возвраты и отмены" } },
+  { id: "shipping",      emoji: "📦", title: { he: "משלוחים",          en: "Shipping",                ru: "Доставка" } },
+  { id: "privacy",       emoji: "🔒", title: { he: "פרטיות",           en: "Privacy",                 ru: "Конфиденциальность" } },
+  { id: "terms",         emoji: "📋", title: { he: "תקנון",            en: "Terms of Service",        ru: "Условия использования" } },
+  { id: "accessibility", emoji: "♿", title: { he: "נגישות",            en: "Accessibility",           ru: "Доступность" } },
+];
+
+const POLICIES = {
+  he: {
+    refund: [
+      { type: "p", text: "מדיניות זו מנוסחת על פי חוק הגנת הצרכן, התשמ\"א-1981 ותקנותיו." },
+      { type: "h", text: "1. זכות ביטול כללית" },
+      { type: "p", text: "לקוח רשאי לבטל עסקה תוך 14 ימים מיום קבלת המוצר, ובלבד שלא נעשה במוצר שימוש ולא נפגם." },
+      { type: "h", text: "2. ⚠️ מוצרים בעיצוב אישי — אין זכות ביטול" },
+      { type: "p", text: "על פי תקנה 6(ב)(1) לחוק הגנת הצרכן, לא ניתן לבטל עסקה עבור חולצות, ספלים, מדבקות ומוצרים אחרים שעוצבו בהתאמה אישית ללקוח (Print-on-Demand). ברגע שהזמנת מוצר עם עיצוב משלך — אין ביטול ואין החזר כספי." },
+      { type: "h", text: "3. החזר במקרים מיוחדים" },
+      { type: "p", text: "נחזיר תמורה גם למוצרים בעיצוב אישי במקרים אלה:" },
+      { type: "l", items: ["פגם במוצר או באיכות ההדפסה", "טעות בהזמנה מצדנו", "מוצר שלא הגיע תוך 21 ימי עסקים"] },
+      { type: "p", text: "אנא צרו עמנו קשר תוך 3 ימי עסקים מקבלת המוצר עם תמונות הפגם ומספר ההזמנה." },
+      { type: "h", text: "4. תהליך ההחזר" },
+      { type: "p", text: "ההחזר הכספי יבוצע תוך 7 ימי עסקים דרך אותו אמצעי תשלום. החלפת מוצר — שליחת מוצר חליפי תוך 7-14 ימי עסקים." },
+      { type: "h", text: "5. דמי ביטול" },
+      { type: "p", text: "במקרה של ביטול עסקה כדין, רשאי בית העסק לגבות דמי ביטול בשיעור 5% ממחיר העסקה או 100₪ — הנמוך מביניהם." },
+      { type: "h", text: "6. ביטול מצד בית העסק" },
+      { type: "p", text: "ספלים שופ שומרת על הזכות לבטל הזמנה ולהחזיר את הכסף במקרים של חוסר במלאי, שגיאה במחיר, חשד להונאה, או תוכן פוגעני/אלים/המפר זכויות יוצרים." },
+    ],
+    shipping: [
+      { type: "h", text: "אזורי שירות" },
+      { type: "p", text: "ספלים שופ שולחת לכל אזורי ישראל. משלוחים לחו\"ל — בתיאום מיוחד." },
+      { type: "h", text: "זמני אספקה" },
+      { type: "l", items: ["3-10 ימי עסקים לרוב היעדים", "עד 14 ימי עסקים בעת עומס או הדפסה מיוחדת", "מועד האספקה מתחיל מיום אישור התשלום", "ימי שישי, שבת וחגים אינם נחשבים ימי עסקים"] },
+      { type: "h", text: "דמי משלוח" },
+      { type: "p", text: "30₪ — תעריף אחיד למרבית האזורים. אזורים מרוחקים (ערבה, הר חרמון, יישובי קו עימות) — ייתכן חיוב נוסף שיתואם מראש." },
+      { type: "h", text: "איסוף עצמי" },
+      { type: "p", text: "ניתן לתאם איסוף עצמי מבאר שבע — ללא עלות. צרו קשר טלפונית לתיאום." },
+      { type: "h", text: "התעכבות במשלוח" },
+      { type: "p", text: "אם החבילה לא הגיעה תוך 21 ימי עסקים, אנא צרו קשר ונדאג לפתרון — משלוח חוזר או החזר כספי מלא." },
+    ],
+    privacy: [
+      { type: "h", text: "איזה מידע אנחנו אוספים" },
+      { type: "l", items: ["מידע אישי: שם מלא, אימייל, טלפון, כתובת למשלוח", "מידע על ההזמנה: מוצרים, עיצובים, הערות", "מידע טכני (אוטומטי): IP, סוג דפדפן, Cookies בסיסיים"] },
+      { type: "h", text: "מטרת איסוף המידע" },
+      { type: "l", items: ["ביצוע ההזמנה והאספקה", "תקשורת עם הלקוח", "תמיכה ופניות", "שיפור השירות", "עמידה בדרישות חוק"] },
+      { type: "h", text: "מה אנחנו לא עושים" },
+      { type: "l", items: ["לא נמכור את פרטיך לצדדים שלישיים", "לא נשלח ספאם ללא הסכמה", "לא נשמור פרטי אשראי (התשלום דרך Tranzila — חברה מאובטחת PCI-DSS)"] },
+      { type: "h", text: "אבטחת מידע" },
+      { type: "p", text: "האתר מאובטח ב-SSL (HTTPS). בסיס הנתונים מאוחסן ב-Supabase עם הצפנה. פרטי תשלום עוברים ישירות ל-Tranzila." },
+      { type: "h", text: "שיתוף מידע עם צדדים שלישיים" },
+      { type: "p", text: "המידע ישותף אך ורק עם חברת השליחים (לאספקה), Tranzila (לתשלום), ורשויות החוק אם נדרש בצו." },
+      { type: "h", text: "הזכויות שלך" },
+      { type: "p", text: "יש לך זכות לעיין, לתקן, למחוק ולקבל את המידע שלך. לבקשה — שלח אימייל ל-gleb2009@gmail.com." },
+    ],
+    terms: [
+      { type: "h", text: "כללי" },
+      { type: "p", text: "השימוש באתר מהווה הסכמה לתנאי תקנון זה. בית העסק רשאי לעדכן את התקנון בכל עת." },
+      { type: "h", text: "כשרות לרכישה" },
+      { type: "p", text: "מינימום גיל 18 (או באישור הורה). חובת מסירת פרטים אמיתיים ומלאים." },
+      { type: "h", text: "הזמנות ותשלום" },
+      { type: "p", text: "ההזמנה נחשבת מאושרת רק לאחר אישור התשלום. אישור ישלח לאימייל. מחירים בשקלים חדשים — כוללים מע\"מ במידת הצורך. תשלום דרך Tranzila." },
+      { type: "h", text: "⚠️ זכויות יוצרים ותוכן פוגעני" },
+      { type: "p", text: "הלקוח מתחייב להעלות רק עיצובים שיש לו זכויות עליהם. אסור להעלות:" },
+      { type: "l", items: ["תוכן פוגעני, גזעני, אלים או מיני", "לוגואים/דמויות מוגנים בזכויות יוצרים (דיסני, מארוול, NBA, אנימה וכו')", "תוכן המסית לאלימות או שנאה", "תוכן המפר חוק"] },
+      { type: "p", text: "הלקוח אחראי באופן בלעדי על התוכן שמעלה. ספלים שופ שומרת על הזכות לסרב להדפיס תוכן פוגעני ולבטל את ההזמנה." },
+      { type: "h", text: "הגבלת אחריות" },
+      { type: "p", text: "ספלים שופ אינה אחראית לנזקים עקיפים, שינויי גוון מינוריים בין מסך להדפסה בפועל, או כישלון אספקה כתוצאה מ-Force Majeure." },
+      { type: "h", text: "סמכות שיפוט" },
+      { type: "p", text: "בכל מחלוקת — הסמכות הבלעדית לבתי המשפט המוסמכים במחוז הדרום (באר שבע)." },
+    ],
+    accessibility: [
+      { type: "p", text: "ספלים שופ מחויבת לאפשר שימוש באתר לכל אדם, כולל אנשים עם מוגבלות, בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות, תשנ\"ח-1998." },
+      { type: "h", text: "רמת ההנגשה" },
+      { type: "p", text: "האתר נבנה בהתאם לתקן WCAG 2.1 רמה AA." },
+      { type: "h", text: "התאמות שיושמו" },
+      { type: "l", items: ["תפריט נגישות במסך (שינוי גופן, ניגודיות, ביטול אנימציות)", "ניווט מקלדת מלא (Tab, Enter, Esc)", "טקסט חלופי (alt) לכל התמונות", "ניגודיות צבעים עומדת בתקן AA", "תמיכה בקוראי מסך (NVDA, JAWS, VoiceOver)", "תמיכה ב-3 שפות: עברית, אנגלית, רוסית"] },
+      { type: "h", text: "פנייה בנושא נגישות" },
+      { type: "p", text: "אם נתקלת בבעיית נגישות, פנה לאימייל gleb2009@gmail.com או לטלפון 054-6841662. נטפל תוך 48 שעות." },
+    ],
+  },
+  en: {
+    refund: [
+      { type: "p", text: "This policy follows Israeli Consumer Protection Law 5741-1981 and its regulations." },
+      { type: "h", text: "1. General Cancellation Right" },
+      { type: "p", text: "Customers may cancel an order within 14 days of receiving the product, provided it has not been used or damaged." },
+      { type: "h", text: "2. ⚠️ Personalized Items — No Cancellation Right" },
+      { type: "p", text: "Per Regulation 6(b)(1), custom-designed items (Print-on-Demand t-shirts, mugs, stickers, etc.) cannot be cancelled. Once you order a product with your own design, no refund or return is available." },
+      { type: "h", text: "3. Refunds in Special Cases" },
+      { type: "p", text: "We will refund custom items in these cases:" },
+      { type: "l", items: ["Product defect or print quality issue", "Our mistake (wrong size, wrong item)", "Item not arrived within 21 business days"] },
+      { type: "p", text: "Contact us within 3 business days of receiving the item with photos of the defect and order number." },
+      { type: "h", text: "4. Refund Process" },
+      { type: "p", text: "Refund will be processed within 7 business days via the original payment method. Replacement items shipped within 7-14 business days." },
+      { type: "h", text: "5. Cancellation Fee" },
+      { type: "p", text: "For legal cancellations, the business may charge 5% of the transaction or 100 ILS — whichever is lower." },
+      { type: "h", text: "6. Cancellation by Sfalim Shop" },
+      { type: "p", text: "We reserve the right to cancel orders and refund payment in cases of stock shortage, pricing errors, suspected fraud, or offensive/copyrighted content." },
+    ],
+    shipping: [
+      { type: "h", text: "Service Areas" },
+      { type: "p", text: "Sfalim Shop ships throughout Israel. International shipping by special arrangement." },
+      { type: "h", text: "Delivery Times" },
+      { type: "l", items: ["3-10 business days for most destinations", "Up to 14 business days during high demand or special prints", "Delivery time begins from payment confirmation date", "Friday, Saturday, and holidays do not count as business days"] },
+      { type: "h", text: "Shipping Fees" },
+      { type: "p", text: "30 ILS — flat rate for most areas. Remote areas (Arava, Mt. Hermon, border areas) may incur additional fees by prior arrangement." },
+      { type: "h", text: "Self-Pickup" },
+      { type: "p", text: "Self-pickup from Be'er Sheva can be arranged — free of charge. Call to coordinate." },
+      { type: "h", text: "Shipping Delays" },
+      { type: "p", text: "If a package hasn't arrived within 21 business days, please contact us — we'll arrange reshipping or full refund." },
+    ],
+    privacy: [
+      { type: "h", text: "Information We Collect" },
+      { type: "l", items: ["Personal: full name, email, phone, shipping address", "Order data: products, designs, notes", "Technical (automatic): IP, browser type, basic cookies"] },
+      { type: "h", text: "Purpose of Collection" },
+      { type: "l", items: ["Order fulfillment and delivery", "Customer communication", "Support and inquiries", "Service improvement", "Legal compliance"] },
+      { type: "h", text: "What We Do NOT Do" },
+      { type: "l", items: ["We will not sell your data to third parties", "No spam without explicit consent", "We do not store credit card details (payment via Tranzila — PCI-DSS compliant)"] },
+      { type: "h", text: "Data Security" },
+      { type: "p", text: "Site is SSL secured (HTTPS). Database hosted on Supabase with encryption. Payment details go directly to Tranzila." },
+      { type: "h", text: "Third-Party Sharing" },
+      { type: "p", text: "Information shared only with: shipping company (delivery), Tranzila (payment), and authorities if legally required." },
+      { type: "h", text: "Your Rights" },
+      { type: "p", text: "You have the right to access, correct, delete, and receive your data. Email gleb2009@gmail.com to request." },
+    ],
+    terms: [
+      { type: "h", text: "General" },
+      { type: "p", text: "Using this site constitutes acceptance of these terms. The business may update the terms at any time." },
+      { type: "h", text: "Purchase Eligibility" },
+      { type: "p", text: "Minimum age 18 (or with parental approval). Must provide accurate and complete information." },
+      { type: "h", text: "Orders and Payment" },
+      { type: "p", text: "Orders are confirmed only after payment approval. Confirmation sent by email. Prices in Israeli Shekels (ILS) including VAT where applicable. Payment via Tranzila." },
+      { type: "h", text: "⚠️ Copyright and Offensive Content" },
+      { type: "p", text: "Customer agrees to upload only designs they have rights to. Prohibited content:" },
+      { type: "l", items: ["Offensive, racist, violent, or sexual content", "Copyrighted logos/characters (Disney, Marvel, NBA, anime, etc.)", "Content inciting violence or hatred", "Content violating any law"] },
+      { type: "p", text: "Customer is solely responsible for uploaded content. Sfalim Shop reserves the right to refuse offensive content and cancel orders." },
+      { type: "h", text: "Limitation of Liability" },
+      { type: "p", text: "Sfalim Shop is not responsible for indirect damages, minor color variations between screen and actual print, or delivery failures due to Force Majeure." },
+      { type: "h", text: "Jurisdiction" },
+      { type: "p", text: "Any dispute — exclusive jurisdiction to courts in Southern District (Be'er Sheva), Israel." },
+    ],
+    accessibility: [
+      { type: "p", text: "Sfalim Shop is committed to making the site usable for all, including people with disabilities, per Israel's Equal Rights for Persons with Disabilities Law 5758-1998." },
+      { type: "h", text: "Accessibility Level" },
+      { type: "p", text: "Site built to WCAG 2.1 Level AA standard." },
+      { type: "h", text: "Implemented Accommodations" },
+      { type: "l", items: ["On-screen accessibility menu (font size, contrast, animations)", "Full keyboard navigation (Tab, Enter, Esc)", "Alt text for all images", "Color contrast meets AA standard", "Screen reader support (NVDA, JAWS, VoiceOver)", "3-language support: Hebrew, English, Russian"] },
+      { type: "h", text: "Accessibility Contact" },
+      { type: "p", text: "For accessibility issues, contact gleb2009@gmail.com or 054-6841662. We respond within 48 hours." },
+    ],
+  },
+  ru: {
+    refund: [
+      { type: "p", text: "Настоящая политика составлена в соответствии с Законом Израиля о защите потребителя 5741-1981." },
+      { type: "h", text: "1. Право отмены" },
+      { type: "p", text: "Клиент имеет право отменить заказ в течение 14 дней с момента получения товара, при условии что товар не использовался и не повреждён." },
+      { type: "h", text: "2. ⚠️ Персонализированные товары — без права отмены" },
+      { type: "p", text: "Согласно правилу 6(б)(1), персонализированные товары (футболки, кружки, наклейки с индивидуальным дизайном) не подлежат отмене. После заказа товара с вашим дизайном — возврат невозможен." },
+      { type: "h", text: "3. Возврат в особых случаях" },
+      { type: "p", text: "Мы вернём деньги за персонализированные товары в случаях:" },
+      { type: "l", items: ["Дефект товара или качества печати", "Ошибка с нашей стороны (неверный размер, не тот товар)", "Товар не прибыл в течение 21 рабочего дня"] },
+      { type: "p", text: "Свяжитесь с нами в течение 3 рабочих дней с момента получения с фото дефекта и номером заказа." },
+      { type: "h", text: "4. Процесс возврата" },
+      { type: "p", text: "Возврат средств в течение 7 рабочих дней тем же способом оплаты. Замена товара — отправка нового в течение 7-14 рабочих дней." },
+      { type: "h", text: "5. Комиссия за отмену" },
+      { type: "p", text: "При законной отмене бизнес имеет право взимать 5% от стоимости или 100 шек. — что меньше." },
+      { type: "h", text: "6. Отмена со стороны Sfalim Shop" },
+      { type: "p", text: "Мы оставляем за собой право отменить заказ и вернуть деньги в случаях отсутствия товара, ошибок в цене, подозрений в мошенничестве или оскорбительного/нарушающего авторские права контента." },
+    ],
+    shipping: [
+      { type: "h", text: "Зоны доставки" },
+      { type: "p", text: "Sfalim Shop доставляет по всему Израилю. Доставка за границу — по спец. договорённости." },
+      { type: "h", text: "Сроки доставки" },
+      { type: "l", items: ["3-10 рабочих дней для большинства направлений", "До 14 рабочих дней при высокой нагрузке или спец. печати", "Срок начинается с момента подтверждения оплаты", "Пятница, суббота и праздники не считаются рабочими"] },
+      { type: "h", text: "Стоимость доставки" },
+      { type: "p", text: "30 шек. — единый тариф для большинства зон. Удалённые зоны (Арава, Хермон, приграничные) — возможна доплата по согласованию." },
+      { type: "h", text: "Самовывоз" },
+      { type: "p", text: "Возможен самовывоз из Беэр-Шевы — бесплатно. Позвоните для согласования." },
+      { type: "h", text: "Задержки доставки" },
+      { type: "p", text: "Если посылка не пришла в течение 21 рабочего дня — свяжитесь с нами, решим проблему: повторная отправка или полный возврат." },
+    ],
+    privacy: [
+      { type: "h", text: "Какую информацию собираем" },
+      { type: "l", items: ["Личные данные: имя, email, телефон, адрес доставки", "Данные заказа: товары, дизайны, заметки", "Технические (автоматически): IP, тип браузера, базовые cookies"] },
+      { type: "h", text: "Цель сбора" },
+      { type: "l", items: ["Выполнение заказа и доставка", "Связь с клиентом", "Поддержка и запросы", "Улучшение сервиса", "Соблюдение закона"] },
+      { type: "h", text: "Что мы НЕ делаем" },
+      { type: "l", items: ["Не продаём ваши данные третьим лицам", "Не отправляем спам без согласия", "Не храним данные карт (оплата через Tranzila — стандарт PCI-DSS)"] },
+      { type: "h", text: "Безопасность данных" },
+      { type: "p", text: "Сайт защищён SSL (HTTPS). База данных на Supabase с шифрованием. Платёжные данные идут напрямую в Tranzila." },
+      { type: "h", text: "Передача третьим лицам" },
+      { type: "p", text: "Данные передаются только: курьерской службе (доставка), Tranzila (оплата) и властям при законном требовании." },
+      { type: "h", text: "Ваши права" },
+      { type: "p", text: "Вы имеете право на доступ, исправление, удаление и получение ваших данных. Запросы на gleb2009@gmail.com." },
+    ],
+    terms: [
+      { type: "h", text: "Общие положения" },
+      { type: "p", text: "Использование сайта означает согласие с условиями. Бизнес может обновлять условия в любое время." },
+      { type: "h", text: "Право на покупку" },
+      { type: "p", text: "Минимальный возраст 18 (или с согласия родителя). Обязательное предоставление точных и полных данных." },
+      { type: "h", text: "Заказы и оплата" },
+      { type: "p", text: "Заказ подтверждается только после одобрения платежа. Подтверждение отправляется на email. Цены в израильских шекелях (ILS) с НДС при необходимости. Оплата через Tranzila." },
+      { type: "h", text: "⚠️ Авторские права и недопустимый контент" },
+      { type: "p", text: "Клиент обязуется загружать только дизайны с правами. Запрещено:" },
+      { type: "l", items: ["Оскорбительный, расистский, агрессивный или сексуальный контент", "Защищённые авторским правом логотипы/персонажи (Disney, Marvel, NBA, аниме и др.)", "Контент, разжигающий насилие или ненависть", "Контент, нарушающий закон"] },
+      { type: "p", text: "Клиент несёт исключительную ответственность за загружаемый контент. Sfalim Shop вправе отказать в печати и отменить заказ." },
+      { type: "h", text: "Ограничение ответственности" },
+      { type: "p", text: "Sfalim Shop не несёт ответственности за косвенный ущерб, незначительные отличия цвета между экраном и печатью, сбои доставки из-за форс-мажора." },
+      { type: "h", text: "Подсудность" },
+      { type: "p", text: "Любые споры — исключительная подсудность судов Южного округа Израиля (Беэр-Шева)." },
+    ],
+    accessibility: [
+      { type: "p", text: "Sfalim Shop стремится сделать сайт доступным для всех, включая людей с ограниченными возможностями, согласно Закону Израиля о равных правах для людей с инвалидностью 5758-1998." },
+      { type: "h", text: "Уровень доступности" },
+      { type: "p", text: "Сайт построен по стандарту WCAG 2.1 уровня AA." },
+      { type: "h", text: "Реализованные адаптации" },
+      { type: "l", items: ["Меню доступности на экране (размер шрифта, контраст, анимации)", "Полная навигация с клавиатуры (Tab, Enter, Esc)", "Alt-текст для всех изображений", "Цветовой контраст соответствует уровню AA", "Поддержка скринридеров (NVDA, JAWS, VoiceOver)", "3 языка: иврит, английский, русский"] },
+      { type: "h", text: "Связь по вопросам доступности" },
+      { type: "p", text: "По вопросам доступности: gleb2009@gmail.com или 054-6841662. Ответим в течение 48 часов." },
+    ],
+  },
+};
+
 // Localization helpers - translate a saved product/variant name to target language
 const PRODUCT_IDS = ['tshirt', 'oversized', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
 const localizeProduct = (savedName, targetLang) => {
@@ -2337,11 +2568,12 @@ function AboutPage({ lang, setPage }) {
 }
 
 export default function App() {
-  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about'];
+  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'policies'];
 
   const getPageFromHash = () => {
     const hash = window.location.hash.replace('#', '');
-    return VALID_PAGES.includes(hash) ? hash : 'home';
+    const root = hash.split('/')[0];
+    return VALID_PAGES.includes(root) ? root : 'home';
   };
 
   const [page, setPageState] = useState(getPageFromHash);
@@ -2420,6 +2652,8 @@ export default function App() {
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
             {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
+            {page === "policies" && <PoliciesPage lang={lang} />}
+            <Footer lang={lang} setPage={setPage} />
           </>
         );
       })()}
@@ -2456,5 +2690,118 @@ function MaintenancePage({ lang, setLang, setPage }) {
         <a href="?staff=1" style={{ color: "#555", textDecoration: "none" }}>· {m.staff} ·</a>
       </div>
     </div>
+  );
+}
+
+function PoliciesPage({ lang }) {
+  const sectionFromHash = typeof window !== "undefined" ? (window.location.hash.split("?")[0].replace("#", "") || "").split("/")[1] || "refund" : "refund";
+  const [activeSection, setActiveSection] = useState(sectionFromHash);
+  const content = POLICIES[lang] || POLICIES.he;
+  const isRTL = lang === "he";
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const s = (window.location.hash.replace("#", "") || "").split("/")[1] || "refund";
+      setActiveSection(s);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  const goSection = (id) => {
+    setActiveSection(id);
+    window.location.hash = `policies/${id}`;
+  };
+
+  return (
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 24px 60px", direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
+      <h1 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 42, marginBottom: 8 }}>
+        {lang === "he" ? "מדיניות ותקנון" : lang === "ru" ? "Политика и условия" : "Policies & Terms"}
+      </h1>
+      <p style={{ color: "#999", fontSize: 15, marginBottom: 32, fontFamily: "'Varela Round',sans-serif" }}>
+        {BUSINESS_INFO.name[lang]} · {lang === "he" ? "ע.מ." : lang === "ru" ? "ИНН" : "VAT ID"} {BUSINESS_INFO.vatId}
+      </p>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
+        {POLICY_SECTIONS.map(s => (
+          <button key={s.id} onClick={() => goSection(s.id)} style={{ background: activeSection === s.id ? "#FF6B35" : "#1a1a1a", color: activeSection === s.id ? "#fff" : "#999", border: `1px solid ${activeSection === s.id ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
+            {s.emoji} {s.title[lang]}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
+        <h2 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
+          {POLICY_SECTIONS.find(s => s.id === activeSection)?.emoji} {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
+        </h2>
+        <div style={{ color: "#ccc", fontFamily: "'Varela Round',sans-serif", fontSize: 14, lineHeight: 1.8 }}>
+          {(content[activeSection] || []).map((block, i) => {
+            if (block.type === "h") return <h3 key={i} style={{ color: "#FF6B35", fontSize: 17, marginTop: 24, marginBottom: 10, fontWeight: 700 }}>{block.text}</h3>;
+            if (block.type === "p") return <p key={i} style={{ marginBottom: 12 }}>{block.text}</p>;
+            if (block.type === "l") return (
+              <ul key={i} style={{ marginBottom: 12, paddingInlineStart: 20 }}>
+                {block.items.map((item, j) => <li key={j} style={{ marginBottom: 6 }}>{item}</li>)}
+              </ul>
+            );
+            return null;
+          })}
+        </div>
+      </div>
+
+      <div style={{ background: "rgba(255,107,53,0.08)", border: "1px solid #FF6B35", borderRadius: 12, padding: "16px 20px", marginTop: 24, color: "#ccc", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+        <div style={{ color: "#FF6B35", fontWeight: 700, marginBottom: 6 }}>
+          {lang === "he" ? "📞 צריכים עזרה?" : lang === "ru" ? "📞 Нужна помощь?" : "📞 Need help?"}
+        </div>
+        <div>📧 {BUSINESS_INFO.email} · 📞 {BUSINESS_INFO.phone}</div>
+        <div style={{ marginTop: 4 }}>📍 {BUSINESS_INFO.address[lang]}</div>
+      </div>
+    </div>
+  );
+}
+
+function Footer({ lang, setPage }) {
+  const isRTL = lang === "he";
+  const goPolicy = (sectionId) => {
+    window.location.hash = `policies/${sectionId}`;
+    setPage("policies");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  return (
+    <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "40px 24px 24px", marginTop: 60, direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 32 }}>
+        <div>
+          <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 700, marginBottom: 12 }}>{BUSINESS_INFO.name[lang]}</div>
+          <div style={{ color: "#999", fontSize: 13, fontFamily: "'Varela Round',sans-serif", lineHeight: 1.7 }}>
+            <div>📍 {BUSINESS_INFO.address[lang]}</div>
+            <div>📞 {BUSINESS_INFO.phone}</div>
+            <div>📧 {BUSINESS_INFO.email}</div>
+            <div style={{ marginTop: 4, color: "#666", fontSize: 11 }}>{lang === "he" ? "ע.מ." : lang === "ru" ? "ИНН" : "VAT ID"} {BUSINESS_INFO.vatId}</div>
+          </div>
+        </div>
+        <div>
+          <div style={{ color: "#fff", fontSize: 13, fontWeight: 700, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'Varela Round',sans-serif" }}>
+            {lang === "he" ? "מידע משפטי" : lang === "ru" ? "Юр. информация" : "Legal"}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {POLICY_SECTIONS.map(s => (
+              <button key={s.id} onClick={() => goPolicy(s.id)} style={{ background: "transparent", border: "none", color: "#999", padding: 0, cursor: "pointer", textAlign: isRTL ? "right" : "left", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }} onMouseOver={e => e.currentTarget.style.color = "#FF6B35"} onMouseOut={e => e.currentTarget.style.color = "#999"}>
+                {s.emoji} {s.title[lang]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div style={{ color: "#fff", fontSize: 13, fontWeight: 700, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'Varela Round',sans-serif" }}>
+            {lang === "he" ? "עקבו אחרינו" : lang === "ru" ? "Соцсети" : "Follow Us"}
+          </div>
+          <a href="https://www.instagram.com/sfalim/" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "8px 16px", borderRadius: 8, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 13 }}>
+            📷 @sfalim
+          </a>
+        </div>
+      </div>
+      <div style={{ maxWidth: 1100, margin: "32px auto 0", paddingTop: 20, borderTop: "1px solid #1a1a1a", color: "#555", fontSize: 12, fontFamily: "'Varela Round',sans-serif", textAlign: "center" }}>
+        © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
+      </div>
+    </footer>
   );
 }
