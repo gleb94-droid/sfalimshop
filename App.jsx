@@ -105,7 +105,7 @@ const BUSINESS_INFO = {
   vatId: "321630279", // עוסק פטור
   address: { he: "רח׳ י\"א הספורטאים 28, באר שבע", en: "11 HaSportaim St. 28, Be'er Sheva, Israel", ru: "ул. 11 Спортсменов 28, Беэр-Шева, Израиль" },
   phone: "054-6841662",
-  email: "gleb2009@gmail.com",
+  email: "hello@sfalimshop.com",
   website: "www.sfalimshop.com",
 };
 
@@ -160,7 +160,7 @@ const POLICIES = {
       { type: "h", text: "שיתוף מידע עם צדדים שלישיים" },
       { type: "p", text: "המידע ישותף אך ורק עם חברת השליחים (לאספקה), Tranzila (לתשלום), ורשויות החוק אם נדרש בצו." },
       { type: "h", text: "הזכויות שלך" },
-      { type: "p", text: "יש לך זכות לעיין, לתקן, למחוק ולקבל את המידע שלך. לבקשה — שלח אימייל ל-gleb2009@gmail.com." },
+      { type: "p", text: "יש לך זכות לעיין, לתקן, למחוק ולקבל את המידע שלך. לבקשה — שלח אימייל ל-hello@sfalimshop.com." },
     ],
     terms: [
       { type: "h", text: "כללי" },
@@ -185,7 +185,7 @@ const POLICIES = {
       { type: "h", text: "התאמות שיושמו" },
       { type: "l", items: ["תפריט נגישות במסך (שינוי גופן, ניגודיות, ביטול אנימציות)", "ניווט מקלדת מלא (Tab, Enter, Esc)", "טקסט חלופי (alt) לכל התמונות", "ניגודיות צבעים עומדת בתקן AA", "תמיכה בקוראי מסך (NVDA, JAWS, VoiceOver)", "תמיכה ב-3 שפות: עברית, אנגלית, רוסית"] },
       { type: "h", text: "פנייה בנושא נגישות" },
-      { type: "p", text: "אם נתקלת בבעיית נגישות, פנה לאימייל gleb2009@gmail.com או לטלפון 054-6841662. נטפל תוך 48 שעות." },
+      { type: "p", text: "אם נתקלת בבעיית נגישות, פנה לאימייל hello@sfalimshop.com או לטלפון 054-6841662. נטפל תוך 48 שעות." },
     ],
   },
   en: {
@@ -230,7 +230,7 @@ const POLICIES = {
       { type: "h", text: "Third-Party Sharing" },
       { type: "p", text: "Information shared only with: shipping company (delivery), Tranzila (payment), and authorities if legally required." },
       { type: "h", text: "Your Rights" },
-      { type: "p", text: "You have the right to access, correct, delete, and receive your data. Email gleb2009@gmail.com to request." },
+      { type: "p", text: "You have the right to access, correct, delete, and receive your data. Email hello@sfalimshop.com to request." },
     ],
     terms: [
       { type: "h", text: "General" },
@@ -255,7 +255,7 @@ const POLICIES = {
       { type: "h", text: "Implemented Accommodations" },
       { type: "l", items: ["On-screen accessibility menu (font size, contrast, animations)", "Full keyboard navigation (Tab, Enter, Esc)", "Alt text for all images", "Color contrast meets AA standard", "Screen reader support (NVDA, JAWS, VoiceOver)", "3-language support: Hebrew, English, Russian"] },
       { type: "h", text: "Accessibility Contact" },
-      { type: "p", text: "For accessibility issues, contact gleb2009@gmail.com or 054-6841662. We respond within 48 hours." },
+      { type: "p", text: "For accessibility issues, contact hello@sfalimshop.com or 054-6841662. We respond within 48 hours." },
     ],
   },
   ru: {
@@ -300,7 +300,7 @@ const POLICIES = {
       { type: "h", text: "Передача третьим лицам" },
       { type: "p", text: "Данные передаются только: курьерской службе (доставка), Tranzila (оплата) и властям при законном требовании." },
       { type: "h", text: "Ваши права" },
-      { type: "p", text: "Вы имеете право на доступ, исправление, удаление и получение ваших данных. Запросы на gleb2009@gmail.com." },
+      { type: "p", text: "Вы имеете право на доступ, исправление, удаление и получение ваших данных. Запросы на hello@sfalimshop.com." },
     ],
     terms: [
       { type: "h", text: "Общие положения" },
@@ -325,7 +325,7 @@ const POLICIES = {
       { type: "h", text: "Реализованные адаптации" },
       { type: "l", items: ["Меню доступности на экране (размер шрифта, контраст, анимации)", "Полная навигация с клавиатуры (Tab, Enter, Esc)", "Alt-текст для всех изображений", "Цветовой контраст соответствует уровню AA", "Поддержка скринридеров (NVDA, JAWS, VoiceOver)", "3 языка: иврит, английский, русский"] },
       { type: "h", text: "Связь по вопросам доступности" },
-      { type: "p", text: "По вопросам доступности: gleb2009@gmail.com или 054-6841662. Ответим в течение 48 часов." },
+      { type: "p", text: "По вопросам доступности: hello@sfalimshop.com или 054-6841662. Ответим в течение 48 часов." },
     ],
   },
 };
@@ -2554,7 +2554,7 @@ function AboutPage({ lang, setPage }) {
           <h2 style={{ color: '#fff', fontSize: 32, marginBottom: 32, fontFamily: "'Playfair Display',serif" }}>{t.contactTitle}</h2>
           <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
             <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>📍 {t.location}</div>
-            <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>📧 gleb2009@gmail.com</div>
+            <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>📧 hello@sfalimshop.com</div>
           </div>
           <button onClick={() => setPage('order')} style={{ background: '#FF6B35', color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'all 0.2s' }}
             onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(255,107,53,0.6)'; }}
