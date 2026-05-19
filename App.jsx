@@ -2719,7 +2719,7 @@ function PoliciesPage({ lang }) {
         {lang === "he" ? "מדיניות ותקנון" : lang === "ru" ? "Политика и условия" : "Policies & Terms"}
       </h1>
       <p style={{ color: "#999", fontSize: 15, marginBottom: 32, fontFamily: "'Varela Round',sans-serif" }}>
-        {BUSINESS_INFO.name[lang]} · {lang === "he" ? "ע.מ." : lang === "ru" ? "ИНН" : "VAT ID"} {BUSINESS_INFO.vatId}
+        {BUSINESS_INFO.name[lang]} · {lang === "he" ? "עוסק פטור" : lang === "ru" ? "Освобождённый предприниматель" : "Exempt Dealer"} {BUSINESS_INFO.vatId}
       </p>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
@@ -2775,7 +2775,7 @@ function Footer({ lang, setPage }) {
             <div>📍 {BUSINESS_INFO.address[lang]}</div>
             <div>📞 {BUSINESS_INFO.phone}</div>
             <div>📧 {BUSINESS_INFO.email}</div>
-            <div style={{ marginTop: 4, color: "#666", fontSize: 11 }}>{lang === "he" ? "ע.מ." : lang === "ru" ? "ИНН" : "VAT ID"} {BUSINESS_INFO.vatId}</div>
+            <div style={{ marginTop: 4, color: "#666", fontSize: 11 }}>{lang === "he" ? "עוסק פטור" : lang === "ru" ? "Освобождённый предприниматель" : "Exempt Dealer"} {BUSINESS_INFO.vatId}</div>
           </div>
         </div>
         <div>
