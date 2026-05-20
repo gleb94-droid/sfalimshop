@@ -2609,6 +2609,7 @@ function OrderPage({ lang, user, setPage }) {
                             quantity: cart.reduce((s, c) => s + c.qty, 0),
                             total: pendingTotal,
                             orderId: pendingOrderIds[0] || "unknown",
+                            orderGroup: pendingOrderGroupId,
                             language: lang,
                           },
                         });
