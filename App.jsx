@@ -62,7 +62,7 @@ const timeBetween = (start, end, lang) => {
 const LANGS = {
   he: {
     dir: "rtl", label: "HE",
-    nav: { home: "בית", order: "הזמנה", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
+    nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "העיצוב שלך.", h1line2: "על הכל.", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "התחל לעצב ←", from: "החל מ-₪" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
@@ -99,7 +99,7 @@ const LANGS = {
   },
   en: {
     dir: "ltr", label: "EN",
-    nav: { home: "Home", order: "Order", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
+    nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Your design.", h1line2: "On everything.", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Start Designing →", from: "from ₪" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
@@ -136,7 +136,7 @@ const LANGS = {
   },
   ru: {
     dir: "ltr", label: "RU",
-    nav: { home: "Главная", order: "Заказ", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
+    nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Ваш дизайн.", h1line2: "На всём.", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Начать →", from: "от ₪" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
@@ -3060,13 +3060,16 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-        {["home", "order", "about"].map(p => (
+        {["home", "order", "pets", "about"].map(p => (
           <button key={p} onClick={() => setPage(p)} style={{
             background: page === p ? COLORS.accentDim : "transparent",
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
             color: page === p ? COLORS.accent : COLORS.gray,
             padding: "8px 18px", borderRadius: 8, cursor: "pointer",
-            fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500,
+            fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif",
+            fontSize: 13, fontWeight: p === "pets" ? 700 : 500,
+            fontStyle: p === "pets" ? "italic" : "normal",
+            letterSpacing: p === "pets" ? "0.5px" : "normal",
             transition: "all 0.2s", position: "relative", overflow: "hidden",
           }}
           onMouseOver={e => { if(page !== p) { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
@@ -3118,8 +3121,8 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
     {/* Mobile dropdown */}
     {mobileMenu && (
       <div style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
-        {["home", "order", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "left", width: "100%" }}>{t.nav[p]}</button>
+        {["home", "order", "pets", "about"].map(p => (
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "left", width: "100%" }}>{t.nav[p]}</button>
         ))}
         {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.track}</button>}
         {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.admin}</button>}
@@ -3474,6 +3477,7 @@ export default function App() {
       he: {
         home:     "ספלים שופ | הדפסות מותאמות אישית — חולצות, ספלים, מדבקות",
         order:    "הזמן עיצוב משלך | ספלים שופ",
+        pets:     "BLOOM Collection | אוסף דיוקנאות חיות מחמד | ספלים שופ",
         about:    "על ספלים שופ | מי אנחנו",
         track:    "מעקב הזמנות | ספלים שופ",
         admin:    "ניהול | ספלים שופ",
@@ -3482,6 +3486,7 @@ export default function App() {
       en: {
         home:     "Sfalim Shop | Custom Prints — Shirts, Mugs, Stickers",
         order:    "Design Your Order | Sfalim Shop",
+        pets:     "BLOOM Collection | Pet Couture by Sfalim Shop",
         about:    "About Sfalim Shop",
         track:    "Track Orders | Sfalim Shop",
         admin:    "Admin | Sfalim Shop",
@@ -3490,6 +3495,7 @@ export default function App() {
       ru: {
         home:     "Sfalim Shop | Индивидуальная печать — футболки, кружки, стикеры",
         order:    "Создать заказ | Sfalim Shop",
+        pets:     "BLOOM Collection | Pet Couture от Sfalim Shop",
         about:    "О Sfalim Shop",
         track:    "Отслеживание заказов | Sfalim Shop",
         admin:    "Админ | Sfalim Shop",
@@ -3710,6 +3716,7 @@ export default function App() {
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} />
             {page === "home" && <Hero setPage={setPage} lang={lang} />}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} />}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
@@ -3729,6 +3736,563 @@ export default function App() {
         );
       })()}
     </div>
+  );
+}
+
+// ============ PETS PAGE — BLOOM Collection / Pet Couture ============
+function PetsPage({ lang, setPage }) {
+  const isRTL = lang === "he";
+  const [designs, setDesigns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null); // currently opened character in modal
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+
+  // Fetch the collection
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("pet_designs")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+        if (error) throw error;
+        setDesigns(data || []);
+      } catch (err) {
+        console.error("Failed to load BLOOM collection:", err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  // Translations
+  const t = {
+    he: {
+      eyebrow: "BLOOM COLLECTION · PET COUTURE",
+      heading: "Bloom.",
+      subheading: "אוסף מנהלי. אנכבר־דמויות עם נשמה.",
+      subheading2: "12 דיוקנאות בשמן, כל אחת בעלת אופי משלה.",
+      scroll: "גלה את האוסף",
+      collectionEyebrow: "האוסף",
+      collectionCount: "12 דמויות",
+      loading: "טוען אוסף...",
+      empty: "האוסף בקרוב",
+      priceFrom: "החל מ-₪",
+      shirtLabel: "חולצה",
+      mugLabel: "ספל",
+      stickerLabel: "מדבקה",
+      availableOn: "זמין עבור",
+      detailMore: "פרטים",
+      modalClose: "סגירה",
+      orderBtn: "הזמנה כ",
+      comingSoonTitle: "ייצור BLOOM יוצא לדרך",
+      comingSoonSub: "מערכת התשלום של אוסף BLOOM נמצאת בשלבי שלמות סופיים. תקבל הודעה במייל כשנהיה מוכנים.",
+      gotIt: "הבנתי",
+      ctaTitle: "רוצה משהו אחר?",
+      ctaSub: "צור עיצוב משלך ונדפיס אותו על מה שתבחר",
+      ctaBtn: "הזמנת הדפסה מותאמת ←",
+    },
+    en: {
+      eyebrow: "BLOOM COLLECTION · PET COUTURE",
+      heading: "Bloom.",
+      subheading: "A curated collection. Characters with soul.",
+      subheading2: "12 oil portraits, each one with its own personality.",
+      scroll: "Browse the collection",
+      collectionEyebrow: "THE COLLECTION",
+      collectionCount: "12 CHARACTERS",
+      loading: "Loading collection...",
+      empty: "Collection coming soon",
+      priceFrom: "From ₪",
+      shirtLabel: "T-shirt",
+      mugLabel: "Mug",
+      stickerLabel: "Sticker",
+      availableOn: "Available on",
+      detailMore: "View details",
+      modalClose: "Close",
+      orderBtn: "Order as",
+      comingSoonTitle: "BLOOM Checkout Launching Soon",
+      comingSoonSub: "Direct ordering of BLOOM characters is in final integration. We will notify you by email when ready.",
+      gotIt: "Got it",
+      ctaTitle: "Want something different?",
+      ctaSub: "Create your own design and we'll print it on anything",
+      ctaBtn: "Custom prints →",
+    },
+    ru: {
+      eyebrow: "BLOOM COLLECTION · PET COUTURE",
+      heading: "Bloom.",
+      subheading: "Кураторская коллекция. Персонажи с душой.",
+      subheading2: "12 масляных портретов, каждый со своим характером.",
+      scroll: "Просмотреть коллекцию",
+      collectionEyebrow: "КОЛЛЕКЦИЯ",
+      collectionCount: "12 ПЕРСОНАЖЕЙ",
+      loading: "Загрузка коллекции...",
+      empty: "Коллекция скоро появится",
+      priceFrom: "От ₪",
+      shirtLabel: "Футболка",
+      mugLabel: "Кружка",
+      stickerLabel: "Стикер",
+      availableOn: "Доступно на",
+      detailMore: "Подробнее",
+      modalClose: "Закрыть",
+      orderBtn: "Заказать как",
+      comingSoonTitle: "Оформление BLOOM скоро запустится",
+      comingSoonSub: "Прямой заказ персонажей BLOOM проходит финальную интеграцию. Мы уведомим вас по email когда будет готово.",
+      gotIt: "Понятно",
+      ctaTitle: "Хочешь что-то другое?",
+      ctaSub: "Создай свой дизайн, и мы напечатаем его на чём угодно",
+      ctaBtn: "Печать на заказ →",
+    },
+  }[lang] || {};
+
+  const getDesignName = (d) => d[`name_${lang}`] || d.name_en;
+  const getAnimal = (d) => d[`animal_${lang}`] || d.animal_en;
+  const getTagline = (d) => d[`tagline_${lang}`] || d.tagline_en;
+
+  return (
+    <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: "100vh", paddingTop: 72, direction: isRTL ? "rtl" : "ltr" }}>
+      {/* Ambient orange glow background */}
+      <div style={{ position: "fixed", top: "10%", left: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 60%)", filter: "blur(60px)", zIndex: 0, pointerEvents: "none" }} />
+      <div style={{ position: "fixed", bottom: "10%", right: "5%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 60%)", filter: "blur(80px)", zIndex: 0, pointerEvents: "none" }} />
+
+      {/* ===== HERO ===== */}
+      <section style={{ position: "relative", zIndex: 1, padding: isMobile ? "60px 20px 40px" : "100px 40px 60px", textAlign: "center", maxWidth: 1200, margin: "0 auto" }}>
+        <div className="reveal" style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: isMobile ? 11 : 13, letterSpacing: "2px", marginBottom: 24 }}>
+          {t.eyebrow}
+        </div>
+
+        <h1 className="reveal" data-delay="1" style={{
+          fontFamily: "'Playfair Display',serif",
+          fontStyle: "italic",
+          fontWeight: 900,
+          fontSize: isMobile ? "5rem" : "9rem",
+          lineHeight: 0.95,
+          color: COLORS.white,
+          margin: "0 0 20px 0",
+          letterSpacing: "-0.02em",
+          textShadow: "0 8px 30px rgba(255,107,53,0.15)",
+        }}>
+          {t.heading}
+        </h1>
+
+        {/* Orange divider with dot */}
+        <div className="reveal" data-delay="2" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, margin: "30px 0" }}>
+          <div style={{ width: 60, height: 1, background: COLORS.accent }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS.accent, boxShadow: "0 0 12px rgba(255,107,53,0.6)" }} />
+          <div style={{ width: 60, height: 1, background: COLORS.accent }} />
+        </div>
+
+        <p className="reveal" data-delay="3" style={{ color: COLORS.gray, fontSize: isMobile ? 15 : 18, fontFamily: "'Varela Round',sans-serif", maxWidth: 540, margin: "0 auto 8px", lineHeight: 1.5 }}>
+          {t.subheading}
+        </p>
+        <p className="reveal" data-delay="4" style={{ color: "#555", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
+          {t.subheading2}
+        </p>
+      </section>
+
+      {/* ===== COLLECTION GRID ===== */}
+      <section style={{ position: "relative", zIndex: 1, padding: isMobile ? "20px 16px 80px" : "40px 40px 120px", maxWidth: 1400, margin: "0 auto" }}>
+        <div className="reveal" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", marginBottom: 8 }}>
+              {t.collectionEyebrow}
+            </div>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: 0 }}>
+              {t.collectionCount}
+            </h2>
+          </div>
+        </div>
+
+        {loading && (
+          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Varela Round',sans-serif" }}>
+            <div style={{ display: "inline-block", width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: "50%", animation: "petsSpin 0.8s linear infinite", marginBottom: 16 }} />
+            <div>{t.loading}</div>
+          </div>
+        )}
+
+        {!loading && designs.length === 0 && (
+          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 20 }}>
+            {t.empty}
+          </div>
+        )}
+
+        {!loading && designs.length > 0 && (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: isMobile ? 12 : 24,
+          }}>
+            {designs.map((d, i) => (
+              <PetCard
+                key={d.id}
+                design={d}
+                index={i}
+                name={getDesignName(d)}
+                animal={getAnimal(d)}
+                tagline={getTagline(d)}
+                priceFrom={t.priceFrom}
+                onClick={() => setSelected(d)}
+                isMobile={isMobile}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ===== CTA SECTION ===== */}
+      <section className="reveal" style={{ position: "relative", zIndex: 1, padding: isMobile ? "60px 20px" : "80px 40px", textAlign: "center", borderTop: `1px solid ${COLORS.border}`, maxWidth: 900, margin: "0 auto" }}>
+        <h3 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.8rem" : "2.4rem", color: COLORS.white, margin: "0 0 12px 0" }}>
+          {t.ctaTitle}
+        </h3>
+        <p style={{ color: COLORS.gray, fontSize: isMobile ? 14 : 16, fontFamily: "'Varela Round',sans-serif", marginBottom: 30 }}>
+          {t.ctaSub}
+        </p>
+        <button onClick={() => setPage("order")} style={{
+          background: COLORS.accent,
+          border: "none",
+          color: "#fff",
+          padding: isMobile ? "14px 28px" : "16px 36px",
+          borderRadius: 10,
+          cursor: "pointer",
+          fontFamily: "'Varela Round',sans-serif",
+          fontSize: isMobile ? 14 : 15,
+          fontWeight: 700,
+          letterSpacing: "0.3px",
+          boxShadow: "0 8px 28px rgba(255,107,53,0.35)",
+          transition: "all 0.25s cubic-bezier(.2,.6,.2,1)",
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 36px rgba(255,107,53,0.5)"; }}
+        onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,107,53,0.35)"; }}
+        >{t.ctaBtn}</button>
+      </section>
+
+      {/* ===== DETAIL MODAL ===== */}
+      {selected && (
+        <PetModal
+          design={selected}
+          lang={lang}
+          name={getDesignName(selected)}
+          animal={getAnimal(selected)}
+          tagline={getTagline(selected)}
+          t={t}
+          onClose={() => setSelected(null)}
+          isMobile={isMobile}
+        />
+      )}
+
+      {/* Spin animation for loader */}
+      <style>{`
+        @keyframes petsSpin { to { transform: rotate(360deg); } }
+      `}</style>
+    </div>
+  );
+}
+
+// ============ PET CARD — gallery tile ============
+function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isMobile }) {
+  const [hovered, setHovered] = useState(false);
+  const imgSrc = design.mockup_url || design.design_url;
+  const fallbackBg = design.mockup_bg || "#1a1a1a";
+
+  return (
+    <div
+      className="reveal"
+      data-delay={Math.min(6, Math.floor(index / 2))}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        cursor: "pointer",
+        background: COLORS.bgCard,
+        border: `1px solid ${hovered ? COLORS.accent : COLORS.border}`,
+        borderRadius: 14,
+        overflow: "hidden",
+        transition: "all 0.35s cubic-bezier(.2,.6,.2,1)",
+        transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        boxShadow: hovered ? "0 18px 48px rgba(0,0,0,0.4), 0 0 30px rgba(255,107,53,0.15)" : "0 4px 18px rgba(0,0,0,0.2)",
+      }}>
+      {/* Image area */}
+      <div style={{
+        position: "relative",
+        aspectRatio: "1",
+        background: design.mockup_url ? "#1a1a1a" : fallbackBg,
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        <img
+          src={imgSrc}
+          alt={name}
+          loading="lazy"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: design.mockup_url ? "cover" : "contain",
+            padding: design.mockup_url ? 0 : "14%",
+            transition: "transform 0.6s cubic-bezier(.2,.6,.2,1)",
+            transform: hovered ? "scale(1.05)" : "scale(1)",
+          }}
+        />
+        {/* Hover overlay with orange tint */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: hovered ? "linear-gradient(180deg, transparent 50%, rgba(255,107,53,0.12) 100%)" : "transparent",
+          transition: "all 0.4s",
+          pointerEvents: "none",
+        }} />
+      </div>
+
+      {/* Text content */}
+      <div style={{ padding: isMobile ? 14 : 20 }}>
+        <h3 style={{
+          fontFamily: "'Playfair Display',serif",
+          fontStyle: "italic",
+          fontWeight: 700,
+          fontSize: isMobile ? 22 : 28,
+          color: COLORS.white,
+          margin: 0,
+          letterSpacing: "-0.01em",
+        }}>{name}</h3>
+        <div style={{
+          color: COLORS.gray,
+          fontFamily: "'IBM Plex Mono','Courier New',monospace",
+          fontSize: 10,
+          letterSpacing: "1.5px",
+          textTransform: "uppercase",
+          marginTop: 4,
+        }}>{animal}</div>
+        <div style={{
+          color: COLORS.accent,
+          fontFamily: "'Playfair Display',serif",
+          fontStyle: "italic",
+          fontWeight: 400,
+          fontSize: isMobile ? 13 : 15,
+          marginTop: 8,
+        }}>{tagline}</div>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: 14,
+          paddingTop: 14,
+          borderTop: `1px solid ${COLORS.border}`,
+        }}>
+          <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{priceFrom}{design.price_sticker}</span>
+          <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>→</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============ PET MODAL — character detail ============
+function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile }) {
+  const isRTL = lang === "he";
+  const [showSoon, setShowSoon] = useState(false);
+  const imgSrc = design.mockup_url || design.design_url;
+  const fallbackBg = design.mockup_bg || "#1a1a1a";
+
+  // Lock body scroll when modal open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        background: "rgba(0,0,0,0.85)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: isMobile ? 12 : 24,
+        animation: "petModalFadeIn 0.3s ease-out",
+        direction: isRTL ? "rtl" : "ltr",
+        overflowY: "auto",
+      }}>
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: COLORS.bgCard,
+          border: `1px solid ${COLORS.border}`,
+          borderRadius: 16,
+          maxWidth: 1000,
+          width: "100%",
+          maxHeight: "92vh",
+          overflowY: "auto",
+          position: "relative",
+          boxShadow: "0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(255,107,53,0.1)",
+          animation: "petModalSlideUp 0.4s cubic-bezier(.2,.6,.2,1)",
+        }}>
+        {/* Close button */}
+        <button onClick={onClose} style={{
+          position: "absolute",
+          top: 16,
+          [isRTL ? "left" : "right"]: 16,
+          width: 40, height: 40,
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(10px)",
+          border: `1px solid ${COLORS.border}`,
+          borderRadius: "50%",
+          color: COLORS.white,
+          cursor: "pointer",
+          fontSize: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10,
+          transition: "all 0.2s",
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.borderColor = COLORS.accent; }}
+        onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; e.currentTarget.style.borderColor = COLORS.border; }}
+        aria-label={t.modalClose}
+        >×</button>
+
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0 }}>
+          {/* Image */}
+          <div style={{
+            background: design.mockup_url ? "#1a1a1a" : fallbackBg,
+            aspectRatio: isMobile ? "1" : "auto",
+            minHeight: isMobile ? "auto" : 500,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: design.mockup_url ? 0 : "10%",
+          }}>
+            <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
+          </div>
+
+          {/* Info */}
+          <div style={{ padding: isMobile ? "28px 24px" : "40px 36px", display: "flex", flexDirection: "column" }}>
+            <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 10, letterSpacing: "2px", marginBottom: 16, textTransform: "uppercase" }}>
+              BLOOM Collection
+            </div>
+
+            <h2 style={{
+              fontFamily: "'Playfair Display',serif",
+              fontStyle: "italic",
+              fontWeight: 900,
+              fontSize: isMobile ? "2.5rem" : "3.5rem",
+              color: COLORS.white,
+              margin: "0 0 4px 0",
+              lineHeight: 1,
+              letterSpacing: "-0.02em",
+            }}>{name}</h2>
+
+            <div style={{
+              color: COLORS.gray,
+              fontFamily: "'IBM Plex Mono','Courier New',monospace",
+              fontSize: 11,
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              marginBottom: 12,
+            }}>{animal}</div>
+
+            <div style={{
+              color: COLORS.accent,
+              fontFamily: "'Playfair Display',serif",
+              fontStyle: "italic",
+              fontWeight: 400,
+              fontSize: isMobile ? 18 : 22,
+              marginBottom: 28,
+            }}>— {tagline}</div>
+
+            {/* Divider */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+              <div style={{ width: 30, height: 1, background: COLORS.accent }} />
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.accent }} />
+            </div>
+
+            <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>
+              {t.availableOn}
+            </div>
+
+            {/* Product buttons */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+              <ProductOption label={t.shirtLabel} price={design.price_shirt} onClick={() => setShowSoon("shirt")} disabled={!design.mockup_url && !design.design_url} />
+              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setShowSoon("mug")} disabled={false} />
+              <ProductOption label={t.stickerLabel} price={design.price_sticker} onClick={() => setShowSoon("sticker")} disabled={false} />
+            </div>
+
+            {showSoon && (
+              <div style={{
+                background: "rgba(255,107,53,0.08)",
+                border: `1px solid rgba(255,107,53,0.3)`,
+                borderRadius: 12,
+                padding: 18,
+                marginTop: 12,
+                animation: "petModalFadeIn 0.3s",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS.accent, animation: "petsSpin 2s linear infinite", boxShadow: "0 0 10px rgba(255,107,53,0.6)" }} />
+                  <div style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 16, fontWeight: 700 }}>
+                    {t.comingSoonTitle}
+                  </div>
+                </div>
+                <p style={{ color: COLORS.gray, fontSize: 13, fontFamily: "'Varela Round',sans-serif", margin: 0, lineHeight: 1.5 }}>
+                  {t.comingSoonSub}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes petModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes petModalSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      `}</style>
+    </div>
+  );
+}
+
+// ============ Product option button inside modal ============
+function ProductOption({ label, price, onClick, disabled }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: disabled ? "transparent" : (hovered ? "rgba(255,107,53,0.1)" : COLORS.bg),
+        border: `1px solid ${disabled ? COLORS.border : (hovered ? COLORS.accent : COLORS.border)}`,
+        borderRadius: 10,
+        padding: "16px 20px",
+        cursor: disabled ? "not-allowed" : "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        transition: "all 0.25s",
+        opacity: disabled ? 0.4 : 1,
+        width: "100%",
+        textAlign: "inherit",
+      }}>
+      <span style={{ color: hovered && !disabled ? COLORS.accent : COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
+      <span style={{ color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18, fontWeight: 700 }}>₪{price}</span>
+    </button>
   );
 }
 
