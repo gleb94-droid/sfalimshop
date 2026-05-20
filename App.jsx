@@ -11,6 +11,14 @@ const COLORS = {
 const SHIPPING_PRICE = 30;
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 
+// ============ ANALYTICS CONFIG — fill in your IDs to activate ============
+// Get GA4 ID at: https://analytics.google.com  → Admin → Data Streams → Web Stream → Measurement ID
+// Get FB Pixel ID at: https://business.facebook.com → Events Manager → Data Sources → Pixel ID
+const ANALYTICS = {
+  ga4: "",      // e.g., "G-XXXXXXXXXX"  (leave empty to disable)
+  fbPixel: "",  // e.g., "123456789012345" (leave empty to disable)
+};
+
 // 🚧 MAINTENANCE MODE — set to true to show "Under Maintenance" page to all visitors.
 // Admin (gleb2009@gmail.com) bypasses this when logged in.
 // Visit ?staff=1 to access login during maintenance.
@@ -2697,6 +2705,99 @@ function OrderPage({ lang, user, setPage }) {
 
 // Hero
 
+// ============ COOKIE CONSENT — premium, Hebrew-first, brand-matching ============
+function CookieConsent({ lang, onAccept, onReject }) {
+  const isRTL = lang === "he";
+  const t = {
+    he: {
+      title: "פרטיות",
+      body: "האתר משתמש בקבצי Cookie לניתוח שימוש ולשיפור החוויה. בלחיצה על \"אישור\" אתם מסכימים לשימוש בעוגיות אנליטיקה. תוכלו לדחות ולהשתמש באתר ללא עוגיות עזר.",
+      accept: "אישור הכל",
+      reject: "חיוניים בלבד",
+      more: "פרטים נוספים",
+    },
+    en: {
+      title: "Privacy",
+      body: "This site uses cookies to analyze usage and improve your experience. By clicking \"Accept\", you consent to analytics cookies. You can decline and use the site with essential cookies only.",
+      accept: "Accept all",
+      reject: "Essential only",
+      more: "Learn more",
+    },
+    ru: {
+      title: "Конфиденциальность",
+      body: "Сайт использует файлы cookie для аналитики и улучшения опыта. Нажимая «Принять», вы соглашаетесь с использованием аналитических cookie. Вы можете отказаться и продолжить с базовыми cookie.",
+      accept: "Принять всё",
+      reject: "Только необходимые",
+      more: "Подробнее",
+    },
+  }[lang] || {
+    title: "Privacy", body: "", accept: "Accept", reject: "Decline", more: "Learn more",
+  };
+
+  return (
+    <div role="dialog" aria-label="Cookie consent" style={{
+      position: "fixed",
+      bottom: 16,
+      left: 16,
+      right: 16,
+      maxWidth: 720,
+      margin: "0 auto",
+      background: "rgba(15,15,15,0.96)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      border: "1px solid rgba(255,107,53,0.25)",
+      borderRadius: 16,
+      padding: "20px 24px",
+      boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,107,53,0.08)",
+      zIndex: 9999,
+      direction: isRTL ? "rtl" : "ltr",
+      animation: "cookieRise 0.5s cubic-bezier(.2,.7,.2,1)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+        <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF6B35", boxShadow: "0 0 12px rgba(255,107,53,0.6)" }}></span>
+        <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: "italic", letterSpacing: "0.5px" }}>{t.title}</div>
+      </div>
+      <p style={{ color: "#bbb", fontFamily: "'Varela Round',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 16, marginTop: 0 }}>
+        {t.body}
+      </p>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: isRTL ? "flex-start" : "flex-end" }}>
+        <button onClick={onReject} style={{
+          background: "transparent",
+          border: "1px solid #333",
+          color: "#888",
+          padding: "10px 18px",
+          borderRadius: 8,
+          fontSize: 13,
+          fontWeight: 600,
+          fontFamily: "'Varela Round',sans-serif",
+          cursor: "pointer",
+          transition: "all 0.2s",
+        }}
+        onMouseOver={e => { e.currentTarget.style.color = "#ccc"; e.currentTarget.style.borderColor = "#555"; }}
+        onMouseOut={e => { e.currentTarget.style.color = "#888"; e.currentTarget.style.borderColor = "#333"; }}
+        >{t.reject}</button>
+        <button onClick={onAccept} style={{
+          background: "#FF6B35",
+          border: "1px solid #FF6B35",
+          color: "#fff",
+          padding: "10px 22px",
+          borderRadius: 8,
+          fontSize: 13,
+          fontWeight: 700,
+          fontFamily: "'Varela Round',sans-serif",
+          cursor: "pointer",
+          boxShadow: "0 4px 16px rgba(255,107,53,0.35)",
+          transition: "all 0.2s",
+          letterSpacing: "0.3px",
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = "#ff8255"; }}
+        onMouseOut={e => { e.currentTarget.style.background = "#FF6B35"; }}
+        >{t.accept}</button>
+      </div>
+    </div>
+  );
+}
+
 // ============ MAGNETIC BUTTON — premium CTA with cursor attraction ============
 function MagneticButton({ children, strength = 0.3, radius = 28, style, className, block = false, ...props }) {
   const buttonRef = useRef(null);
@@ -3367,6 +3468,100 @@ export default function App() {
     };
   }, [page]);
 
+  // ============ DYNAMIC PAGE TITLES + SEO ============
+  useEffect(() => {
+    const titles = {
+      he: {
+        home:     "ספלים שופ | הדפסות מותאמות אישית — חולצות, ספלים, מדבקות",
+        order:    "הזמן עיצוב משלך | ספלים שופ",
+        about:    "על ספלים שופ | מי אנחנו",
+        track:    "מעקב הזמנות | ספלים שופ",
+        admin:    "ניהול | ספלים שופ",
+        policies: "מידע משפטי | ספלים שופ",
+      },
+      en: {
+        home:     "Sfalim Shop | Custom Prints — Shirts, Mugs, Stickers",
+        order:    "Design Your Order | Sfalim Shop",
+        about:    "About Sfalim Shop",
+        track:    "Track Orders | Sfalim Shop",
+        admin:    "Admin | Sfalim Shop",
+        policies: "Legal | Sfalim Shop",
+      },
+      ru: {
+        home:     "Sfalim Shop | Индивидуальная печать — футболки, кружки, стикеры",
+        order:    "Создать заказ | Sfalim Shop",
+        about:    "О Sfalim Shop",
+        track:    "Отслеживание заказов | Sfalim Shop",
+        admin:    "Админ | Sfalim Shop",
+        policies: "Правовая информация | Sfalim Shop",
+      },
+    };
+    const langTitles = titles[lang] || titles.he;
+    document.title = langTitles[page] || langTitles.home;
+    // Update html lang+dir to match current selection
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+  }, [page, lang]);
+
+  // ============ ANALYTICS LOADER — fires only after cookie consent ============
+  const [cookieConsent, setCookieConsent] = useState(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("sxp_cookie_consent");
+  });
+  const [showCookieBanner, setShowCookieBanner] = useState(false);
+
+  useEffect(() => {
+    // Show banner after a short delay if not yet consented
+    if (cookieConsent === null) {
+      const timer = setTimeout(() => setShowCookieBanner(true), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [cookieConsent]);
+
+  useEffect(() => {
+    // Inject GA4 and FB Pixel only after consent === "accepted"
+    if (cookieConsent !== "accepted") return;
+    if (typeof window === "undefined") return;
+
+    // ---- Google Analytics 4 ----
+    if (ANALYTICS.ga4 && !window.__ga4Loaded) {
+      window.__ga4Loaded = true;
+      const s1 = document.createElement("script");
+      s1.async = true;
+      s1.src = `https://www.googletagmanager.com/gtag/js?id=${ANALYTICS.ga4}`;
+      document.head.appendChild(s1);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ window.dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag("js", new Date());
+      gtag("config", ANALYTICS.ga4, { anonymize_ip: true });
+    }
+
+    // ---- Facebook Pixel ----
+    if (ANALYTICS.fbPixel && !window.__fbpLoaded) {
+      window.__fbpLoaded = true;
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+      }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+      window.fbq("init", ANALYTICS.fbPixel);
+      window.fbq("track", "PageView");
+    }
+  }, [cookieConsent]);
+
+  // Track page changes (after first load) — fires PageView for both analytics
+  useEffect(() => {
+    if (cookieConsent !== "accepted") return;
+    if (typeof window === "undefined") return;
+    if (window.gtag && ANALYTICS.ga4) {
+      window.gtag("event", "page_view", { page_path: `/${page === "home" ? "" : page}` });
+    }
+    if (window.fbq && ANALYTICS.fbPixel) {
+      window.fbq("track", "PageView");
+    }
+  }, [page, cookieConsent]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) { setUser(session.user); checkAdmin(session.user); }
@@ -3429,6 +3624,10 @@ export default function App() {
         @keyframes maintPulse {
           0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 30px rgba(255,107,53,0.7); }
           50%      { transform: scale(1.5); opacity: 0.6; box-shadow: 0 0 50px rgba(255,107,53,0.9); }
+        }
+        @keyframes cookieRise {
+          from { transform: translateY(40px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
 
         /* ============ MAGNETIC CTA + Glow on hover ============ */
@@ -3519,6 +3718,13 @@ export default function App() {
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
             <Footer lang={lang} setPage={setPage} />
+            {showCookieBanner && cookieConsent === null && (
+              <CookieConsent
+                lang={lang}
+                onAccept={() => { localStorage.setItem("sxp_cookie_consent", "accepted"); setCookieConsent("accepted"); setShowCookieBanner(false); }}
+                onReject={() => { localStorage.setItem("sxp_cookie_consent", "rejected"); setCookieConsent("rejected"); setShowCookieBanner(false); }}
+              />
+            )}
           </>
         );
       })()}
