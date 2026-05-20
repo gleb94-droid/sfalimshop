@@ -56,11 +56,12 @@ const LANGS = {
     dir: "rtl", label: "HE",
     nav: { home: "בית", order: "הזמנה", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "העיצוב שלך.", h1line2: "על הכל.", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "התחל לעצב ←", from: "החל מ-₪" },
-    steps: ["מוצר", "עיצוב", "פרטים", "סיום"],
+    steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
-    form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "💳 תשלום בשלב הבא", paymentSub: "נעבד תשלום לאחר אישור.", back: "← חזרה", place: "בצע הזמנה" },
-    confirm: { title: "ההזמנה בוצעה! 🎉", sub1: "תודה", sub2: "נצור קשר בקרוב בכתובת", track: "עקוב אחרי ההזמנה", another: "הזמן שוב" },
+    form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "💳 תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
+    payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "החזרים תוך 14 יום *", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו" },
+    confirm: { title: "התשלום אושר!", subtitle: "ההזמנה שלך התקבלה", orderNum: "מספר הזמנה", thanksLine: "תודה {name}! שלחנו אישור לכתובת", whatsNext: "מה קורה עכשיו", step1Title: "אנחנו מתחילים בייצור", step1Sub: "ההזמנה שלך נכנסת לסבב הייצור הקרוב", step2Title: "ייצור: 2-4 ימי עסקים", step2Sub: "הדפסה איכותית של העיצוב שבחרת", step3Title: "משלוח: 1-3 ימי עסקים", step3Sub: "תקבל מספר מעקב באימייל", step4Title: "עדכון על כל שלב", step4Sub: "ניצור איתך קשר בכל שינוי", track: "מעקב אחר ההזמנה", another: "הזמנה נוספת" },
     auth: {
       login: "כניסה", register: "הרשמה", email: "אימייל", password: "סיסמה", name: "שם מלא",
       loginBtn: "כנס", registerBtn: "הירשם", noAccount: "אין לך חשבון?", hasAccount: "כבר רשום?",
@@ -92,11 +93,12 @@ const LANGS = {
     dir: "ltr", label: "EN",
     nav: { home: "Home", order: "Order", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Your design.", h1line2: "On everything.", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Start Designing →", from: "from ₪" },
-    steps: ["Product", "Customize", "Details", "Done"],
+    steps: ["Product", "Customize", "Details", "Payment", "Done"],
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
-    form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "💳 Payment on next step", paymentSub: "We'll process payment after confirmation.", back: "← Back", place: "Place Order" },
-    confirm: { title: "Order Placed! 🎉", sub1: "Thanks", sub2: "We'll be in touch at", track: "Track your order", another: "Order Another" },
+    form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "💳 Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
+    payment: { title: "Secure Payment", subtitle: "Review and confirm your order", orderNum: "Order #", summary: "Order Summary", subtotal: "Subtotal", shipping: "Shipping", total: "Total to Pay", deliveryTo: "Delivery Address", payBtn: "Pay ", paySuffix: " Securely →", processing: "Processing...", soonTitle: "Payment system coming soon", soonSub: "We're finalizing setup with our payment processor. Your order is saved and we'll personally contact you when the system is live.", soonBtn: "Close and save order", cancel: "Cancel Order", editDetails: "← Edit Details", confirmCancel: "Cancel this order?", securedBy: "Secured by", acceptedCards: "We accept:", businessLine: "Sfalim Shop · Exempt Dealer 321630279", trustFast: "Fast and secure payment", trustSSL: "256-bit SSL encryption", trustReturn: "14-day returns *", trustNoSave: "We never store card details" },
+    confirm: { title: "Payment Confirmed!", subtitle: "Your order has been received", orderNum: "Order Number", thanksLine: "Thanks {name}! Confirmation sent to", whatsNext: "What happens next", step1Title: "We start production", step1Sub: "Your order enters the next production batch", step2Title: "Production: 2-4 business days", step2Sub: "Quality printing of your chosen design", step3Title: "Shipping: 1-3 business days", step3Sub: "You'll receive tracking info by email", step4Title: "Updates at every step", step4Sub: "We'll contact you with any changes", track: "Track Order", another: "New Order" },
     auth: {
       login: "Login", register: "Register", email: "Email", password: "Password", name: "Full Name",
       loginBtn: "Login", registerBtn: "Register", noAccount: "No account?", hasAccount: "Already registered?",
@@ -128,11 +130,12 @@ const LANGS = {
     dir: "ltr", label: "RU",
     nav: { home: "Главная", order: "Заказ", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Ваш дизайн.", h1line2: "На всём.", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Начать →", from: "от ₪" },
-    steps: ["Товар", "Дизайн", "Детали", "Готово"],
+    steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
-    form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "💳 Оплата на следующем шаге", paymentSub: "Обработаем оплату после подтверждения.", back: "← Назад", place: "Оформить заказ" },
-    confirm: { title: "Заказ оформлен! 🎉", sub1: "Спасибо", sub2: "Свяжемся с вами по адресу", track: "Отследить заказ", another: "Заказать ещё" },
+    form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "💳 Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
+    payment: { title: "Безопасная оплата", subtitle: "Проверьте и подтвердите заказ", orderNum: "Заказ №", summary: "Сводка заказа", subtotal: "Промежуточный итог", shipping: "Доставка", total: "Итого к оплате", deliveryTo: "Адрес доставки", payBtn: "Оплатить ", paySuffix: " безопасно →", processing: "Обработка...", soonTitle: "Платёжная система скоро запустится", soonSub: "Мы завершаем настройку с провайдером платежей. Ваш заказ сохранён, мы свяжемся с вами лично, когда система заработает.", soonBtn: "Закрыть и сохранить заказ", cancel: "Отменить заказ", editDetails: "← Изменить данные", confirmCancel: "Отменить заказ?", securedBy: "Защищено", acceptedCards: "Способы оплаты:", businessLine: "Sfalim Shop · Освобождённый предприниматель 321630279", trustFast: "Быстрая и безопасная оплата", trustSSL: "256-bit SSL шифрование", trustReturn: "Возврат в течение 14 дней *", trustNoSave: "Мы не сохраняем данные карты" },
+    confirm: { title: "Оплата подтверждена!", subtitle: "Ваш заказ получен", orderNum: "Номер заказа", thanksLine: "Спасибо {name}! Подтверждение отправлено на", whatsNext: "Что дальше", step1Title: "Начинаем производство", step1Sub: "Ваш заказ попадает в ближайшую партию", step2Title: "Производство: 2-4 рабочих дня", step2Sub: "Качественная печать вашего дизайна", step3Title: "Доставка: 1-3 рабочих дня", step3Sub: "Вы получите трек-номер на email", step4Title: "Обновления на каждом этапе", step4Sub: "Мы свяжемся при любых изменениях", track: "Отследить заказ", another: "Новый заказ" },
     auth: {
       login: "Войти", register: "Регистрация", email: "Email", password: "Пароль", name: "Полное имя",
       loginBtn: "Войти", registerBtn: "Зарегистрироваться", noAccount: "Нет аккаунта?", hasAccount: "Уже есть аккаунт?",
@@ -1495,6 +1498,11 @@ function OrderPage({ lang, user, setPage }) {
   const addrTimerRef = useRef();
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingOrderGroupId, setPendingOrderGroupId] = useState(null);
+  const [pendingOrderIds, setPendingOrderIds] = useState([]);
+  const [pendingTotal, setPendingTotal] = useState(0);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [showPaymentSoonModal, setShowPaymentSoonModal] = useState(false);
   const [backPrint, setBackPrint] = useState(false);
   const BACK_PRINT_PRICE = 39;
   const SECOND_FRONT_PRICE = 20;
@@ -1617,7 +1625,7 @@ function OrderPage({ lang, user, setPage }) {
 
   // Warn user before leaving order page (mobile back button, tab close, refresh)
   useEffect(() => {
-    const inProgress = (step >= 2 && step < 4) || (cart.length > 0 && step !== 4);
+    const inProgress = (step >= 2 && step < 4) || (cart.length > 0 && step !== 4 && step !== 5);
     if (!inProgress) return;
     allowLeaveRef.current = false;
     // beforeunload — for tab close / refresh
@@ -1877,6 +1885,7 @@ function OrderPage({ lang, user, setPage }) {
 
     try {
       let firstOrderId = null;
+      const createdOrderIds = [];
       for (let i = 0; i < cart.length; i++) {
         const it = cart[i];
         const itProduct = products.find(p => p.id === it.productId);
@@ -1897,7 +1906,10 @@ function OrderPage({ lang, user, setPage }) {
           customer_name: form.name, customer_email: form.email, customer_phone: phone,
           customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
           product: itProduct.name, variant: itVariant.label, color: it.color,
-          quantity: it.qty, total: itemTotal, notes: form.notes, status: "received",
+          quantity: it.qty, total: itemTotal, notes: form.notes,
+          status: "pending_payment",
+          payment_status: "idle",
+          currency: "ILS",
           user_id: user?.id || null, design_url,
           design_x: it.imagePos.x, design_y: it.imagePos.y, design_size: it.imagePos.size,
           product_color: it.color, language: lang,
@@ -1913,28 +1925,16 @@ function OrderPage({ lang, user, setPage }) {
         }).select().single();
         if (error) throw error;
         if (i === 0) firstOrderId = orderData?.id;
+        if (orderData?.id) createdOrderIds.push(orderData.id);
       }
 
-      try {
-        await supabase.functions.invoke("send-order-confirmation", {
-          body: {
-            customerName: form.name,
-            customerEmail: form.email,
-            product: cart.map(c => c.productName).join(", "),
-            variant: `${cart.length} items`,
-            quantity: cart.reduce((s, c) => s + c.qty, 0),
-            total: cartItemsTotal + SHIPPING_PRICE,
-            orderId: firstOrderId || "unknown",
-            language: lang,
-          },
-        });
-      } catch (emailErr) {
-        console.error("Email send error:", emailErr);
-      }
+      // Save context for the payment step (DON'T send email yet — email sends AFTER payment confirmed)
+      setPendingOrderGroupId(orderGroupId);
+      setPendingOrderIds(createdOrderIds);
+      setPendingTotal(cartItemsTotal + SHIPPING_PRICE);
 
       allowLeaveRef.current = true;
       setStep(4);
-      setCart([]);
     } catch (e) {
       alert("Error: " + (e.message || e));
     }
@@ -2428,13 +2428,245 @@ function OrderPage({ lang, user, setPage }) {
         )}
 
         {step === 4 && (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <div style={{ fontSize: 72, marginBottom: 24 }}>🎉</div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 40, marginBottom: 16 }}>{t.confirm.title}</h2>
-            <p style={{ color: COLORS.gray, fontSize: 16, maxWidth: 400, margin: "0 auto 32px", lineHeight: 1.7 }}>{t.confirm.sub1} {form.name}! {t.confirm.sub2} <span style={{ color: COLORS.accent }}>{form.email}</span></p>
+          <div>
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: "50%", background: "rgba(255,107,53,0.12)", border: `2px solid ${COLORS.accent}`, marginBottom: 16, fontSize: 28 }}>🔒</div>
+              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h2>
+              <p style={{ color: COLORS.gray, fontSize: 15 }}>{t.payment.subtitle}</p>
+            </div>
+
+            {/* Order number */}
+            {pendingOrderGroupId && (
+              <div style={{ background: "rgba(255,107,53,0.06)", border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: "10px 16px", marginBottom: 20, textAlign: "center" }}>
+                <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>{t.payment.orderNum}</div>
+                <div style={{ color: COLORS.accent, fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em" }}>{`SXP-${pendingOrderGroupId.slice(-8).toUpperCase()}`}</div>
+              </div>
+            )}
+
+            {/* Order summary card */}
+            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "22px 22px 20px", marginBottom: 18 }}>
+              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${COLORS.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>📦 {t.payment.summary}</span>
+                <span style={{ color: COLORS.gray, fontSize: 12, fontWeight: 400 }}>{cart.length} {lang === "he" ? "פריטים" : lang === "ru" ? "товаров" : "items"}</span>
+              </div>
+              {cart.map((it) => (
+                <div key={it.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                  <div style={{ flex: 1, paddingInlineEnd: 12 }}>
+                    <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName} × {it.qty}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 3, lineHeight: 1.5 }}>
+                      {it.variantLabel}
+                      {it.backPrint ? ` · ${lang === "he" ? "הדפס אחורי" : lang === "ru" ? "Спина" : "Back print"}` : ""}
+                      {it.secondFront.enabled ? ` · ${lang === "he" ? "הדפס נוסף" : lang === "ru" ? "Доп. перед" : "Extra front"}` : ""}
+                      {it.sleeveLeft.enabled ? ` · ${lang === "he" ? "שרוול שמאל" : lang === "ru" ? "Левый рукав" : "Left sleeve"}` : ""}
+                      {it.sleeveRight.enabled ? ` · ${lang === "he" ? "שרוול ימין" : lang === "ru" ? "Правый рукав" : "Right sleeve"}` : ""}
+                    </div>
+                  </div>
+                  <span style={{ color: COLORS.white, fontWeight: 600, fontSize: 14, whiteSpace: "nowrap" }}>₪{it.itemPrice}</span>
+                </div>
+              ))}
+              <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${COLORS.border}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}>
+                  <span>{t.payment.subtotal}</span>
+                  <span>₪{cartItemsTotal}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 12 }}>
+                  <span>{t.payment.shipping}</span>
+                  <span>₪{SHIPPING_PRICE}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: `1px solid ${COLORS.border}` }}>
+                  <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{t.payment.total}</span>
+                  <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 26, fontFamily: "'Playfair Display',serif" }}>₪{pendingTotal}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Delivery address */}
+            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "18px 22px", marginBottom: 24 }}>
+              <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8, fontWeight: 600 }}>📍 {t.payment.deliveryTo}</div>
+              <div style={{ color: COLORS.white, fontSize: 14, lineHeight: 1.7 }}>
+                <div style={{ fontWeight: 600 }}>{form.name}</div>
+                <div style={{ color: "#ccc" }}>{form.street}, {form.city} {form.postalCode}</div>
+                <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>📞 {form.phonePrefix}-{form.phoneNumber}</div>
+                <div style={{ color: COLORS.gray, fontSize: 13 }}>✉️ {form.email}</div>
+              </div>
+            </div>
+
+            {/* Pay button - the most prominent element */}
+            <button
+              onClick={() => setShowPaymentSoonModal(true)}
+              disabled={paymentProcessing}
+              style={{
+                width: "100%",
+                background: paymentProcessing ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accent} 0%, #FF8855 100%)`,
+                color: "#fff",
+                border: "none",
+                borderRadius: 12,
+                padding: "20px 24px",
+                fontSize: 17,
+                fontWeight: 700,
+                cursor: paymentProcessing ? "not-allowed" : "pointer",
+                fontFamily: "'Varela Round',sans-serif",
+                boxShadow: paymentProcessing ? "none" : "0 8px 24px rgba(255,107,53,0.4)",
+                transition: "all 0.2s",
+                marginBottom: 18,
+                letterSpacing: "0.02em",
+              }}
+              onMouseEnter={e => { if (!paymentProcessing) e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
+            >
+              {paymentProcessing ? t.payment.processing : `${t.payment.payBtn}₪${pendingTotal}${t.payment.paySuffix}`}
+            </button>
+
+            {/* Trust signals row */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
+              {[
+                { icon: "⚡", text: t.payment.trustFast },
+                { icon: "🔒", text: t.payment.trustSSL },
+                { icon: "↩️", text: t.payment.trustReturn },
+                { icon: "💳", text: t.payment.trustNoSave },
+              ].map((badge, i) => (
+                <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16, lineHeight: 1 }}>{badge.icon}</span>
+                  <span style={{ color: COLORS.gray, fontSize: 11.5, lineHeight: 1.3 }}>{badge.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Secured by + accepted cards */}
+            <div style={{ textAlign: "center", padding: "16px 0", borderTop: `1px solid ${COLORS.border}`, marginBottom: 16 }}>
+              <div style={{ color: COLORS.gray, fontSize: 12, marginBottom: 6 }}>
+                🔐 {t.payment.securedBy} <span style={{ color: COLORS.white, fontWeight: 600 }}>Tranzila</span>
+              </div>
+              <div style={{ color: "#666", fontSize: 11, letterSpacing: "0.05em" }}>
+                {t.payment.acceptedCards} VISA · Mastercard · Bit · Apple Pay · Google Pay
+              </div>
+              <div style={{ color: "#555", fontSize: 10.5, marginTop: 6 }}>
+                {t.payment.businessLine}
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+              <button
+                onClick={() => setStep(3)}
+                disabled={paymentProcessing}
+                style={{ flex: 1, background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 16px", fontSize: 13, cursor: paymentProcessing ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}
+              >
+                {t.payment.editDetails}
+              </button>
+              <button
+                onClick={async () => {
+                  if (!window.confirm(t.payment.confirmCancel)) return;
+                  setPaymentProcessing(true);
+                  try {
+                    if (pendingOrderIds.length > 0) {
+                      await supabase.from("orders").update({
+                        status: "cancelled",
+                        payment_status: "cancelled",
+                        cancelled_at: new Date().toISOString(),
+                      }).in("id", pendingOrderIds);
+                    }
+                    setPendingOrderGroupId(null);
+                    setPendingOrderIds([]);
+                    setCart([]);
+                    setStep(1);
+                    setSelectedProduct(null);
+                    setUploadedImage(null);
+                  } catch (e) {
+                    alert("Error: " + (e.message || e));
+                  }
+                  setPaymentProcessing(false);
+                }}
+                disabled={paymentProcessing}
+                style={{ background: "transparent", color: "#888", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 16px", fontSize: 13, cursor: paymentProcessing ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}
+              >
+                {t.payment.cancel}
+              </button>
+            </div>
+
+            {/* Payment-coming-soon modal */}
+            {showPaymentSoonModal && (
+              <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)" }}>
+                <div style={{ background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
+                  <div style={{ fontSize: 56, marginBottom: 16 }}>🛠️</div>
+                  <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
+                  <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
+                  <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: "12px 16px", marginBottom: 24, textAlign: "start" }}>
+                    <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 4 }}>{t.payment.orderNum}</div>
+                    <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 15, letterSpacing: "0.05em" }}>{pendingOrderGroupId ? `SXP-${pendingOrderGroupId.slice(-8).toUpperCase()}` : ""}</div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      setShowPaymentSoonModal(false);
+                      try {
+                        await supabase.functions.invoke("send-order-confirmation", {
+                          body: {
+                            customerName: form.name,
+                            customerEmail: form.email,
+                            product: cart.map(c => c.productName).join(", "),
+                            variant: `${cart.length} items`,
+                            quantity: cart.reduce((s, c) => s + c.qty, 0),
+                            total: pendingTotal,
+                            orderId: pendingOrderIds[0] || "unknown",
+                            language: lang,
+                          },
+                        });
+                      } catch (emailErr) {
+                        console.error("Email send error:", emailErr);
+                      }
+                      setCart([]);
+                      setStep(5);
+                    }}
+                    style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}
+                  >
+                    {t.payment.soonBtn}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 5 && (
+          <div style={{ textAlign: "center", padding: "20px 0 60px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 88, height: 88, borderRadius: "50%", background: "rgba(34,197,94,0.12)", border: "2px solid #22c55e", marginBottom: 24, fontSize: 44 }}>✓</div>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.confirm.title}</h2>
+            <p style={{ color: COLORS.gray, fontSize: 15, marginBottom: 24 }}>{t.confirm.subtitle}</p>
+
+            {pendingOrderGroupId && (
+              <div style={{ display: "inline-block", background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: "10px 20px", marginBottom: 28 }}>
+                <span style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginInlineEnd: 8 }}>{t.confirm.orderNum}</span>
+                <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 15, letterSpacing: "0.05em" }}>{`SXP-${pendingOrderGroupId.slice(-8).toUpperCase()}`}</span>
+              </div>
+            )}
+
+            <p style={{ color: COLORS.gray, fontSize: 15, maxWidth: 460, margin: "0 auto 36px", lineHeight: 1.7 }}>
+              {t.confirm.thanksLine.replace("{name}", form.name)} <span style={{ color: COLORS.accent, fontWeight: 600 }}>{form.email}</span>
+            </p>
+
+            {/* What's next - timeline */}
+            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "24px 22px", marginBottom: 28, textAlign: "start", maxWidth: 520, margin: "0 auto 28px" }}>
+              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 18, textAlign: "center" }}>📦 {t.confirm.whatsNext}</div>
+              {[
+                { num: "1", title: t.confirm.step1Title, sub: t.confirm.step1Sub },
+                { num: "2", title: t.confirm.step2Title, sub: t.confirm.step2Sub },
+                { num: "3", title: t.confirm.step3Title, sub: t.confirm.step3Sub },
+                { num: "4", title: t.confirm.step4Title, sub: t.confirm.step4Sub },
+              ].map((s, i) => (
+                <div key={i} style={{ display: "flex", gap: 14, marginBottom: i === 3 ? 0 : 16, alignItems: "flex-start" }}>
+                  <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: "50%", background: "rgba(255,107,53,0.15)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>{s.num}</div>
+                  <div style={{ flex: 1, paddingTop: 2 }}>
+                    <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{s.title}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5 }}>{s.sub}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
-              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", notes: "" }); setQty(1); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
+              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" }); setQty(1); setPendingOrderGroupId(null); setPendingOrderIds([]); setPendingTotal(0); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
             </div>
           </div>
         )}
