@@ -3746,6 +3746,91 @@ export default function App() {
   );
 }
 
+// ============ PAW PRINTS BACKGROUND — floating paws for /pets ============
+function PawPrintsBackground() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId;
+
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Draw a single paw print at (x,y) with given size, rotation and alpha
+    const drawPaw = (x, y, size, rot, alpha, color) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = color;
+      // main pad
+      ctx.beginPath();
+      ctx.ellipse(0, size * 0.35, size * 0.5, size * 0.42, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // three toes on top + side toes
+      const toes = [
+        { tx: -size * 0.42, ty: -size * 0.25, r: size * 0.22 },
+        { tx: 0,            ty: -size * 0.5,  r: size * 0.24 },
+        { tx: size * 0.42,  ty: -size * 0.25, r: size * 0.22 },
+      ];
+      toes.forEach((toe) => {
+        ctx.beginPath();
+        ctx.ellipse(toe.tx, toe.ty, toe.r, toe.r * 1.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    };
+
+    const paws = Array.from({ length: 18 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 16 + 10,
+      speed: Math.random() * 0.25 + 0.08,
+      drift: (Math.random() - 0.5) * 0.2,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.004,
+      alpha: Math.random() * 0.06 + 0.03,
+      color: Math.random() > 0.5 ? "#FF6B35" : "#ff8c5a",
+    }));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      paws.forEach((p) => {
+        drawPaw(p.x, p.y, p.size, p.rot, p.alpha, p.color);
+        p.y -= p.speed;
+        p.x += p.drift;
+        p.rot += p.rotSpeed;
+        // recycle to bottom when it floats off the top
+        if (p.y < -p.size * 2) {
+          p.y = canvas.height + p.size * 2;
+          p.x = Math.random() * canvas.width;
+        }
+        if (p.x < -p.size * 2) p.x = canvas.width + p.size;
+        if (p.x > canvas.width + p.size * 2) p.x = -p.size;
+      });
+      ctx.globalAlpha = 1;
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
+  }, []);
+
+  return (
+    <canvas ref={canvasRef} style={{
+      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+      pointerEvents: "none", zIndex: 0,
+    }} />
+  );
+}
+
 // ============ PETS PAGE — BLOOM Collection / Pet Couture ============
 function PetsPage({ lang, setPage }) {
   const isRTL = lang === "he";
@@ -3922,6 +4007,9 @@ function PetsPage({ lang, setPage }) {
       <div style={{ position: "fixed", top: "10%", left: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 60%)", filter: "blur(60px)", zIndex: 0, pointerEvents: "none" }} />
       <div style={{ position: "fixed", bottom: "10%", right: "5%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 60%)", filter: "blur(80px)", zIndex: 0, pointerEvents: "none" }} />
 
+      {/* Floating paw prints */}
+      <PawPrintsBackground />
+
       {/* ===== HERO ===== */}
       <section style={{ position: "relative", zIndex: 1, padding: isMobile ? "60px 20px 40px" : "100px 40px 60px", textAlign: "center", maxWidth: 1200, margin: "0 auto" }}>
         <div className="reveal" style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: isMobile ? 11 : 13, letterSpacing: "2px", marginBottom: 24 }}>
@@ -4065,6 +4153,12 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
   const imgSrc = design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
 
+  // Editorial corner-cut on hover (desktop only — no hover on touch)
+  const cutCard = hovered && !isMobile;
+  const clipPath = cutCard
+    ? "polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%)"
+    : "polygon(0 0, 100% 0, 100% 100%, 100% 100%, 0 100%)";
+
   return (
     <div
       onClick={onClick}
@@ -4076,7 +4170,8 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
         border: `1px solid ${hovered ? COLORS.accent : "rgba(255,255,255,0.06)"}`,
         borderRadius: 14,
         overflow: "hidden",
-        transition: "all 0.35s cubic-bezier(.2,.6,.2,1)",
+        clipPath,
+        transition: "clip-path 0.4s cubic-bezier(.2,.6,.2,1), transform 0.35s cubic-bezier(.2,.6,.2,1), box-shadow 0.35s cubic-bezier(.2,.6,.2,1), border-color 0.35s",
         transform: hovered ? "translateY(-6px)" : "translateY(0)",
         boxShadow: hovered ? "0 18px 48px rgba(0,0,0,0.4), 0 0 30px rgba(255,107,53,0.15)" : "none",
       }}>
