@@ -2503,7 +2503,10 @@ function OrderPage({ lang, user, setPage }) {
             </div>
 
             {/* Pay button - the most prominent element */}
-            <button
+            <MagneticButton
+              block
+              strength={0.25}
+              radius={24}
               onClick={() => setShowPaymentSoonModal(true)}
               disabled={paymentProcessing}
               style={{
@@ -2518,15 +2521,14 @@ function OrderPage({ lang, user, setPage }) {
                 cursor: paymentProcessing ? "not-allowed" : "pointer",
                 fontFamily: "'Varela Round',sans-serif",
                 boxShadow: paymentProcessing ? "none" : "0 8px 24px rgba(255,107,53,0.4)",
-                transition: "all 0.2s",
+                transition: "background 0.2s, box-shadow 0.3s",
                 marginBottom: 18,
                 letterSpacing: "0.02em",
+                display: "block",
               }}
-              onMouseEnter={e => { if (!paymentProcessing) e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
             >
               {paymentProcessing ? t.payment.processing : `${t.payment.payBtn}₪${pendingTotal}${t.payment.paySuffix}`}
-            </button>
+            </MagneticButton>
 
             {/* Trust signals row */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
@@ -2694,6 +2696,72 @@ function OrderPage({ lang, user, setPage }) {
 }
 
 // Hero
+
+// ============ MAGNETIC BUTTON — premium CTA with cursor attraction ============
+function MagneticButton({ children, strength = 0.3, radius = 28, style, className, block = false, ...props }) {
+  const buttonRef = useRef(null);
+  const zoneRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Skip on touch devices and reduced-motion
+    if (window.matchMedia("(hover: none)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const zone = zoneRef.current;
+    const btn = buttonRef.current;
+    if (!zone || !btn) return;
+
+    let rafId = null;
+    let lastEvent = null;
+
+    const update = () => {
+      rafId = null;
+      if (!lastEvent || !btn) return;
+      const rect = btn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = lastEvent.clientX - cx;
+      const dy = lastEvent.clientY - cy;
+      btn.style.transform = `translate(${dx * strength}px, ${dy * strength}px)`;
+      btn.classList.add("magnetic-active");
+    };
+
+    const handleMove = (e) => {
+      lastEvent = e;
+      if (!rafId) rafId = requestAnimationFrame(update);
+    };
+
+    const handleLeave = () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      if (btn) {
+        btn.style.transform = "translate(0px, 0px)";
+        btn.classList.remove("magnetic-active");
+      }
+    };
+
+    zone.addEventListener("mousemove", handleMove);
+    zone.addEventListener("mouseleave", handleLeave);
+    return () => {
+      zone.removeEventListener("mousemove", handleMove);
+      zone.removeEventListener("mouseleave", handleLeave);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [strength]);
+
+  return (
+    <span ref={zoneRef} className="magnetic-zone" style={{ display: block ? "block" : "inline-block", padding: radius, margin: -radius, lineHeight: 0 }}>
+      <button
+        ref={buttonRef}
+        className={`magnetic-btn${className ? ` ${className}` : ""}`}
+        style={{ ...style, transition: `${style?.transition || ""}${style?.transition ? ", " : ""}transform 0.4s cubic-bezier(.2,.7,.2,1)`.replace(/^, /, "") }}
+        {...props}
+      >
+        {children}
+      </button>
+    </span>
+  );
+}
 
 // Particles + Floating Emojis Background
 function ParticlesBackground() {
@@ -2869,16 +2937,18 @@ function Hero({ setPage, lang }) {
   const products = PRODUCTS(t);
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 60px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
-      <div style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Varela Round',sans-serif" }}>{t.hero.badge}</div>
-      <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
+      <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Varela Round',sans-serif" }}>{t.hero.badge}</div>
+      <h1 className="reveal" data-delay="1" style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
         {t.hero.h1line1}<br /><span style={{ color: COLORS.accent, fontStyle: "italic" }}>{t.hero.h1line2}</span>
       </h1>
-      <p style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Varela Round',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
-      <button onClick={() => setPage("order")} style={{ background: COLORS.accent, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s" }} onMouseOver={e => e.target.style.background = COLORS.accentHover} onMouseOut={e => e.target.style.background = COLORS.accent}>{t.hero.cta}</button>
+      <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Varela Round',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
+      <span className="reveal" data-delay="3">
+        <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accent, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentHover} onMouseOut={e => e.target.style.background = COLORS.accent}>{t.hero.cta}</MagneticButton>
+      </span>
       <div style={{ display: "flex", gap: 20, marginTop: 80, flexWrap: "wrap", justifyContent: "center" }}>
         {products.map((p, idx) => (
-          <div key={p.id} onClick={() => setPage("order")}
-            style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: "28px 32px", cursor: "pointer", minWidth: 160, transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s", animation: `fadeUp 0.6s ${idx * 0.15}s ease forwards`, opacity: 0 }}
+          <div key={p.id} onClick={() => setPage("order")} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
+            style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: "28px 32px", cursor: "pointer", minWidth: 160, transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
             <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
@@ -3178,21 +3248,21 @@ function AboutPage({ lang, setPage }) {
 
       {/* Hero section */}
       <div style={{ ...sectionStyle, textAlign: 'center', padding: '60px 24px 80px' }}>
-        <div style={{ display: 'inline-block', background: 'rgba(255,107,53,0.15)', border: '1px solid rgba(255,107,53,0.3)', borderRadius: 100, padding: '6px 18px', marginBottom: 24, color: '#FF6B35', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <div className="reveal" style={{ display: 'inline-block', background: 'rgba(255,107,53,0.15)', border: '1px solid rgba(255,107,53,0.3)', borderRadius: 100, padding: '6px 18px', marginBottom: 24, color: '#FF6B35', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           {t.badge}
         </div>
-        <h1 style={{ color: '#fff', fontSize: 'clamp(36px,6vw,72px)', fontWeight: 900, marginBottom: 16, fontFamily: "'Playfair Display',serif", letterSpacing: '-1px' }}>{t.title}</h1>
-        <p style={{ color: '#FF6B35', fontSize: 18, marginBottom: 32 }}>{t.subtitle}</p>
-        <p style={{ color: '#888', fontSize: 17, maxWidth: 580, margin: '0 auto', lineHeight: 1.8 }}>{t.story}</p>
+        <h1 className="reveal" data-delay="1" style={{ color: '#fff', fontSize: 'clamp(36px,6vw,72px)', fontWeight: 900, marginBottom: 16, fontFamily: "'Playfair Display',serif", letterSpacing: '-1px' }}>{t.title}</h1>
+        <p className="reveal" data-delay="2" style={{ color: '#FF6B35', fontSize: 18, marginBottom: 32 }}>{t.subtitle}</p>
+        <p className="reveal" data-delay="3" style={{ color: '#888', fontSize: 17, maxWidth: 580, margin: '0 auto', lineHeight: 1.8 }}>{t.story}</p>
       </div>
 
       {/* Technologies */}
       <div style={{ background: '#111', borderTop: '1px solid #1e1e1e', borderBottom: '1px solid #1e1e1e', padding: '60px 24px' }}>
         <div style={{ ...sectionStyle }}>
-          <h2 style={{ color: '#fff', fontSize: 32, marginBottom: 40, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.techTitle}</h2>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 40, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.techTitle}</h2>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.tech?.map((tech, i) => (
-              <div key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '32px 32px 28px', flex: '1 1 220px', maxWidth: 280, transition: 'border-color 0.3s, transform 0.3s', position: 'relative' }}
+              <div key={i} className="reveal" data-delay={String(i + 1)} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '32px 32px 28px', flex: '1 1 220px', maxWidth: 280, transition: 'border-color 0.3s, transform 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)', position: 'relative' }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = '#FF6B35'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontStyle: 'italic', fontSize: 38, color: '#FF6B35', opacity: 0.85, lineHeight: 1, marginBottom: 14, letterSpacing: '-0.5px' }}>{tech.num}</div>
@@ -3208,10 +3278,10 @@ function AboutPage({ lang, setPage }) {
       {/* Process */}
       <div style={{ padding: '60px 24px' }}>
         <div style={{ ...sectionStyle }}>
-          <h2 style={{ color: '#fff', fontSize: 32, marginBottom: 48, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.processTitle}</h2>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 48, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.processTitle}</h2>
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.process?.map((step, i) => (
-              <div key={i} style={{ flex: '1 1 180px', textAlign: 'center', padding: '0 20px', position: 'relative' }}>
+              <div key={i} className="reveal" data-delay={String(i + 1)} style={{ flex: '1 1 180px', textAlign: 'center', padding: '0 20px', position: 'relative' }}>
                 {i < (t.process.length - 1) && <div style={{ position: 'absolute', top: 24, left: '60%', right: '-10%', height: 1, background: 'linear-gradient(to right, #FF6B35, #2a2a2a)', opacity: 0.4 }} />}
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,107,53,0.15)', border: '2px solid #FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#FF6B35', fontWeight: 800, fontSize: 14 }}>{step.step}</div>
                 <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>{step.title}</div>
@@ -3225,16 +3295,16 @@ function AboutPage({ lang, setPage }) {
       {/* Contact */}
       <div style={{ background: '#111', borderTop: '1px solid #1e1e1e', padding: '60px 24px' }}>
         <div style={{ ...sectionStyle, textAlign: 'center' }}>
-          <h2 style={{ color: '#fff', fontSize: 32, marginBottom: 32, fontFamily: "'Playfair Display',serif" }}>{t.contactTitle}</h2>
-          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 32, fontFamily: "'Playfair Display',serif" }}>{t.contactTitle}</h2>
+          <div className="reveal" data-delay="1" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
             <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>{t.location}</div>
             <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>hello@sfalimshop.com</div>
           </div>
-          <button onClick={() => setPage('order')} style={{ background: '#FF6B35', color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'all 0.2s' }}
-            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(255,107,53,0.6)'; }}
-            onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 0 30px rgba(255,107,53,0.4)'; }}>
-            {t.cta} →
-          </button>
+          <span className="reveal" data-delay="2">
+            <MagneticButton onClick={() => setPage('order')} style={{ background: '#FF6B35', color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'box-shadow 0.3s' }}>
+              {t.cta} →
+            </MagneticButton>
+          </span>
         </div>
       </div>
     </div>
@@ -3292,6 +3362,33 @@ export default function App() {
     window.history.replaceState({ page: current }, '', window.location.href);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // ============ SCROLL REVEAL — observe all .reveal elements on every page change ============
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.querySelectorAll(".reveal").forEach(el => el.classList.add("revealed"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+
+    // Small delay to let DOM mount after page change
+    const timer = setTimeout(() => {
+      document.querySelectorAll(".reveal:not(.revealed)").forEach(el => observer.observe(el));
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [page]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -3355,6 +3452,31 @@ export default function App() {
         @keyframes maintPulse {
           0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 30px rgba(255,107,53,0.7); }
           50%      { transform: scale(1.5); opacity: 0.6; box-shadow: 0 0 50px rgba(255,107,53,0.9); }
+        }
+
+        /* ============ MAGNETIC CTA + Glow on hover ============ */
+        .magnetic-zone { -webkit-tap-highlight-color: transparent; }
+        .magnetic-btn { position: relative; will-change: transform; }
+        .magnetic-btn.magnetic-active { box-shadow: 0 0 28px rgba(255,107,53,0.55), 0 8px 28px rgba(0,0,0,0.35) !important; }
+        @media (hover: none) { .magnetic-btn { transform: none !important; } }
+        @media (prefers-reduced-motion: reduce) { .magnetic-btn { transform: none !important; transition: none !important; } }
+
+        /* ============ SCROLL REVEAL — fade up on intersection ============ */
+        .reveal {
+          opacity: 0;
+          transform: translateY(28px);
+          transition: opacity 0.75s cubic-bezier(.2,.6,.2,1), transform 0.75s cubic-bezier(.2,.6,.2,1);
+          will-change: opacity, transform;
+        }
+        .reveal.revealed { opacity: 1; transform: translateY(0); will-change: auto; }
+        .reveal[data-delay="1"] { transition-delay: 0.08s; }
+        .reveal[data-delay="2"] { transition-delay: 0.16s; }
+        .reveal[data-delay="3"] { transition-delay: 0.24s; }
+        .reveal[data-delay="4"] { transition-delay: 0.32s; }
+        .reveal[data-delay="5"] { transition-delay: 0.4s; }
+        .reveal[data-delay="6"] { transition-delay: 0.48s; }
+        @media (prefers-reduced-motion: reduce) {
+          .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
         }
         .trust-badge {
           opacity: 0;
