@@ -2600,19 +2600,24 @@ function OrderPage({ lang, user, setPage }) {
                     onClick={async () => {
                       setShowPaymentSoonModal(false);
                       try {
-                        await supabase.functions.invoke("send-order-confirmation", {
-                          body: {
-                            customerName: form.name,
-                            customerEmail: form.email,
-                            product: cart.map(c => c.productName).join(", "),
-                            variant: `${cart.length} items`,
-                            quantity: cart.reduce((s, c) => s + c.qty, 0),
-                            total: pendingTotal,
-                            orderId: pendingOrderIds[0] || "unknown",
-                            orderGroup: pendingOrderGroupId,
-                            language: lang,
-                          },
-                        });
+                        await Promise.all([
+                          supabase.functions.invoke("send-order-confirmation", {
+                            body: {
+                              customerName: form.name,
+                              customerEmail: form.email,
+                              product: cart.map(c => c.productName).join(", "),
+                              variant: `${cart.length} items`,
+                              quantity: cart.reduce((s, c) => s + c.qty, 0),
+                              total: pendingTotal,
+                              orderId: pendingOrderIds[0] || "unknown",
+                              orderGroup: pendingOrderGroupId,
+                              language: lang,
+                            },
+                          }),
+                          supabase.functions.invoke("send-admin-order-alert", {
+                            body: { orderGroup: pendingOrderGroupId },
+                          }),
+                        ]);
                       } catch (emailErr) {
                         console.error("Email send error:", emailErr);
                       }
