@@ -81,6 +81,7 @@ const LANGS = {
       pwMismatch: "הסיסמאות לא תואמות", pwTooShort: "הסיסמה חייבת להכיל לפחות 8 תווים",
       accountSettings: "🔐 הגדרות חשבון", changePassword: "שנה סיסמה", setPassword: "הגדר סיסמה לחשבון",
       setPasswordDesc: "הוסף סיסמה לכניסה מהירה יותר (לא חובה)",
+      googleBtn: "המשך עם Google", emailRequired: "אנא הזן מייל למעלה תחילה",
     },
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
@@ -116,6 +117,7 @@ const LANGS = {
       pwMismatch: "Passwords don't match", pwTooShort: "Password must be at least 8 characters",
       accountSettings: "🔐 Account Settings", changePassword: "Change password", setPassword: "Set account password",
       setPasswordDesc: "Add a password for faster sign-in (optional)",
+      googleBtn: "Continue with Google", emailRequired: "Please enter your email above first",
     },
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
@@ -151,6 +153,7 @@ const LANGS = {
       pwMismatch: "Пароли не совпадают", pwTooShort: "Пароль должен быть не менее 8 символов",
       accountSettings: "🔐 Настройки аккаунта", changePassword: "Изменить пароль", setPassword: "Установить пароль",
       setPasswordDesc: "Добавьте пароль для быстрого входа (необязательно)",
+      googleBtn: "Продолжить с Google", emailRequired: "Сначала введите email выше",
     },
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
@@ -644,7 +647,7 @@ function AuthPage({ lang, onAuth }) {
   };
 
   const handleMagicLink = async () => {
-    if (!email) { setError(t.auth.email); return; }
+    if (!email) { setError(t.auth.emailRequired); return; }
     setError(""); setSuccess(""); setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -655,6 +658,17 @@ function AuthPage({ lang, onAuth }) {
       setSuccess(t.auth.magicLinkSent);
     } catch (err) { setError(err.message); }
     setLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(""); setSuccess(""); setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin },
+      });
+      if (error) throw error;
+    } catch (err) { setError(err.message); setLoading(false); }
   };
 
   const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
@@ -757,13 +771,27 @@ function AuthPage({ lang, onAuth }) {
           <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.orDivider}</div>
           <div style={{ flex: 1, height: 1, background: COLORS.border }} />
         </div>
-        <button type="button" onClick={handleMagicLink} disabled={loading || !email} style={{ width: "100%", background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: email ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif", opacity: email ? 1 : 0.5, transition: "all 0.2s" }}
-          onMouseOver={e => { if (email) e.currentTarget.style.borderColor = COLORS.accent; }}
+        <button type="button" onClick={handleMagicLink} disabled={loading} style={{ width: "100%", background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}
+          onMouseOver={e => e.currentTarget.style.borderColor = COLORS.accent}
           onMouseOut={e => e.currentTarget.style.borderColor = COLORS.border}
         >
           {t.auth.magicLink}
         </button>
         <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 8, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.magicLinkDesc}</p>
+
+        {/* Google login button */}
+        <button type="button" onClick={handleGoogleLogin} disabled={loading} style={{ width: "100%", marginTop: 12, background: "#fff", color: "#1a1a1a", border: "1px solid #fff", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}
+          onMouseOver={e => e.currentTarget.style.background = "#f0f0f0"}
+          onMouseOut={e => e.currentTarget.style.background = "#fff"}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          {t.auth.googleBtn}
+        </button>
 
         <div style={{ textAlign: "center", marginTop: 20, color: COLORS.gray, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
           {mode === "login" ? t.auth.noAccount : t.auth.hasAccount}{" "}
