@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { supabase } from './supabase.js'
+import { createClient } from '@supabase/supabase-js'
+const supabase = createClient('https://ubvgrxlxtelulwjtfudd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE')
+
 const COLORS = {
   bg: "#0f0f0f", bgCard: "#1a1a1a", border: "#2a2a2a",
   accent: "#FF6B35", accentHover: "#ff8255", accentDim: "rgba(255,107,53,0.15)",
@@ -59,7 +61,27 @@ const LANGS = {
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "💳 תשלום בשלב הבא", paymentSub: "נעבד תשלום לאחר אישור.", back: "← חזרה", place: "בצע הזמנה" },
     confirm: { title: "ההזמנה בוצעה! 🎉", sub1: "תודה", sub2: "נצור קשר בקרוב בכתובת", track: "עקוב אחרי ההזמנה", another: "הזמן שוב" },
-    auth: { login: "כניסה", register: "הרשמה", email: "אימייל", password: "סיסמה", name: "שם מלא", loginBtn: "כנס", registerBtn: "הירשם", noAccount: "אין לך חשבון?", hasAccount: "כבר רשום?", loginTitle: "ברוך הבא חזרה", registerTitle: "צור חשבון" },
+    auth: {
+      login: "כניסה", register: "הרשמה", email: "אימייל", password: "סיסמה", name: "שם מלא",
+      loginBtn: "כנס", registerBtn: "הירשם", noAccount: "אין לך חשבון?", hasAccount: "כבר רשום?",
+      loginTitle: "ברוך הבא חזרה", registerTitle: "צור חשבון",
+      generatePw: "🎲 ייצר סיסמה חזקה", showPw: "👁️ הצג", hidePw: "🙈 הסתר",
+      copyPw: "📋 העתק", copied: "✓ הועתק!",
+      forgotPw: "שכחת סיסמה?", forgotPwTitle: "איפוס סיסמה",
+      forgotPwDesc: "הזן את כתובת המייל ונשלח לך קישור איפוס",
+      forgotPwBtn: "שלח קישור איפוס", forgotPwSent: "📬 קישור איפוס נשלח למייל!",
+      backToLogin: "← חזרה לכניסה",
+      magicLink: "✨ שלח לי קישור במייל",
+      magicLinkDesc: "ללא סיסמה — תיכנס דרך הקישור במייל",
+      magicLinkSent: "📬 קישור נשלח! בדוק את המייל",
+      orDivider: "או",
+      resetPwTitle: "קביעת סיסמה חדשה",
+      newPw: "סיסמה חדשה", confirmPw: "אשר סיסמה",
+      setPw: "שמור סיסמה", pwSet: "✓ הסיסמה נקבעה בהצלחה!",
+      pwMismatch: "הסיסמאות לא תואמות", pwTooShort: "הסיסמה חייבת להכיל לפחות 8 תווים",
+      accountSettings: "🔐 הגדרות חשבון", changePassword: "שנה סיסמה", setPassword: "הגדר סיסמה לחשבון",
+      setPasswordDesc: "הוסף סיסמה לכניסה מהירה יותר (לא חובה)",
+    },
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
     products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
@@ -74,7 +96,27 @@ const LANGS = {
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
     form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "💳 Payment on next step", paymentSub: "We'll process payment after confirmation.", back: "← Back", place: "Place Order" },
     confirm: { title: "Order Placed! 🎉", sub1: "Thanks", sub2: "We'll be in touch at", track: "Track your order", another: "Order Another" },
-    auth: { login: "Login", register: "Register", email: "Email", password: "Password", name: "Full Name", loginBtn: "Login", registerBtn: "Register", noAccount: "No account?", hasAccount: "Already registered?", loginTitle: "Welcome back", registerTitle: "Create account" },
+    auth: {
+      login: "Login", register: "Register", email: "Email", password: "Password", name: "Full Name",
+      loginBtn: "Login", registerBtn: "Register", noAccount: "No account?", hasAccount: "Already registered?",
+      loginTitle: "Welcome back", registerTitle: "Create account",
+      generatePw: "🎲 Generate strong password", showPw: "👁️ Show", hidePw: "🙈 Hide",
+      copyPw: "📋 Copy", copied: "✓ Copied!",
+      forgotPw: "Forgot password?", forgotPwTitle: "Reset password",
+      forgotPwDesc: "Enter your email and we'll send you a reset link",
+      forgotPwBtn: "Send reset link", forgotPwSent: "📬 Reset link sent to your email!",
+      backToLogin: "← Back to login",
+      magicLink: "✨ Email me a magic link",
+      magicLinkDesc: "No password — sign in via the link in your email",
+      magicLinkSent: "📬 Link sent! Check your email",
+      orDivider: "or",
+      resetPwTitle: "Set new password",
+      newPw: "New password", confirmPw: "Confirm password",
+      setPw: "Save password", pwSet: "✓ Password set successfully!",
+      pwMismatch: "Passwords don't match", pwTooShort: "Password must be at least 8 characters",
+      accountSettings: "🔐 Account Settings", changePassword: "Change password", setPassword: "Set account password",
+      setPasswordDesc: "Add a password for faster sign-in (optional)",
+    },
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
     products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
@@ -89,7 +131,27 @@ const LANGS = {
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
     form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "💳 Оплата на следующем шаге", paymentSub: "Обработаем оплату после подтверждения.", back: "← Назад", place: "Оформить заказ" },
     confirm: { title: "Заказ оформлен! 🎉", sub1: "Спасибо", sub2: "Свяжемся с вами по адресу", track: "Отследить заказ", another: "Заказать ещё" },
-    auth: { login: "Войти", register: "Регистрация", email: "Email", password: "Пароль", name: "Полное имя", loginBtn: "Войти", registerBtn: "Зарегистрироваться", noAccount: "Нет аккаунта?", hasAccount: "Уже есть аккаунт?", loginTitle: "С возвращением", registerTitle: "Создать аккаунт" },
+    auth: {
+      login: "Войти", register: "Регистрация", email: "Email", password: "Пароль", name: "Полное имя",
+      loginBtn: "Войти", registerBtn: "Зарегистрироваться", noAccount: "Нет аккаунта?", hasAccount: "Уже есть аккаунт?",
+      loginTitle: "С возвращением", registerTitle: "Создать аккаунт",
+      generatePw: "🎲 Создать надёжный пароль", showPw: "👁️ Показать", hidePw: "🙈 Скрыть",
+      copyPw: "📋 Копировать", copied: "✓ Скопировано!",
+      forgotPw: "Забыли пароль?", forgotPwTitle: "Сброс пароля",
+      forgotPwDesc: "Введите email и мы отправим ссылку для сброса",
+      forgotPwBtn: "Отправить ссылку", forgotPwSent: "📬 Ссылка отправлена на email!",
+      backToLogin: "← Вернуться ко входу",
+      magicLink: "✨ Войти по ссылке из email",
+      magicLinkDesc: "Без пароля — войдите по ссылке из письма",
+      magicLinkSent: "📬 Ссылка отправлена! Проверьте почту",
+      orDivider: "или",
+      resetPwTitle: "Установить новый пароль",
+      newPw: "Новый пароль", confirmPw: "Подтвердите пароль",
+      setPw: "Сохранить пароль", pwSet: "✓ Пароль установлен!",
+      pwMismatch: "Пароли не совпадают", pwTooShort: "Пароль должен быть не менее 8 символов",
+      accountSettings: "🔐 Настройки аккаунта", changePassword: "Изменить пароль", setPassword: "Установить пароль",
+      setPasswordDesc: "Добавьте пароль для быстрого входа (необязательно)",
+    },
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
     products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
@@ -524,33 +586,111 @@ function StickerSqMockup({ color, imageUrl, imagePos }) {
 // Auth Page
 function AuthPage({ lang, onAuth }) {
   const t = LANGS[lang];
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState("login"); // login | register | forgot
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const handleSubmit = async () => {
-    setError(""); setLoading(true);
+  const generatePassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
+    const arr = new Uint32Array(16);
+    crypto.getRandomValues(arr);
+    let pw = "";
+    for (let i = 0; i < 16; i++) {
+      pw += chars[arr[i] % chars.length];
+    }
+    setPassword(pw);
+    setShowPassword(true);
+    setCopied(false);
+  };
+
+  const copyPassword = async () => {
+    try {
+      await navigator.clipboard.writeText(password);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) { console.error("Copy failed:", err); }
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setError(""); setSuccess(""); setLoading(true);
     try {
       if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         onAuth(data.user);
-      } else {
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
+      } else if (mode === "register") {
+        const { data, error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { full_name: name } }
+        });
         if (error) throw error;
         onAuth(data.user);
+      } else if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/#reset-password`,
+        });
+        if (error) throw error;
+        setSuccess(t.auth.forgotPwSent);
       }
-    } catch (e) {
-      setError(e.message);
-    }
+    } catch (err) { setError(err.message); }
+    setLoading(false);
+  };
+
+  const handleMagicLink = async () => {
+    if (!email) { setError(t.auth.email); return; }
+    setError(""); setSuccess(""); setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      setSuccess(t.auth.magicLinkSent);
+    } catch (err) { setError(err.message); }
     setLoading(false);
   };
 
   const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
+  const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" };
+  const smallBtnStyle = { background: "transparent", border: "none", color: COLORS.accent, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 };
 
+  // Forgot Password mode
+  if (mode === "forgot") {
+    return (
+      <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🔑</div>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{t.auth.forgotPwTitle}</h2>
+            <p style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.forgotPwDesc}</p>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>{t.auth.email}</label>
+              <input type="email" name="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+            </div>
+            {error && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
+            {success && <div style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
+            <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              {loading ? "..." : t.auth.forgotPwBtn}
+            </button>
+          </form>
+          <div style={{ textAlign: "center", marginTop: 20 }}>
+            <button onClick={() => { setMode("login"); setError(""); setSuccess(""); }} style={smallBtnStyle}>{t.auth.backToLogin}</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Login / Register mode
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
       <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
@@ -558,31 +698,275 @@ function AuthPage({ lang, onAuth }) {
           <div style={{ fontSize: 40, marginBottom: 12 }}>☕</div>
           <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{mode === "login" ? t.auth.loginTitle : t.auth.registerTitle}</h2>
         </div>
-        {mode === "register" && (
+        <form onSubmit={handleSubmit}>
+          {mode === "register" && (
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>{t.auth.name}</label>
+              <input type="text" name="name" autoComplete="name" value={name} onChange={e => setName(e.target.value)} required style={inputStyle} />
+            </div>
+          )}
           <div style={{ marginBottom: 16 }}>
-            <label style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>{t.auth.name}</label>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
+            <label style={labelStyle}>{t.auth.email}</label>
+            <input type="email" name="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
           </div>
-        )}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>{t.auth.email}</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label style={labelStyle}>{t.auth.password}</label>
+              {mode === "login" && (
+                <button type="button" onClick={() => { setMode("forgot"); setError(""); setSuccess(""); }} style={smallBtnStyle}>{t.auth.forgotPw}</button>
+              )}
+            </div>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                minLength={8}
+                style={{ ...inputStyle, paddingRight: 80 }}
+              />
+              <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", right: 8, top: 14, ...smallBtnStyle, color: COLORS.gray }}>
+                {showPassword ? t.auth.hidePw : t.auth.showPw}
+              </button>
+            </div>
+            {mode === "register" && (
+              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                  {t.auth.generatePw}
+                </button>
+                {password && (
+                  <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600, transition: "all 0.2s" }}>
+                    {copied ? t.auth.copied : t.auth.copyPw}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          {error && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
+          {success && <div style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
+          <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+            {loading ? "..." : mode === "login" ? t.auth.loginBtn : t.auth.registerBtn}
+          </button>
+        </form>
+
+        {/* Magic Link divider */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+          <div style={{ flex: 1, height: 1, background: COLORS.border }} />
+          <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.orDivider}</div>
+          <div style={{ flex: 1, height: 1, background: COLORS.border }} />
         </div>
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>{t.auth.password}</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} style={inputStyle} />
-        </div>
-        {error && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
-        <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
-          {loading ? "..." : mode === "login" ? t.auth.loginBtn : t.auth.registerBtn}
+        <button type="button" onClick={handleMagicLink} disabled={loading || !email} style={{ width: "100%", background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: email ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif", opacity: email ? 1 : 0.5, transition: "all 0.2s" }}
+          onMouseOver={e => { if (email) e.currentTarget.style.borderColor = COLORS.accent; }}
+          onMouseOut={e => e.currentTarget.style.borderColor = COLORS.border}
+        >
+          {t.auth.magicLink}
         </button>
-        <div style={{ textAlign: "center", marginTop: 20, color: COLORS.gray, fontSize: 13 }}>
+        <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 8, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.magicLinkDesc}</p>
+
+        <div style={{ textAlign: "center", marginTop: 20, color: COLORS.gray, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
           {mode === "login" ? t.auth.noAccount : t.auth.hasAccount}{" "}
-          <span onClick={() => setMode(mode === "login" ? "register" : "login")} style={{ color: COLORS.accent, cursor: "pointer", fontWeight: 600 }}>
+          <span onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setSuccess(""); setPassword(""); }} style={{ color: COLORS.accent, cursor: "pointer", fontWeight: 600 }}>
             {mode === "login" ? t.auth.register : t.auth.login}
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Reset Password Page (shown when user clicks reset link in email)
+function ResetPasswordPage({ lang, setPage }) {
+  const t = LANGS[lang];
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const generatePassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
+    const arr = new Uint32Array(16);
+    crypto.getRandomValues(arr);
+    let pw = "";
+    for (let i = 0; i < 16; i++) { pw += chars[arr[i] % chars.length]; }
+    setPassword(pw); setConfirm(pw); setShowPassword(true); setCopied(false);
+  };
+
+  const copyPassword = async () => {
+    try {
+      await navigator.clipboard.writeText(password);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {}
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setError("");
+    if (password !== confirm) { setError(t.auth.pwMismatch); return; }
+    if (password.length < 8) { setError(t.auth.pwTooShort); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      setDone(true);
+      setTimeout(() => setPage("track"), 2000);
+    } catch (err) { setError(err.message); }
+    setLoading(false);
+  };
+
+  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
+  const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" };
+
+  return (
+    <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
+      <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🔐</div>
+          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{t.auth.resetPwTitle}</h2>
+        </div>
+        {done ? (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+            <div style={{ color: COLORS.success, fontSize: 16, fontWeight: 600, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.pwSet}</div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>{t.auth.newPw}</label>
+              <div style={{ position: "relative" }}>
+                <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingRight: 80 }} />
+                <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", right: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                  {showPassword ? t.auth.hidePw : t.auth.showPw}
+                </button>
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                  {t.auth.generatePw}
+                </button>
+                {password && (
+                  <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                    {copied ? t.auth.copied : t.auth.copyPw}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <label style={labelStyle}>{t.auth.confirmPw}</label>
+              <input type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
+            </div>
+            {error && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
+            <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              {loading ? "..." : t.auth.setPw}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Account Settings — used in TrackPage personal area for setting/changing password
+function AccountSettings({ lang }) {
+  const t = LANGS[lang];
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const generatePassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
+    const arr = new Uint32Array(16);
+    crypto.getRandomValues(arr);
+    let pw = "";
+    for (let i = 0; i < 16; i++) { pw += chars[arr[i] % chars.length]; }
+    setPassword(pw); setConfirm(pw); setShowPassword(true); setCopied(false);
+  };
+
+  const copyPassword = async () => {
+    try {
+      await navigator.clipboard.writeText(password);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {}
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setError(""); setDone(false);
+    if (password !== confirm) { setError(t.auth.pwMismatch); return; }
+    if (password.length < 8) { setError(t.auth.pwTooShort); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      setDone(true);
+      setPassword(""); setConfirm("");
+      setTimeout(() => { setDone(false); setOpen(false); }, 3000);
+    } catch (err) { setError(err.message); }
+    setLoading(false);
+  };
+
+  const inputStyle = { width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none" };
+  const labelStyle = { color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", display: "block", marginBottom: 6 };
+
+  return (
+    <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 12, marginBottom: 24, overflow: "hidden" }}>
+      <div onClick={() => setOpen(o => !o)} style={{ padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{t.auth.accountSettings}</div>
+          <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 2 }}>{t.auth.setPasswordDesc}</div>
+        </div>
+        <span style={{ color: COLORS.gray, fontSize: 14 }}>{open ? "▲" : "▼"}</span>
+      </div>
+      {open && (
+        <div style={{ padding: "16px 18px", borderTop: `1px solid ${COLORS.border}` }}>
+          {done ? (
+            <div style={{ textAlign: "center", padding: "8px 0" }}>
+              <div style={{ fontSize: 32, marginBottom: 6 }}>✅</div>
+              <div style={{ color: COLORS.success, fontSize: 14, fontWeight: 600 }}>{t.auth.pwSet}</div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: 12 }}>
+                <label style={labelStyle}>{t.auth.newPw}</label>
+                <div style={{ position: "relative" }}>
+                  <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingRight: 70 }} />
+                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", right: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                    {showPassword ? t.auth.hidePw : t.auth.showPw}
+                  </button>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                  <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "6px", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                    {t.auth.generatePw}
+                  </button>
+                  {password && (
+                    <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                      {copied ? t.auth.copied : t.auth.copyPw}
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>{t.auth.confirmPw}</label>
+                <input type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
+              </div>
+              {error && <div style={{ color: "#f87171", fontSize: 12, marginBottom: 12, background: "rgba(248,113,113,0.1)", padding: "8px 12px", borderRadius: 6 }}>{error}</div>}
+              <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+                {loading ? "..." : t.auth.setPw}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -637,6 +1021,8 @@ function TrackPage({ lang, user }) {
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
         <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h2>
         <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
+
+        <AccountSettings lang={lang} />
 
         {loading ? <div style={{ color: COLORS.gray, textAlign: "center", padding: 40 }}>...</div> :
           orders.length === 0 ? (
@@ -2575,7 +2961,7 @@ function AboutPage({ lang, setPage }) {
 }
 
 export default function App() {
-  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'policies'];
+  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'policies', 'reset-password'];
 
   const getPageFromHash = () => {
     const hash = window.location.hash.replace('#', '');
@@ -2660,6 +3046,7 @@ export default function App() {
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
             {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
             {page === "policies" && <PoliciesPage lang={lang} />}
+            {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
             <Footer lang={lang} setPage={setPage} />
           </>
         );
