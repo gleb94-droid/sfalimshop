@@ -3357,6 +3357,23 @@ export default function App() {
         .trust-badge:hover .badge-icon {
           animation: iconRotate 0.6s ease-in-out !important;
         }
+
+        /* Premium footer links — understated, elegant hover */
+        .footer-link {
+          position: relative;
+          color: #888;
+          background: transparent;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          font-family: 'Varela Round', sans-serif;
+          font-size: 13px;
+          line-height: 1.6;
+          transition: color 0.3s cubic-bezier(.2,.6,.2,1), letter-spacing 0.3s cubic-bezier(.2,.6,.2,1);
+        }
+        .footer-link:hover { color: #FF6B35; letter-spacing: 0.4px; }
+        .footer-contact-link { color: inherit; text-decoration: none; transition: color 0.25s ease; }
+        .footer-contact-link:hover { color: #FF6B35; }
       `}</style>
       <ParticlesBackground />
       <CursorGlow />
@@ -3520,39 +3537,44 @@ function Footer({ lang, setPage }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
-    <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "40px 24px 24px", marginTop: 60, direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 32 }}>
+    <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "48px 24px 24px", marginTop: 60, direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 40 }}>
         <div>
-          <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 700, marginBottom: 12 }}>{BUSINESS_INFO.name[lang]}</div>
-          <div style={{ color: "#999", fontSize: 13, fontFamily: "'Varela Round',sans-serif", lineHeight: 1.7 }}>
-            <div>📍 {BUSINESS_INFO.address[lang]}</div>
-            <div>📞 {BUSINESS_INFO.phone}</div>
-            <div>📧 {BUSINESS_INFO.email}</div>
-            <div style={{ marginTop: 4, color: "#666", fontSize: 11 }}>{lang === "he" ? "ח.פ." : lang === "ru" ? "Бизнес-ID" : "Business ID"} {BUSINESS_INFO.vatId} {lang === "he" ? "(עוסק פטור)" : lang === "ru" ? "(освобождённый предприниматель)" : "(Exempt Dealer)"}</div>
+          <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, marginBottom: 14, letterSpacing: "0.3px" }}>{BUSINESS_INFO.name[lang]}</div>
+          <div style={{ width: 32, height: 2, background: "rgba(255,107,53,0.5)", marginBottom: 18, borderRadius: 2 }}></div>
+          <div style={{ color: "#888", fontSize: 13, fontFamily: "'Varela Round',sans-serif", lineHeight: 1.9 }}>
+            <div style={{ marginBottom: 4 }}>{BUSINESS_INFO.address[lang]}</div>
+            <div style={{ marginBottom: 4 }}>
+              <a href={`tel:${BUSINESS_INFO.phone}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.phone}</a>
+            </div>
+            <div>
+              <a href={`mailto:${BUSINESS_INFO.email}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.email}</a>
+            </div>
+            <div style={{ marginTop: 12, color: "#555", fontSize: 11, letterSpacing: "0.03em" }}>{lang === "he" ? "ח.פ." : lang === "ru" ? "Бизнес-ID" : "Business ID"} {BUSINESS_INFO.vatId} {lang === "he" ? "(עוסק פטור)" : lang === "ru" ? "(освобождённый предприниматель)" : "(Exempt Dealer)"}</div>
           </div>
         </div>
         <div>
-          <div style={{ color: "#fff", fontSize: 13, fontWeight: 700, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'Varela Round',sans-serif" }}>
+          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
             {lang === "he" ? "מידע משפטי" : lang === "ru" ? "Юр. информация" : "Legal"}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {POLICY_SECTIONS.map(s => (
-              <button key={s.id} onClick={() => goPolicy(s.id)} style={{ background: "transparent", border: "none", color: "#999", padding: 0, cursor: "pointer", textAlign: isRTL ? "right" : "left", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }} onMouseOver={e => e.currentTarget.style.color = "#FF6B35"} onMouseOut={e => e.currentTarget.style.color = "#999"}>
-                {s.emoji} {s.title[lang]}
+              <button key={s.id} onClick={() => goPolicy(s.id)} className="footer-link" style={{ textAlign: isRTL ? "right" : "left" }}>
+                {s.title[lang]}
               </button>
             ))}
           </div>
         </div>
         <div>
-          <div style={{ color: "#fff", fontSize: 13, fontWeight: 700, marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'Varela Round',sans-serif" }}>
+          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
             {lang === "he" ? "עקבו אחרינו" : lang === "ru" ? "Соцсети" : "Follow Us"}
           </div>
-          <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "8px 16px", borderRadius: 8, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 13 }}>
-            📷 @sfalimshop
+          <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener" className="footer-contact-link" style={{ display: "inline-block", color: "#888", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.3px" }}>
+            Instagram <span style={{ color: "#555" }}>· @sfalimshop</span>
           </a>
         </div>
       </div>
-      <div style={{ maxWidth: 1100, margin: "32px auto 0", paddingTop: 20, borderTop: "1px solid #1a1a1a", color: "#555", fontSize: 12, fontFamily: "'Varela Round',sans-serif", textAlign: "center" }}>
+      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#444", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
         © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
       </div>
     </footer>
