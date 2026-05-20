@@ -3779,6 +3779,60 @@ function PetsPage({ lang, setPage }) {
     })();
   }, []);
 
+  // ============ SCHEMA.ORG — Product structured data for BLOOM (SEO / Rich Results) ============
+  useEffect(() => {
+    if (typeof document === "undefined" || !designs.length) return;
+
+    const pickName = (d) => d[`name_${lang}`] || d.name_en || d.name_he || "BLOOM Character";
+    const pickDesc = (d) => {
+      const a = d[`animal_${lang}`] || d.animal_en || "";
+      const tag = d[`tagline_${lang}`] || d.tagline_en || "";
+      return [tag, a].filter(Boolean).join(" · ") || "BLOOM Collection pet portrait";
+    };
+
+    const itemList = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "BLOOM Collection",
+      "itemListElement": designs.map((d, i) => {
+        const prices = [d.price_sticker, d.price_mug, d.price_shirt]
+          .map(Number)
+          .filter((n) => Number.isFinite(n) && n > 0);
+        const product = {
+          "@type": "Product",
+          "name": pickName(d),
+          "description": pickDesc(d),
+          "brand": { "@type": "Brand", "name": "Sfalim Shop" },
+        };
+        const image = d.mockup_url || d.design_url;
+        if (image) product.image = image;
+        if (prices.length) {
+          product.offers = {
+            "@type": "AggregateOffer",
+            "priceCurrency": "ILS",
+            "lowPrice": Math.min(...prices),
+            "highPrice": Math.max(...prices),
+            "availability": "https://schema.org/InStock",
+          };
+        }
+        return { "@type": "ListItem", "position": i + 1, "item": product };
+      }),
+    };
+
+    const stale = document.getElementById("bloom-jsonld");
+    if (stale) stale.remove();
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "bloom-jsonld";
+    script.text = JSON.stringify(itemList);
+    document.head.appendChild(script);
+
+    return () => {
+      const el = document.getElementById("bloom-jsonld");
+      if (el) el.remove();
+    };
+  }, [designs, lang]);
+
   // Translations
   const t = {
     he: {
