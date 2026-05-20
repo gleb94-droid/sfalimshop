@@ -3393,7 +3393,7 @@ function AboutPage({ lang, setPage }) {
 }
 
 export default function App() {
-  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'policies', 'reset-password'];
+ const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'policies', 'reset-password'];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
