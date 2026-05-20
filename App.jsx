@@ -2526,8 +2526,8 @@ function OrderPage({ lang, user, setPage }) {
                 { icon: "↩️", text: t.payment.trustReturn },
                 { icon: "💳", text: t.payment.trustNoSave },
               ].map((badge, i) => (
-                <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 16, lineHeight: 1 }}>{badge.icon}</span>
+                <div key={i} className="trust-badge" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, cursor: "default" }}>
+                  <span className="badge-icon" style={{ fontSize: 16, lineHeight: 1 }}>{badge.icon}</span>
                   <span style={{ color: COLORS.gray, fontSize: 11.5, lineHeight: 1.3 }}>{badge.text}</span>
                 </div>
               ))}
@@ -2703,26 +2703,40 @@ function ParticlesBackground() {
       pulse: Math.random() * Math.PI * 2,
     }));
 
-    // Floating emoji items
-    const emojis = ['☕', '👕', '⭐', '🧡', '👕', '☕', '✨', '👕', '☕', '🔶', '👕', '⭐', '☕', '🧡'];
-    const floaters = emojis.map((emoji, i) => ({
-      emoji,
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      size: Math.random() * 28 + 16,
-      dx: (Math.random() - 0.5) * 0.2,
-      dy: (Math.random() - 0.5) * 0.2,
-      rotation: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.008,
-      alpha: Math.random() * 0.18 + 0.07,
-      pulse: Math.random() * Math.PI * 2,
-    }));
+    // Ambient glowing orbs — large, soft, drifting (premium feel)
+    const orbs = [
+      { baseX: 0.2, baseY: 0.3, baseR: 320, color: '255, 107, 53', alpha: 0.10, speed: 0.00018, phase: 0 },
+      { baseX: 0.8, baseY: 0.7, baseR: 280, color: '255, 140, 90', alpha: 0.08, speed: 0.00022, phase: Math.PI / 2 },
+      { baseX: 0.5, baseY: 0.15, baseR: 240, color: '255, 107, 53', alpha: 0.06, speed: 0.00028, phase: Math.PI },
+      { baseX: 0.1, baseY: 0.9, baseR: 360, color: '230, 80, 35', alpha: 0.07, speed: 0.00016, phase: Math.PI * 1.5 },
+      { baseX: 0.7, baseY: 0.5, baseR: 200, color: '255, 200, 150', alpha: 0.045, speed: 0.00032, phase: Math.PI / 3 },
+    ];
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const t2 = Date.now() / 1000;
+      const tMs = Date.now();
 
-      // Draw dots
+      // Ambient orbs — soft glowing background atmosphere
+      ctx.globalCompositeOperation = 'lighter';
+      orbs.forEach(o => {
+        const driftX = Math.sin(tMs * o.speed + o.phase) * 70;
+        const driftY = Math.cos(tMs * o.speed * 0.7 + o.phase) * 50;
+        const cx = canvas.width * o.baseX + driftX;
+        const cy = canvas.height * o.baseY + driftY;
+        const radius = o.baseR + Math.sin(t2 * 0.4 + o.phase) * 25;
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        gradient.addColorStop(0, `rgba(${o.color}, ${o.alpha})`);
+        gradient.addColorStop(0.45, `rgba(${o.color}, ${o.alpha * 0.35})`);
+        gradient.addColorStop(1, `rgba(${o.color}, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Dot particles
       particles.forEach(p => {
         const pr = p.r + Math.sin(t2 * 1.5 + p.pulse) * 0.3;
         const pa = p.alpha + Math.sin(t2 * 1.2 + p.pulse) * 0.06;
@@ -2736,7 +2750,7 @@ function ParticlesBackground() {
         if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
       });
 
-      // Draw connections
+      // Connections between nearby particles
       particles.forEach((p1, i) => {
         particles.slice(i + 1).forEach(p2 => {
           const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
@@ -2752,25 +2766,6 @@ function ParticlesBackground() {
         });
       });
 
-      // Draw floating emojis
-      floaters.forEach(f => {
-        const fa = f.alpha + Math.sin(t2 * 0.8 + f.pulse) * 0.03;
-        const fs = f.size + Math.sin(t2 * 0.6 + f.pulse) * 1.5;
-        ctx.save();
-        ctx.translate(f.x, f.y);
-        ctx.rotate(f.rotation);
-        ctx.globalAlpha = Math.max(0, fa);
-        ctx.font = `${fs}px serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(f.emoji, 0, 0);
-        ctx.restore();
-        f.x += f.dx; f.y += f.dy;
-        f.rotation += f.rotSpeed;
-        if (f.x < -50 || f.x > canvas.width + 50) f.dx *= -1;
-        if (f.y < -50 || f.y > canvas.height + 50) f.dy *= -1;
-      });
-
       ctx.globalAlpha = 1;
       animId = requestAnimationFrame(draw);
     };
@@ -2781,7 +2776,7 @@ function ParticlesBackground() {
   return (
     <canvas ref={canvasRef} style={{
       position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-      pointerEvents: 'none', zIndex: 0, opacity: 0.7,
+      pointerEvents: 'none', zIndex: 0, opacity: 0.85,
     }} />
   );
 }
@@ -3305,6 +3300,57 @@ export default function App() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0f0f0f; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* === Premium Animations === */
+
+        /* Trust badge: staggered entry + breathing pulse on icon */
+        @keyframes badgeFadeIn {
+          0% { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes iconBreathe {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255,107,53,0)); }
+          50%      { transform: scale(1.08); filter: drop-shadow(0 0 6px rgba(255,107,53,0.45)); }
+        }
+        @keyframes iconShimmer {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.65; }
+        }
+        @keyframes iconRotate {
+          0%   { transform: rotate(0deg); }
+          25%  { transform: rotate(-12deg); }
+          75%  { transform: rotate(12deg); }
+          100% { transform: rotate(0deg); }
+        }
+        @keyframes iconBounce {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-3px); }
+        }
+        .trust-badge {
+          opacity: 0;
+          animation: badgeFadeIn 0.5s cubic-bezier(.2,.6,.2,1) forwards;
+          transition: transform 0.25s cubic-bezier(.2,.6,.2,1), border-color 0.25s, background 0.25s;
+        }
+        .trust-badge:hover {
+          transform: translateY(-3px);
+          border-color: #FF6B35 !important;
+          background: rgba(255,107,53,0.05) !important;
+        }
+        .trust-badge .badge-icon {
+          display: inline-block;
+          transform-origin: center;
+        }
+        .trust-badge:nth-child(1) { animation-delay: 0.05s; }
+        .trust-badge:nth-child(2) { animation-delay: 0.15s; }
+        .trust-badge:nth-child(3) { animation-delay: 0.25s; }
+        .trust-badge:nth-child(4) { animation-delay: 0.35s; }
+        .trust-badge:nth-child(1) .badge-icon { animation: iconBreathe 2.4s ease-in-out infinite; }
+        .trust-badge:nth-child(2) .badge-icon { animation: iconShimmer 2.8s ease-in-out infinite; }
+        .trust-badge:nth-child(3) .badge-icon { animation: iconBounce 2.6s ease-in-out infinite; }
+        .trust-badge:nth-child(4) .badge-icon { animation: iconBreathe 3.2s ease-in-out infinite 0.6s; }
+        .trust-badge:hover .badge-icon {
+          animation: iconRotate 0.6s ease-in-out !important;
+        }
       `}</style>
       <ParticlesBackground />
       <CursorGlow />
