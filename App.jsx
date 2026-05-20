@@ -22,12 +22,12 @@ const IL_PREFIXES = [
 ];
 
 const ORDER_STAGES = [
-  { key: "received",  en: "Order Received",    he: "התקבלה הזמנה",     ru: "Заказ получен",      emoji: "📥" },
-  { key: "design",    en: "In Design",          he: "בעיצוב",            ru: "В дизайне",          emoji: "🎨" },
-  { key: "printing",  en: "Printing",           he: "בהדפסה",            ru: "В печати",           emoji: "🖨️" },
-  { key: "ready",     en: "Ready to Ship",      he: "מוכן למשלוח",       ru: "Готов к отправке",   emoji: "📦" },
-  { key: "shipped",   en: "Shipped",            he: "נשלח",              ru: "Отправлен",          emoji: "🚚" },
-  { key: "delivered", en: "Delivered",          he: "נמסר",              ru: "Доставлен",          emoji: "✅" },
+  { key: "received",  en: "Order Received",    he: "התקבלה הזמנה",     ru: "Заказ получен",      dot: "#6B7280" },
+  { key: "design",    en: "In Design",          he: "בעיצוב",            ru: "В дизайне",          dot: "#F59E0B" },
+  { key: "printing",  en: "Printing",           he: "בהדפסה",            ru: "В печати",           dot: "#FF6B35" },
+  { key: "ready",     en: "Ready to Ship",      he: "מוכן למשלוח",       ru: "Готов к отправке",   dot: "#3B82F6" },
+  { key: "shipped",   en: "Shipped",            he: "נשלח",              ru: "Отправлен",          dot: "#8B5CF6" },
+  { key: "delivered", en: "Delivered",          he: "נמסר",              ru: "Доставлен",          dot: "#28C878" },
 ];
 
 
@@ -59,7 +59,7 @@ const LANGS = {
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
-    form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "💳 תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
+    form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
     payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "החזרים תוך 14 יום *", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו" },
     confirm: { title: "התשלום אושר!", subtitle: "ההזמנה שלך התקבלה", orderNum: "מספר הזמנה", thanksLine: "תודה {name}! שלחנו אישור לכתובת", whatsNext: "מה קורה עכשיו", step1Title: "אנחנו מתחילים בייצור", step1Sub: "ההזמנה שלך נכנסת לסבב הייצור הקרוב", step2Title: "ייצור: 2-4 ימי עסקים", step2Sub: "הדפסה איכותית של העיצוב שבחרת", step3Title: "משלוח: 1-3 ימי עסקים", step3Sub: "תקבל מספר מעקב באימייל", step4Title: "עדכון על כל שלב", step4Sub: "ניצור איתך קשר בכל שינוי", track: "מעקב אחר ההזמנה", another: "הזמנה נוספת" },
     auth: {
@@ -67,12 +67,12 @@ const LANGS = {
       loginBtn: "כנס", registerBtn: "הירשם", noAccount: "אין לך חשבון?", hasAccount: "כבר רשום?",
       loginTitle: "ברוך הבא חזרה", registerTitle: "צור חשבון",
       generatePw: "🎲 ייצר סיסמה חזקה", showPw: "👁️ הצג", hidePw: "🙈 הסתר",
-      copyPw: "📋 העתק", copied: "✓ הועתק!",
+      copyPw: "העתק", copied: "✓ הועתק!",
       forgotPw: "שכחת סיסמה?", forgotPwTitle: "איפוס סיסמה",
       forgotPwDesc: "הזן את כתובת המייל ונשלח לך קישור איפוס",
       forgotPwBtn: "שלח קישור איפוס", forgotPwSent: "📬 קישור איפוס נשלח למייל!",
       backToLogin: "← חזרה לכניסה",
-      magicLink: "✨ שלח לי קישור במייל",
+      magicLink: "שלח לי קישור במייל",
       magicLinkDesc: "ללא סיסמה — תיכנס דרך הקישור במייל",
       magicLinkSent: "📬 קישור נשלח! בדוק את המייל",
       orDivider: "או",
@@ -80,7 +80,7 @@ const LANGS = {
       newPw: "סיסמה חדשה", confirmPw: "אשר סיסמה",
       setPw: "שמור סיסמה", pwSet: "✓ הסיסמה נקבעה בהצלחה!",
       pwMismatch: "הסיסמאות לא תואמות", pwTooShort: "הסיסמה חייבת להכיל לפחות 8 תווים",
-      accountSettings: "🔐 הגדרות חשבון", changePassword: "שנה סיסמה", setPassword: "הגדר סיסמה לחשבון",
+      accountSettings: "הגדרות חשבון", changePassword: "שנה סיסמה", setPassword: "הגדר סיסמה לחשבון",
       setPasswordDesc: "הוסף סיסמה לכניסה מהירה יותר (לא חובה)",
       googleBtn: "המשך עם Google", emailRequired: "אנא הזן מייל למעלה תחילה",
     },
@@ -96,7 +96,7 @@ const LANGS = {
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
-    form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "💳 Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
+    form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
     payment: { title: "Secure Payment", subtitle: "Review and confirm your order", orderNum: "Order #", summary: "Order Summary", subtotal: "Subtotal", shipping: "Shipping", total: "Total to Pay", deliveryTo: "Delivery Address", payBtn: "Pay ", paySuffix: " Securely →", processing: "Processing...", soonTitle: "Payment system coming soon", soonSub: "We're finalizing setup with our payment processor. Your order is saved and we'll personally contact you when the system is live.", soonBtn: "Close and save order", cancel: "Cancel Order", editDetails: "← Edit Details", confirmCancel: "Cancel this order?", securedBy: "Secured by", acceptedCards: "We accept:", businessLine: "Sfalim Shop · Exempt Dealer 321630279", trustFast: "Fast and secure payment", trustSSL: "256-bit SSL encryption", trustReturn: "14-day returns *", trustNoSave: "We never store card details" },
     confirm: { title: "Payment Confirmed!", subtitle: "Your order has been received", orderNum: "Order Number", thanksLine: "Thanks {name}! Confirmation sent to", whatsNext: "What happens next", step1Title: "We start production", step1Sub: "Your order enters the next production batch", step2Title: "Production: 2-4 business days", step2Sub: "Quality printing of your chosen design", step3Title: "Shipping: 1-3 business days", step3Sub: "You'll receive tracking info by email", step4Title: "Updates at every step", step4Sub: "We'll contact you with any changes", track: "Track Order", another: "New Order" },
     auth: {
@@ -104,12 +104,12 @@ const LANGS = {
       loginBtn: "Login", registerBtn: "Register", noAccount: "No account?", hasAccount: "Already registered?",
       loginTitle: "Welcome back", registerTitle: "Create account",
       generatePw: "🎲 Generate strong password", showPw: "👁️ Show", hidePw: "🙈 Hide",
-      copyPw: "📋 Copy", copied: "✓ Copied!",
+      copyPw: "Copy", copied: "✓ Copied!",
       forgotPw: "Forgot password?", forgotPwTitle: "Reset password",
       forgotPwDesc: "Enter your email and we'll send you a reset link",
       forgotPwBtn: "Send reset link", forgotPwSent: "📬 Reset link sent to your email!",
       backToLogin: "← Back to login",
-      magicLink: "✨ Email me a magic link",
+      magicLink: "Email me a magic link",
       magicLinkDesc: "No password — sign in via the link in your email",
       magicLinkSent: "📬 Link sent! Check your email",
       orDivider: "or",
@@ -117,7 +117,7 @@ const LANGS = {
       newPw: "New password", confirmPw: "Confirm password",
       setPw: "Save password", pwSet: "✓ Password set successfully!",
       pwMismatch: "Passwords don't match", pwTooShort: "Password must be at least 8 characters",
-      accountSettings: "🔐 Account Settings", changePassword: "Change password", setPassword: "Set account password",
+      accountSettings: "Account Settings", changePassword: "Change password", setPassword: "Set account password",
       setPasswordDesc: "Add a password for faster sign-in (optional)",
       googleBtn: "Continue with Google", emailRequired: "Please enter your email above first",
     },
@@ -133,7 +133,7 @@ const LANGS = {
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
-    form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "💳 Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
+    form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
     payment: { title: "Безопасная оплата", subtitle: "Проверьте и подтвердите заказ", orderNum: "Заказ №", summary: "Сводка заказа", subtotal: "Промежуточный итог", shipping: "Доставка", total: "Итого к оплате", deliveryTo: "Адрес доставки", payBtn: "Оплатить ", paySuffix: " безопасно →", processing: "Обработка...", soonTitle: "Платёжная система скоро запустится", soonSub: "Мы завершаем настройку с провайдером платежей. Ваш заказ сохранён, мы свяжемся с вами лично, когда система заработает.", soonBtn: "Закрыть и сохранить заказ", cancel: "Отменить заказ", editDetails: "← Изменить данные", confirmCancel: "Отменить заказ?", securedBy: "Защищено", acceptedCards: "Способы оплаты:", businessLine: "Sfalim Shop · Освобождённый предприниматель 321630279", trustFast: "Быстрая и безопасная оплата", trustSSL: "256-bit SSL шифрование", trustReturn: "Возврат в течение 14 дней *", trustNoSave: "Мы не сохраняем данные карты" },
     confirm: { title: "Оплата подтверждена!", subtitle: "Ваш заказ получен", orderNum: "Номер заказа", thanksLine: "Спасибо {name}! Подтверждение отправлено на", whatsNext: "Что дальше", step1Title: "Начинаем производство", step1Sub: "Ваш заказ попадает в ближайшую партию", step2Title: "Производство: 2-4 рабочих дня", step2Sub: "Качественная печать вашего дизайна", step3Title: "Доставка: 1-3 рабочих дня", step3Sub: "Вы получите трек-номер на email", step4Title: "Обновления на каждом этапе", step4Sub: "Мы свяжемся при любых изменениях", track: "Отследить заказ", another: "Новый заказ" },
     auth: {
@@ -141,12 +141,12 @@ const LANGS = {
       loginBtn: "Войти", registerBtn: "Зарегистрироваться", noAccount: "Нет аккаунта?", hasAccount: "Уже есть аккаунт?",
       loginTitle: "С возвращением", registerTitle: "Создать аккаунт",
       generatePw: "🎲 Создать надёжный пароль", showPw: "👁️ Показать", hidePw: "🙈 Скрыть",
-      copyPw: "📋 Копировать", copied: "✓ Скопировано!",
+      copyPw: "Копировать", copied: "✓ Скопировано!",
       forgotPw: "Забыли пароль?", forgotPwTitle: "Сброс пароля",
       forgotPwDesc: "Введите email и мы отправим ссылку для сброса",
       forgotPwBtn: "Отправить ссылку", forgotPwSent: "📬 Ссылка отправлена на email!",
       backToLogin: "← Вернуться ко входу",
-      magicLink: "✨ Войти по ссылке из email",
+      magicLink: "Войти по ссылке из email",
       magicLinkDesc: "Без пароля — войдите по ссылке из письма",
       magicLinkSent: "📬 Ссылка отправлена! Проверьте почту",
       orDivider: "или",
@@ -154,7 +154,7 @@ const LANGS = {
       newPw: "Новый пароль", confirmPw: "Подтвердите пароль",
       setPw: "Сохранить пароль", pwSet: "✓ Пароль установлен!",
       pwMismatch: "Пароли не совпадают", pwTooShort: "Пароль должен быть не менее 8 символов",
-      accountSettings: "🔐 Настройки аккаунта", changePassword: "Изменить пароль", setPassword: "Установить пароль",
+      accountSettings: "Настройки аккаунта", changePassword: "Изменить пароль", setPassword: "Установить пароль",
       setPasswordDesc: "Добавьте пароль для быстрого входа (необязательно)",
       googleBtn: "Продолжить с Google", emailRequired: "Сначала введите email выше",
     },
@@ -176,11 +176,11 @@ const BUSINESS_INFO = {
 };
 
 const POLICY_SECTIONS = [
-  { id: "refund",        emoji: "🔄", title: { he: "החזרים וביטולים", en: "Refunds & Cancellations", ru: "Возвраты и отмены" } },
-  { id: "shipping",      emoji: "📦", title: { he: "משלוחים",          en: "Shipping",                ru: "Доставка" } },
-  { id: "privacy",       emoji: "🔒", title: { he: "פרטיות",           en: "Privacy",                 ru: "Конфиденциальность" } },
-  { id: "terms",         emoji: "📋", title: { he: "תקנון",            en: "Terms of Service",        ru: "Условия использования" } },
-  { id: "accessibility", emoji: "♿", title: { he: "נגישות",            en: "Accessibility",           ru: "Доступность" } },
+  { id: "refund",        title: { he: "החזרים וביטולים", en: "Refunds & Cancellations", ru: "Возвраты и отмены" } },
+  { id: "shipping",      title: { he: "משלוחים",          en: "Shipping",                ru: "Доставка" } },
+  { id: "privacy",       title: { he: "פרטיות",           en: "Privacy",                 ru: "Конфиденциальность" } },
+  { id: "terms",         title: { he: "תקנון",            en: "Terms of Service",        ru: "Условия использования" } },
+  { id: "accessibility", title: { he: "נגישות",            en: "Accessibility",           ru: "Доступность" } },
 ];
 
 const POLICIES = {
@@ -223,7 +223,7 @@ const POLICIES = {
       { type: "l", items: ["לא נמכור את פרטיך לצדדים שלישיים", "לא נשלח ספאם ללא הסכמה", "לא נשמור פרטי אשראי (התשלום דרך Tranzila — חברה מאובטחת PCI-DSS)"] },
       { type: "h", text: "אבטחת מידע" },
       { type: "p", text: "האתר מאובטח ב-SSL (HTTPS). בסיס הנתונים מאוחסן ב-Supabase עם הצפנה. פרטי תשלום עוברים ישירות ל-Tranzila." },
-      { type: "h", text: "🔐 הצהרת PCI DSS — אבטחת כרטיסי אשראי" },
+      { type: "h", text: "הצהרת PCI DSS — אבטחת כרטיסי אשראי" },
       { type: "p", text: "ספלים שופ מצהירה על עמידה בדרישות האבטחה של ארגוני כרטיסי האשראי ובתקן PCI DSS:" },
       { type: "l", items: ["בית העסק אינו שומר פרטי כרטיסי אשראי במערכות שלו או באופן ידני כלשהו", "ספק דף התשלום המאובטח שלנו הוא Tranzila — חברה מוסמכת PCI DSS Level 1, רמת האבטחה הגבוהה ביותר בתעשייה", "פרטי האשראי נשלחים ישירות מהלקוח ל-Tranzila בערוץ מוצפן (SSL/TLS)", "אנו לא רואים, לא שומרים, ולא יכולים לגשת לפרטי האשראי בשום שלב"] },
       { type: "h", text: "שיתוף מידע עם צדדים שלישיים" },
@@ -296,7 +296,7 @@ const POLICIES = {
       { type: "l", items: ["We will not sell your data to third parties", "No spam without explicit consent", "We do not store credit card details (payment via Tranzila — PCI-DSS compliant)"] },
       { type: "h", text: "Data Security" },
       { type: "p", text: "Site is SSL secured (HTTPS). Database hosted on Supabase with encryption. Payment details go directly to Tranzila." },
-      { type: "h", text: "🔐 PCI DSS Declaration — Credit Card Security" },
+      { type: "h", text: "PCI DSS Declaration — Credit Card Security" },
       { type: "p", text: "Sfalim Shop declares compliance with credit card industry security requirements and PCI DSS standards:" },
       { type: "l", items: ["The business does NOT store credit card details in any systems or manually", "Our secure payment page provider is Tranzila — certified PCI DSS Level 1, the highest security level in the industry", "Credit card details are sent directly from the customer to Tranzila via an encrypted channel (SSL/TLS)", "We do not see, store, or have access to credit card details at any stage"] },
       { type: "h", text: "Third-Party Sharing" },
@@ -369,7 +369,7 @@ const POLICIES = {
       { type: "l", items: ["Не продаём ваши данные третьим лицам", "Не отправляем спам без согласия", "Не храним данные карт (оплата через Tranzila — стандарт PCI-DSS)"] },
       { type: "h", text: "Безопасность данных" },
       { type: "p", text: "Сайт защищён SSL (HTTPS). База данных на Supabase с шифрованием. Платёжные данные идут напрямую в Tranzila." },
-      { type: "h", text: "🔐 Декларация PCI DSS — безопасность карт" },
+      { type: "h", text: "Декларация PCI DSS — безопасность карт" },
       { type: "p", text: "Sfalim Shop заявляет о соответствии требованиям безопасности кредитных карт и стандарту PCI DSS:" },
       { type: "l", items: ["Бизнес НЕ хранит данные кредитных карт в системах или вручную", "Наш поставщик безопасной страницы оплаты — Tranzila, сертифицированный PCI DSS Level 1 (высший уровень безопасности)", "Данные карты передаются напрямую от клиента в Tranzila по зашифрованному каналу (SSL/TLS)", "Мы не видим, не храним и не имеем доступа к данным карт ни на одном этапе"] },
       { type: "h", text: "Передача третьим лицам" },
@@ -435,12 +435,12 @@ const localizeVariant = (savedLabel, targetLang) => {
 };
 
 const PRODUCTS = (t) => [
-  { id: "mug",        name: t.products.mug,       emoji: "☕", variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
-  { id: "tshirt",     name: t.products.tshirt,    emoji: "👕", variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "oversized",  name: t.products.oversized, emoji: "🧥", variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "dryfit",     name: t.products.dryfit,    emoji: "⚡", variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "sticker",    name: t.products.sticker,   emoji: "⭕", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
-  { id: "sticker_sq", name: t.products.sticker_sq, emoji: "⬜", variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
+  { id: "mug",        name: t.products.mug,       variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "tshirt",     name: t.products.tshirt,    variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "oversized",  name: t.products.oversized, variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "dryfit",     name: t.products.dryfit,    variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "sticker",    name: t.products.sticker,   variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
+  { id: "sticker_sq", name: t.products.sticker_sq, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
 ];
 
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
@@ -712,8 +712,8 @@ function AuthPage({ lang, onAuth }) {
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
       <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>☕</div>
-          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{mode === "login" ? t.auth.loginTitle : t.auth.registerTitle}</h2>
+          <div style={{ display: "inline-block", padding: "4px 16px", borderBottom: "2px solid rgba(255,107,53,0.5)", color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 22, marginBottom: 16 }}>Sfalim</div>
+          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, marginTop: 8 }}>{mode === "login" ? t.auth.loginTitle : t.auth.registerTitle}</h2>
         </div>
         <form onSubmit={handleSubmit}>
           {mode === "register" && (
@@ -857,12 +857,12 @@ function ResetPasswordPage({ lang, setPage }) {
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
       <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🔐</div>
-          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{t.auth.resetPwTitle}</h2>
+          <div style={{ display: "inline-block", padding: "4px 16px", borderBottom: "2px solid rgba(255,107,53,0.5)", color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 22, marginBottom: 16 }}>Sfalim</div>
+          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, marginTop: 8 }}>{t.auth.resetPwTitle}</h2>
         </div>
         {done ? (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(40,200,120,0.15)", border: "2px solid #28C878", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#28C878", fontSize: 28, fontWeight: 700 }}>✓</div>
             <div style={{ color: COLORS.success, fontSize: 16, fontWeight: 600, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.pwSet}</div>
           </div>
         ) : (
@@ -1039,10 +1039,10 @@ function TrackPage({ lang, user }) {
 
   if (!user) return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", direction: t.dir }}>
-      <div style={{ textAlign: "center", color: COLORS.gray }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
-        <div style={{ fontSize: 18, color: COLORS.white, marginBottom: 8 }}>{t.auth.loginTitle}</div>
-        <div style={{ fontSize: 14 }}>{t.auth.noAccount}</div>
+      <div style={{ textAlign: "center", color: COLORS.gray, maxWidth: 360 }}>
+        <div style={{ width: 56, height: 56, borderRadius: "50%", border: "1px solid rgba(255,107,53,0.4)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: COLORS.accent, fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic" }}>S</div>
+        <div style={{ fontSize: 22, color: COLORS.white, marginBottom: 10, fontFamily: "'Playfair Display',serif" }}>{t.auth.loginTitle}</div>
+        <div style={{ fontSize: 14, lineHeight: 1.7 }}>{t.auth.noAccount}</div>
       </div>
     </div>
   );
@@ -1057,9 +1057,10 @@ function TrackPage({ lang, user }) {
 
         {loading ? <div style={{ color: COLORS.gray, textAlign: "center", padding: 40 }}>...</div> :
           orders.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "60px 0", color: COLORS.gray }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
-              <div style={{ fontSize: 18 }}>{t.track.noOrders}</div>
+            <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
+              <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
+              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#777", marginBottom: 8 }}>—</div>
+              <div style={{ fontSize: 16, color: "#888" }}>{t.track.noOrders}</div>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1074,12 +1075,12 @@ function TrackPage({ lang, user }) {
                       <div>
                         <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 16 }}>{localizeProduct(order.product, lang)} — {localizeVariant(order.variant, lang)}</div>
                         <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4 }}>{new Date(order.created_at).toLocaleDateString()}</div>
-                        <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 2 }}>⏱️ {timeAgo(order.created_at, lang)}</div>
+                        <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
                         {order.completed_at && <div style={{ color: COLORS.success, fontSize: 12, marginTop: 2 }}>✅ {lang === "he" ? "הושלם תוך" : lang === "ru" ? "Выполнен за" : "Completed in"} {timeBetween(order.created_at, order.completed_at, lang)}</div>}
                       </div>
                       <div style={{ textAlign: "right" }}>
                         <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{order.total}</div>
-                        <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4 }}>{stage.emoji} {stage[lang] || stage.en}</div>
+                        <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4, display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 8px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
                       </div>
                       </div>
                     </div>
@@ -1101,11 +1102,11 @@ function TrackPage({ lang, user }) {
                               </div>
                               <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8, maxWidth: 180 }}>
                                 {order.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: order.product_color, border: "1px solid #555" }} />{order.product_color}</div>}
-                                {order.design_size && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>📐 ~{Math.round((order.design_size / 160) * 30)} cm</div>}
-                                {order.back_print && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>🖨️</div>}
-                                {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>➕</div>}
-                                {order.sleeve_left_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕L</div>}
-                                {order.sleeve_right_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕R</div>}
+                                {order.design_size && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((order.design_size / 160) * 30)} cm</div>}
+                                {order.back_print && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>BACK</div>}
+                                {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>+1</div>}
+                                {order.sleeve_left_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>L-SL</div>}
+                                {order.sleeve_right_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>R-SL</div>}
                               </div>
                             </div>
                             <div style={{ flex: 1, minWidth: 240 }}>
@@ -1129,7 +1130,7 @@ function TrackPage({ lang, user }) {
                                   {order.customer_message ? (
                                     <div style={{ background: COLORS.bg, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
                                       {order.customer_message_at && (
-                                        <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 6 }}>📅 {new Date(order.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })} · ⏱️ {timeAgo(order.customer_message_at, lang)}</div>
+                                        <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 6 }}>{new Date(order.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })} · {timeAgo(order.customer_message_at, lang)}</div>
                                       )}
                                       {order.customer_message}
                                     </div>
@@ -1150,8 +1151,8 @@ function TrackPage({ lang, user }) {
                             return (
                               <div key={s.key} style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: i < ORDER_STAGES.length - 1 ? 0 : 0 }}>
                                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                  <div style={{ width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: done ? COLORS.accent : COLORS.bg, border: `2px solid ${done ? COLORS.accent : COLORS.border}`, fontSize: 16, transition: "all 0.3s", boxShadow: active ? `0 0 12px ${COLORS.accent}` : "none" }}>
-                                    {done ? (i === si ? s.emoji : "✓") : ""}
+                                  <div style={{ width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: done ? (active ? s.dot : COLORS.accent) : COLORS.bg, border: `2px solid ${done ? (active ? s.dot : COLORS.accent) : COLORS.border}`, fontSize: 16, color: "#fff", fontWeight: 700, transition: "all 0.3s", boxShadow: active ? `0 0 14px ${s.dot}` : "none" }}>
+                                    {done ? (i === si ? "●" : "✓") : ""}
                                   </div>
                                   {i < ORDER_STAGES.length - 1 && <div style={{ width: 2, height: 32, background: done && i < si ? COLORS.accent : COLORS.border, transition: "background 0.3s" }} />}
                                 </div>
@@ -1247,9 +1248,9 @@ function AdminPage({ lang }) {
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {ORDER_STAGES.map(s => (
-              <div key={s.key} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "8px 14px", textAlign: "center" }}>
+              <div key={s.key} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "8px 14px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                 <div style={{ color: statusColors[s.key] || COLORS.accent, fontWeight: 700, fontSize: 18 }}>{orders.filter(o => o.status === s.key).length}</div>
-                <div style={{ color: COLORS.gray, fontSize: 11 }}>{s.emoji}</div>
+                <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: s.dot }}></span>
               </div>
             ))}
           </div>
@@ -1265,11 +1266,13 @@ function AdminPage({ lang }) {
                 background: filterStatus === key ? (key === "all" ? COLORS.accent : statusColors[key] || COLORS.accent) : COLORS.bgCard,
                 border: `1px solid ${filterStatus === key ? (key === "all" ? COLORS.accent : statusColors[key] || COLORS.accent) : COLORS.border}`,
                 color: filterStatus === key ? "#000" : COLORS.gray,
-                borderRadius: 8, padding: "8px 16px", cursor: "pointer",
+                borderRadius: 8, padding: "8px 14px", cursor: "pointer",
                 fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
                 transition: "all 0.2s",
+                display: "inline-flex", alignItems: "center", gap: 8,
               }}>
-                {key === "all" ? `📋 ${lang === "he" ? "הכל" : lang === "ru" ? "Все" : "All"}` : `${stage.emoji} ${stage[lang] || stage.en}`} ({count})
+                {key !== "all" && stage && <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: filterStatus === key ? "#000" : stage.dot }}></span>}
+                {key === "all" ? (lang === "he" ? "הכל" : lang === "ru" ? "Все" : "All") : (stage[lang] || stage.en)} ({count})
               </button>
             );
           })}
@@ -1279,7 +1282,7 @@ function AdminPage({ lang }) {
         {deleteConfirm && (
           <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 400, width: "90%", textAlign: "center" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🗑️</div>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: "50%", background: "rgba(239,68,68,0.12)", border: "2px solid #ef4444", marginBottom: 16, color: "#ef4444", fontSize: 28, fontWeight: 700 }}>!</div>
               <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
                 {lang === "he" ? "למחוק את ההזמנה?" : lang === "ru" ? "Удалить заказ?" : "Delete this order?"}
               </div>
@@ -1300,9 +1303,10 @@ function AdminPage({ lang }) {
 
         {loading ? <div style={{ color: COLORS.gray, textAlign: "center", padding: 40 }}>Loading...</div> :
           (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).length === 0 ? (
-            <div style={{ textAlign: "center", padding: "60px 0", color: COLORS.gray }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-              <div>{t.admin.noOrders}</div>
+            <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
+              <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
+              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#777", marginBottom: 8 }}>—</div>
+              <div style={{ fontSize: 16, color: "#888" }}>{t.admin.noOrders}</div>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1330,18 +1334,18 @@ function AdminPage({ lang }) {
                         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                           <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColors[order.status] || COLORS.accent, boxShadow: `0 0 8px ${statusColors[order.status] || COLORS.accent}`, flexShrink: 0 }} />
                           <div>
-                            <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginLeft: 8, marginRight: 8, background: "rgba(255,107,53,0.15)", padding: "2px 8px", borderRadius: 10 }}>🛒 {group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
+                            <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginLeft: 8, marginRight: 8, background: "rgba(255,107,53,0.15)", padding: "2px 10px", borderRadius: 10, letterSpacing: "0.05em" }}>{group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13 }}>{isMulti ? group.map(o => `${localizeProduct(o.product, lang)} ×${o.quantity}`).join(" · ") : `${localizeProduct(order.product, lang)} · ${localizeVariant(order.variant, lang)} · ×${order.quantity}`}</div>
                           </div>
                         </div>
                         <div style={{ textAlign: "right" }}>
                           <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{groupTotal}</div>
-                          <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 2 }}>{stage.emoji} {stage[lang] || stage.en}</div>
-                          <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>⏱️ {timeAgo(order.created_at, lang)}</div>
-                          {order.completed_at && <div style={{ color: COLORS.success, fontSize: 11, marginTop: 2 }}>✅ {timeBetween(order.created_at, order.completed_at, lang)}</div>}
+                          <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 4, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 6px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
+                          <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
+                          {order.completed_at && <div style={{ color: COLORS.success, fontSize: 11, marginTop: 2 }}>✓ {timeBetween(order.created_at, order.completed_at, lang)}</div>}
                         </div>
                       </div>
-                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(group.map(o => o.id)); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 14, marginLeft: 12, flexShrink: 0 }}>🗑️</button>
+                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(group.map(o => o.id)); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 13, marginLeft: 12, flexShrink: 0, fontWeight: 700 }}>×</button>
                     </div>
 
                     {isOpen && (
@@ -1349,10 +1353,10 @@ function AdminPage({ lang }) {
                         <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                           <div style={{ flex: 1 }}>
                             <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.customer}</div>
-                            <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📧 {order.customer_email}</div>
-                            {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📱 {order.customer_phone}</div>}
-                            {(order.customer_street || order.customer_city) && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>📍 {[order.customer_street, order.customer_city, order.customer_postal_code].filter(Boolean).join(", ")}</div>}
-                            {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>💬 {order.notes}</div>}
+                            <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{order.customer_email}</div>
+                            {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{order.customer_phone}</div>}
+                            {(order.customer_street || order.customer_city) && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{[order.customer_street, order.customer_city, order.customer_postal_code].filter(Boolean).join(", ")}</div>}
+                            {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>{order.notes}</div>}
                             {group.some(o => o.customer_message) && (
                               <div style={{ marginTop: 8 }}>
                                 {group.filter(o => o.customer_message).map(o => (
@@ -1363,7 +1367,7 @@ function AdminPage({ lang }) {
                                       </div>
                                       {o.customer_message_at && (
                                         <div style={{ color: COLORS.gray, fontSize: 10 }}>
-                                          📅 {new Date(o.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ⏱️ {timeAgo(o.customer_message_at, lang)}
+                                          {new Date(o.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · {timeAgo(o.customer_message_at, lang)}
                                         </div>
                                       )}
                                     </div>
@@ -1374,7 +1378,7 @@ function AdminPage({ lang }) {
                             )}
                           </div>
                           <div style={{ flexBasis: "100%", marginTop: 8, paddingTop: 16, borderTop: `1px dashed ${COLORS.border}` }}>
-                            <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: "uppercase", marginBottom: 12, letterSpacing: "0.08em" }}>🛒 {lang === "he" ? "פריטים בהזמנה" : lang === "ru" ? "Товары в заказе" : "Items in order"}</div>
+                            <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: "uppercase", marginBottom: 12, letterSpacing: "0.15em" }}>{lang === "he" ? "פריטים בהזמנה" : lang === "ru" ? "Товары в заказе" : "Items in order"}</div>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
                               {group.map(it => (
                                 <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
@@ -1382,11 +1386,11 @@ function AdminPage({ lang }) {
                                   <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{localizeVariant(it.variant, lang)} · ₪{it.total}</div>
                                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
                                     {it.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: it.product_color, border: "1px solid #555" }} />{it.product_color}</div>}
-                                    {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>📐 ~{Math.round((it.design_size / 160) * 30)} cm</div>}
-                                    {it.back_print && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>🖨️</div>}
-                                    {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>➕</div>}
-                                    {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕L</div>}
-                                    {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.accent }}>👕R</div>}
+                                    {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((it.design_size / 160) * 30)} cm</div>}
+                                    {it.back_print && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>BACK</div>}
+                                    {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>+1</div>}
+                                    {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>L-SL</div>}
+                                    {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>R-SL</div>}
                                   </div>
                                   {it.design_url && (
                                     <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
@@ -1431,13 +1435,13 @@ function AdminPage({ lang }) {
                                       <span>{lang === "he" ? "שלב הפריט" : lang === "ru" ? "Этап" : "Item stage"}</span>
                                       {(() => {
                                         const cur = ORDER_STAGES.find(s => s.key === it.status) || ORDER_STAGES[0];
-                                        return <span style={{ color: statusColors[it.status] || COLORS.accent, fontWeight: 700 }}>{cur.emoji} {cur[lang] || cur.en}</span>;
+                                        return <span style={{ color: statusColors[it.status] || COLORS.accent, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: cur.dot }}></span>{cur[lang] || cur.en}</span>;
                                       })()}
                                     </div>
                                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                                       {ORDER_STAGES.map(s => (
-                                        <button key={s.key} onClick={() => updateStatus(it.id, s.key, it.created_at, false)} title={s[lang] || s.en} style={{ background: it.status === s.key ? statusColors[s.key] : COLORS.bgCard, border: `1px solid ${it.status === s.key ? statusColors[s.key] : COLORS.border}`, color: it.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "4px 8px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", flex: "1 1 auto", minWidth: 32 }}>
-                                          {s.emoji}
+                                        <button key={s.key} onClick={() => updateStatus(it.id, s.key, it.created_at, false)} title={s[lang] || s.en} style={{ background: it.status === s.key ? statusColors[s.key] : COLORS.bgCard, border: `1px solid ${it.status === s.key ? statusColors[s.key] : COLORS.border}`, borderRadius: 6, padding: "6px 10px", cursor: "pointer", flex: "1 1 auto", minWidth: 32, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                          <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: s.dot, boxShadow: it.status === s.key ? `0 0 6px ${s.dot}` : "none" }}></span>
                                         </button>
                                       ))}
                                     </div>
@@ -1452,8 +1456,9 @@ function AdminPage({ lang }) {
                             </div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                               {ORDER_STAGES.map(s => (
-                                <button key={s.key} onClick={() => { group.forEach((o, idx) => updateStatus(o.id, s.key, o.created_at, idx === 0)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>
-                                  {s.emoji} {s[lang] || s.en}
+                                <button key={s.key} onClick={() => { group.forEach((o, idx) => updateStatus(o.id, s.key, o.created_at, idx === 0)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                  <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: order.status === s.key ? "#000" : s.dot }}></span>
+                                  {s[lang] || s.en}
                                 </button>
                               ))}
                             </div>
@@ -1982,7 +1987,7 @@ function OrderPage({ lang, user, setPage }) {
         {showNextChoice && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 420, width: "100%", textAlign: "center" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: "50%", background: "rgba(40,200,120,0.12)", border: "2px solid #28C878", marginBottom: 16, color: "#28C878", fontSize: 26, fontWeight: 700 }}>✓</div>
               <div style={{ color: COLORS.white, fontSize: 20, fontWeight: 700, marginBottom: 8, fontFamily: "'Playfair Display',serif" }}>
                 {lang === "he" ? "הפריט נוסף לסל!" : lang === "ru" ? "Товар добавлен в корзину!" : "Item added to cart!"}
               </div>
@@ -1991,10 +1996,10 @@ function OrderPage({ lang, user, setPage }) {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <button onClick={() => { if (addToCart()) { resetForNewItem(); setShowNextChoice(false); setStep(1); } }} style={{ background: COLORS.bgCard, border: `2px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>
-                  {lang === "he" ? "➕ הוסף עוד פריט" : lang === "ru" ? "➕ Добавить ещё товар" : "➕ Add another item"}
+                  {lang === "he" ? "הוסף עוד פריט" : lang === "ru" ? "Добавить ещё товар" : "Add another item"}
                 </button>
                 <button onClick={() => { if (addToCart()) { setShowNextChoice(false); setStep(3); } }} style={{ background: COLORS.accent, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
-                  {lang === "he" ? "💳 לתשלום ולסיום" : lang === "ru" ? "💳 К оплате" : "💳 Proceed to checkout"}
+                  {lang === "he" ? "לתשלום ולסיום" : lang === "ru" ? "К оплате" : "Proceed to checkout"}
                 </button>
                 <button onClick={() => setShowNextChoice(false)} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
                   {lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}
@@ -2009,27 +2014,27 @@ function OrderPage({ lang, user, setPage }) {
             {cart.length > 0 && (
               <div style={{ background: "rgba(255,107,53,0.1)", border: `2px solid ${COLORS.accent}`, borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                 <div>
-                  <div style={{ color: COLORS.accent, fontSize: 14, fontWeight: 700 }}>
-                    🛒 {lang === "he" ? `${cart.length} פריטים בסל` : lang === "ru" ? `${cart.length} товаров в корзине` : `${cart.length} items in cart`}
+                  <div style={{ color: COLORS.accent, fontSize: 14, fontWeight: 700, letterSpacing: "0.05em" }}>
+                    {lang === "he" ? `${cart.length} פריטים בסל` : lang === "ru" ? `${cart.length} товаров в корзине` : `${cart.length} items in cart`}
                   </div>
                   <div style={{ color: COLORS.white, fontSize: 13, marginTop: 2 }}>
                     {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + SHIPPING_PRICE}
                   </div>
                 </div>
                 <button onClick={() => setStep(3)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
-                  {lang === "he" ? "💳 לתשלום" : lang === "ru" ? "💳 К оплате" : "💳 Checkout"} →
+                  {lang === "he" ? "לתשלום" : lang === "ru" ? "К оплате" : "Checkout"} →
                 </button>
               </div>
             )}
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h2>
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.product.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {products.map(p => (
+              {products.map((p, idx) => (
                 <div key={p.id} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
                   style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <span style={{ fontSize: 32 }}>{p.emoji}</span>
-                    <div><div style={{ color: COLORS.white, fontWeight: 600 }}>{p.name}</div><div style={{ color: COLORS.gray, fontSize: 13 }}>{p.variants.length} {t.product.options} · {t.product.from}{Math.min(...p.variants.map(v => v.price))}</div></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: 32 }}>{String(idx + 1).padStart(2, '0')}</span>
+                    <div><div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>{p.name}</div><div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>{p.variants.length} {t.product.options} · {t.product.from}{Math.min(...p.variants.map(v => v.price))}</div></div>
                   </div>
                   {selectedProduct === p.id && <span style={{ color: COLORS.accent }}>✓</span>}
                 </div>
@@ -2082,10 +2087,10 @@ function OrderPage({ lang, user, setPage }) {
                     {uploadedImage && secondFront.enabled && secondFront.image && (
                       <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
                         <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'main' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                          {lang === "he" ? "🎯 עיצוב ראשי" : "🎯 Main Design"}
+                          {lang === "he" ? "עיצוב ראשי" : "Main Design"}
                         </button>
                         <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'second' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                          {lang === "he" ? "➕ עיצוב שני" : "➕ 2nd Design"}
+                          {lang === "he" ? "עיצוב שני" : "2nd Design"}
                         </button>
                       </div>
                     )}
@@ -2142,7 +2147,7 @@ function OrderPage({ lang, user, setPage }) {
                     <button onClick={() => { setActiveDesign('second'); setSecondPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: secondPositionLocked ? COLORS.bgCard : "#a78bfa", color: secondPositionLocked ? "#a78bfa" : "#fff", border: `2px solid #a78bfa`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: secondPositionLocked ? "none" : "0 4px 12px rgba(167,139,250,0.3)" }}>
                       {secondPositionLocked
                         ? (lang === "he" ? "✏️ ערוך מיקום עיצוב שני" : lang === "ru" ? "✏️ Редактировать второй" : "✏️ Edit 2nd position")
-                        : (lang === "he" ? "➕ אישור מיקום עיצוב שני" : lang === "ru" ? "➕ Сохранить второй" : "➕ Lock 2nd position")}
+                        : (lang === "he" ? "אישור מיקום עיצוב שני" : lang === "ru" ? "Сохранить второй" : "Lock 2nd position")}
                     </button>
                   )}
                   {/* Mobile size slider — below mockup */}
@@ -2244,10 +2249,10 @@ function OrderPage({ lang, user, setPage }) {
                     <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : lang === "ru" ? "Дополнительные принты" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {[
-                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "➕ עיצוב נוסף בחזית" : lang === "ru" ? "➕ Дополнительный дизайн спереди" : "➕ Second Front Design", price: SECOND_FRONT_PRICE, isSecondFront: true },
-                        { key: "bp",  state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: (fn) => { const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }); setBackPrint(v.enabled); setBackDesign({ sameAsMain: v.sameAsMain, image: v.image }); }, ref: backFileRef, label: lang === "he" ? "🖨️ הדפסה על הגב" : lang === "ru" ? "🖨️ Принт на спине" : "🖨️ Back Print", price: BACK_PRINT_PRICE },
-                        { key: "sl",  state: sleeveLeft,  setState: setSleeveLeft,  ref: sleeveLeftRef,  label: lang === "he" ? "👕 שרוול שמאל" : lang === "ru" ? "👕 Левый рукав" : "👕 Left Sleeve",  price: SLEEVE_PRICE },
-                        { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "👕 שרוול ימין" : lang === "ru" ? "👕 Правый рукав" : "👕 Right Sleeve", price: SLEEVE_PRICE },
+                        { key: "sf",  state: secondFront, setState: setSecondFront, ref: secondFileRef,  label: lang === "he" ? "עיצוב נוסף בחזית" : lang === "ru" ? "Дополнительный дизайн спереди" : "Second Front Design", price: SECOND_FRONT_PRICE, isSecondFront: true },
+                        { key: "bp",  state: { enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }, setState: (fn) => { const v = fn({ enabled: backPrint, sameAsMain: backDesign.sameAsMain, image: backDesign.image }); setBackPrint(v.enabled); setBackDesign({ sameAsMain: v.sameAsMain, image: v.image }); }, ref: backFileRef, label: lang === "he" ? "הדפסה על הגב" : lang === "ru" ? "Принт на спине" : "Back Print", price: BACK_PRINT_PRICE },
+                        { key: "sl",  state: sleeveLeft,  setState: setSleeveLeft,  ref: sleeveLeftRef,  label: lang === "he" ? "שרוול שמאל" : lang === "ru" ? "Левый рукав" : "Left Sleeve",  price: SLEEVE_PRICE },
+                        { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "שרוול ימין" : lang === "ru" ? "Правый рукав" : "Right Sleeve", price: SLEEVE_PRICE },
                       ].map(({ key, state, setState, ref, label, price, isSecondFront }) => (
                         <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: `1px solid ${state.enabled ? COLORS.accent : COLORS.border}`, borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
                           <div onClick={() => {
@@ -2349,7 +2354,7 @@ function OrderPage({ lang, user, setPage }) {
                   <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
                     {addrSuggestions.map((s, i) => (
                       <div key={i} onMouseDown={(e) => { e.preventDefault(); selectAddress(s); }} style={{ padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                        <div style={{ color: COLORS.accent, fontWeight: 600 }}>📍 {s.display_name.split(",").slice(0, 2).join(",")}</div>
+                        <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.display_name.split(",").slice(0, 2).join(",")}</div>
                         <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.display_name.split(",").slice(2).join(",").trim()}</div>
                       </div>
                     ))}
@@ -2381,7 +2386,7 @@ function OrderPage({ lang, user, setPage }) {
                   <div key={it.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: COLORS.gray, fontSize: 13, marginBottom: 8, paddingBottom: 8, borderBottom: `1px solid ${COLORS.border}` }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13 }}>{it.productName} × {it.qty}</div>
-                      <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{it.variantLabel}{it.backPrint ? " · 🖨️" : ""}{it.secondFront.enabled ? " · ➕" : ""}{it.sleeveLeft.enabled ? " · 👕L" : ""}{it.sleeveRight.enabled ? " · 👕R" : ""}</div>
+                      <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{it.variantLabel}{it.backPrint ? ` · ${lang === "he" ? "אחורי" : lang === "ru" ? "Спина" : "Back"}` : ""}{it.secondFront.enabled ? ` · ${lang === "he" ? "חזית+" : lang === "ru" ? "Доп" : "+1"}` : ""}{it.sleeveLeft.enabled ? ` · ${lang === "he" ? "ש.שמ" : "L-Sl"}` : ""}{it.sleeveRight.enabled ? ` · ${lang === "he" ? "ש.ימ" : "R-Sl"}` : ""}</div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ color: COLORS.white, fontWeight: 600 }}>₪{it.itemPrice}</span>
@@ -2431,7 +2436,12 @@ function OrderPage({ lang, user, setPage }) {
           <div>
             {/* Header */}
             <div style={{ textAlign: "center", marginBottom: 32 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: "50%", background: "rgba(255,107,53,0.12)", border: `2px solid ${COLORS.accent}`, marginBottom: 16, fontSize: 28 }}>🔒</div>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: "50%", background: "rgba(255,107,53,0.12)", border: `2px solid ${COLORS.accent}`, marginBottom: 16 }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={COLORS.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
               <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h2>
               <p style={{ color: COLORS.gray, fontSize: 15 }}>{t.payment.subtitle}</p>
             </div>
@@ -2447,7 +2457,7 @@ function OrderPage({ lang, user, setPage }) {
             {/* Order summary card */}
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "22px 22px 20px", marginBottom: 18 }}>
               <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${COLORS.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>📦 {t.payment.summary}</span>
+                <span>{t.payment.summary}</span>
                 <span style={{ color: COLORS.gray, fontSize: 12, fontWeight: 400 }}>{cart.length} {lang === "he" ? "פריטים" : lang === "ru" ? "товаров" : "items"}</span>
               </div>
               {cart.map((it) => (
@@ -2483,12 +2493,12 @@ function OrderPage({ lang, user, setPage }) {
 
             {/* Delivery address */}
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "18px 22px", marginBottom: 24 }}>
-              <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8, fontWeight: 600 }}>📍 {t.payment.deliveryTo}</div>
+              <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8, fontWeight: 600 }}>{t.payment.deliveryTo}</div>
               <div style={{ color: COLORS.white, fontSize: 14, lineHeight: 1.7 }}>
                 <div style={{ fontWeight: 600 }}>{form.name}</div>
                 <div style={{ color: "#ccc" }}>{form.street}, {form.city} {form.postalCode}</div>
-                <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>📞 {form.phonePrefix}-{form.phoneNumber}</div>
-                <div style={{ color: COLORS.gray, fontSize: 13 }}>✉️ {form.email}</div>
+                <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>{form.phonePrefix}-{form.phoneNumber}</div>
+                <div style={{ color: COLORS.gray, fontSize: 13 }}>{form.email}</div>
               </div>
             </div>
 
@@ -2521,13 +2531,13 @@ function OrderPage({ lang, user, setPage }) {
             {/* Trust signals row */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
               {[
-                { icon: "⚡", text: t.payment.trustFast },
-                { icon: "🔒", text: t.payment.trustSSL },
-                { icon: "↩️", text: t.payment.trustReturn },
-                { icon: "💳", text: t.payment.trustNoSave },
+                { text: t.payment.trustFast },
+                { text: t.payment.trustSSL },
+                { text: t.payment.trustReturn },
+                { text: t.payment.trustNoSave },
               ].map((badge, i) => (
-                <div key={i} className="trust-badge" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, cursor: "default" }}>
-                  <span className="badge-icon" style={{ fontSize: 16, lineHeight: 1 }}>{badge.icon}</span>
+                <div key={i} className="trust-badge" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, cursor: "default" }}>
+                  <span className="badge-icon" style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.accent, display: "inline-block", flexShrink: 0, boxShadow: `0 0 8px rgba(255,107,53,0.4)` }}></span>
                   <span style={{ color: COLORS.gray, fontSize: 11.5, lineHeight: 1.3 }}>{badge.text}</span>
                 </div>
               ))}
@@ -2535,8 +2545,8 @@ function OrderPage({ lang, user, setPage }) {
 
             {/* Secured by + accepted cards */}
             <div style={{ textAlign: "center", padding: "16px 0", borderTop: `1px solid ${COLORS.border}`, marginBottom: 16 }}>
-              <div style={{ color: COLORS.gray, fontSize: 12, marginBottom: 6 }}>
-                🔐 {t.payment.securedBy} <span style={{ color: COLORS.white, fontWeight: 600 }}>Tranzila</span>
+              <div style={{ color: COLORS.gray, fontSize: 12, marginBottom: 6, letterSpacing: "0.05em" }}>
+                {t.payment.securedBy} <span style={{ color: COLORS.white, fontWeight: 600 }}>Tranzila</span>
               </div>
               <div style={{ color: "#666", fontSize: 11, letterSpacing: "0.05em" }}>
                 {t.payment.acceptedCards} VISA · Mastercard · Bit · Apple Pay · Google Pay
@@ -2589,7 +2599,9 @@ function OrderPage({ lang, user, setPage }) {
             {showPaymentSoonModal && (
               <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)" }}>
                 <div style={{ background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
-                  <div style={{ fontSize: 56, marginBottom: 16 }}>🛠️</div>
+                  <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+                    <span style={{ width: 14, height: 14, borderRadius: "50%", background: COLORS.accent, display: "inline-block", boxShadow: `0 0 30px rgba(255,107,53,0.7)`, animation: "maintPulse 2s ease-in-out infinite" }}></span>
+                  </div>
                   <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
                   <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
                   <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: "12px 16px", marginBottom: 24, textAlign: "start" }}>
@@ -2653,7 +2665,7 @@ function OrderPage({ lang, user, setPage }) {
 
             {/* What's next - timeline */}
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "24px 22px", marginBottom: 28, textAlign: "start", maxWidth: 520, margin: "0 auto 28px" }}>
-              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 18, textAlign: "center" }}>📦 {t.confirm.whatsNext}</div>
+              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 18, textAlign: "center", letterSpacing: "0.05em" }}>{t.confirm.whatsNext}</div>
               {[
                 { num: "1", title: t.confirm.step1Title, sub: t.confirm.step1Sub },
                 { num: "2", title: t.confirm.step2Title, sub: t.confirm.step2Sub },
@@ -2866,11 +2878,11 @@ function Hero({ setPage, lang }) {
       <div style={{ display: "flex", gap: 20, marginTop: 80, flexWrap: "wrap", justifyContent: "center" }}>
         {products.map((p, idx) => (
           <div key={p.id} onClick={() => setPage("order")}
-            style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: "24px 32px", cursor: "pointer", minWidth: 160, transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s", animation: `fadeUp 0.6s ${idx * 0.15}s ease forwards`, opacity: 0 }}
+            style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: "28px 32px", cursor: "pointer", minWidth: 160, transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s", animation: `fadeUp 0.6s ${idx * 0.15}s ease forwards`, opacity: 0 }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-            <div style={{ fontSize: 36, marginBottom: 8 }}>{p.emoji}</div>
-            <div style={{ color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, fontSize: 14 }}>{p.name}</div>
+            <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
+            <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
             <div style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 12, marginTop: 4 }}>{t.hero.from}{Math.min(...p.variants.map(v => v.price))}</div>
           </div>
         ))}
@@ -2920,7 +2932,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
           >{t.nav.track}</button>
         )}
         {isAdmin && (
-          <button onClick={() => setPage("admin")} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>📋 {t.nav.admin}</button>
+          <button onClick={() => setPage("admin")} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>{t.nav.admin}</button>
         )}
       </div>}
 
@@ -2962,7 +2974,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
           <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "left", width: "100%" }}>{t.nav[p]}</button>
         ))}
         {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.track}</button>}
-        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>📋 {t.nav.admin}</button>}
+        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.admin}</button>}
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
         {user
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
@@ -3036,7 +3048,14 @@ function AccessibilityMenu({ lang }) {
         }}
         onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 6px 30px rgba(255,107,53,0.7)'; }}
         onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,53,0.5)'; }}
-      >♿</button>
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="4" r="2"/>
+          <path d="M12 6v6"/>
+          <path d="M8 9h8"/>
+          <path d="M9 22l3-10 3 10"/>
+        </svg>
+      </button>
 
       {/* Accessibility panel */}
       {open && (
@@ -3047,8 +3066,8 @@ function AccessibilityMenu({ lang }) {
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
           animation: 'fadeUp 0.2s ease',
         }}>
-          <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 16, fontFamily: "'Varela Round',sans-serif" }}>
-            ♿ {t.title}
+          <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 16, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em" }}>
+            {t.title}
           </div>
 
           {/* Text size */}
@@ -3085,15 +3104,15 @@ function AccessibilityMenu({ lang }) {
 function AboutPage({ lang, setPage }) {
   const t = {
     he: {
-      badge: 'באר שבע, בירת הנגב 🏙️',
+      badge: 'באר שבע, בירת הנגב',
       title: 'אנחנו Sfalim Shop',
       subtitle: 'מקצועיות ושירות אדיב — מ-2023',
       story: 'Sfalim Shop נולד מתוך אהבה לעיצוב ויצירה. מאז 2023 אנחנו מביאים לחיים כל עיצוב — על חולצות, ספלים ומדבקות — עם רמת גימור מקצועית שתרגישו בה.',
       techTitle: 'הטכנולוגיות שלנו',
       tech: [
-        { name: 'Sublimation', desc: 'הדפסה לחולצות פוליאסטר וספלים עם צבעים עמוקים ועמידים', icon: '🌊' },
-        { name: 'DTF', desc: 'הדפסה ישירה על בד — מתאים לכל סוג בד בפירוט מדהים', icon: '🎯' },
-        { name: 'Vinyl', desc: 'חיתוך ויניל לעיצובים חדים וברורים עם עמידות גבוהה', icon: '✂️' },
+        { name: 'Sublimation', desc: 'הדפסה לחולצות פוליאסטר וספלים עם צבעים עמוקים ועמידים', num: '01' },
+        { name: 'DTF', desc: 'הדפסה ישירה על בד — מתאים לכל סוג בד בפירוט מדהים', num: '02' },
+        { name: 'Vinyl', desc: 'חיתוך ויניל לעיצובים חדים וברורים עם עמידות גבוהה', num: '03' },
       ],
       processTitle: 'איך זה עובד?',
       process: [
@@ -3107,15 +3126,15 @@ function AboutPage({ lang, setPage }) {
       cta: 'התחל להזמין',
     },
     en: {
-      badge: 'Beer Sheva, Capital of the Negev 🏙️',
+      badge: 'Beer Sheva, Capital of the Negev',
       title: "We're Sfalim Shop",
       subtitle: 'Professionalism & friendly service — since 2023',
       story: 'Sfalim Shop was born from a love of design and creativity. Since 2023, we bring every design to life — on t-shirts, mugs and stickers — with professional quality you can feel.',
       techTitle: 'Our Technologies',
       tech: [
-        { name: 'Sublimation', desc: 'Printing on polyester shirts and mugs with deep, durable colors', icon: '🌊' },
-        { name: 'DTF', desc: 'Direct to film printing on any fabric type with stunning detail', icon: '🎯' },
-        { name: 'Vinyl', desc: 'Vinyl cutting for sharp, clear designs with high durability', icon: '✂️' },
+        { name: 'Sublimation', desc: 'Printing on polyester shirts and mugs with deep, durable colors', num: '01' },
+        { name: 'DTF', desc: 'Direct to film printing on any fabric type with stunning detail', num: '02' },
+        { name: 'Vinyl', desc: 'Vinyl cutting for sharp, clear designs with high durability', num: '03' },
       ],
       processTitle: 'How it works',
       process: [
@@ -3129,15 +3148,15 @@ function AboutPage({ lang, setPage }) {
       cta: 'Start Ordering',
     },
     ru: {
-      badge: 'Беэр-Шева, столица Негева 🏙️',
+      badge: 'Беэр-Шева, столица Негева',
       title: 'Мы — Sfalim Shop',
       subtitle: 'Профессионализм и дружелюбный сервис — с 2023',
       story: 'Sfalim Shop родился из любви к дизайну и творчеству. С 2023 года мы воплощаем любой дизайн в жизнь — на футболках, кружках и стикерах — с профессиональным качеством.',
       techTitle: 'Наши технологии',
       tech: [
-        { name: 'Sublimation', desc: 'Печать на полиэстер и кружках с яркими стойкими цветами', icon: '🌊' },
-        { name: 'DTF', desc: 'Прямая печать на любой ткани с потрясающей детализацией', icon: '🎯' },
-        { name: 'Vinyl', desc: 'Виниловая резка для четких дизайнов с высокой прочностью', icon: '✂️' },
+        { name: 'Sublimation', desc: 'Печать на полиэстер и кружках с яркими стойкими цветами', num: '01' },
+        { name: 'DTF', desc: 'Прямая печать на любой ткани с потрясающей детализацией', num: '02' },
+        { name: 'Vinyl', desc: 'Виниловая резка для четких дизайнов с высокой прочностью', num: '03' },
       ],
       processTitle: 'Как это работает',
       process: [
@@ -3173,12 +3192,13 @@ function AboutPage({ lang, setPage }) {
           <h2 style={{ color: '#fff', fontSize: 32, marginBottom: 40, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.techTitle}</h2>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.tech?.map((tech, i) => (
-              <div key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '28px 32px', flex: '1 1 220px', maxWidth: 280, transition: 'border-color 0.2s, transform 0.2s' }}
+              <div key={i} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '32px 32px 28px', flex: '1 1 220px', maxWidth: 280, transition: 'border-color 0.3s, transform 0.3s', position: 'relative' }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = '#FF6B35'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>{tech.icon}</div>
-                <div style={{ color: '#FF6B35', fontWeight: 700, fontSize: 18, marginBottom: 10 }}>{tech.name}</div>
-                <div style={{ color: '#666', fontSize: 14, lineHeight: 1.7 }}>{tech.desc}</div>
+                <div style={{ fontFamily: "'Playfair Display',serif", fontStyle: 'italic', fontSize: 38, color: '#FF6B35', opacity: 0.85, lineHeight: 1, marginBottom: 14, letterSpacing: '-0.5px' }}>{tech.num}</div>
+                <div style={{ width: 32, height: 2, background: 'rgba(255,107,53,0.4)', marginBottom: 14, borderRadius: 2 }}></div>
+                <div style={{ color: '#fff', fontWeight: 700, fontSize: 17, marginBottom: 10, fontFamily: "'Varela Round',sans-serif", letterSpacing: '0.3px' }}>{tech.name}</div>
+                <div style={{ color: '#777', fontSize: 13.5, lineHeight: 1.7 }}>{tech.desc}</div>
               </div>
             ))}
           </div>
@@ -3207,8 +3227,8 @@ function AboutPage({ lang, setPage }) {
         <div style={{ ...sectionStyle, textAlign: 'center' }}>
           <h2 style={{ color: '#fff', fontSize: 32, marginBottom: 32, fontFamily: "'Playfair Display',serif" }}>{t.contactTitle}</h2>
           <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
-            <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>📍 {t.location}</div>
-            <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>📧 hello@sfalimshop.com</div>
+            <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>{t.location}</div>
+            <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>hello@sfalimshop.com</div>
           </div>
           <button onClick={() => setPage('order')} style={{ background: '#FF6B35', color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'all 0.2s' }}
             onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(255,107,53,0.6)'; }}
@@ -3332,6 +3352,10 @@ export default function App() {
           0%, 100% { transform: translateY(0); }
           50%      { transform: translateY(-3px); }
         }
+        @keyframes maintPulse {
+          0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 30px rgba(255,107,53,0.7); }
+          50%      { transform: scale(1.5); opacity: 0.6; box-shadow: 0 0 50px rgba(255,107,53,0.9); }
+        }
         .trust-badge {
           opacity: 0;
           animation: badgeFadeIn 0.5s cubic-bezier(.2,.6,.2,1) forwards;
@@ -3405,9 +3429,9 @@ export default function App() {
 
 function MaintenancePage({ lang, setLang, setPage }) {
   const messages = {
-    he: { title: "האתר בתחזוקה", sub: "אנחנו עובדים על שדרוגים מרגשים ✨", back: "נחזור בקרוב!", staff: "כניסת צוות" },
-    en: { title: "Under Maintenance", sub: "We're working on exciting upgrades ✨", back: "Back soon!", staff: "Staff login" },
-    ru: { title: "Сайт на обслуживании", sub: "Мы работаем над улучшениями ✨", back: "Скоро вернёмся!", staff: "Вход для персонала" },
+    he: { title: "האתר בתחזוקה", sub: "אנחנו עובדים על שדרוגים מרגשים", back: "נחזור בקרוב!", staff: "כניסת צוות" },
+    en: { title: "Under Maintenance", sub: "We are working on exciting upgrades", back: "Back soon!", staff: "Staff login" },
+    ru: { title: "Сайт на обслуживании", sub: "Мы работаем над улучшениями", back: "Скоро вернёмся!", staff: "Вход для персонала" },
   };
   const m = messages[lang] || messages.he;
   return (
@@ -3420,12 +3444,14 @@ function MaintenancePage({ lang, setLang, setPage }) {
         ))}
       </div>
       <div style={{ textAlign: "center", maxWidth: 520 }}>
-        <div style={{ fontSize: 80, marginBottom: 20 }}>🚧</div>
-        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 48, color: "#fff", marginBottom: 16 }}>{m.title}</h1>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+          <span style={{ width: 14, height: 14, borderRadius: "50%", background: "#FF6B35", display: "inline-block", boxShadow: "0 0 30px rgba(255,107,53,0.7)", animation: "maintPulse 2s ease-in-out infinite" }}></span>
+        </div>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 48, color: "#fff", marginBottom: 16, letterSpacing: "-0.5px" }}>{m.title}</h1>
         <p style={{ color: "#999", fontSize: 18, marginBottom: 8, fontFamily: "'Varela Round',sans-serif" }}>{m.sub}</p>
         <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 36 }}>{m.back}</p>
         <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 14 }}>
-          📷 Instagram @sfalimshop
+          Instagram @sfalimshop
         </a>
       </div>
       <div style={{ position: "absolute", bottom: 56, fontSize: 12, color: "#666", fontFamily: "'Varela Round',sans-serif", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "center", padding: "0 16px" }}>
@@ -3495,14 +3521,14 @@ function PoliciesPage({ lang }) {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
         {POLICY_SECTIONS.map(s => (
           <button key={s.id} onClick={() => goSection(s.id)} style={{ background: activeSection === s.id ? "#FF6B35" : "#1a1a1a", color: activeSection === s.id ? "#fff" : "#999", border: `1px solid ${activeSection === s.id ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
-            {s.emoji} {s.title[lang]}
+            {s.title[lang]}
           </button>
         ))}
       </div>
 
       <div style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
         <h2 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
-          {POLICY_SECTIONS.find(s => s.id === activeSection)?.emoji} {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
+          {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
         </h2>
         <div style={{ color: "#ccc", fontFamily: "'Varela Round',sans-serif", fontSize: 14, lineHeight: 1.8 }}>
           {(content[activeSection] || []).map((block, i) => {
@@ -3519,11 +3545,11 @@ function PoliciesPage({ lang }) {
       </div>
 
       <div style={{ background: "rgba(255,107,53,0.08)", border: "1px solid #FF6B35", borderRadius: 12, padding: "16px 20px", marginTop: 24, color: "#ccc", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
-        <div style={{ color: "#FF6B35", fontWeight: 700, marginBottom: 6 }}>
-          {lang === "he" ? "📞 צריכים עזרה?" : lang === "ru" ? "📞 Нужна помощь?" : "📞 Need help?"}
+        <div style={{ color: "#FF6B35", fontWeight: 700, marginBottom: 6, letterSpacing: "0.05em" }}>
+          {lang === "he" ? "צריכים עזרה?" : lang === "ru" ? "Нужна помощь?" : "Need help?"}
         </div>
-        <div>📧 {BUSINESS_INFO.email} · 📞 {BUSINESS_INFO.phone}</div>
-        <div style={{ marginTop: 4 }}>📍 {BUSINESS_INFO.address[lang]}</div>
+        <div><a href={`mailto:${BUSINESS_INFO.email}`} style={{ color: "#ccc", textDecoration: "none" }}>{BUSINESS_INFO.email}</a> · <a href={`tel:${BUSINESS_INFO.phone}`} style={{ color: "#ccc", textDecoration: "none" }}>{BUSINESS_INFO.phone}</a></div>
+        <div style={{ marginTop: 4 }}>{BUSINESS_INFO.address[lang]}</div>
       </div>
     </div>
   );
