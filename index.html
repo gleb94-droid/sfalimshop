@@ -1,14 +1,155 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sfalim Shop</title>
-    <meta name="description" content="הדפסות מותאמות אישית על חולצות, ספלים ומדבקות" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- ============ PRIMARY META TAGS ============ -->
+  <title>ספלים שופ | הדפסות מותאמות אישית — חולצות, ספלים, מדבקות</title>
+  <meta name="title" content="ספלים שופ | הדפסות מותאמות אישית — חולצות, ספלים, מדבקות" />
+  <meta name="description" content="הדפסות איכותיות מותאמות אישית. ספלים, חולצות ומדבקות עם העיצוב שלך — מודפס בישראל באהבה ובדיוק. משלוח עד הבית." />
+  <meta name="keywords" content="ספלים מותאמים אישית, הדפסה על חולצות, מדבקות מותאמות, מתנה מקורית, הדפסה דיגיטלית, עיצוב אישי, באר שבע" />
+  <meta name="author" content="Sfalim Shop" />
+  <link rel="canonical" href="https://www.sfalimshop.com/" />
+
+  <!-- ============ OPEN GRAPH (WhatsApp, Facebook, LinkedIn) ============ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ספלים שופ" />
+  <meta property="og:url" content="https://www.sfalimshop.com/" />
+  <meta property="og:title" content="ספלים שופ | הדפסות מותאמות אישית" />
+  <meta property="og:description" content="הדפסות איכותיות על ספלים, חולצות ומדבקות עם העיצוב שלך. מודפס בישראל באהבה ובדיוק." />
+  <meta property="og:image" content="https://www.sfalimshop.com/og-image.png" />
+  <meta property="og:image:secure_url" content="https://www.sfalimshop.com/og-image.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="ספלים שופ - הדפסות מותאמות אישית" />
+  <meta property="og:locale" content="he_IL" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:locale:alternate" content="ru_RU" />
+
+  <!-- ============ TWITTER / X CARDS ============ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://www.sfalimshop.com/" />
+  <meta name="twitter:title" content="ספלים שופ | הדפסות מותאמות אישית" />
+  <meta name="twitter:description" content="הדפסות איכותיות על ספלים, חולצות ומדבקות עם העיצוב שלך." />
+  <meta name="twitter:image" content="https://www.sfalimshop.com/og-image.png" />
+  <meta name="twitter:image:alt" content="ספלים שופ - הדפסות מותאמות אישית" />
+
+  <!-- ============ CRAWLERS ============ -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow" />
+  <meta name="bingbot" content="index, follow" />
+
+  <!-- ============ MOBILE APP META ============ -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sfalim Shop" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- ============ FAVICONS & MANIFEST ============ -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- ============ PERFORMANCE: PRECONNECT ============ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://ubvgrxlxtelulwjtfudd.supabase.co" />
+  <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+  <link rel="dns-prefetch" href="//connect.facebook.net" />
+
+  <!-- ============ FONTS (preload critical, async swap) ============ -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Varela+Round&display=swap" as="style" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Varela+Round&display=swap" rel="stylesheet" />
+
+  <!-- ============ STRUCTURED DATA: LOCAL BUSINESS ============ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": "https://www.sfalimshop.com/#organization",
+    "name": "ספלים שופ",
+    "alternateName": ["Sfalim Shop", "Sfalimshop"],
+    "description": "הדפסות מותאמות אישית — חולצות, ספלים ומדבקות עם העיצוב שלך",
+    "url": "https://www.sfalimshop.com",
+    "logo": "https://www.sfalimshop.com/logo.png",
+    "image": "https://www.sfalimshop.com/og-image.png",
+    "email": "hello@sfalimshop.com",
+    "telephone": "+972-54-6841662",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "HaSportaim St. 28",
+      "addressLocality": "Be'er Sheva",
+      "addressRegion": "Southern District",
+      "addressCountry": "IL"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "31.2518",
+      "longitude": "34.7913"
+    },
+    "priceRange": "₪15-₪109",
+    "currenciesAccepted": "ILS",
+    "paymentAccepted": "Credit Card",
+    "vatID": "321630279",
+    "sameAs": [
+      "https://www.instagram.com/sfalimshop/"
+    ],
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      }
+    ]
+  }
+  </script>
+
+  <!-- ============ STRUCTURED DATA: WEBSITE ============ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://www.sfalimshop.com/#website",
+    "url": "https://www.sfalimshop.com",
+    "name": "ספלים שופ",
+    "alternateName": "Sfalim Shop",
+    "description": "הדפסות מותאמות אישית — חולצות, ספלים, מדבקות",
+    "inLanguage": ["he-IL", "en-US", "ru-RU"],
+    "publisher": { "@id": "https://www.sfalimshop.com/#organization" }
+  }
+  </script>
+
+  <!-- ============ STRUCTURED DATA: PRODUCT CATALOG ============ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+      { "@type": "Product", "name": "ספל מותאם אישית", "description": "ספל פורצלן עם העיצוב שלך", "offers": { "@type": "Offer", "price": "69", "priceCurrency": "ILS" } },
+      { "@type": "Product", "name": "חולצה מותאמת אישית", "description": "חולצה כותנה איכותית עם הדפסה", "offers": { "@type": "Offer", "price": "89", "priceCurrency": "ILS" } },
+      { "@type": "Product", "name": "חולצת אוברסייז", "description": "חולצה בגזרה רחבה", "offers": { "@type": "Offer", "price": "99", "priceCurrency": "ILS" } },
+      { "@type": "Product", "name": "חולצת דרייפיט", "description": "חולצת ספורט נושמת", "offers": { "@type": "Offer", "price": "95", "priceCurrency": "ILS" } },
+      { "@type": "Product", "name": "מדבקות מותאמות", "description": "מדבקות עמידות עם העיצוב שלך", "offers": { "@type": "Offer", "price": "15", "priceCurrency": "ILS" } }
+    ]
+  }
+  </script>
+</head>
+<body style="margin:0;background:#0f0f0f;color:#fff;">
+  <noscript>
+    <div style="padding:24px;text-align:center;font-family:sans-serif;">
+      ספלים שופ דורש JavaScript כדי לפעול. אנא הפעל JavaScript בדפדפן שלך.<br/>
+      Sfalim Shop requires JavaScript to function. Please enable JavaScript in your browser.
+    </div>
+  </noscript>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
 </html>
