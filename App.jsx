@@ -2909,29 +2909,6 @@ function useScrollReveal(ref) {
   return visible;
 }
 
-// Magnetic Button Component
-function MagneticButton({ children, style, onClick, disabled }) {
-  const btnRef = useRef(null);
-  const handleMouseMove = (e) => {
-    const btn = btnRef.current;
-    if (!btn) return;
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
-  };
-  const handleMouseLeave = () => {
-    if (btnRef.current) btnRef.current.style.transform = 'translate(0, 0)';
-  };
-  return (
-    <button ref={btnRef} onClick={onClick} disabled={disabled}
-      onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
-      style={{ ...style, transition: 'transform 0.15s ease, background 0.2s, box-shadow 0.2s' }}>
-      {children}
-    </button>
-  );
-}
-
 function Hero({ setPage, lang }) {
   const t = LANGS[lang];
   const products = PRODUCTS(t);
