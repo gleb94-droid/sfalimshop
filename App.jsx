@@ -3465,8 +3465,15 @@ export default function App() {
       document.querySelectorAll(".reveal:not(.revealed)").forEach(el => observer.observe(el));
     }, 50);
 
+    // Safety net: force-reveal anything still hidden after 1.5s
+    // Prevents the "empty page on refresh" bug when observer fails to fire
+    const safetyTimer = setTimeout(() => {
+      document.querySelectorAll(".reveal:not(.revealed)").forEach(el => el.classList.add("revealed"));
+    }, 1500);
+
     return () => {
       clearTimeout(timer);
+      clearTimeout(safetyTimer);
       observer.disconnect();
     };
   }, [page]);
@@ -4011,19 +4018,19 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
       onMouseLeave={() => setHovered(false)}
       style={{
         cursor: "pointer",
-        background: COLORS.bgCard,
-        border: `1px solid ${hovered ? COLORS.accent : COLORS.border}`,
+        background: "transparent",
+        border: `1px solid ${hovered ? COLORS.accent : "rgba(255,255,255,0.06)"}`,
         borderRadius: 14,
         overflow: "hidden",
         transition: "all 0.35s cubic-bezier(.2,.6,.2,1)",
         transform: hovered ? "translateY(-6px)" : "translateY(0)",
-        boxShadow: hovered ? "0 18px 48px rgba(0,0,0,0.4), 0 0 30px rgba(255,107,53,0.15)" : "0 4px 18px rgba(0,0,0,0.2)",
+        boxShadow: hovered ? "0 18px 48px rgba(0,0,0,0.4), 0 0 30px rgba(255,107,53,0.15)" : "none",
       }}>
       {/* Image area */}
       <div style={{
         position: "relative",
         aspectRatio: "1",
-        background: design.mockup_url ? "#1a1a1a" : fallbackBg,
+        background: design.mockup_url ? "transparent" : fallbackBg,
         overflow: "hidden",
         display: "flex",
         alignItems: "center",
@@ -4036,8 +4043,8 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
           style={{
             width: "100%",
             height: "100%",
-            objectFit: design.mockup_url ? "cover" : "contain",
-            padding: design.mockup_url ? 0 : "14%",
+            objectFit: "contain",
+            padding: design.mockup_url ? "8%" : "14%",
             transition: "transform 0.6s cubic-bezier(.2,.6,.2,1)",
             transform: hovered ? "scale(1.05)" : "scale(1)",
           }}
