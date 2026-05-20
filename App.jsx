@@ -3777,8 +3777,8 @@ function PetsPage({ lang, setPage }) {
     he: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
       heading: "Bloom.",
-      subheading: "אוסף מנהלי. אנכבר־דמויות עם נשמה.",
-      subheading2: "12 דיוקנאות בשמן, כל אחת בעלת אופי משלה.",
+      subheading: "אוסף מובחר. דמויות עם נשמה.",
+      subheading2: "12 דיוקנאות בשמן — לכל אחד אופי משלו.",
       scroll: "גלה את האוסף",
       collectionEyebrow: "האוסף",
       collectionCount: "12 דמויות",
@@ -3877,7 +3877,7 @@ function PetsPage({ lang, setPage }) {
           margin: "0 0 20px 0",
           letterSpacing: "-0.02em",
           textShadow: "0 8px 30px rgba(255,107,53,0.15)",
-        }}>
+        }} dir="ltr">
           {t.heading}
         </h1>
 
@@ -3986,9 +3986,13 @@ function PetsPage({ lang, setPage }) {
         />
       )}
 
-      {/* Spin animation for loader */}
+      {/* Animations for PetsPage */}
       <style>{`
         @keyframes petsSpin { to { transform: rotate(360deg); } }
+        @keyframes petCardFadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
       `}</style>
     </div>
   );
@@ -4002,8 +4006,6 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
 
   return (
     <div
-      className="reveal"
-      data-delay={Math.min(6, Math.floor(index / 2))}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
