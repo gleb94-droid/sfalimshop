@@ -15,8 +15,8 @@ const ADMIN_EMAIL = "gleb2009@gmail.com";
 // Get GA4 ID at: https://analytics.google.com  → Admin → Data Streams → Web Stream → Measurement ID
 // Get FB Pixel ID at: https://business.facebook.com → Events Manager → Data Sources → Pixel ID
 const ANALYTICS = {
-  ga4: "",      // e.g., "G-XXXXXXXXXX"  (leave empty to disable)
-  fbPixel: "",  // e.g., "123456789012345" (leave empty to disable)
+  ga4: "G-JCCY177TCN",      // e.g., "G-XXXXXXXXXX"  (leave empty to disable)
+  fbPixel: "2048679669402511",  // e.g., "123456789012345" (leave empty to disable)
 };
 
 // 🚧 MAINTENANCE MODE — set to true to show "Under Maintenance" page to all visitors.
