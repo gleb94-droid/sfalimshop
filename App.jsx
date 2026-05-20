@@ -2991,13 +2991,26 @@ function AboutPage({ lang, setPage }) {
 export default function App() {
   const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'policies', 'reset-password'];
 
-  const getPageFromHash = () => {
+  // Clean URL paths → policy section IDs (for Google verification + SEO)
+  const PATH_TO_POLICY_SECTION = {
+    '/privacy': 'privacy',
+    '/terms': 'terms',
+    '/refunds': 'refund',
+    '/shipping': 'shipping',
+    '/accessibility': 'accessibility',
+  };
+
+  const getPageFromURL = () => {
+    if (typeof window === 'undefined') return 'home';
+    if (PATH_TO_POLICY_SECTION[window.location.pathname]) return 'policies';
     const hash = window.location.hash.replace('#', '');
     const root = hash.split('/')[0];
     return VALID_PAGES.includes(root) ? root : 'home';
   };
 
-  const [page, setPageState] = useState(getPageFromHash);
+  const getPageFromHash = getPageFromURL;
+
+  const [page, setPageState] = useState(getPageFromURL);
   const [lang, setLang] = useState("he");
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -3009,6 +3022,12 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Convert clean policy paths (/privacy, /terms etc.) to hash form so internal routing works
+    const section = PATH_TO_POLICY_SECTION[window.location.pathname];
+    if (section) {
+      window.history.replaceState({ page: 'policies' }, '', `/#policies/${section}`);
+    }
+
     // Handle browser back/forward button
     const handlePopState = (e) => {
       const newPage = e.state?.page || getPageFromHash();
@@ -3059,7 +3078,7 @@ export default function App() {
       <CursorGlow />
       {(() => {
         const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
-        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride) {
+        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride && page !== 'policies') {
           return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} />;
         }
         return (
@@ -3108,6 +3127,23 @@ function MaintenancePage({ lang, setLang, setPage }) {
           📷 Instagram @sfalimshop
         </a>
       </div>
+      <div style={{ position: "absolute", bottom: 56, fontSize: 12, color: "#666", fontFamily: "'Varela Round',sans-serif", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "center", padding: "0 16px" }}>
+        <a href="/privacy" style={{ color: "#888", textDecoration: "none" }}>
+          {lang === "he" ? "פרטיות" : lang === "ru" ? "Конфиденциальность" : "Privacy Policy"}
+        </a>
+        <span style={{ color: "#444" }}>·</span>
+        <a href="/terms" style={{ color: "#888", textDecoration: "none" }}>
+          {lang === "he" ? "תקנון" : lang === "ru" ? "Условия" : "Terms of Service"}
+        </a>
+        <span style={{ color: "#444" }}>·</span>
+        <a href="/accessibility" style={{ color: "#888", textDecoration: "none" }}>
+          {lang === "he" ? "נגישות" : lang === "ru" ? "Доступность" : "Accessibility"}
+        </a>
+        <span style={{ color: "#444" }}>·</span>
+        <a href="mailto:hello@sfalimshop.com" style={{ color: "#888", textDecoration: "none" }}>
+          {lang === "he" ? "צור קשר" : lang === "ru" ? "Контакты" : "Contact"}
+        </a>
+      </div>
       <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#555", fontFamily: "'Varela Round',sans-serif" }}>
         <a href="?staff=1" style={{ color: "#555", textDecoration: "none" }}>· {m.staff} ·</a>
       </div>
@@ -3116,8 +3152,19 @@ function MaintenancePage({ lang, setLang, setPage }) {
 }
 
 function PoliciesPage({ lang }) {
-  const sectionFromHash = typeof window !== "undefined" ? (window.location.hash.split("?")[0].replace("#", "") || "").split("/")[1] || "refund" : "refund";
-  const [activeSection, setActiveSection] = useState(sectionFromHash);
+  const PATH_TO_SECTION = {
+    '/privacy': 'privacy',
+    '/terms': 'terms',
+    '/refunds': 'refund',
+    '/shipping': 'shipping',
+    '/accessibility': 'accessibility',
+  };
+  const sectionFromURL = (() => {
+    if (typeof window === "undefined") return "refund";
+    if (PATH_TO_SECTION[window.location.pathname]) return PATH_TO_SECTION[window.location.pathname];
+    return (window.location.hash.split("?")[0].replace("#", "") || "").split("/")[1] || "refund";
+  })();
+  const [activeSection, setActiveSection] = useState(sectionFromURL);
   const content = POLICIES[lang] || POLICIES.he;
   const isRTL = lang === "he";
 
