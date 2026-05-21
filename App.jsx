@@ -3869,6 +3869,8 @@ function PetsPage({ lang, setPage }) {
   const [selected, setSelected] = useState(null); // currently opened character in modal
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
   const pHero = useParallax(0.18);
+  const pOrb1 = useParallax(0.25);
+  const pOrb2 = useParallax(-0.18);
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768);
@@ -4035,8 +4037,8 @@ function PetsPage({ lang, setPage }) {
   return (
     <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: "100vh", paddingTop: 72, direction: isRTL ? "rtl" : "ltr" }}>
       {/* Ambient orange glow background */}
-      <div style={{ position: "fixed", top: "10%", left: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 60%)", filter: "blur(60px)", zIndex: 0, pointerEvents: "none" }} />
-      <div style={{ position: "fixed", bottom: "10%", right: "5%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 60%)", filter: "blur(80px)", zIndex: 0, pointerEvents: "none" }} />
+      <div style={{ position: "fixed", top: "10%", left: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 60%)", filter: "blur(60px)", zIndex: 0, pointerEvents: "none", transform: `translateY(${pOrb1}px)`, willChange: "transform" }} />
+      <div style={{ position: "fixed", bottom: "10%", right: "5%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 60%)", filter: "blur(80px)", zIndex: 0, pointerEvents: "none", transform: `translateY(${pOrb2}px)`, willChange: "transform" }} />
 
       {/* Floating paw prints */}
       <PawPrintsBackground />
