@@ -11,6 +11,16 @@ const COLORS = {
 const SHIPPING_PRICE = 30;
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 
+// ============ BLOOM shirt colors — 5 basic options for the Pet Couture collection ============
+const BLOOM_SHIRT_COLORS = [
+  { id: "white", hex: "#ffffff", he: "לבן",  en: "White", ru: "Белый" },
+  { id: "black", hex: "#1a1a1a", he: "שחור", en: "Black", ru: "Чёрный" },
+  { id: "gray",  hex: "#9ca3af", he: "אפור", en: "Gray",  ru: "Серый" },
+  { id: "navy",  hex: "#1e3a5f", he: "נייבי", en: "Navy",  ru: "Тёмно-синий" },
+  { id: "sand",  hex: "#d4c5a9", he: "חול",  en: "Sand",  ru: "Песочный" },
+  { id: "pink",  hex: "#f9a8d4", he: "ורוד", en: "Pink",  ru: "Розовый" },
+];
+
 // ============ ANALYTICS CONFIG — fill in your IDs to activate ============
 // Get GA4 ID at: https://analytics.google.com  → Admin → Data Streams → Web Stream → Measurement ID
 // Get FB Pixel ID at: https://business.facebook.com → Events Manager → Data Sources → Pixel ID
@@ -4291,6 +4301,7 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
 function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile }) {
   const isRTL = lang === "he";
   const [showSoon, setShowSoon] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const imgSrc = design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
 
@@ -4422,6 +4433,34 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile })
               {t.availableOn}
             </div>
 
+            {/* Shirt color picker — choice is saved for ordering */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase" }}>
+                  {lang === "he" ? "צבע חולצה" : lang === "ru" ? "Цвет футболки" : "Shirt color"}
+                </span>
+                <span style={{ color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 600 }}>
+                  {selectedColor[lang] || selectedColor.en}
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {BLOOM_SHIRT_COLORS.map((c) => (
+                  <div
+                    key={c.id}
+                    onClick={() => setSelectedColor(c)}
+                    title={c[lang] || c.en}
+                    style={{
+                      width: 30, height: 30, borderRadius: "50%", background: c.hex, cursor: "pointer",
+                      border: `3px solid ${selectedColor.id === c.id ? COLORS.accent : "transparent"}`,
+                      boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
+                      transition: "transform 0.15s, border-color 0.15s",
+                      transform: selectedColor.id === c.id ? "scale(1.18)" : "scale(1)",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
             {/* Product buttons */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
               <ProductOption label={t.shirtLabel} price={design.price_shirt} onClick={() => setShowSoon("shirt")} disabled={!design.mockup_url && !design.design_url} />
@@ -4444,6 +4483,14 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile })
                     {t.comingSoonTitle}
                   </div>
                 </div>
+                {showSoon === "shirt" && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <span style={{ width: 16, height: 16, borderRadius: "50%", background: selectedColor.hex, border: "1px solid rgba(255,255,255,0.3)", flexShrink: 0 }} />
+                    <span style={{ color: COLORS.white, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
+                      {lang === "he" ? `צבע נבחר: ${selectedColor.he}` : lang === "ru" ? `Выбран цвет: ${selectedColor.ru}` : `Selected color: ${selectedColor.en}`}
+                    </span>
+                  </div>
+                )}
                 <p style={{ color: COLORS.gray, fontSize: 13, fontFamily: "'Varela Round',sans-serif", margin: 0, lineHeight: 1.5 }}>
                   {t.comingSoonSub}
                 </p>
