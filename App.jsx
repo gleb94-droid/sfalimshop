@@ -1496,7 +1496,7 @@ function AdminPage({ lang }) {
 }
 
 // Order Page
-function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem }) {
+function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart }) {
   const t = LANGS[lang];
   const products = PRODUCTS(t);
   const [step, setStep] = useState(pendingBloomItem ? 3 : 1);
@@ -1578,9 +1578,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   }, [step]);
 
   const allowLeaveRef = useRef(false);
-  const [cart, setCart] = useState([]);
   const [currentItemCartId, setCurrentItemCartId] = useState(null);
-  const [showNextChoice, setShowNextChoice] = useState(false);
+  // showNextChoice opens immediately when arriving with a BLOOM item to add.
+  const [showNextChoice, setShowNextChoice] = useState(!!pendingBloomItem);
+  // Tracks whether the "added to cart" popup is showing for a BLOOM item
+  // (its buttons return to the collection) vs a custom item.
+  const [nextChoiceIsBloom, setNextChoiceIsBloom] = useState(!!pendingBloomItem);
 
   const commitCurrentItem = () => {
     if (!product || !variant || !uploadedImage) return false;
@@ -1643,15 +1646,21 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   // ── BLOOM direct order ──────────────────────────────────────────────
   // A character chosen from the BLOOM modal arrives as a ready-made item:
-  // its design is already fixed (the character's design_url), so we add it
-  // straight to the cart and jump to the details step — no product picker,
+  // its design is already fixed (the character's design_url). We add it to
+  // the cart and show the "added to cart" choice popup — no product picker,
   // no file upload. Runs once when the order page opens with a pending item.
   const bloomConsumedRef = useRef(false);
   useEffect(() => {
     if (bloomConsumedRef.current || !pendingBloomItem) return;
-    const prod = products.find(p => p.id === pendingBloomItem.productId);
-    if (!prod || !prod.variants.length) { clearPendingBloomItem(); return; }
     bloomConsumedRef.current = true;
+    const prod = products.find(p => p.id === pendingBloomItem.productId);
+    if (!prod || !prod.variants.length) {
+      // Bad data — close the popup so we never show an empty confirmation.
+      setShowNextChoice(false);
+      setNextChoiceIsBloom(false);
+      clearPendingBloomItem();
+      return;
+    }
     const v = (pendingBloomItem.variantId && prod.variants.find(x => x.id === pendingBloomItem.variantId)) || prod.variants[0];
     const colorHex = pendingBloomItem.shirtColor ? pendingBloomItem.shirtColor.hex : prod.colors[0];
     const matchedIdx = prod.colors.indexOf(colorHex);
@@ -1674,7 +1683,6 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       itemPrice: Number(pendingBloomItem.price) || 0,
     };
     setCart(c => [...c, bloomCartItem]);
-    setStep(3);
     clearPendingBloomItem();
   }, []);
 
@@ -2052,13 +2060,19 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {lang === "he" ? "מה ברצונך לעשות?" : lang === "ru" ? "Что бы вы хотели сделать?" : "What would you like to do?"}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <button onClick={() => { if (addToCart()) { resetForNewItem(); setShowNextChoice(false); setStep(1); } }} style={{ background: COLORS.bgCard, border: `2px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>
+                <button onClick={() => {
+                  if (nextChoiceIsBloom) { setShowNextChoice(false); setNextChoiceIsBloom(false); setPage("pets"); }
+                  else if (addToCart()) { resetForNewItem(); setShowNextChoice(false); setStep(1); }
+                }} style={{ background: COLORS.bgCard, border: `2px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>
                   {lang === "he" ? "הוסף עוד פריט" : lang === "ru" ? "Добавить ещё товар" : "Add another item"}
                 </button>
-                <button onClick={() => { if (addToCart()) { setShowNextChoice(false); setStep(3); } }} style={{ background: COLORS.accent, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
+                <button onClick={() => {
+                  if (nextChoiceIsBloom) { setShowNextChoice(false); setNextChoiceIsBloom(false); setStep(3); }
+                  else if (addToCart()) { setShowNextChoice(false); setStep(3); }
+                }} style={{ background: COLORS.accent, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
                   {lang === "he" ? "לתשלום ולסיום" : lang === "ru" ? "К оплате" : "Proceed to checkout"}
                 </button>
-                <button onClick={() => setShowNextChoice(false)} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+                <button onClick={() => { setShowNextChoice(false); setNextChoiceIsBloom(false); }} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
                   {lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}
                 </button>
               </div>
@@ -2484,7 +2498,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               );
             })()}
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-              <button onClick={() => setStep(2)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
+              <button onClick={() => setStep(product ? 2 : 1)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
               <button onClick={handleSubmit} disabled={!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode || submitting} style={{ flex: 1, background: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? COLORS.accent : COLORS.bgCard, color: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
                 {submitting ? "..." : `${t.form.place} · ₪${total}`}
               </button>
@@ -3504,6 +3518,9 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [pendingBloomItem, setPendingBloomItem] = useState(null);
+  // The order cart lives here (not inside OrderPage) so it survives navigation
+  // between the BLOOM collection and the order page while shopping.
+  const [cart, setCart] = useState([]);
 
   const setPage = (newPage) => {
     const hash = newPage === 'home' ? '' : newPage;
@@ -3816,7 +3833,7 @@ export default function App() {
             {page === "home" && <Hero setPage={setPage} lang={lang} />}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={orderBloomDesign} />}
-            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} />}
+            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
