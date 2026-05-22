@@ -2052,6 +2052,9 @@ function OrderPage({ lang, user, setPage }) {
                   style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
                     <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: 32 }}>{String(idx + 1).padStart(2, '0')}</span>
+                    <div style={{ width: 54, height: 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <img src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                    </div>
                     <div><div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>{p.name}</div><div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>{p.variants.length} {t.product.options} · {t.product.from}{Math.min(...p.variants.map(v => v.price))}</div></div>
                   </div>
                   {selectedProduct === p.id && <span style={{ color: COLORS.accent }}>✓</span>}
