@@ -102,7 +102,7 @@ const LANGS = {
       setPasswordDesc: "הוסף סיסמה לכניסה מהירה יותר (לא חובה)",
       googleBtn: "המשך עם Google", emailRequired: "אנא הזן מייל למעלה תחילה",
     },
-    track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך" },
+    track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך", guestTitle: "מעקב אחר ההזמנה שלך", guestDesc: "לא צריך סיסמה — נשלח לך למייל קישור מאובטח לצפייה בהזמנות שלך.", guestBtn: "שלח לי קישור" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
     products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
@@ -139,7 +139,7 @@ const LANGS = {
       setPasswordDesc: "Add a password for faster sign-in (optional)",
       googleBtn: "Continue with Google", emailRequired: "Please enter your email above first",
     },
-    track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date" },
+    track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
     products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
@@ -176,7 +176,7 @@ const LANGS = {
       setPasswordDesc: "Добавьте пароль для быстрого входа (необязательно)",
       googleBtn: "Продолжить с Google", emailRequired: "Сначала введите email выше",
     },
-    track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата" },
+    track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
     products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
@@ -1029,10 +1029,18 @@ function TrackPage({ lang, user }) {
   const [filterStatus, setFilterStatus] = useState("all");
   const [msgDrafts, setMsgDrafts] = useState({});
   const [savingMsg, setSavingMsg] = useState({});
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [guestError, setGuestError] = useState("");
+  const [guestSent, setGuestSent] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+    // Match the customer's account orders AND any placed as a guest with the same email.
+    const orFilter = user.email
+      ? `user_id.eq.${user.id},customer_email.eq.${user.email}`
+      : `user_id.eq.${user.id}`;
+    supabase.from("orders").select("*").or(orFilter).order("created_at", { ascending: false })
       .then(({ data }) => {
         setOrders(data || []);
         const drafts = {};
@@ -1055,12 +1063,53 @@ function TrackPage({ lang, user }) {
 
   const getStageIndex = (status) => ORDER_STAGES.findIndex(s => s.key === status);
 
+  // Guest order tracking — email a one-tap magic link, then land back here logged in.
+  const sendTrackLink = async () => {
+    const email = guestEmail.trim();
+    if (!email) return;
+    setGuestError(""); setGuestLoading(true);
+    try {
+      localStorage.setItem("sxp_track_after_login", "1");
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      setGuestSent(true);
+    } catch (err) {
+      localStorage.removeItem("sxp_track_after_login");
+      setGuestError(err.message);
+    }
+    setGuestLoading(false);
+  };
+
   if (!user) return (
-    <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", direction: t.dir }}>
-      <div style={{ textAlign: "center", color: COLORS.gray, maxWidth: 360 }}>
-        <div style={{ width: 56, height: 56, borderRadius: "50%", border: "1px solid rgba(255,107,53,0.4)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: COLORS.accent, fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic" }}>S</div>
-        <div style={{ fontSize: 22, color: COLORS.white, marginBottom: 10, fontFamily: "'Playfair Display',serif" }}>{t.auth.loginTitle}</div>
-        <div style={{ fontSize: 14, lineHeight: 1.7 }}>{t.auth.noAccount}</div>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir, fontFamily: "'Varela Round',sans-serif" }}>
+      <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 420 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontSize: 42, marginBottom: 12 }}>📦</div>
+          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0 }}>{t.track.guestTitle}</h2>
+          <p style={{ color: COLORS.gray, fontSize: 13.5, marginTop: 10, lineHeight: 1.6 }}>{t.track.guestDesc}</p>
+        </div>
+        {guestSent ? (
+          <div style={{ color: COLORS.success, fontSize: 14, textAlign: "center", background: "rgba(74,222,128,0.1)", padding: "16px 14px", borderRadius: 10, lineHeight: 1.6 }}>
+            {t.auth.magicLinkSent}
+          </div>
+        ) : (
+          <>
+            <label style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>{t.auth.email}</label>
+            <input type="email" inputMode="email" autoComplete="email" value={guestEmail}
+              onChange={e => setGuestEmail(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") sendTrackLink(); }}
+              placeholder="your@email.com"
+              style={{ width: "100%", boxSizing: "border-box", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8, marginBottom: 16 }} />
+            {guestError && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 14, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{guestError}</div>}
+            <button onClick={sendTrackLink} disabled={guestLoading || !guestEmail.trim()}
+              style={{ width: "100%", background: (guestLoading || !guestEmail.trim()) ? COLORS.border : COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: (guestLoading || !guestEmail.trim()) ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              {guestLoading ? "..." : t.track.guestBtn}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -3883,7 +3932,14 @@ export default function App() {
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
-      if (session?.user) checkAdmin(session.user); else setIsAdmin(false);
+      if (session?.user) {
+        checkAdmin(session.user);
+        // Returning from a guest order-tracking magic link → land on the orders page.
+        if (localStorage.getItem("sxp_track_after_login") === "1") {
+          localStorage.removeItem("sxp_track_after_login");
+          setPage("track");
+        }
+      } else setIsAdmin(false);
     });
     return () => subscription.unsubscribe();
   }, []);
