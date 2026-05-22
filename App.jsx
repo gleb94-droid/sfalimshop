@@ -1652,7 +1652,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     const prod = products.find(p => p.id === pendingBloomItem.productId);
     if (!prod || !prod.variants.length) { clearPendingBloomItem(); return; }
     bloomConsumedRef.current = true;
-    const v = prod.variants[0];
+    const v = (pendingBloomItem.variantId && prod.variants.find(x => x.id === pendingBloomItem.variantId)) || prod.variants[0];
     const colorHex = pendingBloomItem.shirtColor ? pendingBloomItem.shirtColor.hex : prod.colors[0];
     const matchedIdx = prod.colors.indexOf(colorHex);
     const bloomCartItem = {
@@ -4354,25 +4354,52 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
 function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, onOrderBloom }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
+  const [shirtType, setShirtType] = useState("basic");
+  const [shirtSize, setShirtSize] = useState("m");
   const imgSrc = design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
 
+  // Shirt type → OrderPage product. Sizes match the PRODUCTS variant ids.
+  const SHIRT_TYPES = [
+    { id: "basic",     productId: "tshirt",    label: { he: "בייסיק",   en: "Basic",     ru: "Базовая" } },
+    { id: "oversized", productId: "oversized", label: { he: "אוברסייז", en: "Oversized", ru: "Оверсайз" } },
+  ];
+  const SHIRT_SIZES = ["s", "m", "l", "xl", "xxl"];
+
+  // Live shirt price comes straight from the PRODUCTS variant prices,
+  // so it updates whenever the type or size changes.
+  const shirtProductId = shirtType === "oversized" ? "oversized" : "tshirt";
+  const shirtProductDef = PRODUCTS(LANGS[lang]).find(p => p.id === shirtProductId);
+  const shirtVariantDef = shirtProductDef ? shirtProductDef.variants.find(v => v.id === shirtSize) : null;
+  const shirtPrice = shirtVariantDef ? shirtVariantDef.price : (design.price_shirt || 0);
+
   // Add this BLOOM character to the order cart with its design already fixed.
-  // Shirt carries the chosen shirt color; mug/sticker keep the product default.
+  // Shirt carries the chosen type, size and color; mug/sticker keep defaults.
   const handleOrder = (kind) => {
+    if (!design.design_url) return;
+    if (kind === "shirt") {
+      onOrderBloom({
+        productId: shirtProductId,
+        variantId: shirtSize,
+        price: Number(shirtPrice) || 0,
+        designUrl: design.design_url,
+        characterName: name,
+        shirtColor: selectedColor,
+      });
+      return;
+    }
     const map = {
-      shirt:   { productId: "tshirt",  price: design.price_shirt },
       mug:     { productId: "mug",     price: design.price_mug },
       sticker: { productId: "sticker", price: design.price_sticker },
     };
     const choice = map[kind];
-    if (!choice || !design.design_url) return;
+    if (!choice) return;
     onOrderBloom({
       productId: choice.productId,
       price: Number(choice.price) || 0,
       designUrl: design.design_url,
       characterName: name,
-      shirtColor: kind === "shirt" ? selectedColor : null,
+      shirtColor: null,
     });
   };
 
@@ -4532,9 +4559,57 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
               </div>
             </div>
 
+            {/* Shirt type — Basic / Oversized (applies to the shirt option) */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>
+                {lang === "he" ? "סוג חולצה" : lang === "ru" ? "Тип футболки" : "Shirt type"}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {SHIRT_TYPES.map((st) => (
+                  <button
+                    key={st.id}
+                    onClick={() => setShirtType(st.id)}
+                    style={{
+                      flex: 1,
+                      background: shirtType === st.id ? COLORS.accent : COLORS.bg,
+                      border: `1px solid ${shirtType === st.id ? COLORS.accent : COLORS.border}`,
+                      color: shirtType === st.id ? "#fff" : COLORS.white,
+                      borderRadius: 8, padding: "10px 12px", cursor: "pointer",
+                      fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
+                      transition: "background 0.2s, border-color 0.2s",
+                    }}
+                  >{st.label[lang] || st.label.en}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Shirt size — S / M / L / XL / XXL (applies to the shirt option) */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>
+                {lang === "he" ? "מידה" : lang === "ru" ? "Размер" : "Size"}
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {SHIRT_SIZES.map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => setShirtSize(sz)}
+                    style={{
+                      minWidth: 46,
+                      background: shirtSize === sz ? COLORS.accent : COLORS.bg,
+                      border: `1px solid ${shirtSize === sz ? COLORS.accent : COLORS.border}`,
+                      color: shirtSize === sz ? "#fff" : COLORS.white,
+                      borderRadius: 8, padding: "8px 12px", cursor: "pointer",
+                      fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
+                      transition: "background 0.2s, border-color 0.2s",
+                    }}
+                  >{sz.toUpperCase()}</button>
+                ))}
+              </div>
+            </div>
+
             {/* Product buttons */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-              <ProductOption label={t.shirtLabel} price={design.price_shirt} onClick={() => handleOrder("shirt")} disabled={!design.design_url} />
+              <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => handleOrder("shirt")} disabled={!design.design_url} />
               <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => handleOrder("mug")} disabled={!design.design_url} />
               <ProductOption label={t.stickerLabel} price={design.price_sticker} onClick={() => handleOrder("sticker")} disabled={!design.design_url} />
             </div>
