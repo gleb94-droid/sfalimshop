@@ -825,9 +825,9 @@ function AuthPage({ lang, onAuth }) {
                 onChange={e => setPassword(e.target.value)}
                 required
                 minLength={8}
-                style={{ ...inputStyle, paddingRight: 80 }}
+                style={{ ...inputStyle, padding: t.dir === "rtl" ? "12px 14px 12px 80px" : "12px 80px 12px 14px" }}
               />
-              <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", right: 8, top: 14, ...smallBtnStyle, color: COLORS.gray }}>
+              <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", [t.dir === "rtl" ? "left" : "right"]: 8, top: 14, ...smallBtnStyle, color: COLORS.gray }}>
                 {showPassword ? t.auth.hidePw : t.auth.showPw}
               </button>
             </div>
@@ -953,8 +953,8 @@ function ResetPasswordPage({ lang, setPage }) {
             <div style={{ marginBottom: 16 }}>
               <label style={labelStyle}>{t.auth.newPw}</label>
               <div style={{ position: "relative" }}>
-                <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingRight: 80 }} />
-                <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", right: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, padding: t.dir === "rtl" ? "12px 14px 12px 80px" : "12px 80px 12px 14px" }} />
+                <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", [t.dir === "rtl" ? "left" : "right"]: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
                   {showPassword ? t.auth.hidePw : t.auth.showPw}
                 </button>
               </div>
@@ -1053,8 +1053,8 @@ function AccountSettings({ lang }) {
               <div style={{ marginBottom: 12 }}>
                 <label style={labelStyle}>{t.auth.newPw}</label>
                 <div style={{ position: "relative" }}>
-                  <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingRight: 70 }} />
-                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", right: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                  <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, padding: t.dir === "rtl" ? "10px 12px 10px 70px" : "10px 70px 10px 12px" }} />
+                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", [t.dir === "rtl" ? "left" : "right"]: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
                     {showPassword ? t.auth.hidePw : t.auth.showPw}
                   </button>
                 </div>

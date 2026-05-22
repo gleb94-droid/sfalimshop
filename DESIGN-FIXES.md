@@ -108,3 +108,25 @@ real login, so it was reviewed from the code.
 - Switched the price/status block to logical `text-align: end`, so it now hugs
   the correct outer edge in every language and matches the status line.
 - Translated the "Current status" caption to Hebrew and Russian.
+
+---
+
+## Auth pages (Login / Register / Reset password / Account settings)
+
+**Problems found**
+- The show/hide ("Show"/"הצג") toggle inside every password field was pinned to
+  the right edge, with the input padded on the right to make room. That is
+  correct in English/Russian, but in Hebrew (RTL) the toggle ended up on the
+  *start* side of the field — the wrong side — overlapping where the password
+  text begins.
+
+**Fixes**
+- Made the password toggle position and the matching input padding
+  direction-aware in all three places it appears (the login/register form, the
+  reset-password page, and the account-settings panel): the toggle now sits at
+  the end of the field — right in LTR, left in RTL.
+- Wrote the padding as a single shorthand value to avoid a React
+  shorthand/longhand style conflict that surfaced when switching language.
+
+The auth card layout itself (spacing, buttons, Google sign-in) was fine at both
+sizes — no other changes.
