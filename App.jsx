@@ -1496,10 +1496,10 @@ function AdminPage({ lang }) {
 }
 
 // Order Page
-function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart }) {
+function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart, pendingCheckout, clearPendingCheckout }) {
   const t = LANGS[lang];
   const products = PRODUCTS(t);
-  const [step, setStep] = useState(pendingBloomItem ? 3 : 1);
+  const [step, setStep] = useState((pendingBloomItem || pendingCheckout) ? 3 : 1);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(0);
@@ -1685,6 +1685,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     setCart(c => [...c, bloomCartItem]);
     clearPendingBloomItem();
   }, []);
+
+  // Checkout requested from the cart drawer — jump to the details step.
+  useEffect(() => {
+    if (pendingCheckout) { setStep(3); clearPendingCheckout(); }
+  }, [pendingCheckout]);
 
   const safeGo = (action) => {
     if (step >= 2 && step < 4) { setLeaveWarning(true); setPendingNav(() => action); }
@@ -3139,16 +3144,33 @@ function Hero({ setPage, lang }) {
 }
 
 // Nav
-function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
+function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick }) {
   const t = LANGS[lang];
   const [mobileMenu, setMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
+
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handle);
     return () => window.removeEventListener('resize', handle);
   }, []);
+
+  // Cart icon with item-count badge — reused in the desktop and mobile nav.
+  const cartButton = (
+    <button onClick={onCartClick} aria-label={lang === "he" ? "סל קניות" : lang === "ru" ? "Корзина" : "Cart"}
+      style={{ position: "relative", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.2s" }}
+      onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
+      onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="9" cy="21" r="1" />
+        <circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+      </svg>
+      {cartCount > 0 && (
+        <span style={{ position: "absolute", top: -7, right: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+      )}
+    </button>
+  );
 
   return (
     <>
@@ -3188,6 +3210,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
 
       {/* Lang + Hamburger - MOBILE RIGHT */}
       {isMobile && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {cartButton}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
             <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
@@ -3198,6 +3221,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout }) {
 
       {/* Auth + Lang - RIGHT (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+        {cartButton}
         {user ? (
           <button onClick={onLogout} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, padding: "7px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
@@ -3491,6 +3515,165 @@ function AboutPage({ lang, setPage }) {
   );
 }
 
+// ============ CART DRAWER — slide-out cart, openable from anywhere ============
+function CartDrawer({ lang, open, cart, setCart, onClose, onCheckout }) {
+  const isRTL = lang === "he";
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+
+  // Lock body scroll while the drawer is open
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  const TR = {
+    he: { title: "סל הקניות", empty: "הסל ריק", emptySub: "הוסיפו מוצרים כדי להתחיל", subtotal: "סכום ביניים", shipping: "משלוח", total: "סה״כ", checkout: "מעבר לתשלום", remove: "הסר", close: "סגירה" },
+    en: { title: "Your cart", empty: "Your cart is empty", emptySub: "Add products to get started", subtotal: "Subtotal", shipping: "Shipping", total: "Total", checkout: "Proceed to checkout", remove: "Remove", close: "Close" },
+    ru: { title: "Корзина", empty: "Корзина пуста", emptySub: "Добавьте товары, чтобы начать", subtotal: "Подытог", shipping: "Доставка", total: "Итого", checkout: "Перейти к оплате", remove: "Удалить", close: "Закрыть" },
+  };
+  const tr = TR[lang] || TR.en;
+
+  const subtotal = cart.reduce((s, it) => s + it.itemPrice, 0);
+  const shipping = cart.length > 0 ? SHIPPING_PRICE : 0;
+  const total = subtotal + shipping;
+
+  // Compact list of any print extras carried by a custom item.
+  const extrasFor = (it) => [
+    it.backPrint && (lang === "he" ? "הדפס אחורי" : lang === "ru" ? "Спина" : "Back print"),
+    it.secondFront && it.secondFront.enabled && (lang === "he" ? "הדפס נוסף" : lang === "ru" ? "Доп. перед" : "Extra front"),
+    it.sleeveLeft && it.sleeveLeft.enabled && (lang === "he" ? "שרוול שמאל" : lang === "ru" ? "Левый рукав" : "Left sleeve"),
+    it.sleeveRight && it.sleeveRight.enabled && (lang === "he" ? "שרוול ימין" : lang === "ru" ? "Правый рукав" : "Right sleeve"),
+  ].filter(Boolean).join(" · ");
+
+  if (!open) return null;
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={onClose} aria-hidden="true" style={{
+        position: "fixed", inset: 0, zIndex: 1100,
+        background: "rgba(0,0,0,0.6)",
+        animation: "cartFade 0.25s ease",
+      }} />
+
+      {/* Panel */}
+      <div style={{
+        position: "fixed", top: 0, bottom: 0,
+        [isRTL ? "left" : "right"]: 0,
+        zIndex: 1101,
+        width: isMobile ? "100%" : 400, maxWidth: "100%",
+        background: COLORS.bg,
+        borderInlineStart: `1px solid ${COLORS.border}`,
+        boxShadow: "0 0 60px rgba(0,0,0,0.6)",
+        display: "flex", flexDirection: "column",
+        direction: isRTL ? "rtl" : "ltr",
+        fontFamily: "'Varela Round',sans-serif",
+        animation: `${isRTL ? "cartSlideL" : "cartSlideR"} 0.3s cubic-bezier(.2,.6,.2,1)`,
+      }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 22px", borderBottom: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
+          <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700 }}>
+            {`${tr.title}${cart.length > 0 ? ` (${cart.length})` : ""}`}
+          </div>
+          <button onClick={onClose} aria-label={tr.close} style={{
+            width: 36, height: 36, borderRadius: "50%", background: "transparent",
+            border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer",
+            fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s", flexShrink: 0,
+          }}
+          onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
+          onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}
+          >×</button>
+        </div>
+
+        {/* Items */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px 18px" }}>
+          {cart.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "70px 20px", color: COLORS.gray }}>
+              <div style={{ fontSize: 46, marginBottom: 14 }}>🛒</div>
+              <div style={{ color: COLORS.white, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{tr.empty}</div>
+              <div style={{ fontSize: 13 }}>{tr.emptySub}</div>
+            </div>
+          ) : (
+            cart.map((it) => {
+              const extras = extrasFor(it);
+              return (
+                <div key={it.id} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "14px 0", borderBottom: `1px solid ${COLORS.border}` }}>
+                  <div style={{ width: 62, height: 62, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <img src={it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5 }}>
+                      {it.variantLabel && <span>{it.variantLabel}</span>}
+                      {it.color && <span title={it.color} style={{ width: 13, height: 13, borderRadius: "50%", background: it.color, border: "1px solid rgba(255,255,255,0.3)", display: "inline-block", flexShrink: 0 }} />}
+                      {it.qty > 1 && <span>{`× ${it.qty}`}</span>}
+                    </div>
+                    {extras && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{extras}</div>}
+                    <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14, marginTop: 7 }}>{`₪${it.itemPrice}`}</div>
+                  </div>
+                  <button onClick={() => setCart(c => c.filter(x => x.id !== it.id))} aria-label={tr.remove} style={{
+                    background: "transparent", border: "none", color: COLORS.gray,
+                    cursor: "pointer", fontSize: 22, lineHeight: 1, padding: 2, flexShrink: 0, transition: "color 0.2s",
+                  }}
+                  onMouseOver={e => e.currentTarget.style.color = "#ef4444"}
+                  onMouseOut={e => e.currentTarget.style.color = COLORS.gray}
+                  >×</button>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Footer — totals + checkout */}
+        {cart.length > 0 && (
+          <div style={{ flexShrink: 0, borderTop: `1px solid ${COLORS.border}`, padding: "18px 22px", background: COLORS.bgCard }}>
+            <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 7 }}>
+              <span>{tr.subtotal}</span><span>{`₪${subtotal}`}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 11 }}>
+              <span>{tr.shipping}</span><span>{`₪${shipping}`}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 11, borderTop: `1px solid ${COLORS.border}`, marginBottom: 15 }}>
+              <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{tr.total}</span>
+              <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display',serif" }}>{`₪${total}`}</span>
+            </div>
+            <button onClick={onCheckout} style={{
+              width: "100%", background: COLORS.accent, color: "#fff", border: "none",
+              borderRadius: 10, padding: "15px", fontSize: 15, fontWeight: 700, cursor: "pointer",
+              fontFamily: "'Varela Round',sans-serif", boxShadow: "0 6px 20px rgba(255,107,53,0.35)", transition: "background 0.2s",
+            }}
+            onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
+            onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
+            >{tr.checkout}</button>
+          </div>
+        )}
+
+        <style>{`
+          @keyframes cartFade { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes cartSlideR { from { transform: translateX(100%); } to { transform: translateX(0); } }
+          @keyframes cartSlideL { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        `}</style>
+      </div>
+    </>
+  );
+}
+
 export default function App() {
  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'policies', 'reset-password'];
 
@@ -3521,6 +3704,9 @@ export default function App() {
   // The order cart lives here (not inside OrderPage) so it survives navigation
   // between the BLOOM collection and the order page while shopping.
   const [cart, setCart] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  // When true, OrderPage opens straight on the checkout details step.
+  const [pendingCheckout, setPendingCheckout] = useState(false);
 
   const setPage = (newPage) => {
     const hash = newPage === 'home' ? '' : newPage;
@@ -3532,6 +3718,13 @@ export default function App() {
   const orderBloomDesign = (item) => {
     setPendingBloomItem(item);
     setPage("order");
+  };
+
+  // Open the order page on the checkout step — used by the cart drawer.
+  const goToCheckout = () => {
+    setCartOpen(false);
+    setPendingCheckout(true);
+    if (page !== "order") setPage("order");
   };
 
   useEffect(() => {
@@ -3829,11 +4022,11 @@ export default function App() {
         return (
           <>
             <AccessibilityMenu lang={lang} />
-            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} />
+            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.length} onCartClick={() => setCartOpen(true)} />
             {page === "home" && <Hero setPage={setPage} lang={lang} />}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={orderBloomDesign} />}
-            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} />}
+            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
@@ -3841,6 +4034,7 @@ export default function App() {
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
             <Footer lang={lang} setPage={setPage} />
+            <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} onClose={() => setCartOpen(false)} onCheckout={goToCheckout} />
             {showCookieBanner && cookieConsent === null && (
               <CookieConsent
                 lang={lang}
