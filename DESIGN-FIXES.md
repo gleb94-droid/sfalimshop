@@ -26,3 +26,24 @@ Each page was checked at desktop (1280px) and mobile (390px) width, in Hebrew (R
 - Slightly reduced card padding and the hero-to-grid gap on mobile.
 
 Result: balanced, identical layout in Hebrew, English and Russian on both sizes.
+
+---
+
+## Order wizard (5-step checkout)
+
+Checked steps 1-3 live (desktop + mobile, all three languages). Steps 4-5 were
+reviewed from the code only — driving the browser through them would create real
+test orders in the live database, which must not happen pre-launch.
+
+**Problems found**
+- Step 3 (Details): the orange "payment on the next step" note box had
+  `padding: 0`, so its two lines of text sat flush against the box border —
+  it looked cramped and unfinished.
+
+**Fixes**
+- Gave the payment-note box proper inner padding (`12px 14px`) and made the
+  first line semi-bold so it reads as a heading.
+
+Everything else in the wizard (step indicator, product list, the customize
+two-column layout, the details form, summary cards) held up correctly at both
+sizes and in all three languages — no other changes needed.
