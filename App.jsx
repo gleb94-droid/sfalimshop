@@ -2008,7 +2008,6 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     const orderGroupId = `grp-${Date.now()}`;
 
     try {
-      let firstOrderId = null;
       const createdOrderIds = [];
       for (let i = 0; i < cart.length; i++) {
         const it = cart[i];
@@ -2026,7 +2025,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         const itemTotal = it.itemPrice + (i === 0 ? SHIPPING_PRICE : 0);
 
-        const { data: orderData, error } = await supabase.from("orders").insert({
+        const orderRow = {
           customer_name: form.name, customer_email: form.email, customer_phone: phone,
           customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
           product: itProduct.name, variant: itVariant.label, color: it.color,
@@ -2046,10 +2045,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           sleeve_left_url: it.sleeveLeft.enabled ? (it.sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
           sleeve_right_url: it.sleeveRight.enabled ? (it.sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
           order_group: orderGroupId,
-        }).select().single();
-        if (error) throw error;
-        if (i === 0) firstOrderId = orderData?.id;
-        if (orderData?.id) createdOrderIds.push(orderData.id);
+        };
+
+        if (user) {
+          // Logged-in customers can read their own rows back under RLS — keep .select().
+          const { data: orderData, error } = await supabase.from("orders").insert(orderRow).select().single();
+          if (error) throw error;
+          if (orderData?.id) createdOrderIds.push(orderData.id);
+        } else {
+          // Guests can't read rows back once anon SELECT is restricted — insert only.
+          const { error } = await supabase.from("orders").insert(orderRow);
+          if (error) throw error;
+        }
       }
 
       // Save context for the payment step (DON'T send email yet — email sends AFTER payment confirmed)
@@ -2751,7 +2758,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                               variant: `${cart.length} items`,
                               quantity: cart.reduce((s, c) => s + c.qty, 0),
                               total: pendingTotal,
-                              orderId: pendingOrderIds[0] || "unknown",
+                              orderId: pendingOrderGroupId,
                               orderGroup: pendingOrderGroupId,
                               language: lang,
                             },
