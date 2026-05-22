@@ -1496,10 +1496,10 @@ function AdminPage({ lang }) {
 }
 
 // Order Page
-function OrderPage({ lang, user, setPage }) {
+function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem }) {
   const t = LANGS[lang];
   const products = PRODUCTS(t);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(pendingBloomItem ? 3 : 1);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(0);
@@ -1641,6 +1641,43 @@ function OrderPage({ lang, user, setPage }) {
     if (id === currentItemCartId) setCurrentItemCartId(null);
   };
 
+  // ── BLOOM direct order ──────────────────────────────────────────────
+  // A character chosen from the BLOOM modal arrives as a ready-made item:
+  // its design is already fixed (the character's design_url), so we add it
+  // straight to the cart and jump to the details step — no product picker,
+  // no file upload. Runs once when the order page opens with a pending item.
+  const bloomConsumedRef = useRef(false);
+  useEffect(() => {
+    if (bloomConsumedRef.current || !pendingBloomItem) return;
+    const prod = products.find(p => p.id === pendingBloomItem.productId);
+    if (!prod || !prod.variants.length) { clearPendingBloomItem(); return; }
+    bloomConsumedRef.current = true;
+    const v = prod.variants[0];
+    const colorHex = pendingBloomItem.shirtColor ? pendingBloomItem.shirtColor.hex : prod.colors[0];
+    const matchedIdx = prod.colors.indexOf(colorHex);
+    const bloomCartItem = {
+      id: Date.now() + Math.random(),
+      productId: prod.id,
+      productName: pendingBloomItem.characterName ? `${prod.name} · ${pendingBloomItem.characterName}` : prod.name,
+      variantId: v.id,
+      variantLabel: v.label,
+      colorIdx: matchedIdx >= 0 ? matchedIdx : 0,
+      color: colorHex,
+      qty: 1,
+      uploadedImage: pendingBloomItem.designUrl,
+      imagePos: { x: 150, y: 130, size: 85 },
+      backPrint: false,
+      backDesign: { enabled: false, sameAsMain: true, image: null },
+      secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
+      sleeveLeft: { enabled: false, sameAsMain: true, image: null },
+      sleeveRight: { enabled: false, sameAsMain: true, image: null },
+      itemPrice: Number(pendingBloomItem.price) || 0,
+    };
+    setCart(c => [...c, bloomCartItem]);
+    setStep(3);
+    clearPendingBloomItem();
+  }, []);
+
   const safeGo = (action) => {
     if (step >= 2 && step < 4) { setLeaveWarning(true); setPendingNav(() => action); }
     else action();
@@ -1717,6 +1754,8 @@ function OrderPage({ lang, user, setPage }) {
 
   const uploadDesignImage = async (dataUrl) => {
     if (!dataUrl) return null;
+    // BLOOM designs are already hosted on Supabase — reuse the URL, don't re-upload.
+    if (/^https?:\/\//i.test(dataUrl)) return dataUrl;
     try {
       const res = await fetch(dataUrl);
       const blob = await res.blob();
@@ -3464,11 +3503,18 @@ export default function App() {
   const [lang, setLang] = useState("he");
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingBloomItem, setPendingBloomItem] = useState(null);
 
   const setPage = (newPage) => {
     const hash = newPage === 'home' ? '' : newPage;
     window.history.pushState({ page: newPage }, '', '#' + hash);
     setPageState(newPage);
+  };
+
+  // Hand a ready-made BLOOM item to OrderPage's cart, then jump to the order page
+  const orderBloomDesign = (item) => {
+    setPendingBloomItem(item);
+    setPage("order");
   };
 
   useEffect(() => {
@@ -3769,8 +3815,8 @@ export default function App() {
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} />
             {page === "home" && <Hero setPage={setPage} lang={lang} />}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} />}
-            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={orderBloomDesign} />}
+            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
@@ -3878,7 +3924,7 @@ function PawPrintsBackground() {
 }
 
 // ============ PETS PAGE — BLOOM Collection / Pet Couture ============
-function PetsPage({ lang, setPage }) {
+function PetsPage({ lang, setPage, onOrderBloom }) {
   const isRTL = lang === "he";
   const [designs, setDesigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -4184,6 +4230,7 @@ function PetsPage({ lang, setPage }) {
           t={t}
           onClose={() => setSelected(null)}
           isMobile={isMobile}
+          onOrderBloom={onOrderBloom}
         />
       )}
 
@@ -4304,12 +4351,30 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile }) {
+function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, onOrderBloom }) {
   const isRTL = lang === "he";
-  const [showSoon, setShowSoon] = useState(false);
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const imgSrc = design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
+
+  // Add this BLOOM character to the order cart with its design already fixed.
+  // Shirt carries the chosen shirt color; mug/sticker keep the product default.
+  const handleOrder = (kind) => {
+    const map = {
+      shirt:   { productId: "tshirt",  price: design.price_shirt },
+      mug:     { productId: "mug",     price: design.price_mug },
+      sticker: { productId: "sticker", price: design.price_sticker },
+    };
+    const choice = map[kind];
+    if (!choice || !design.design_url) return;
+    onOrderBloom({
+      productId: choice.productId,
+      price: Number(choice.price) || 0,
+      designUrl: design.design_url,
+      characterName: name,
+      shirtColor: kind === "shirt" ? selectedColor : null,
+    });
+  };
 
   // Lock body scroll when modal open
   useEffect(() => {
@@ -4469,39 +4534,10 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile })
 
             {/* Product buttons */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-              <ProductOption label={t.shirtLabel} price={design.price_shirt} onClick={() => setShowSoon("shirt")} disabled={!design.mockup_url && !design.design_url} />
-              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setShowSoon("mug")} disabled={false} />
-              <ProductOption label={t.stickerLabel} price={design.price_sticker} onClick={() => setShowSoon("sticker")} disabled={false} />
+              <ProductOption label={t.shirtLabel} price={design.price_shirt} onClick={() => handleOrder("shirt")} disabled={!design.design_url} />
+              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => handleOrder("mug")} disabled={!design.design_url} />
+              <ProductOption label={t.stickerLabel} price={design.price_sticker} onClick={() => handleOrder("sticker")} disabled={!design.design_url} />
             </div>
-
-            {showSoon && (
-              <div style={{
-                background: "rgba(255,107,53,0.08)",
-                border: `1px solid rgba(255,107,53,0.3)`,
-                borderRadius: 12,
-                padding: 18,
-                marginTop: 12,
-                animation: "petModalFadeIn 0.3s",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS.accent, animation: "petsSpin 2s linear infinite", boxShadow: "0 0 10px rgba(255,107,53,0.6)" }} />
-                  <div style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 16, fontWeight: 700 }}>
-                    {t.comingSoonTitle}
-                  </div>
-                </div>
-                {showSoon === "shirt" && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <span style={{ width: 16, height: 16, borderRadius: "50%", background: selectedColor.hex, border: "1px solid rgba(255,255,255,0.3)", flexShrink: 0 }} />
-                    <span style={{ color: COLORS.white, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
-                      {lang === "he" ? `צבע נבחר: ${selectedColor.he}` : lang === "ru" ? `Выбран цвет: ${selectedColor.ru}` : `Selected color: ${selectedColor.en}`}
-                    </span>
-                  </div>
-                )}
-                <p style={{ color: COLORS.gray, fontSize: 13, fontFamily: "'Varela Round',sans-serif", margin: 0, lineHeight: 1.5 }}>
-                  {t.comingSoonSub}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
