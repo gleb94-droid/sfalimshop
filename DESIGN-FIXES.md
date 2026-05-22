@@ -130,3 +130,23 @@ real login, so it was reviewed from the code.
 
 The auth card layout itself (spacing, buttons, Google sign-in) was fine at both
 sizes — no other changes.
+
+---
+
+## Policies, Cart drawer, Maintenance page & shared elements
+
+Checked the Policies page, the cart drawer (empty and with an item), the
+Maintenance page, the navigation bar, the footer, the cookie banner and the
+accessibility menu at desktop and mobile in all three languages.
+
+**Result: no changes needed.** These parts are already solid:
+- The Policies page reflows cleanly and uses direction-aware list indentation.
+- The cart drawer correctly slides in from the right in English/Russian and from
+  the left in Hebrew, and goes full-width on mobile.
+- The Maintenance page is centered and tidy in every language.
+- The navigation bar and footer hold up at both sizes.
+
+(Minor known item, left as-is: on a phone, on the very first visit, the floating
+accessibility button can overlap the corner of the one-time cookie banner. It is
+transient — the banner disappears after the first choice — and coordinating the
+two fixed elements was judged riskier than the small benefit.)
