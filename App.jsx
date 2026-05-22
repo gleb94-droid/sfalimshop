@@ -21,6 +21,13 @@ const BLOOM_SHIRT_COLORS = [
   { id: "pink",  hex: "#f9a8d4", he: "ורוד", en: "Pink",  ru: "Розовый" },
 ];
 
+// Resolve a saved hex colour to a readable name (falls back to the hex itself).
+const colorName = (hex, lang) => {
+  if (!hex) return "";
+  const c = BLOOM_SHIRT_COLORS.find(x => x.hex.toLowerCase() === String(hex).toLowerCase());
+  return c ? (c[lang] || c.en) : hex;
+};
+
 // ============ ANALYTICS CONFIG — fill in your IDs to activate ============
 // Get GA4 ID at: https://analytics.google.com  → Admin → Data Streams → Web Stream → Measurement ID
 // Get FB Pixel ID at: https://business.facebook.com → Events Manager → Data Sources → Pixel ID
@@ -607,6 +614,64 @@ function StickerMockup({ color, imageUrl, imagePos }) {
 function StickerSqMockup({ color, imageUrl, imagePos }) {
   return <ProductMockupBase productKey="sticker_sq" color={color} imageUrl={imageUrl} imagePos={imagePos} />;
 }
+
+// ── Order mockup generation ──────────────────────────────────────────────────
+// Flatten the product (in the chosen colour) + the design overlay(s) onto one
+// offscreen canvas and export a PNG — exactly what ProductMockupBase renders
+// live. Used at checkout to snapshot every order into orders.mockup_url.
+const loadImageEl = (src) => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => resolve(img);
+  img.onerror = () => reject(new Error(`Image load failed: ${String(src).slice(0, 80)}`));
+  img.src = src;
+});
+
+// Draw an image "contained" (aspect ratio preserved, centred) inside a box —
+// matches the design overlay's objectFit:"contain" in ProductMockupBase.
+const drawContain = (ctx, img, bx, by, bw, bh) => {
+  const ar = (img.naturalWidth || img.width || 1) / (img.naturalHeight || img.height || 1);
+  let w = bw;
+  let h = bw / ar;
+  if (h > bh) { h = bh; w = bh * ar; }
+  ctx.drawImage(img, bx + (bw - w) / 2, by + (bh - h) / 2, w, h);
+};
+
+const generateOrderMockup = async (productKey, color, designUrl, imagePos, secondUrl, secondPos) => {
+  const size = 600;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  // Product, tinted to the chosen colour — same logic as ProductMockupBase.
+  const mockupUrl = MOCKUP_URLS[productKey] || MOCKUP_URLS.tshirt;
+  const productImg = await loadImageEl(mockupUrl);
+  if (!color || color === "#ffffff") {
+    ctx.drawImage(productImg, 0, 0, size, size);
+  } else {
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, size, size);
+    ctx.globalCompositeOperation = "multiply";
+    ctx.drawImage(productImg, 0, 0, size, size);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(productImg, 0, 0, size, size);
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  // Design overlay(s). imagePos lives in a 0-400 space; the canvas is 600.
+  const scale = size / 400;
+  if (designUrl && imagePos) {
+    const d = await loadImageEl(designUrl);
+    drawContain(ctx, d, imagePos.x * scale, imagePos.y * scale, imagePos.size * scale, imagePos.size * scale);
+  }
+  if (secondUrl && secondPos) {
+    const d2 = await loadImageEl(secondUrl);
+    drawContain(ctx, d2, secondPos.x * scale, secondPos.y * scale, secondPos.size * scale, secondPos.size * scale);
+  }
+
+  return canvas.toDataURL("image/png");
+};
 // Auth Page
 function AuthPage({ lang, onAuth }) {
   const t = LANGS[lang];
@@ -1458,7 +1523,7 @@ function AdminPage({ lang }) {
                                   <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{localizeProduct(it.product, lang)} × {it.quantity}</div>
                                   <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{localizeVariant(it.variant, lang)} · ₪{it.total}</div>
                                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
-                                    {it.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: it.product_color, border: "1px solid #555" }} />{it.product_color}</div>}
+                                    {(it.product_color || it.color) && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: it.product_color || it.color, border: "1px solid #555", flexShrink: 0 }} />{colorName(it.product_color || it.color, lang)}</div>}
                                     {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((it.design_size / 160) * 30)} cm</div>}
                                     {it.back_print && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>BACK</div>}
                                     {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>+1</div>}
@@ -2043,6 +2108,25 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         const itemTotal = it.itemPrice + (i === 0 ? SHIPPING_PRICE : 0);
 
+        // Snapshot what the customer saw into one flattened mockup image.
+        // BLOOM items already carry a ready-made mockup — keep it.
+        let mockup_url = it.mockupUrl || null;
+        if (!mockup_url) {
+          try {
+            const mockupPng = await generateOrderMockup(
+              it.productId,
+              it.color,
+              it.uploadedImage,
+              it.imagePos,
+              it.secondFront.enabled ? (it.secondFront.sameAsMain ? it.uploadedImage : it.secondFront.image) : null,
+              it.secondFront.enabled ? it.secondFront.pos : null,
+            );
+            mockup_url = await uploadDesignImage(mockupPng);
+          } catch (mockErr) {
+            console.error("Order mockup generation failed:", mockErr);
+          }
+        }
+
         const orderRow = {
           customer_name: form.name, customer_email: form.email, customer_phone: phone,
           customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
@@ -2052,7 +2136,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           payment_status: "idle",
           currency: "ILS",
           user_id: user?.id || null, design_url,
-          mockup_url: it.mockupUrl || null,
+          mockup_url,
           design_x: it.imagePos.x, design_y: it.imagePos.y, design_size: it.imagePos.size,
           product_color: it.color, language: lang,
           back_print: it.backPrint,
