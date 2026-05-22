@@ -47,3 +47,20 @@ test orders in the live database, which must not happen pre-launch.
 Everything else in the wizard (step indicator, product list, the customize
 two-column layout, the details form, summary cards) held up correctly at both
 sizes and in all three languages — no other changes needed.
+
+---
+
+## BLOOM / Pets page
+
+Checked the collection page and the character detail modal at desktop and
+mobile in all three languages.
+
+**Result: no changes needed.** This page is already well built:
+- The 12-character grid reflows correctly (4 columns on desktop, 2 on mobile).
+- The detail modal switches from a two-column to a stacked layout on mobile,
+  scrolls when the content is tall, and already mirrors its close button to the
+  correct side in Hebrew (RTL).
+
+(One pre-existing detail — the floating accessibility button can overlap the
+modal's lower-left corner on mobile — is a site-wide element and is addressed in
+the globals section.)
