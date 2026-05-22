@@ -1161,15 +1161,21 @@ function TrackPage({ lang, user }) {
                                 {lang === "he" ? "העיצוב שלך" : lang === "ru" ? "Ваш дизайн" : "Your design"}
                               </div>
                               <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180 }}>
-                                {(() => {
-                                  const pname = order.product?.toLowerCase() || "";
-                                  const pid = (pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка")) ? "mug" : ((pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) && (pname.includes("square") || pname.includes("מרובע") || pname.includes("квадрат"))) ? "sticker_sq" : (pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) ? "sticker" : (pname.includes("oversize") || pname.includes("אוברסייז") || pname.includes("оверсайз")) ? "oversized" : (pname.includes("dryfit") || pname.includes("dry") || pname.includes("דרייפיט") || pname.includes("драйфит")) ? "dryfit" : "tshirt";
-                                  return <ProductMockupBase productKey={pid} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={{ x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 }} secondImageUrl={order.second_front_url && order.second_front_url !== order.design_url ? order.second_front_url : (order.second_front_url ? order.design_url : null)} secondImagePos={order.second_front_url ? { x: order.second_front_x ?? 210, y: order.second_front_y ?? 120, size: order.second_front_size ?? 85 } : null} />;
-                                })()}
+                                {order.mockup_url ? (
+                                  // BLOOM orders: show the exact ready-made mockup the customer saw at checkout.
+                                  <img src={order.mockup_url} alt={lang === "he" ? "תצוגת ההזמנה" : lang === "ru" ? "Превью заказа" : "Order preview"} style={{ width: "100%", display: "block", borderRadius: 8 }} />
+                                ) : (
+                                  // Custom orders: re-composite the design at the position the customer chose.
+                                  (() => {
+                                    const pname = order.product?.toLowerCase() || "";
+                                    const pid = (pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка")) ? "mug" : ((pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) && (pname.includes("square") || pname.includes("מרובע") || pname.includes("квадрат"))) ? "sticker_sq" : (pname.includes("sticker") || pname.includes("מדבקה") || pname.includes("стикер")) ? "sticker" : (pname.includes("oversize") || pname.includes("אוברסייז") || pname.includes("оверсайз")) ? "oversized" : (pname.includes("dryfit") || pname.includes("dry") || pname.includes("דרייפיט") || pname.includes("драйфит")) ? "dryfit" : "tshirt";
+                                    return <ProductMockupBase productKey={pid} color={order.product_color || "#ffffff"} imageUrl={order.design_url} imagePos={{ x: order.design_x ?? 150, y: order.design_y ?? 130, size: order.design_size ?? 100 }} secondImageUrl={order.second_front_url && order.second_front_url !== order.design_url ? order.second_front_url : (order.second_front_url ? order.design_url : null)} secondImagePos={order.second_front_url ? { x: order.second_front_x ?? 210, y: order.second_front_y ?? 120, size: order.second_front_size ?? 85 } : null} />;
+                                  })()
+                                )}
                               </div>
                               <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8, maxWidth: 180 }}>
                                 {order.product_color && <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 9, height: 9, borderRadius: "50%", background: order.product_color, border: "1px solid #555" }} />{order.product_color}</div>}
-                                {order.design_size && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((order.design_size / 160) * 30)} cm</div>}
+                                {order.design_size && !order.mockup_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((order.design_size / 160) * 30)} cm</div>}
                                 {order.back_print && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>BACK</div>}
                                 {order.second_front_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>+1</div>}
                                 {order.sleeve_left_url && <div style={{ background: COLORS.bg, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>L-SL</div>}
@@ -1723,6 +1729,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       color: colorHex,
       qty: 1,
       uploadedImage: pendingBloomItem.designUrl,
+      mockupUrl: pendingBloomItem.mockupUrl || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -2034,6 +2041,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           payment_status: "idle",
           currency: "ILS",
           user_id: user?.id || null, design_url,
+          mockup_url: it.mockupUrl || null,
           design_x: it.imagePos.x, design_y: it.imagePos.y, design_size: it.imagePos.size,
           product_color: it.color, language: lang,
           back_print: it.backPrint,
@@ -4651,12 +4659,16 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   // Shirt carries the chosen type, size and color; mug/sticker keep defaults.
   const handleOrder = (kind) => {
     if (!design.design_url) return;
+    // The polished image the customer is actually looking at in this modal —
+    // saved on the order so the order preview matches what they saw.
+    const mockupUrl = design.mockup_url || design.design_url;
     if (kind === "shirt") {
       onOrderBloom({
         productId: shirtProductId,
         variantId: shirtSize,
         price: Number(shirtPrice) || 0,
         designUrl: design.design_url,
+        mockupUrl,
         characterName: name,
         shirtColor: selectedColor,
       });
@@ -4672,6 +4684,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
       productId: choice.productId,
       price: Number(choice.price) || 0,
       designUrl: design.design_url,
+      mockupUrl,
       characterName: name,
       shirtColor: null,
     });
