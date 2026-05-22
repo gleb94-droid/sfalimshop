@@ -87,3 +87,24 @@ the globals section.)
 
 The rest of the About page (hero, technology cards, contact section) reflowed
 correctly and needed no changes.
+
+---
+
+## Track Order page
+
+The guest tracking screen (the email "send me a link" card) was checked live in
+all three languages and looked correct. The logged-in order list sits behind a
+real login, so it was reviewed from the code.
+
+**Problems found (logged-in order list)**
+- The price + status block on each order card was hard-coded to align right.
+  In Hebrew (RTL) that pushed the price toward the middle of the card while the
+  status hugged the far edge — the two lines no longer lined up.
+- The small "Current status" caption under the active step of the order
+  timeline was hard-coded in English, so it stayed English in Hebrew and
+  Russian.
+
+**Fixes**
+- Switched the price/status block to logical `text-align: end`, so it now hugs
+  the correct outer edge in every language and matches the status line.
+- Translated the "Current status" caption to Hebrew and Russian.

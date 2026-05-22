@@ -1210,7 +1210,7 @@ function TrackPage({ lang, user }) {
                         <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
                         {order.completed_at && <div style={{ color: COLORS.success, fontSize: 12, marginTop: 2 }}>✅ {lang === "he" ? "הושלם תוך" : lang === "ru" ? "Выполнен за" : "Completed in"} {timeBetween(order.created_at, order.completed_at, lang)}</div>}
                       </div>
-                      <div style={{ textAlign: "right" }}>
+                      <div style={{ textAlign: "end" }}>
                         <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{order.total}</div>
                         <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4, display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 8px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
                       </div>
@@ -1296,7 +1296,7 @@ function TrackPage({ lang, user }) {
                                 </div>
                                 <div style={{ paddingTop: 8, paddingBottom: i < ORDER_STAGES.length - 1 ? 24 : 0 }}>
                                   <div style={{ color: done ? COLORS.white : COLORS.gray, fontWeight: active ? 700 : 400, fontSize: 15 }}>{s[lang] || s.en}</div>
-                                  {active && <div style={{ color: COLORS.accent, fontSize: 12, marginTop: 2 }}>● Current status</div>}
+                                  {active && <div style={{ color: COLORS.accent, fontSize: 12, marginTop: 2 }}>● {lang === "he" ? "סטטוס נוכחי" : lang === "ru" ? "Текущий статус" : "Current status"}</div>}
                                 </div>
                               </div>
                             );
