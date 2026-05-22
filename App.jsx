@@ -3607,6 +3607,16 @@ function AccessibilityMenu({ lang }) {
 
 // ============ ABOUT PAGE ============
 function AboutPage({ lang, setPage }) {
+  const isRTL = lang === "he";
+  const [vw, setVw] = useState(typeof window !== "undefined" ? window.innerWidth : 1280);
+  useEffect(() => {
+    const handle = () => setVw(window.innerWidth);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+  // The process-step connector line only makes sense when the 4 steps sit in a
+  // single row — that is guaranteed only on wide viewports.
+  const showConnector = vw >= 920;
   const t = {
     he: {
       badge: 'באר שבע, בירת הנגב',
@@ -3717,7 +3727,7 @@ function AboutPage({ lang, setPage }) {
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.process?.map((step, i) => (
               <div key={i} className="reveal" data-delay={String(i + 1)} style={{ flex: '1 1 180px', textAlign: 'center', padding: '0 20px', position: 'relative' }}>
-                {i < (t.process.length - 1) && <div style={{ position: 'absolute', top: 24, left: '60%', right: '-10%', height: 1, background: 'linear-gradient(to right, #FF6B35, #2a2a2a)', opacity: 0.4 }} />}
+                {i < (t.process.length - 1) && showConnector && <div style={{ position: 'absolute', top: 24, [isRTL ? 'right' : 'left']: '60%', [isRTL ? 'left' : 'right']: '-10%', height: 1, background: `linear-gradient(to ${isRTL ? 'left' : 'right'}, #FF6B35, #2a2a2a)`, opacity: 0.4 }} />}
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,107,53,0.15)', border: '2px solid #FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#FF6B35', fontWeight: 800, fontSize: 14 }}>{step.step}</div>
                 <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>{step.title}</div>
                 <div style={{ color: '#555', fontSize: 13, lineHeight: 1.6 }}>{step.desc}</div>

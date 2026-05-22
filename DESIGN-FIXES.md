@@ -64,3 +64,26 @@ mobile in all three languages.
 (One pre-existing detail — the floating accessibility button can overlap the
 modal's lower-left corner on mobile — is a site-wide element and is addressed in
 the globals section.)
+
+---
+
+## About page
+
+**Problems found**
+- In the "How it works" section, the thin line that connects the four step
+  circles was always drawn on the right-hand side of each circle. That is
+  correct for English/Russian, but in Hebrew (right-to-left) it pointed the
+  wrong way — away from the next step.
+- On mobile, where the four steps stack vertically, those connector lines
+  still rendered as little horizontal stubs sticking out sideways into empty
+  space next to each circle.
+
+**Fixes**
+- Made the connector line direction-aware: it now points toward the next step
+  on the correct side in both left-to-right and right-to-left layouts, and the
+  orange-to-grey fade follows the same direction.
+- The connector is now only drawn on wide screens where the four steps actually
+  sit in one row; it is hidden once they stack, removing the stray stubs.
+
+The rest of the About page (hero, technology cards, contact section) reflowed
+correctly and needed no changes.
