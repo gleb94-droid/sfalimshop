@@ -3,3 +3,6 @@ node_modules/
 
 # Build output
 dist/
+
+# Claude Code local files
+.claude/
