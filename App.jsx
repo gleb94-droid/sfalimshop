@@ -1823,10 +1823,20 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
     </div>
   );
 
-  // Mobile bar — collapsible, sits at the top of the form column.
+  // Mobile bar — collapsible AND sticky just below the fixed Nav (height 72),
+  // so the running total stays visible while the form scrolls.
+  // zIndex: 50 → above page content, below the Nav (zIndex 100) and toast/drawer.
   if (isMobile) {
     return (
-      <div dir={isRTL ? "rtl" : "ltr"} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+      <div dir={isRTL ? "rtl" : "ltr"} style={{
+        position: "sticky", top: 72, zIndex: 50,
+        background: COLORS.bgCard, border: `1px solid ${COLORS.border}`,
+        borderRadius: 12, padding: "14px 16px", marginBottom: 16,
+        boxShadow: "0 6px 18px rgba(0,0,0,0.4)",
+        // Expanded panel can be long — cap height and let it scroll inside.
+        maxHeight: open ? "calc(100vh - 96px)" : "auto",
+        overflowY: open ? "auto" : "visible",
+      }}>
         <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} style={{
           display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%",
           background: "transparent", border: "none", color: COLORS.white, cursor: "pointer",
@@ -1850,12 +1860,18 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
     );
   }
 
-  // Desktop sticky sidebar.
+  // Desktop sticky sidebar. Requires the parent flex row to use
+  // alignItems: flex-start (already set in OrderPage step 3) so the column
+  // doesn't stretch to match the form's height — that would defeat sticky.
+  // maxHeight + internal scroll keep a long cart from running past the
+  // viewport (Nav 72 + breathing room 24 + bottom gap 24 = 120 reserved).
   return (
     <div dir={isRTL ? "rtl" : "ltr"} style={{
       position: "sticky", top: 96,
       background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16,
       padding: 20,
+      maxHeight: "calc(100vh - 120px)",
+      overflowY: "auto",
     }}>
       <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 19, margin: "0 0 14px 0" }}>
         {tr.title}
@@ -2902,7 +2918,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             display: "flex",
             flexDirection: isMobile ? "column" : "row",
             gap: isMobile ? 0 : 28,
-            alignItems: "flex-start",
+            // alignItems: 'stretch' (the default) is REQUIRED here so the sidebar
+            // wrapper grows to match the form column's height. The OrderSummary
+            // inside uses position: sticky — for that to have slide room, its
+            // parent (the wrapper) must be TALLER than it is. flex-start would
+            // collapse the wrapper to the summary's own height and kill sticky.
+            alignItems: "stretch",
           }}>
             {/* Mobile: collapsible summary at the very top of the form column */}
             {isMobile && <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={true} />}
