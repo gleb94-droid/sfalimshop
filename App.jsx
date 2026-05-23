@@ -4500,6 +4500,49 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
     };
   }, [designs, lang]);
 
+  // URL-shareable BLOOM characters: #pets/<slug> opens that character.
+  // Slug is derived from English name (locale-independent so links are stable).
+  const slugify = (d) => {
+    const name = (d?.name_en || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return name || (d?.id != null ? String(d.id) : "");
+  };
+
+  // Read the URL hash and open the matching character — or fall back to the grid view.
+  useEffect(() => {
+    if (!designs.length) return;
+    const applyHash = () => {
+      const hash = (window.location.hash || "").replace("#", "");
+      const parts = hash.split("/");
+      if (parts[0] !== "pets") return;
+      const slug = parts[1];
+      if (!slug) { setSelected(null); return; }
+      const match = designs.find(d => slugify(d) === slug);
+      if (match) {
+        setSelected(match);
+      } else {
+        // Unknown id — fall back gracefully to the collection view and tidy the URL
+        setSelected(null);
+        window.history.replaceState({ page: "pets" }, "", "#pets");
+      }
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, [designs]);
+
+  const openPet = (d) => {
+    setSelected(d);
+    const slug = slugify(d);
+    if (slug) window.history.pushState({ page: "pets" }, "", `#pets/${slug}`);
+  };
+
+  const closePet = () => {
+    setSelected(null);
+    // replaceState (not pushState) so the back button returns to the page
+    // the user was on before opening the modal, not back into the modal.
+    window.history.replaceState({ page: "pets" }, "", "#pets");
+  };
+
   // Translations
   const t = {
     he: {
@@ -4670,7 +4713,7 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
                 animal={getAnimal(d)}
                 tagline={getTagline(d)}
                 priceFrom={t.priceFrom}
-                onClick={() => setSelected(d)}
+                onClick={() => openPet(d)}
                 isMobile={isMobile}
               />
             ))}
@@ -4714,7 +4757,7 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
           animal={getAnimal(selected)}
           tagline={getTagline(selected)}
           t={t}
-          onClose={() => setSelected(null)}
+          onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
         />
