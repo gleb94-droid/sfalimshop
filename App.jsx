@@ -82,6 +82,7 @@ const LANGS = {
     nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "העיצוב שלך.", h1line2: "על הכל.", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "התחל לעצב ←", from: "החל מ-₪" },
     trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
+    badges: { bestseller: "רב מכר", new: "חדש" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
@@ -120,6 +121,7 @@ const LANGS = {
     nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Your design.", h1line2: "On everything.", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Start Designing →", from: "from ₪" },
     trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
+    badges: { bestseller: "Bestseller", new: "New" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
@@ -158,6 +160,7 @@ const LANGS = {
     nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Ваш дизайн.", h1line2: "На всём.", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Начать →", from: "от ₪" },
     trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
+    badges: { bestseller: "Хит продаж", new: "Новинка" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
@@ -1326,9 +1329,13 @@ function AdminPage({ lang }) {
   const [selected, setSelected] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  // BLOOM characters — manage the is_bestseller / is_new flags from here.
+  const [petDesigns, setPetDesigns] = useState([]);
+  const [petsLoading, setPetsLoading] = useState(true);
 
   useEffect(() => {
     fetchOrders();
+    fetchPetDesigns();
     const sub = supabase.channel("orders-changes").on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders).subscribe();
     return () => sub.unsubscribe();
   }, []);
@@ -1337,6 +1344,25 @@ function AdminPage({ lang }) {
     const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
     setOrders(data || []);
     setLoading(false);
+  };
+
+  const fetchPetDesigns = async () => {
+    const { data } = await supabase
+      .from("pet_designs")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    setPetDesigns(data || []);
+    setPetsLoading(false);
+  };
+
+  // Optimistic toggle for is_bestseller / is_new. Reverts on DB error.
+  const togglePetFlag = async (id, field, value) => {
+    setPetDesigns(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
+    const { error } = await supabase.from("pet_designs").update({ [field]: value }).eq("id", id);
+    if (error) {
+      console.error(`Failed to update ${field}:`, error);
+      setPetDesigns(prev => prev.map(d => d.id === id ? { ...d, [field]: !value } : d));
+    }
   };
 
   const deleteOrder = async (orderIdOrIds) => {
@@ -1619,6 +1645,63 @@ function AdminPage({ lang }) {
             </div>
           )
         }
+
+        {/* ===== BLOOM character flags (is_bestseller / is_new) ===== */}
+        <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ marginBottom: 20 }}>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>BLOOM</h2>
+            <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
+              {petsLoading
+                ? (lang === "he" ? "טוען..." : lang === "ru" ? "Загрузка..." : "Loading...")
+                : `${petDesigns.length} ${lang === "he" ? "דמויות" : lang === "ru" ? "персонажей" : "characters"}`}
+            </p>
+          </div>
+
+          {!petsLoading && petDesigns.length === 0 && (
+            <div style={{ textAlign: "center", padding: "32px 0", color: COLORS.gray, fontSize: 14 }}>
+              {lang === "he" ? "אין דמויות עדיין" : lang === "ru" ? "Персонажей пока нет" : "No characters yet"}
+            </div>
+          )}
+
+          {petDesigns.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {petDesigns.map((d) => {
+                const dName = d[`name_${lang}`] || d.name_en || d.name_he || "—";
+                const thumb = d.mockup_url || d.design_url;
+                return (
+                  <div key={d.id} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 8, background: d.mockup_bg || COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                      {thumb && <img src={thumb} alt={dName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                    </div>
+                    <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", flex: 1, minWidth: 120 }}>{dName}</div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button onClick={() => togglePetFlag(d.id, "is_bestseller", !d.is_bestseller)}
+                        aria-pressed={!!d.is_bestseller}
+                        style={{
+                          background: d.is_bestseller ? COLORS.accent : "transparent",
+                          border: `1px solid ${d.is_bestseller ? COLORS.accent : COLORS.border}`,
+                          color: d.is_bestseller ? "#fff" : COLORS.gray,
+                          borderRadius: 6, padding: "6px 12px", cursor: "pointer",
+                          fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
+                          transition: "all 0.2s",
+                        }}>{t.badges.bestseller}</button>
+                      <button onClick={() => togglePetFlag(d.id, "is_new", !d.is_new)}
+                        aria-pressed={!!d.is_new}
+                        style={{
+                          background: d.is_new ? COLORS.accent : "transparent",
+                          border: `1px solid ${d.is_new ? COLORS.accent : COLORS.border}`,
+                          color: d.is_new ? "#fff" : COLORS.gray,
+                          borderRadius: 6, padding: "6px 12px", cursor: "pointer",
+                          fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
+                          transition: "all 0.2s",
+                        }}>{t.badges.new}</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -4774,6 +4857,7 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
               <PetCard
                 key={d.id}
                 design={d}
+                lang={lang}
                 index={i}
                 name={getDesignName(d)}
                 animal={getAnimal(d)}
@@ -4841,8 +4925,63 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
   );
 }
 
+// ============ PET BADGES — Bestseller / New corner badges ============
+// Sits in the top-leading corner (top-right in RTL, top-left in LTR). Shared
+// between the gallery card and the detail modal so they stay visually identical.
+function PetBadges({ design, lang }) {
+  const isRTL = lang === "he";
+  const labels = LANGS[lang].badges;
+  const showBest = !!design?.is_bestseller;
+  const showNew = !!design?.is_new;
+  if (!showBest && !showNew) return null;
+  return (
+    <div style={{
+      position: "absolute",
+      top: 10,
+      [isRTL ? "right" : "left"]: 10,
+      display: "flex",
+      flexDirection: "column",
+      gap: 6,
+      zIndex: 3,
+      pointerEvents: "none",
+    }}>
+      {showBest && (
+        <span style={{
+          background: COLORS.accent,
+          color: "#fff",
+          fontFamily: "'Varela Round',sans-serif",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          padding: "3px 9px",
+          borderRadius: 6,
+          boxShadow: "0 4px 12px rgba(255,107,53,0.35)",
+          whiteSpace: "nowrap",
+        }}>{labels.bestseller}</span>
+      )}
+      {showNew && (
+        <span style={{
+          background: "rgba(15,15,15,0.85)",
+          color: COLORS.accent,
+          border: `1px solid ${COLORS.accent}`,
+          fontFamily: "'Varela Round',sans-serif",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          padding: "2px 8px",
+          borderRadius: 6,
+          backdropFilter: "blur(4px)",
+          whiteSpace: "nowrap",
+        }}>{labels.new}</span>
+      )}
+    </div>
+  );
+}
+
 // ============ PET CARD — gallery tile ============
-function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isMobile }) {
+function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClick, isMobile }) {
   const [hovered, setHovered] = useState(false);
   const imgSrc = design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
@@ -4900,6 +5039,7 @@ function PetCard({ design, index, name, animal, tagline, priceFrom, onClick, isM
           transition: "all 0.4s",
           pointerEvents: "none",
         }} />
+        <PetBadges design={design} lang={lang} />
       </div>
 
       {/* Text content */}
@@ -5075,6 +5215,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0 }}>
           {/* Image */}
           <div style={{
+            position: "relative",
             background: design.mockup_url ? "#1a1a1a" : fallbackBg,
             aspectRatio: isMobile ? "1" : "auto",
             minHeight: isMobile ? "auto" : 500,
@@ -5084,6 +5225,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
             padding: design.mockup_url ? 0 : "10%",
           }}>
             <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
+            <PetBadges design={design} lang={lang} />
           </div>
 
           {/* Info */}
