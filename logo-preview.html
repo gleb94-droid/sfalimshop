@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sfalim Shop — Brand Sheet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700;1,900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --panel-2: #0f0f0f;
+      --line: #222;
+      --orange: #FF6B35;
+      --orange-light: #ff8c5a;
+      --text: #f4f4f4;
+      --muted: #888;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      padding: 60px 24px;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    header {
+      text-align: center;
+      padding-bottom: 60px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 60px;
+    }
+    .eyebrow {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      letter-spacing: 4px;
+      color: var(--orange);
+      font-size: 14px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 56px;
+      margin-bottom: 8px;
+    }
+    .sub { color: var(--muted); font-size: 16px; }
+    section { margin-bottom: 64px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .section-title h2 {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 600;
+      font-size: 28px;
+    }
+    .section-title .num {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--orange);
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--orange);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 16px;
+    }
+    .panel.dark { background: var(--panel-2); }
+    .panel-light {
+      background: #f4f4f4;
+      color: #0a0a0a;
+      border: 1px solid #d8d8d8;
+    }
+    .panel-light img, .panel-light object { filter: invert(0); }
+    .label {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 800px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    .center { display: flex; align-items: center; justify-content: center; }
+    img.logo, object.logo { max-width: 100%; height: auto; }
+    .mark-row { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .mark-row .item { text-align: center; }
+    .mark-row .item .label { margin-top: 12px; }
+    .swatch {
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+    .swatch .name { font-size: 18px; }
+    .swatch .hex { opacity: 0.75; font-size: 14px; letter-spacing: 1px; margin-top: 4px; }
+    .type-sample {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-2);
+    }
+    .type-sample .meta-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .notes {
+      background: var(--panel);
+      border-right: 3px solid var(--orange);
+      padding: 20px 24px;
+      border-radius: 8px;
+      color: #ccc;
+      font-size: 15px;
+    }
+    .notes code {
+      background: rgba(255,107,53,0.12);
+      color: var(--orange);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 13px;
+    }
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      padding-top: 40px;
+      border-top: 1px solid var(--line);
+      font-family: 'Playfair Display', serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Brand Sheet · גיליון מותג</div>
+      <h1>Sfalim Shop</h1>
+      <div class="sub">עיצוב מקורי · נשמה מקומית</div>
+    </header>
+
+    <section>
+      <div class="section-title"><span class="num">1</span><h2>לוגו ראשי (אופקי) · Primary Horizontal</h2></div>
+      <div class="panel dark center"><object class="logo" type="image/svg+xml" data="public/logo.svg" style="max-width: 800px;"></object></div>
+      <div class="panel panel-light center"><object class="logo" type="image/svg+xml" data="public/logo.svg" style="max-width: 800px; filter: invert(1) hue-rotate(180deg);"></object></div>
+      <div class="notes">לשימוש בכותרת אתר, חתימת אימייל, באנרים, וכל מקום שיש לו רוחב מספיק. גרסה כהה היא הראשית.</div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="num">2</span><h2>לוגו אנכי (כרזה) · Vertical Stacked</h2></div>
+      <div class="panel dark center"><object class="logo" type="image/svg+xml" data="public/logo-stacked.svg" style="max-width: 480px;"></object></div>
+      <div class="notes">לשימוש בפוסטים מרובעים באינסטגרם, על אריזות, גלויות, או כפתיח/סיום של רילסים. הסגנון האדיטוריאלי הזה משדר "מותג בוטיק".</div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="num">3</span><h2>סימן מותג · Brand Mark</h2></div>
+      <div class="panel dark">
+        <div class="mark-row">
+          <div class="item">
+            <object class="logo" type="image/svg+xml" data="public/logo-mark.svg" style="width: 200px;"></object>
+            <div class="label">200×200 (Mark)</div>
+          </div>
+          <div class="item">
+            <object class="logo" type="image/svg+xml" data="public/logo-mark.svg" style="width: 120px;"></object>
+            <div class="label">120×120</div>
+          </div>
+          <div class="item">
+            <object class="logo" type="image/svg+xml" data="public/logo-mark.svg" style="width: 64px;"></object>
+            <div class="label">64×64</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">תמונת פרופיל לאינסטגרם, אווטאר, סטיקרים, כל מקום שיש רק ריבוע קטן.</div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="num">4</span><h2>פאביקון · Favicon</h2></div>
+      <div class="panel dark">
+        <div class="mark-row">
+          <div class="item">
+            <object class="logo" type="image/svg+xml" data="public/favicon.svg" style="width: 64px;"></object>
+            <div class="label">64×64 (גודל קובץ)</div>
+          </div>
+          <div class="item">
+            <object class="logo" type="image/svg+xml" data="public/favicon.svg" style="width: 32px;"></object>
+            <div class="label">32×32</div>
+          </div>
+          <div class="item">
+            <object class="logo" type="image/svg+xml" data="public/favicon.svg" style="width: 16px;"></object>
+            <div class="label">16×16 (לשונית דפדפן)</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">הפאביקון רוענן: קווים מעט יותר עדינים, פרופורציות מוקפדות יותר. תואם לסימן המותג.</div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="num">5</span><h2>פלטת צבעים · Color Palette</h2></div>
+      <div class="grid-3">
+        <div class="swatch" style="background:#0f0f0f; border:1px solid #222;">
+          <div class="name" style="color:#fff">Charcoal · פחם</div>
+          <div class="hex" style="color:#aaa">#0F0F0F</div>
+        </div>
+        <div class="swatch" style="background:#FF6B35;">
+          <div class="name" style="color:#0f0f0f">Sfalim Orange</div>
+          <div class="hex" style="color:#3a1a0d">#FF6B35</div>
+        </div>
+        <div class="swatch" style="background:#ff8c5a;">
+          <div class="name" style="color:#0f0f0f">Orange Light</div>
+          <div class="hex" style="color:#3a1a0d">#FF8C5A</div>
+        </div>
+        <div class="swatch" style="background:#ffffff; border:1px solid #ddd;">
+          <div class="name" style="color:#0f0f0f">Paper · נייר</div>
+          <div class="hex" style="color:#666">#FFFFFF</div>
+        </div>
+        <div class="swatch" style="background:#a8a8a8;">
+          <div class="name" style="color:#0f0f0f">Muted · אפור</div>
+          <div class="hex" style="color:#3a3a3a">#A8A8A8</div>
+        </div>
+        <div class="swatch" style="background:#1a1614;">
+          <div class="name" style="color:#fff">Warm Black</div>
+          <div class="hex" style="color:#aaa">#1A1614</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="num">6</span><h2>טיפוגרפיה · Typography</h2></div>
+      <div class="grid-2">
+        <div class="type-sample">
+          <div class="meta-row"><span>אנגלית · Latin</span><span>Playfair Display Italic</span></div>
+          <div style="font-family:'Playfair Display',serif; font-style:italic; font-weight:700; font-size:48px; color:#fff;">Sfalim Shop</div>
+          <div style="font-family:'Playfair Display',serif; font-style:italic; font-weight:400; font-size:18px; color:#aaa; margin-top:8px;">Original Design · Local Soul</div>
+        </div>
+        <div class="type-sample">
+          <div class="meta-row"><span>עברית · Hebrew</span><span>Heebo</span></div>
+          <div style="font-family:'Heebo',sans-serif; font-weight:500; font-size:36px; color:#fff;">ספלים שופ</div>
+          <div style="font-family:'Heebo',sans-serif; font-weight:400; font-size:16px; color:#aaa; margin-top:8px;">עיצוב מקורי · נשמה מקומית</div>
+        </div>
+      </div>
+      <div class="notes" style="margin-top:16px;">שני הפונטים נטענים ממילא ב-<code>index.html</code> — אפס בקשות נוספות. הצירוף הזה (סריף איטלקי אדיטוריאלי + סנס עברי נקי) משדר בוטיק, חם ומקצועי — בדיוק הטון שאנחנו רוצים.</div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="num">7</span><h2>איך מייצאים ל-PNG · How to Export</h2></div>
+      <div class="notes">
+        כל הלוגואים פה הם SVG חיים — נטענים עם הפונטים האמיתיים בדפדפן. כדי לייצא PNG:<br/><br/>
+        <strong>אפשרות א׳ (הכי קל):</strong> פתח/י את הקובץ <code>logo-preview.html</code> בכרום, התקרב/י לפי הצורך, וצלם/י מסך (Win+Shift+S).<br/><br/>
+        <strong>אפשרות ב׳ (איכותי):</strong> פתח/י את ה-SVG ישירות בדפדפן → <code>F12</code> → לחיצה ימנית על האלמנט → "Capture node screenshot". יוצא PNG חד ברזולוציה מלאה.<br/><br/>
+        <strong>אפשרות ג׳ (הכי מקצועי):</strong> פתח/י ב-Figma או Inkscape → ייצוא PNG בכל רזולוציה. שם גם אפשר לשנות צבעים/פונט אם רוצים גרסה מותאמת.
+      </div>
+    </section>
+
+    <div class="footer">
+      Sfalim Shop · עיצוב מקורי · נשמה מקומית<br/>
+      Brand sheet by Ramkol · רמקול
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="mugGradMark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B35"/>
+      <stop offset="100%" stop-color="#ff8c5a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="200" height="200" rx="44" fill="#0f0f0f"/>
+  <rect x="2" y="2" width="196" height="196" rx="42" fill="none" stroke="#FF6B35" stroke-width="1" opacity="0.25"/>
+
+  <g transform="translate(38, 30) scale(2.1)">
+    <path d="M 12 22 L 12 50 Q 12 56 18 56 L 38 56 Q 44 56 44 50 L 44 22 Z"
+          fill="none" stroke="url(#mugGradMark)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M 44 30 Q 57 30 57 39 Q 57 48 44 48"
+          fill="none" stroke="url(#mugGradMark)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 19 16 Q 22 10 19 3" fill="none" stroke="#FF6B35" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
+    <path d="M 28 14 Q 30 7 28 0" fill="none" stroke="#FF6B35" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+    <path d="M 36 16 Q 38 10 36 3" fill="none" stroke="#FF6B35" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
+  </g>
+</svg>
