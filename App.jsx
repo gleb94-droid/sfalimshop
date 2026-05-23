@@ -3724,6 +3724,14 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
   const t = LANGS[lang];
   const [mobileMenu, setMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  // Trigger a one-shot scale bump on the badge whenever cartCount goes up,
+  // so the user gets visual confirmation that an item was just added.
+  const [bumpKey, setBumpKey] = useState(0);
+  const prevCountRef = useRef(cartCount);
+  useEffect(() => {
+    if (cartCount > prevCountRef.current) setBumpKey(k => k + 1);
+    prevCountRef.current = cartCount;
+  }, [cartCount]);
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768);
@@ -3743,7 +3751,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
       {cartCount > 0 && (
-        <span style={{ position: "absolute", top: -7, right: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+        <span key={bumpKey} className="cart-badge-bump" style={{ position: "absolute", top: -7, right: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
       )}
     </button>
   );
@@ -4327,11 +4335,57 @@ export default function App() {
     setPageState(newPage);
   };
 
-  // Hand a ready-made BLOOM item to OrderPage's cart, then jump to the order page
+  // Hand a ready-made BLOOM item to OrderPage's cart, then jump to the order page.
+  // Kept for the legacy "go straight to checkout" path — the BLOOM modal no
+  // longer uses it; it calls addBloomToCart directly so the user stays on /pets.
   const orderBloomDesign = (item) => {
     setPendingBloomItem(item);
     setPage("order");
   };
+
+  // Short-lived toast shown after a BLOOM item is added to the cart from /pets.
+  // null when hidden, otherwise the localized message string.
+  const [cartToast, setCartToast] = useState(null);
+  const cartToastTimer = useRef(null);
+
+  // Build the same cart item OrderPage builds when it consumes pendingBloomItem,
+  // and push it to the shared cart so the user can keep browsing BLOOM.
+  const addBloomToCart = (item) => {
+    const tNow = LANGS[lang] || LANGS.he;
+    const prod = PRODUCTS(tNow).find(p => p.id === item.productId);
+    if (!prod || !prod.variants.length) return;
+    const v = (item.variantId && prod.variants.find(x => x.id === item.variantId)) || prod.variants[0];
+    const colorHex = item.shirtColor ? item.shirtColor.hex : prod.colors[0];
+    const matchedIdx = prod.colors.indexOf(colorHex);
+    const cartItem = {
+      id: Date.now() + Math.random(),
+      productId: prod.id,
+      productName: item.characterName ? `${prod.name} · ${item.characterName}` : prod.name,
+      variantId: v.id,
+      variantLabel: v.label,
+      colorIdx: matchedIdx >= 0 ? matchedIdx : 0,
+      color: colorHex,
+      qty: 1,
+      uploadedImage: item.designUrl,
+      mockupUrl: item.mockupUrl || null,
+      imagePos: { x: 150, y: 130, size: 85 },
+      backPrint: false,
+      backDesign: { enabled: false, sameAsMain: true, image: null },
+      secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
+      sleeveLeft: { enabled: false, sameAsMain: true, image: null },
+      sleeveRight: { enabled: false, sameAsMain: true, image: null },
+      itemPrice: Number(item.price) || 0,
+    };
+    setCart(c => [...c, cartItem]);
+
+    // Toast: clear any previous timer so rapid taps don't queue up multiple toasts.
+    const msg = lang === "he" ? "✓ נוסף לסל" : lang === "ru" ? "✓ Добавлено в корзину" : "✓ Added to cart";
+    setCartToast(msg);
+    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
+    cartToastTimer.current = setTimeout(() => setCartToast(null), 2000);
+  };
+
+  useEffect(() => () => { if (cartToastTimer.current) clearTimeout(cartToastTimer.current); }, []);
 
   // Open the order page on the checkout step — used by the cart drawer.
   const goToCheckout = () => {
@@ -4645,7 +4699,7 @@ export default function App() {
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.length} onCartClick={() => setCartOpen(true)} />
             {page === "home" && <><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={orderBloomDesign} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} />}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
@@ -4655,6 +4709,44 @@ export default function App() {
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
             <Footer lang={lang} setPage={setPage} />
             <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} onClose={() => setCartOpen(false)} onCheckout={goToCheckout} />
+            {/* Small "added to cart" toast — auto-clears after 2s. Click jumps to cart. */}
+            {cartToast && (
+              <button
+                type="button"
+                onClick={() => { setCartToast(null); setCartOpen(true); }}
+                aria-live="polite"
+                style={{
+                  position: "fixed",
+                  bottom: 24,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "rgba(15,15,15,0.95)",
+                  color: "#fff",
+                  border: `1px solid ${COLORS.accent}`,
+                  borderRadius: 999,
+                  padding: "12px 22px",
+                  fontFamily: "'Varela Round',sans-serif",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  letterSpacing: "0.02em",
+                  cursor: "pointer",
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.5), 0 0 24px rgba(255,107,53,0.35)",
+                  backdropFilter: "blur(10px)",
+                  zIndex: 2000,
+                  animation: "cartToastIn 0.25s cubic-bezier(.2,.6,.2,1)",
+                  display: "inline-flex", alignItems: "center", gap: 10,
+                }}>
+                <span style={{ color: COLORS.accent, fontSize: 16, fontWeight: 700 }}>{cartToast}</span>
+                <span style={{ color: COLORS.gray, fontSize: 12 }}>
+                  {lang === "he" ? "צפה בסל ←" : lang === "ru" ? "Открыть корзину →" : "View cart →"}
+                </span>
+              </button>
+            )}
+            <style>{`
+              @keyframes cartToastIn { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+              @keyframes cartBadgeBump { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
+              .cart-badge-bump { animation: cartBadgeBump 0.35s cubic-bezier(.2,.6,.2,1); }
+            `}</style>
             {showCookieBanner && cookieConsent === null && (
               <CookieConsent
                 lang={lang}
