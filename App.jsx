@@ -80,7 +80,7 @@ const LANGS = {
   he: {
     dir: "rtl", label: "HE",
     nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
-    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "העיצוב שלך.", h1line2: "על הכל.", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "התחל לעצב ←", from: "החל מ-₪" },
+    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "העיצוב שלך.", h1line2: "על הכל.", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
@@ -119,7 +119,7 @@ const LANGS = {
   en: {
     dir: "ltr", label: "EN",
     nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
-    hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Your design.", h1line2: "On everything.", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Start Designing →", from: "from ₪" },
+    hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Your design.", h1line2: "On everything.", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
@@ -158,7 +158,7 @@ const LANGS = {
   ru: {
     dir: "ltr", label: "RU",
     nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
-    hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Ваш дизайн.", h1line2: "На всём.", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Начать →", from: "от ₪" },
+    hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Ваш дизайн.", h1line2: "На всём.", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
@@ -465,14 +465,24 @@ const localizeVariant = (savedLabel, targetLang) => {
   return savedLabel;
 };
 
+const SHIRT_COLOR_PALETTE = BLOOM_SHIRT_COLORS.map(c => c.hex);
+
 const PRODUCTS = (t) => [
-  { id: "mug",        name: t.products.mug,       variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
-  { id: "tshirt",     name: t.products.tshirt,    variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "oversized",  name: t.products.oversized, variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "dryfit",     name: t.products.dryfit,    variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: ["#ffffff", "#1a1a1a"], printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "sticker",    name: t.products.sticker,   variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
-  { id: "sticker_sq", name: t.products.sticker_sq, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
+  { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · גזרה רגילה · הדפסת DTF", en: "100% combed cotton · regular fit · DTF print", ru: "100% хлопок · обычный крой · DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "oversized",  name: t.products.oversized, desc: { he: "כותנה כבדה 240 גרם · גזרה אוברסייז · הדפסת DTF", en: "Heavy 240gsm cotton · oversize cut · DTF print", ru: "Плотный хлопок 240 г/м² · оверсайз · DTF-печать" }, is_new: true, variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "dryfit",     name: t.products.dryfit,    desc: { he: "פוליאסטר נושם · מתאים לאימון · הדפסת סובלימציה", en: "Breathable polyester · sport-ready · sublimation print", ru: "Дышащий полиэстер · для спорта · сублимационная печать" }, variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "sticker",    name: t.products.sticker,   desc: { he: "מדבקת ויניל עגולה · עמידה במים ובשמש", en: "Round vinyl sticker · water- and UV-resistant", ru: "Круглый виниловый стикер · водо- и UV-устойчивый" }, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
+  { id: "sticker_sq", name: t.products.sticker_sq, desc: { he: "מדבקת ויניל מרובעת · עמידה במים ובשמש", en: "Square vinyl sticker · water- and UV-resistant", ru: "Квадратный виниловый стикер · водо- и UV-устойчивый" }, is_new: true, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
 ];
+
+// Format a price range for product cards: "₪89" if min===max, otherwise "₪89–₪99".
+const formatPriceRange = (variants) => {
+  const prices = variants.map(v => v.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  return min === max ? `₪${min}` : `₪${min}–₪${max}`;
+};
 
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
 const PLACEMENTS = {
@@ -2391,13 +2401,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {products.map((p, idx) => (
                 <div key={p.id} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
-                  style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
+                  style={{ position: "relative", background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
+                  <ProductBadges product={p} lang={lang} />
                   <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
                     <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: 32 }}>{String(idx + 1).padStart(2, '0')}</span>
                     <div style={{ width: 54, height: 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <img src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     </div>
-                    <div><div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>{p.name}</div><div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>{p.variants.length} {t.product.options} · {t.product.from}{Math.min(...p.variants.map(v => v.price))}</div></div>
+                    <div>
+                      <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>{p.name}</div>
+                      <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
+                      <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {t.product.options}</span></div>
+                    </div>
                   </div>
                   {selectedProduct === p.id && <span style={{ color: COLORS.accent }}>✓</span>}
                 </div>
@@ -3476,6 +3491,36 @@ function TrustRow({ lang }) {
   );
 }
 
+// Corner badges for regular product cards (Bestseller / New). Mirrors PetBadges
+// styling so badges look identical across the BLOOM gallery and the homepage grid.
+function ProductBadges({ product, lang }) {
+  const isRTL = lang === "he";
+  const labels = LANGS[lang].badges;
+  const showBest = !!product?.is_bestseller;
+  const showNew = !!product?.is_new;
+  if (!showBest && !showNew) return null;
+  return (
+    <div style={{ position: "absolute", top: 10, [isRTL ? "right" : "left"]: 10, display: "flex", flexDirection: "column", gap: 6, zIndex: 3, pointerEvents: "none" }}>
+      {showBest && (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accent, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21.02 7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          {labels.bestseller}
+        </span>
+      )}
+      {showNew && (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(15,15,15,0.85)", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 8px", borderRadius: 6, backdropFilter: "blur(4px)", whiteSpace: "nowrap" }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="M12 3l1.91 5.18L19 10l-5.09 1.82L12 17l-1.91-5.18L5 10l5.09-1.82L12 3z" />
+          </svg>
+          {labels.new}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function Hero({ setPage, lang }) {
   const t = LANGS[lang];
   const products = PRODUCTS(t);
@@ -3497,8 +3542,12 @@ function Hero({ setPage, lang }) {
         {t.hero.h1line1}<br /><span style={{ color: COLORS.accent, fontStyle: "italic" }}>{t.hero.h1line2}</span>
       </h1>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Varela Round',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
-      <span className="reveal" data-delay="3">
+      <span className="reveal" data-delay="3" style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
         <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accent, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentHover} onMouseOut={e => e.target.style.background = COLORS.accent}>{t.hero.cta}</MagneticButton>
+        <button onClick={() => setPage("pets")} style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", letterSpacing: "0.3px", transition: "background 0.2s, color 0.2s" }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
+        >{t.hero.ctaSecondary} →</button>
       </span>
       </div>
       <div className="reveal" data-delay="4" style={{ marginTop: isMobile ? 32 : 40, width: "100%", maxWidth: 720, padding: "0 8px", boxSizing: "border-box" }}>
@@ -3507,15 +3556,17 @@ function Hero({ setPage, lang }) {
       <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 768 ? 820 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
           <div key={p.id} onClick={() => setPage("order")} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
-            style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
+            style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+            <ProductBadges product={p} lang={lang} />
             <div style={{ width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
             <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
             <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
-            <div style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 12, marginTop: 4 }}>{t.hero.from}{Math.min(...p.variants.map(v => v.price))}</div>
+            <div style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: 12, lineHeight: 1.5, marginTop: 4, minHeight: 34 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
+            <div style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 13, marginTop: 8 }}>{formatPriceRange(p.variants)}</div>
           </div>
         ))}
       </div>
@@ -3571,7 +3622,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
     <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
       {/* Logo - LEFT */}
       <div style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => setPage("home")}>
-        <img src="data:image/png;base64,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" alt="Sfalim Shop" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} /></div>
+        <img src="/logo.jpg" alt="Sfalim Shop" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} /></div>
 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
@@ -5107,6 +5158,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("basic");
   const [shirtSize, setShirtSize] = useState("m");
+  const [zoomed, setZoomed] = useState(false);
   const imgSrc = design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
 
@@ -5165,12 +5217,16 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  // Close on Escape key
+  // Close on Escape — closes zoom overlay first, then the modal itself.
   useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    const handler = (e) => {
+      if (e.key !== "Escape") return;
+      if (zoomed) { setZoomed(false); return; }
+      onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [onClose, zoomed]);
 
   return (
     <div
@@ -5230,18 +5286,31 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
 
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0 }}>
           {/* Image */}
-          <div style={{
-            position: "relative",
-            background: design.mockup_url ? "#1a1a1a" : fallbackBg,
-            aspectRatio: isMobile ? "1" : "auto",
-            minHeight: isMobile ? "auto" : 500,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: design.mockup_url ? 0 : "10%",
-          }}>
+          <div
+            onClick={(e) => { e.stopPropagation(); setZoomed(true); }}
+            title={lang === "he" ? "לחץ להגדלה" : lang === "ru" ? "Нажмите, чтобы увеличить" : "Click to zoom"}
+            style={{
+              position: "relative",
+              background: design.mockup_url ? "#1a1a1a" : fallbackBg,
+              aspectRatio: isMobile ? "1" : "auto",
+              minHeight: isMobile ? "auto" : 500,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: design.mockup_url ? 0 : "10%",
+              cursor: "zoom-in",
+            }}>
             <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
             <PetBadges design={design} lang={lang} />
+            <div aria-hidden="true" style={{ position: "absolute", bottom: 12, [isRTL ? "left" : "right"]: 12, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 20, padding: "6px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em", backdropFilter: "blur(6px)", pointerEvents: "none" }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                <line x1="11" y1="8" x2="11" y2="14" />
+                <line x1="8" y1="11" x2="14" y2="11" />
+              </svg>
+              <span>{lang === "he" ? "הגדל" : lang === "ru" ? "Увеличить" : "Zoom"}</span>
+            </div>
           </div>
 
           {/* Info */}
@@ -5375,9 +5444,52 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
         </div>
       </div>
 
+      {zoomed && (
+        <div
+          onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
+          role="dialog"
+          aria-label={lang === "he" ? "תמונה מוגדלת" : lang === "ru" ? "Увеличенное изображение" : "Zoomed image"}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1100,
+            background: "rgba(0,0,0,0.95)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            cursor: "zoom-out",
+            animation: "petZoomFadeIn 0.2s ease-out",
+          }}>
+          <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", boxShadow: "0 30px 80px rgba(0,0,0,0.6)" }} />
+          <button
+            onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
+            aria-label={t.modalClose}
+            style={{
+              position: "absolute",
+              top: 20,
+              [isRTL ? "left" : "right"]: 20,
+              width: 44, height: 44,
+              background: "rgba(255,255,255,0.1)",
+              border: `1px solid rgba(255,255,255,0.25)`,
+              borderRadius: "50%",
+              color: "#fff",
+              cursor: "pointer",
+              fontSize: 22,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(10px)",
+            }}>×</button>
+        </div>
+      )}
+
       <style>{`
         @keyframes petModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes petModalSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes petZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
     </div>
   );
