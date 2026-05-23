@@ -1721,7 +1721,149 @@ function AdminPage({ lang }) {
 }
 
 // Order Page
-function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart, pendingCheckout, clearPendingCheckout }) {
+// ============ ORDER SUMMARY — sticky sidebar on desktop, collapsible top bar on mobile ============
+// Lives inside step 3 of the OrderPage so the customer always sees what
+// they're about to pay for, with inline qty/remove controls.
+function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
+  const isRTL = lang === "he";
+  const TR = {
+    he: { title: "ההזמנה שלך", items: "פריטים", subtotal: "סכום ביניים", shipping: "משלוח", free: "חינם", total: "סה״כ", empty: "הסל ריק", expand: "הצג סיכום", collapse: "הסתר סיכום", inc: "הוסף", dec: "הפחת", remove: "הסר" },
+    en: { title: "Your order", items: "items", subtotal: "Subtotal", shipping: "Shipping", free: "Free", total: "Total", empty: "Cart is empty", expand: "Show summary", collapse: "Hide summary", inc: "Increase", dec: "Decrease", remove: "Remove" },
+    ru: { title: "Ваш заказ", items: "товаров", subtotal: "Подытог", shipping: "Доставка", free: "Бесплатно", total: "Итого", empty: "Корзина пуста", expand: "Показать", collapse: "Скрыть", inc: "Увеличить", dec: "Уменьшить", remove: "Удалить" },
+  };
+  const tr = TR[lang] || TR.he;
+
+  // Mobile starts collapsed so the form stays the first thing in the viewport.
+  const [open, setOpen] = useState(!isMobile);
+
+  // Inline qty updater — falls back to a local impl if the parent didn't pass one.
+  const setQty = updateCartQty || ((id, q) => {
+    if (q < 1) { setCart(c => c.filter(it => it.id !== id)); return; }
+    setCart(c => c.map(it => {
+      if (it.id !== id) return it;
+      const unit = Number(it.unitPrice ?? it.itemPrice / Math.max(1, it.qty || 1)) || 0;
+      return { ...it, qty: q, unitPrice: unit, itemPrice: unit * q };
+    }));
+  });
+
+  const subtotal = cart.reduce((s, it) => s + (Number(it.itemPrice) || 0), 0);
+  const itemCount = cart.reduce((s, it) => s + (Number(it.qty) || 1), 0);
+  const shipping = cart.length > 0 ? SHIPPING_PRICE : 0;
+  const total = subtotal + shipping;
+
+  const qtyBtnStyle = {
+    width: isMobile ? 36 : 28,
+    height: isMobile ? 36 : 28,
+    borderRadius: 8,
+    border: `1px solid ${COLORS.border}`,
+    background: COLORS.bg,
+    color: COLORS.white,
+    cursor: "pointer",
+    fontSize: isMobile ? 18 : 14,
+    lineHeight: 1,
+    fontFamily: "'Varela Round',sans-serif",
+    fontWeight: 700,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    touchAction: "manipulation",
+    transition: "border-color 0.15s, color 0.15s",
+  };
+
+  const itemRow = (it) => {
+    const qty = Number(it.qty) || 1;
+    const unit = Number(it.unitPrice ?? it.itemPrice / Math.max(1, qty)) || 0;
+    return (
+      <div key={it.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 0", borderBottom: `1px solid ${COLORS.border}` }}>
+        <div style={{ width: 48, height: 48, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bg, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <img src={it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
+            {it.variantLabel && <span>{it.variantLabel}</span>}
+            {it.color && <span title={it.color} style={{ width: 11, height: 11, borderRadius: "50%", background: it.color, border: "1px solid rgba(255,255,255,0.3)", display: "inline-block", flexShrink: 0 }} />}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, direction: "ltr" }}>
+              <button type="button" aria-label={tr.dec} onClick={() => setQty(it.id, qty - 1)} style={qtyBtnStyle}>−</button>
+              <span style={{ minWidth: 22, textAlign: "center", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 14 }}>{qty}</span>
+              <button type="button" aria-label={tr.inc} onClick={() => setQty(it.id, qty + 1)} style={qtyBtnStyle}>+</button>
+            </div>
+            <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13, fontFamily: "'Varela Round',sans-serif", direction: "ltr" }}>{`₪${unit * qty}`}</span>
+          </div>
+        </div>
+        <button type="button" onClick={() => setCart(c => c.filter(x => x.id !== it.id))} aria-label={tr.remove} style={{
+          background: "transparent", border: "none", color: COLORS.gray,
+          cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 4,
+          minWidth: isMobile ? 36 : "auto", minHeight: isMobile ? 36 : "auto",
+          flexShrink: 0, transition: "color 0.2s", touchAction: "manipulation",
+        }}
+        onMouseOver={e => e.currentTarget.style.color = "#ef4444"}
+        onMouseOut={e => e.currentTarget.style.color = COLORS.gray}
+        >🗑</button>
+      </div>
+    );
+  };
+
+  const breakdown = (
+    <div style={{ marginTop: 12, fontSize: 13 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: COLORS.gray }}>
+        <span>{tr.subtotal}</span><span style={{ color: COLORS.white }}>{`₪${subtotal}`}</span>
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: COLORS.gray }}>
+        <span>{tr.shipping}</span><span style={{ color: COLORS.white }}>{shipping === 0 ? tr.free : `₪${shipping}`}</span>
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${COLORS.border}`, color: COLORS.accent, fontWeight: 700, fontSize: 17, fontFamily: "'Playfair Display',serif" }}>
+        <span>{tr.total}</span><span>{`₪${total}`}</span>
+      </div>
+    </div>
+  );
+
+  // Mobile bar — collapsible, sits at the top of the form column.
+  if (isMobile) {
+    return (
+      <div dir={isRTL ? "rtl" : "ltr"} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+        <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%",
+          background: "transparent", border: "none", color: COLORS.white, cursor: "pointer",
+          fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600, padding: 0,
+        }}>
+          <span>{`${tr.title} · ${itemCount} ${tr.items}`}</span>
+          <span style={{ color: COLORS.accent, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {`₪${total}`}
+            <span style={{ fontSize: 11 }}>{open ? "▲" : "▼"}</span>
+          </span>
+        </button>
+        {open && (
+          <div style={{ marginTop: 12 }}>
+            {cart.length === 0 ? (
+              <div style={{ color: COLORS.gray, fontSize: 13, padding: "12px 0" }}>{tr.empty}</div>
+            ) : cart.map(itemRow)}
+            {cart.length > 0 && breakdown}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop sticky sidebar.
+  return (
+    <div dir={isRTL ? "rtl" : "ltr"} style={{
+      position: "sticky", top: 96,
+      background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16,
+      padding: 20,
+    }}>
+      <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 19, margin: "0 0 14px 0" }}>
+        {tr.title}
+      </h3>
+      {cart.length === 0 ? (
+        <div style={{ color: COLORS.gray, fontSize: 13, padding: "8px 0" }}>{tr.empty}</div>
+      ) : cart.map(itemRow)}
+      {cart.length > 0 && breakdown}
+    </div>
+  );
+}
+
+function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart, updateCartQty, pendingCheckout, clearPendingCheckout }) {
   const t = LANGS[lang];
   const products = PRODUCTS(t);
   const [step, setStep] = useState((pendingBloomItem || pendingCheckout) ? 3 : 1);
@@ -2319,7 +2461,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
-      <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 24px 60px" }}>
+      <div style={{ maxWidth: step === 3 ? 1100 : 700, margin: "0 auto", padding: "24px 24px 60px", transition: "max-width 0.25s ease" }}>
         <div style={{ display: "flex", marginBottom: 40 }}>
           {t.steps.map((s, i) => (
             <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -2730,7 +2872,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         )}
 
         {step === 3 && (
-          <div>
+          <div style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? 0 : 28,
+            alignItems: "flex-start",
+          }}>
+            {/* Mobile: collapsible summary at the very top of the form column */}
+            {isMobile && <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={true} />}
+
+            {/* Form column — wider on desktop (flex 1.5 vs sidebar's 1) */}
+            <div style={{ flex: isMobile ? "none" : "1.5", width: "100%", minWidth: 0 }}>
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h2>
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.form.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -2769,24 +2921,6 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               </div>
               <div><label style={labelStyle}>{t.form.notes}</label><textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
-              {/* Quantity selector moved into the cart drawer — set per cart line there. */}
-              <div style={{ background: COLORS.bgCard, borderRadius: 12, padding: 20, border: `1px solid ${COLORS.border}` }}>
-                <div style={{ color: COLORS.white, fontWeight: 600, marginBottom: 12 }}>{t.form.summary} ({cart.length} {lang === "he" ? "פריטים" : lang === "ru" ? "товаров" : "items"})</div>
-                {cart.map((it) => (
-                  <div key={it.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: COLORS.gray, fontSize: 13, marginBottom: 8, paddingBottom: 8, borderBottom: `1px solid ${COLORS.border}` }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13 }}>{it.productName} × {it.qty}</div>
-                      <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{it.variantLabel}{it.backPrint ? ` · ${lang === "he" ? "אחורי" : lang === "ru" ? "Спина" : "Back"}` : ""}{it.secondFront.enabled ? ` · ${lang === "he" ? "חזית+" : lang === "ru" ? "Доп" : "+1"}` : ""}{it.sleeveLeft.enabled ? ` · ${lang === "he" ? "ש.שמ" : "L-Sl"}` : ""}{it.sleeveRight.enabled ? ` · ${lang === "he" ? "ש.ימ" : "R-Sl"}` : ""}</div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ color: COLORS.white, fontWeight: 600 }}>₪{it.itemPrice}</span>
-                      <button onClick={() => removeFromCart(it.id)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 18, padding: 0 }}>×</button>
-                    </div>
-                  </div>
-                ))}
-                <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 14, marginBottom: 12 }}><span>{t.form.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
-                <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 12, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 700 }}>{t.form.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 20 }}>₪{cartItemsTotal + SHIPPING_PRICE}</span></div>
-              </div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{t.form.paymentSub}</div>
@@ -2819,6 +2953,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {submitting ? "..." : `${t.form.place} · ₪${total}`}
               </button>
             </div>
+            </div>
+
+            {/* Desktop sticky summary column */}
+            {!isMobile && (
+              <div style={{ flex: "1", width: "100%", minWidth: 280, maxWidth: 360 }}>
+                <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={false} />
+              </div>
+            )}
           </div>
         )}
 
@@ -4460,14 +4602,10 @@ export default function App() {
   const openCart = () => { setCartOpen(true); setUserClosedCart(false); };
   const closeCart = () => { setCartOpen(false); setUserClosedCart(true); };
 
-  // Auto-open the cart drawer the first time the user lands on /order, so the
-  // current basket is visible. Skipped if the cart is empty (avoids opening
-  // an empty drawer over the form) or if the user already closed it.
-  useEffect(() => {
-    if (page === "order" && !userClosedCart && cart.length > 0) {
-      setCartOpen(true);
-    }
-  }, [page, userClosedCart, cart.length]);
+  // Cart auto-open on /order was useful before the inline OrderSummary existed.
+  // Now that step 3 has a sticky summary column (and a collapsible bar on
+  // mobile), the drawer would just be redundant noise — disabled on purpose.
+  // The user can still open the drawer manually from the nav icon if they want.
 
   const setPage = (newPage) => {
     const hash = newPage === 'home' ? '' : newPage;
@@ -4861,7 +4999,7 @@ export default function App() {
             {page === "home" && <><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} />}
-            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
+            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
