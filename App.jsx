@@ -83,6 +83,7 @@ const LANGS = {
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "העיצוב שלך.", h1line2: "על הכל.", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
+    reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
@@ -122,6 +123,7 @@ const LANGS = {
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Your design.", h1line2: "On everything.", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
+    reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
@@ -161,6 +163,7 @@ const LANGS = {
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Ваш дизайн.", h1line2: "На всём.", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
+    reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
@@ -2401,20 +2404,23 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {products.map((p, idx) => (
                 <div key={p.id} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
-                  style={{ position: "relative", background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
-                  <ProductBadges product={p} lang={lang} />
-                  <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: 32 }}>{String(idx + 1).padStart(2, '0')}</span>
-                    <div style={{ width: 54, height: 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
+                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
+                    <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <img src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     </div>
-                    <div>
-                      <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>{p.name}</div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
+                        {p.is_bestseller && <span style={{ background: COLORS.accent, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
+                        {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
+                      </div>
                       <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
                       <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {t.product.options}</span></div>
                     </div>
                   </div>
-                  {selectedProduct === p.id && <span style={{ color: COLORS.accent }}>✓</span>}
+                  {selectedProduct === p.id && <span style={{ color: COLORS.accent, flexShrink: 0 }}>✓</span>}
                 </div>
               ))}
             </div>
@@ -2551,11 +2557,20 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                 </div>
                 <div>
-                  <label style={labelStyle}>{t.customize.color}</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <span>{t.customize.color}</span>
+                    {product.colors[selectedColor] && (
+                      <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 12, textTransform: "none", letterSpacing: 0 }}>
+                        {colorName(product.colors[selectedColor], lang)}
+                      </span>
+                    )}
+                  </label>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                     {product.colors.map((c, i) => (
                       <div key={i} onClick={() => setSelectedColor(i)}
-                        style={{ width: 26, height: 26, borderRadius: "50%", background: c, cursor: "pointer", border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
+                        title={colorName(c, lang)}
+                        aria-label={colorName(c, lang)}
+                        style={{ width: 28, height: 28, borderRadius: "50%", background: c, cursor: "pointer", border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
                     ))}
                   </div>
                 </div>
@@ -3488,6 +3503,136 @@ function TrustRow({ lang }) {
         </span>
       ))}
     </div>
+  );
+}
+
+// Star rating row — small Playfair-styled stars. role="img" gives screen readers the rating.
+function ReviewStars({ rating, label }) {
+  const full = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+  return (
+    <div role="img" aria-label={`${full}/5 — ${label}`} style={{ display: "inline-flex", gap: 2, color: COLORS.accent, fontSize: 14, lineHeight: 1 }}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <span key={i} aria-hidden="true" style={{ opacity: i < full ? 1 : 0.25 }}>★</span>
+      ))}
+    </div>
+  );
+}
+
+// Customer reviews section — only renders when at least one active row exists in
+// the `testimonials` table on Supabase (schema in /testimonials.sql at repo root).
+// Empty/no-rows → returns null so we never show placeholder/fake content.
+function Reviews({ lang }) {
+  const isRTL = lang === "he";
+  const t = LANGS[lang]?.reviews || LANGS.he.reviews;
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("testimonials")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        setReviews(data || []);
+      } catch (err) {
+        // Table may not exist yet (Gleb hasn't run testimonials.sql). Silently hide.
+        setReviews([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  // Inject AggregateRating into the page-level JSON-LD when we have ratings,
+  // and clean up if the component unmounts or reviews change.
+  useEffect(() => {
+    if (typeof document === "undefined" || !reviews.length) return;
+    const ratings = reviews.map(r => Number(r.rating)).filter(n => Number.isFinite(n) && n > 0);
+    if (!ratings.length) return;
+    const avg = (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1);
+    const payload = {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": "https://www.sfalimshop.com/#organization",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": String(avg),
+        "reviewCount": String(reviews.length),
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+    };
+    const id = "sfalim-aggregate-rating";
+    const stale = document.getElementById(id);
+    if (stale) stale.remove();
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = id;
+    script.text = JSON.stringify(payload);
+    document.head.appendChild(script);
+    return () => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    };
+  }, [reviews]);
+
+  // Hide entirely until Gleb has at least one active review — no placeholders.
+  if (loading || !reviews.length) return null;
+
+  const body = (r) => r[`body_${lang}`] || r.body_he || r.body_en || "";
+
+  return (
+    <section dir={isRTL ? "rtl" : "ltr"} style={{ padding: isMobile ? "60px 20px" : "80px 24px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 5 }}>
+      <div className="reveal" style={{ textAlign: "center", marginBottom: isMobile ? 32 : 48 }}>
+        <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", marginBottom: 12, textTransform: "uppercase" }}>
+          {t.eyebrow}
+        </div>
+        <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "2rem" : "2.6rem", margin: 0, letterSpacing: "-0.01em" }}>
+          {t.title}
+        </h2>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 18 }}>
+          <div style={{ width: 40, height: 1, background: COLORS.accent }} />
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.accent }} />
+          <div style={{ width: 40, height: 1, background: COLORS.accent }} />
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))", gap: isMobile ? 16 : 24 }}>
+        {reviews.map((r) => (
+          <article key={r.id} className="reveal" aria-label={t.aria} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? "20px 18px" : "26px 24px", display: "flex", flexDirection: "column", gap: 12, transition: "border-color 0.25s, transform 0.25s" }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-4px)"; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; }}>
+            <ReviewStars rating={r.rating} label={t.aria} />
+            <blockquote style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: isMobile ? 16 : 18, lineHeight: 1.55, margin: 0 }}>
+              “{body(r)}”
+            </blockquote>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: "auto", paddingTop: 8, borderTop: `1px solid ${COLORS.border}` }}>
+              {r.author_avatar && (
+                <img src={r.author_avatar} alt={r.author_name} loading="lazy" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: `1px solid ${COLORS.border}` }} />
+              )}
+              <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.3 }}>
+                <span style={{ color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 13 }}>{r.author_name}</span>
+                {(r.author_city || r.product) && (
+                  <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                    {[r.author_city, r.product].filter(Boolean).join(" · ")}
+                  </span>
+                )}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -4498,7 +4643,7 @@ export default function App() {
           <>
             <AccessibilityMenu lang={lang} />
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.length} onCartClick={() => setCartOpen(true)} />
-            {page === "home" && <Hero setPage={setPage} lang={lang} />}
+            {page === "home" && <><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={orderBloomDesign} />}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
