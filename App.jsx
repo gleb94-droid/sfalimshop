@@ -3876,11 +3876,22 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
 // Main App
 
 // ============ ACCESSIBILITY ============
-function AccessibilityMenu({ lang }) {
+function AccessibilityMenu({ lang, cartOpen }) {
   const [open, setOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
   const [highContrast, setHighContrast] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+
+  // Cart drawer slides in from inline-end (right in LTR, left in RTL). Anchor
+  // the a11y button to inline-start so the two never share the same edge.
+  // On mobile the cart is full-width, so just hide the button while it's open.
+  if (cartOpen && isMobile) return null;
 
   useEffect(() => {
     document.documentElement.style.fontSize = fontSize + '%';
@@ -3916,17 +3927,18 @@ function AccessibilityMenu({ lang }) {
 
   return (
     <>
-      {/* Accessibility button - fixed bottom left */}
+      {/* Accessibility button — fixed at the bottom inline-start corner so it
+          always sits on the opposite side from the cart drawer. */}
       <button
         aria-label="Accessibility menu"
         onClick={() => setOpen(!open)}
         style={{
-          position: 'fixed', bottom: 24, left: 24, zIndex: 9998,
+          position: 'fixed', bottom: 24, insetInlineStart: 24, zIndex: 9998,
           width: 52, height: 52, borderRadius: '50%',
           background: '#FF6B35', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 22, boxShadow: '0 4px 20px rgba(255,107,53,0.5)',
-          transition: 'transform 0.2s, box-shadow 0.2s',
+          transition: 'transform 0.2s, box-shadow 0.2s, opacity 0.25s',
         }}
         onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 6px 30px rgba(255,107,53,0.7)'; }}
         onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,107,53,0.5)'; }}
@@ -3939,10 +3951,10 @@ function AccessibilityMenu({ lang }) {
         </svg>
       </button>
 
-      {/* Accessibility panel */}
+      {/* Accessibility panel — sits on the same inline-start side as the button. */}
       {open && (
         <div style={{
-          position: 'fixed', bottom: 88, left: 24, zIndex: 9997,
+          position: 'fixed', bottom: 88, insetInlineStart: 24, zIndex: 9997,
           background: '#1a1a1a', border: '1px solid #2a2a2a',
           borderRadius: 16, padding: 20, width: 260,
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
@@ -4435,8 +4447,27 @@ export default function App() {
   // between the BLOOM collection and the order page while shopping.
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+  // True once the user has explicitly closed the cart drawer (or proceeded to
+  // checkout from it). The /order auto-open effect respects this flag so the
+  // drawer doesn't reopen behind the user's back. Re-opening the cart from
+  // the nav icon or the toast resets it.
+  const [userClosedCart, setUserClosedCart] = useState(false);
   // When true, OrderPage opens straight on the checkout details step.
   const [pendingCheckout, setPendingCheckout] = useState(false);
+
+  // Centralised open/close helpers — every caller that touches cartOpen
+  // should go through these so userClosedCart stays accurate.
+  const openCart = () => { setCartOpen(true); setUserClosedCart(false); };
+  const closeCart = () => { setCartOpen(false); setUserClosedCart(true); };
+
+  // Auto-open the cart drawer the first time the user lands on /order, so the
+  // current basket is visible. Skipped if the cart is empty (avoids opening
+  // an empty drawer over the form) or if the user already closed it.
+  useEffect(() => {
+    if (page === "order" && !userClosedCart && cart.length > 0) {
+      setCartOpen(true);
+    }
+  }, [page, userClosedCart, cart.length]);
 
   const setPage = (newPage) => {
     const hash = newPage === 'home' ? '' : newPage;
@@ -4516,8 +4547,10 @@ export default function App() {
   useEffect(() => () => { if (cartToastTimer.current) clearTimeout(cartToastTimer.current); }, []);
 
   // Open the order page on the checkout step — used by the cart drawer.
+  // The user explicitly chose to proceed, so close the cart AND mark it as
+  // user-closed; otherwise the auto-open effect would reopen it on /order.
   const goToCheckout = () => {
-    setCartOpen(false);
+    closeCart();
     setPendingCheckout(true);
     if (page !== "order") setPage("order");
   };
@@ -4823,8 +4856,8 @@ export default function App() {
         }
         return (
           <>
-            <AccessibilityMenu lang={lang} />
-            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={() => setCartOpen(true)} />
+            <AccessibilityMenu lang={lang} cartOpen={cartOpen} />
+            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} />
             {page === "home" && <><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} />}
@@ -4836,10 +4869,10 @@ export default function App() {
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
             <Footer lang={lang} setPage={setPage} />
-            <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={() => setCartOpen(false)} onCheckout={goToCheckout} />
+            <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} />
             {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
                 top-corner pill on desktop. Action button opens the cart drawer. */}
-            {cartToast && <CartToast message={cartToast} lang={lang} onClose={() => setCartToast(null)} onViewCart={() => { setCartToast(null); setCartOpen(true); }} />}
+            {cartToast && <CartToast message={cartToast} lang={lang} onClose={() => setCartToast(null)} onViewCart={() => { setCartToast(null); openCart(); }} />}
             <style>{`
               @keyframes cartToastInDesktop { from { opacity: 0; transform: translateX(${lang === "he" ? "100%" : "-100%"}); } to { opacity: 1; transform: translateX(0); } }
               @keyframes cartToastInMobile { from { opacity: 0; transform: translateY(120%); } to { opacity: 1; transform: translateY(0); } }
