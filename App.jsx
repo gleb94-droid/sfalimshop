@@ -4947,6 +4947,9 @@ function PetBadges({ design, lang }) {
     }}>
       {showBest && (
         <span style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
           background: COLORS.accent,
           color: "#fff",
           fontFamily: "'Varela Round',sans-serif",
@@ -4958,10 +4961,18 @@ function PetBadges({ design, lang }) {
           borderRadius: 6,
           boxShadow: "0 4px 12px rgba(255,107,53,0.35)",
           whiteSpace: "nowrap",
-        }}>{labels.bestseller}</span>
+        }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21.02 7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          {labels.bestseller}
+        </span>
       )}
       {showNew && (
         <span style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
           background: "rgba(15,15,15,0.85)",
           color: COLORS.accent,
           border: `1px solid ${COLORS.accent}`,
@@ -4974,7 +4985,12 @@ function PetBadges({ design, lang }) {
           borderRadius: 6,
           backdropFilter: "blur(4px)",
           whiteSpace: "nowrap",
-        }}>{labels.new}</span>
+        }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="M12 3l1.91 5.18L19 10l-5.09 1.82L12 17l-1.91-5.18L5 10l5.09-1.82L12 3z" />
+          </svg>
+          {labels.new}
+        </span>
       )}
     </div>
   );
