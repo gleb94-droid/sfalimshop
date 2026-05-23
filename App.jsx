@@ -1817,7 +1817,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   const commitCurrentItem = () => {
     if (!product || !variant || !uploadedImage) return false;
-    const itemPrice = (variant.price * qty)
+    // Quantity is always 1 at item creation time now — the user adjusts it
+    // inside the cart drawer (+/- buttons). unitPrice is the per-item price
+    // including extras; itemPrice = unitPrice × qty (recomputed by updateCartQty).
+    const unitPrice = variant.price
       + (backPrint ? BACK_PRINT_PRICE : 0)
       + (secondFront.enabled ? SECOND_FRONT_PRICE : 0)
       + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
@@ -1829,7 +1832,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       variantLabel: variant.label,
       colorIdx: selectedColor,
       color: product.colors[selectedColor],
-      qty,
+      qty: 1,
       uploadedImage,
       imagePos: { ...imagePos },
       backPrint,
@@ -1837,7 +1840,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       secondFront: { enabled: secondFront.enabled, image: secondFront.image, sameAsMain: secondFront.sameAsMain, pos: { ...secondFront.pos } },
       sleeveLeft: { ...sleeveLeft },
       sleeveRight: { ...sleeveRight },
-      itemPrice,
+      unitPrice,
+      itemPrice: unitPrice,
     };
     if (currentItemCartId) {
       setCart(c => c.map(it => it.id === currentItemCartId ? { ...it, ...itemData } : it));
@@ -2765,14 +2769,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               </div>
               <div><label style={labelStyle}>{t.form.notes}</label><textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
-              <div>
-                <label style={labelStyle}>{t.form.qty}</label>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, direction: "ltr" }}>
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 36, height: 36, borderRadius: 6, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18 }}>−</button>
-                  <span style={{ color: COLORS.white, fontSize: 18, fontWeight: 600, minWidth: 30, textAlign: "center" }}>{qty}</span>
-                  <button onClick={() => setQty(q => q + 1)} style={{ width: 36, height: 36, borderRadius: 6, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18 }}>+</button>
-                </div>
-              </div>
+              {/* Quantity selector moved into the cart drawer — set per cart line there. */}
               <div style={{ background: COLORS.bgCard, borderRadius: 12, padding: 20, border: `1px solid ${COLORS.border}` }}>
                 <div style={{ color: COLORS.white, fontWeight: 600, marginBottom: 12 }}>{t.form.summary} ({cart.length} {lang === "he" ? "פריטים" : lang === "ru" ? "товаров" : "items"})</div>
                 {cart.map((it) => (
@@ -4136,16 +4133,106 @@ function AboutPage({ lang, setPage }) {
   );
 }
 
-// ============ CART DRAWER — slide-out cart, openable from anywhere ============
-function CartDrawer({ lang, open, cart, setCart, onClose, onCheckout }) {
+// ============ CART TOAST — "added to cart" feedback bubble ============
+// Bottom sheet on mobile (full-width, big tap target). Pill in the top
+// inline-start corner on desktop. Auto-dismisses via the parent timer.
+function CartToast({ message, lang, onClose, onViewCart }) {
   const isRTL = lang === "he";
-  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
-
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
   useEffect(() => {
-    const handle = () => setIsMobile(window.innerWidth < 768);
+    const handle = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handle);
     return () => window.removeEventListener("resize", handle);
   }, []);
+  const viewLabel = lang === "he" ? "צפה בסל" : lang === "ru" ? "Открыть корзину" : "View cart";
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      dir={isRTL ? "rtl" : "ltr"}
+      style={{
+        position: "fixed",
+        bottom: isMobile ? 20 : "auto",
+        top: isMobile ? "auto" : 90,
+        insetInlineStart: isMobile ? 16 : "auto",
+        insetInlineEnd: isMobile ? 16 : 20,
+        width: isMobile ? "calc(100% - 32px)" : "auto",
+        maxWidth: isMobile ? "none" : 380,
+        background: "rgba(26,26,26,0.97)",
+        color: "#fff",
+        padding: isMobile ? "14px 16px" : "14px 18px",
+        borderRadius: 14,
+        border: `1px solid ${COLORS.accent}`,
+        boxShadow: "0 12px 32px rgba(0,0,0,0.5), 0 0 24px rgba(255,107,53,0.25)",
+        backdropFilter: "blur(12px)",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        fontFamily: "'Varela Round',sans-serif",
+        animation: `${isMobile ? "cartToastInMobile" : "cartToastInDesktop"} 0.3s cubic-bezier(.2,.6,.2,1)`,
+      }}>
+      <span aria-hidden="true" style={{ color: "#4ade80", fontSize: 22, lineHeight: 1, flexShrink: 0 }}>✓</span>
+      <span style={{ flex: 1, fontSize: 14, lineHeight: 1.35 }}>{message}</span>
+      <button onClick={onViewCart} type="button" style={{
+        background: COLORS.accent, border: "none", color: "#fff",
+        padding: isMobile ? "10px 14px" : "8px 14px",
+        borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 700,
+        fontFamily: "'Varela Round',sans-serif", flexShrink: 0,
+        minHeight: isMobile ? 40 : "auto", touchAction: "manipulation",
+        transition: "background 0.2s",
+      }}
+      onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
+      onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
+      >{viewLabel}</button>
+      {!isMobile && (
+        <button onClick={onClose} type="button" aria-label="dismiss" style={{
+          background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer",
+          fontSize: 18, lineHeight: 1, padding: 4, flexShrink: 0,
+        }}>×</button>
+      )}
+    </div>
+  );
+}
+
+// ============ CART DRAWER — slide-out cart, openable from anywhere ============
+function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheckout }) {
+  const isRTL = lang === "he";
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+
+  // Fallback if the parent didn't pass an updater (defensive, e.g. older callers).
+  const setQty = updateCartQty || ((id, q) => {
+    if (q < 1) { setCart(c => c.filter(it => it.id !== id)); return; }
+    setCart(c => c.map(it => {
+      if (it.id !== id) return it;
+      const unit = Number(it.unitPrice ?? it.itemPrice / Math.max(1, it.qty || 1)) || 0;
+      return { ...it, qty: q, unitPrice: unit, itemPrice: unit * q };
+    }));
+  });
+
+  // Big-enough tap target on mobile, compact on desktop.
+  const qtyBtnStyle = {
+    width: isMobile ? 40 : 30,
+    height: isMobile ? 40 : 30,
+    borderRadius: 8,
+    border: `1px solid ${COLORS.border}`,
+    background: COLORS.bgCard,
+    color: COLORS.white,
+    cursor: "pointer",
+    fontSize: isMobile ? 20 : 16,
+    lineHeight: 1,
+    fontFamily: "'Varela Round',sans-serif",
+    fontWeight: 700,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    touchAction: "manipulation",
+    transition: "border-color 0.15s, color 0.15s",
+  };
 
   // Lock body scroll while the drawer is open
   useEffect(() => {
@@ -4233,37 +4320,58 @@ function CartDrawer({ lang, open, cart, setCart, onClose, onCheckout }) {
           ) : (
             cart.map((it) => {
               const extras = extrasFor(it);
+              const qty = Number(it.qty) || 1;
+              const unit = Number(it.unitPrice ?? (it.itemPrice / Math.max(1, qty))) || 0;
               return (
                 <div key={it.id} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "14px 0", borderBottom: `1px solid ${COLORS.border}` }}>
-                  <div style={{ width: 62, height: 62, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: isMobile ? 72 : 62, height: isMobile ? 72 : 62, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <img src={it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
                       {it.color && <span title={it.color} style={{ width: 13, height: 13, borderRadius: "50%", background: it.color, border: "1px solid rgba(255,255,255,0.3)", display: "inline-block", flexShrink: 0 }} />}
-                      {it.qty > 1 && <span>{`× ${it.qty}`}</span>}
                     </div>
                     {extras && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{extras}</div>}
-                    <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14, marginTop: 7 }}>{`₪${it.itemPrice}`}</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, direction: "ltr" }}>
+                        <button type="button" onClick={() => setQty(it.id, qty - 1)} aria-label={lang === "he" ? "הפחת" : lang === "ru" ? "Уменьшить" : "Decrease"} style={qtyBtnStyle}>−</button>
+                        <span aria-live="polite" style={{ minWidth: 26, textAlign: "center", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>{qty}</span>
+                        <button type="button" onClick={() => setQty(it.id, qty + 1)} aria-label={lang === "he" ? "הוסף" : lang === "ru" ? "Увеличить" : "Increase"} style={qtyBtnStyle}>+</button>
+                      </div>
+                      <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14, fontFamily: "'Varela Round',sans-serif", direction: "ltr" }}>
+                        {qty > 1 ? `₪${unit} × ${qty} = ₪${unit * qty}` : `₪${unit * qty}`}
+                      </div>
+                    </div>
                   </div>
                   <button onClick={() => setCart(c => c.filter(x => x.id !== it.id))} aria-label={tr.remove} style={{
                     background: "transparent", border: "none", color: COLORS.gray,
-                    cursor: "pointer", fontSize: 22, lineHeight: 1, padding: 2, flexShrink: 0, transition: "color 0.2s",
+                    cursor: "pointer", fontSize: isMobile ? 22 : 20, lineHeight: 1, padding: isMobile ? 8 : 4,
+                    minWidth: isMobile ? 40 : "auto", minHeight: isMobile ? 40 : "auto",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, transition: "color 0.2s", touchAction: "manipulation",
                   }}
                   onMouseOver={e => e.currentTarget.style.color = "#ef4444"}
                   onMouseOut={e => e.currentTarget.style.color = COLORS.gray}
-                  >×</button>
+                  >🗑</button>
                 </div>
               );
             })
           )}
         </div>
 
-        {/* Footer — totals + checkout */}
+        {/* Footer — totals + checkout. On mobile this stays glued to the bottom
+            (it's a flex item that never shrinks); paddingBottom respects iOS
+            safe-area inset so the button isn't covered by the home indicator. */}
         {cart.length > 0 && (
-          <div style={{ flexShrink: 0, borderTop: `1px solid ${COLORS.border}`, padding: "18px 22px", background: COLORS.bgCard }}>
+          <div style={{
+            flexShrink: 0,
+            borderTop: `1px solid ${COLORS.border}`,
+            padding: isMobile ? "16px 18px calc(16px + env(safe-area-inset-bottom)) 18px" : "18px 22px",
+            background: COLORS.bgCard,
+            boxShadow: isMobile ? "0 -8px 24px rgba(0,0,0,0.3)" : "none",
+          }}>
             <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 7 }}>
               <span>{tr.subtotal}</span><span>{`₪${subtotal}`}</span>
             </div>
@@ -4276,8 +4384,9 @@ function CartDrawer({ lang, open, cart, setCart, onClose, onCheckout }) {
             </div>
             <button onClick={onCheckout} style={{
               width: "100%", background: COLORS.accent, color: "#fff", border: "none",
-              borderRadius: 10, padding: "15px", fontSize: 15, fontWeight: 700, cursor: "pointer",
-              fontFamily: "'Varela Round',sans-serif", boxShadow: "0 6px 20px rgba(255,107,53,0.35)", transition: "background 0.2s",
+              borderRadius: 12, padding: isMobile ? "16px" : "15px", fontSize: 16, fontWeight: 700, cursor: "pointer",
+              fontFamily: "'Varela Round',sans-serif", boxShadow: "0 6px 20px rgba(255,107,53,0.35)",
+              transition: "background 0.2s", touchAction: "manipulation",
             }}
             onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
             onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
@@ -4350,6 +4459,8 @@ export default function App() {
 
   // Build the same cart item OrderPage builds when it consumes pendingBloomItem,
   // and push it to the shared cart so the user can keep browsing BLOOM.
+  // unitPrice is stored separately from itemPrice so CartDrawer +/- can
+  // recompute itemPrice = unitPrice × qty without re-running this builder.
   const addBloomToCart = (item) => {
     const tNow = LANGS[lang] || LANGS.he;
     const prod = PRODUCTS(tNow).find(p => p.id === item.productId);
@@ -4357,6 +4468,7 @@ export default function App() {
     const v = (item.variantId && prod.variants.find(x => x.id === item.variantId)) || prod.variants[0];
     const colorHex = item.shirtColor ? item.shirtColor.hex : prod.colors[0];
     const matchedIdx = prod.colors.indexOf(colorHex);
+    const unitPrice = Number(item.price) || 0;
     const cartItem = {
       id: Date.now() + Math.random(),
       productId: prod.id,
@@ -4374,15 +4486,31 @@ export default function App() {
       secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
       sleeveLeft: { enabled: false, sameAsMain: true, image: null },
       sleeveRight: { enabled: false, sameAsMain: true, image: null },
-      itemPrice: Number(item.price) || 0,
+      unitPrice,
+      itemPrice: unitPrice,
     };
     setCart(c => [...c, cartItem]);
 
-    // Toast: clear any previous timer so rapid taps don't queue up multiple toasts.
-    const msg = lang === "he" ? "✓ נוסף לסל" : lang === "ru" ? "✓ Добавлено в корзину" : "✓ Added to cart";
-    setCartToast(msg);
+    // Toast: include the product name and a CTA to open the cart drawer.
+    const productLabel = cartItem.productName;
+    const tmpl = lang === "he" ? `${productLabel} נוסף לסל!` : lang === "ru" ? `${productLabel} добавлен в корзину!` : `${productLabel} added to cart!`;
+    setCartToast(tmpl);
     if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
-    cartToastTimer.current = setTimeout(() => setCartToast(null), 2000);
+    cartToastTimer.current = setTimeout(() => setCartToast(null), 3000);
+  };
+
+  // Cart line update — used by the CartDrawer +/- buttons. Drops the line
+  // entirely when qty falls below 1, otherwise recomputes itemPrice.
+  const updateCartQty = (itemId, newQty) => {
+    if (newQty < 1) {
+      setCart(c => c.filter(it => it.id !== itemId));
+      return;
+    }
+    setCart(c => c.map(it => {
+      if (it.id !== itemId) return it;
+      const unit = Number(it.unitPrice ?? it.itemPrice / Math.max(1, it.qty || 1)) || 0;
+      return { ...it, qty: newQty, unitPrice: unit, itemPrice: unit * newQty };
+    }));
   };
 
   useEffect(() => () => { if (cartToastTimer.current) clearTimeout(cartToastTimer.current); }, []);
@@ -4696,7 +4824,7 @@ export default function App() {
         return (
           <>
             <AccessibilityMenu lang={lang} />
-            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.length} onCartClick={() => setCartOpen(true)} />
+            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={() => setCartOpen(true)} />
             {page === "home" && <><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} />}
@@ -4708,42 +4836,13 @@ export default function App() {
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
             <Footer lang={lang} setPage={setPage} />
-            <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} onClose={() => setCartOpen(false)} onCheckout={goToCheckout} />
-            {/* Small "added to cart" toast — auto-clears after 2s. Click jumps to cart. */}
-            {cartToast && (
-              <button
-                type="button"
-                onClick={() => { setCartToast(null); setCartOpen(true); }}
-                aria-live="polite"
-                style={{
-                  position: "fixed",
-                  bottom: 24,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  background: "rgba(15,15,15,0.95)",
-                  color: "#fff",
-                  border: `1px solid ${COLORS.accent}`,
-                  borderRadius: 999,
-                  padding: "12px 22px",
-                  fontFamily: "'Varela Round',sans-serif",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  letterSpacing: "0.02em",
-                  cursor: "pointer",
-                  boxShadow: "0 12px 40px rgba(0,0,0,0.5), 0 0 24px rgba(255,107,53,0.35)",
-                  backdropFilter: "blur(10px)",
-                  zIndex: 2000,
-                  animation: "cartToastIn 0.25s cubic-bezier(.2,.6,.2,1)",
-                  display: "inline-flex", alignItems: "center", gap: 10,
-                }}>
-                <span style={{ color: COLORS.accent, fontSize: 16, fontWeight: 700 }}>{cartToast}</span>
-                <span style={{ color: COLORS.gray, fontSize: 12 }}>
-                  {lang === "he" ? "צפה בסל ←" : lang === "ru" ? "Открыть корзину →" : "View cart →"}
-                </span>
-              </button>
-            )}
+            <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={() => setCartOpen(false)} onCheckout={goToCheckout} />
+            {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
+                top-corner pill on desktop. Action button opens the cart drawer. */}
+            {cartToast && <CartToast message={cartToast} lang={lang} onClose={() => setCartToast(null)} onViewCart={() => { setCartToast(null); setCartOpen(true); }} />}
             <style>{`
-              @keyframes cartToastIn { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+              @keyframes cartToastInDesktop { from { opacity: 0; transform: translateX(${lang === "he" ? "100%" : "-100%"}); } to { opacity: 1; transform: translateX(0); } }
+              @keyframes cartToastInMobile { from { opacity: 0; transform: translateY(120%); } to { opacity: 1; transform: translateY(0); } }
               @keyframes cartBadgeBump { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
               .cart-badge-bump { animation: cartBadgeBump 0.35s cubic-bezier(.2,.6,.2,1); }
             `}</style>
@@ -5424,6 +5523,18 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   // Show navigation arrows only when there are at least 2 designs to flip between.
   const canNavigate = typeof onPrev === "function" && typeof onNext === "function" && total > 1;
 
+  // Touch swipe: 50px threshold. Left-swipe goes to the next design, right
+  // goes back — same convention as Instagram regardless of RTL.
+  const touchStartX = useRef(null);
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null || !canNavigate || zoomed) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 50) onNext();
+    else if (diff < -50) onPrev();
+    touchStartX.current = null;
+  };
+
   // Shirt type → OrderPage product. Sizes match the PRODUCTS variant ids.
   const SHIRT_TYPES = [
     { id: "basic",     productId: "tshirt",    label: { he: "בייסיק",   en: "Basic",     ru: "Базовая" } },
@@ -5558,6 +5669,8 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
           {/* Image */}
           <div
             onClick={(e) => { e.stopPropagation(); setZoomed(true); }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
             title={lang === "he" ? "לחץ להגדלה" : lang === "ru" ? "Нажмите, чтобы увеличить" : "Click to zoom"}
             style={{
               position: "relative",
@@ -5569,11 +5682,13 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
               justifyContent: "center",
               padding: design.mockup_url ? 0 : "10%",
               cursor: "zoom-in",
+              touchAction: "pan-y",
             }}>
             <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
             <PetBadges design={design} lang={lang} />
 
             {/* Prev/next chevrons — visible only when there are 2+ designs.
+                Larger tap targets on mobile so a finger can hit them comfortably.
                 stopPropagation so clicking the arrows does NOT open the zoom overlay. */}
             {canNavigate && (
               <>
@@ -5585,13 +5700,13 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                   style={{
                     position: "absolute",
                     top: "50%",
-                    left: 12,
+                    left: isMobile ? 8 : 12,
                     transform: "translateY(-50%)",
-                    width: isMobile ? 38 : 44,
-                    height: isMobile ? 38 : 44,
+                    width: isMobile ? 52 : 44,
+                    height: isMobile ? 52 : 44,
                     border: "none",
                     borderRadius: "50%",
-                    background: "rgba(0,0,0,0.45)",
+                    background: "rgba(0,0,0,0.55)",
                     color: COLORS.accent,
                     cursor: "pointer",
                     display: "flex",
@@ -5600,9 +5715,10 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                     zIndex: 4,
                     backdropFilter: "blur(8px)",
                     WebkitBackdropFilter: "blur(8px)",
+                    touchAction: "manipulation",
                     transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
                   }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="15 18 9 12 15 6" />
                   </svg>
                 </button>
@@ -5614,13 +5730,13 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                   style={{
                     position: "absolute",
                     top: "50%",
-                    right: 12,
+                    right: isMobile ? 8 : 12,
                     transform: "translateY(-50%)",
-                    width: isMobile ? 38 : 44,
-                    height: isMobile ? 38 : 44,
+                    width: isMobile ? 52 : 44,
+                    height: isMobile ? 52 : 44,
                     border: "none",
                     borderRadius: "50%",
-                    background: "rgba(0,0,0,0.45)",
+                    background: "rgba(0,0,0,0.55)",
                     color: COLORS.accent,
                     cursor: "pointer",
                     display: "flex",
@@ -5629,9 +5745,10 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                     zIndex: 4,
                     backdropFilter: "blur(8px)",
                     WebkitBackdropFilter: "blur(8px)",
+                    touchAction: "manipulation",
                     transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
                   }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </button>
