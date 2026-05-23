@@ -4888,6 +4888,25 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
     window.history.replaceState({ page: "pets" }, "", "#pets");
   };
 
+  // Step left/right through the BLOOM collection while the modal is open.
+  // dir = +1 → next, -1 → previous; index wraps with modulo so it loops forever.
+  // We use replaceState (not pushState) so the back button still returns to /pets
+  // rather than walking through every design the user previewed.
+  const goPet = (dir) => {
+    if (!selected || !designs.length) return;
+    const idx = designs.findIndex(d => d.id === selected.id);
+    if (idx < 0) return;
+    const len = designs.length;
+    const nextIdx = ((idx + dir) % len + len) % len;
+    const d = designs[nextIdx];
+    setSelected(d);
+    const slug = slugify(d);
+    if (slug) window.history.replaceState({ page: "pets" }, "", `#pets/${slug}`);
+  };
+
+  // Position of the currently-open design — passed to the modal for the "3 / 12" counter.
+  const selectedIdx = selected ? designs.findIndex(d => d.id === selected.id) : -1;
+
   // Translations
   const t = {
     he: {
@@ -5106,6 +5125,10 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
           onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
+          onPrev={() => goPet(-1)}
+          onNext={() => goPet(1)}
+          currentIndex={selectedIdx + 1}
+          total={designs.length}
         />
       )}
 
@@ -5298,7 +5321,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, onOrderBloom }) {
+function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("basic");
@@ -5306,6 +5329,8 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   const [zoomed, setZoomed] = useState(false);
   const imgSrc = design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
+  // Show navigation arrows only when there are at least 2 designs to flip between.
+  const canNavigate = typeof onPrev === "function" && typeof onNext === "function" && total > 1;
 
   // Shirt type → OrderPage product. Sizes match the PRODUCTS variant ids.
   const SHIRT_TYPES = [
@@ -5362,16 +5387,24 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  // Close on Escape — closes zoom overlay first, then the modal itself.
+  // Keyboard nav inside the modal:
+  //   Esc → close zoom first, then close the modal
+  //   ← / → → step through BLOOM designs (LTR-friendly; RTL users still get
+  //   "right arrow = next" because most carousels worldwide work that way)
   useEffect(() => {
     const handler = (e) => {
-      if (e.key !== "Escape") return;
-      if (zoomed) { setZoomed(false); return; }
-      onClose();
+      if (e.key === "Escape") {
+        if (zoomed) { setZoomed(false); return; }
+        onClose();
+        return;
+      }
+      if (!canNavigate || zoomed) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); onNext(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); onPrev(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose, zoomed]);
+  }, [onClose, zoomed, canNavigate, onPrev, onNext]);
 
   return (
     <div
@@ -5447,6 +5480,92 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
             }}>
             <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
             <PetBadges design={design} lang={lang} />
+
+            {/* Prev/next chevrons — visible only when there are 2+ designs.
+                stopPropagation so clicking the arrows does NOT open the zoom overlay. */}
+            {canNavigate && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onPrev(); }}
+                  aria-label={lang === "he" ? "עיצוב קודם" : lang === "ru" ? "Предыдущий дизайн" : "Previous design"}
+                  className="bloom-nav-btn"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: 12,
+                    transform: "translateY(-50%)",
+                    width: isMobile ? 38 : 44,
+                    height: isMobile ? 38 : 44,
+                    border: "none",
+                    borderRadius: "50%",
+                    background: "rgba(0,0,0,0.45)",
+                    color: COLORS.accent,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 4,
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
+                  }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onNext(); }}
+                  aria-label={lang === "he" ? "עיצוב הבא" : lang === "ru" ? "Следующий дизайн" : "Next design"}
+                  className="bloom-nav-btn"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: 12,
+                    transform: "translateY(-50%)",
+                    width: isMobile ? 38 : 44,
+                    height: isMobile ? 38 : 44,
+                    border: "none",
+                    borderRadius: "50%",
+                    background: "rgba(0,0,0,0.45)",
+                    color: COLORS.accent,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 4,
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
+                  }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+
+                {/* "3 / 12" position counter — sits at the bottom-center of the image,
+                    matches the look of the zoom indicator. */}
+                <div aria-live="polite" style={{
+                  position: "absolute",
+                  bottom: 12,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "rgba(0,0,0,0.55)",
+                  color: "#fff",
+                  borderRadius: 20,
+                  padding: "5px 14px",
+                  fontSize: 11,
+                  fontFamily: "'IBM Plex Mono','Courier New',monospace",
+                  letterSpacing: "0.12em",
+                  backdropFilter: "blur(6px)",
+                  pointerEvents: "none",
+                }}>
+                  {currentIndex} / {total}
+                </div>
+              </>
+            )}
+
             <div aria-hidden="true" style={{ position: "absolute", bottom: 12, [isRTL ? "left" : "right"]: 12, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 20, padding: "6px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em", backdropFilter: "blur(6px)", pointerEvents: "none" }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" />
@@ -5635,6 +5754,9 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
         @keyframes petModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes petModalSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes petZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .bloom-nav-btn:hover { background: rgba(0,0,0,0.7) !important; color: #fff !important; transform: translateY(-50%) scale(1.15) !important; box-shadow: 0 0 24px rgba(255,107,53,0.5); }
+        .bloom-nav-btn:focus-visible { outline: 2px solid #FF6B35; outline-offset: 2px; }
+        .bloom-nav-btn:active { transform: translateY(-50%) scale(1.05) !important; }
       `}</style>
     </div>
   );
