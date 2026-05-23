@@ -1774,13 +1774,18 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
     return (
       <div key={it.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 0", borderBottom: `1px solid ${COLORS.border}` }}>
         <div style={{ width: 48, height: 48, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bg, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <img src={it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          <img src={it.mockupUrl || it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: it.mockupUrl ? "cover" : "contain" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
-            {it.color && <span title={it.color} style={{ width: 11, height: 11, borderRadius: "50%", background: it.color, border: "1px solid rgba(255,255,255,0.3)", display: "inline-block", flexShrink: 0 }} />}
+            {it.color && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <span aria-hidden="true" style={{ width: 11, height: 11, borderRadius: "50%", background: it.color, border: "1px solid rgba(255,255,255,0.3)", display: "inline-block", flexShrink: 0 }} />
+                <span>{colorName(it.color, lang)}</span>
+              </span>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, direction: "ltr" }}>
@@ -1967,15 +1972,19 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       + (secondFront.enabled ? SECOND_FRONT_PRICE : 0)
       + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
       + (sleeveRight.enabled ? SLEEVE_PRICE : 0);
+    const colorHex = product.colors[selectedColor];
     const itemData = {
       productId: selectedProduct,
       productName: product.name,
       variantId: selectedVariant,
       variantLabel: variant.label,
       colorIdx: selectedColor,
-      color: product.colors[selectedColor],
+      color: colorHex,
       qty: 1,
       uploadedImage,
+      // mockupUrl is populated asynchronously below — keep any previous value
+      // when re-committing the same line so the thumbnail doesn't disappear.
+      mockupUrl: null,
       imagePos: { ...imagePos },
       backPrint,
       backDesign: { ...backDesign },
@@ -1985,13 +1994,30 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       unitPrice,
       itemPrice: unitPrice,
     };
+    let cartItemId = currentItemCartId;
     if (currentItemCartId) {
-      setCart(c => c.map(it => it.id === currentItemCartId ? { ...it, ...itemData } : it));
+      setCart(c => c.map(it => it.id === currentItemCartId ? { ...it, ...itemData, mockupUrl: it.mockupUrl || null } : it));
     } else {
-      const newId = Date.now() + Math.random();
-      setCart(c => [...c, { id: newId, ...itemData }]);
-      setCurrentItemCartId(newId);
+      cartItemId = Date.now() + Math.random();
+      setCart(c => [...c, { id: cartItemId, ...itemData }]);
+      setCurrentItemCartId(cartItemId);
     }
+
+    // Snapshot of the inputs so the generator stays correct even if the user
+    // edits the customizer before the canvas finishes drawing.
+    const productKey = selectedProduct;
+    const designSnap = uploadedImage;
+    const posSnap = { ...imagePos };
+    const secondUrl = (secondFront.enabled && secondFront.image) ? secondFront.image : null;
+    const secondPos = secondUrl ? { ...secondFront.pos } : null;
+    // Compose the product + chosen colour + design overlay into a data URL,
+    // then patch the cart line so the cart thumbnail matches the live preview.
+    generateOrderMockup(productKey, colorHex, designSnap, posSnap, secondUrl, secondPos)
+      .then(dataUrl => {
+        setCart(c => c.map(it => it.id === cartItemId ? { ...it, mockupUrl: dataUrl } : it));
+      })
+      .catch(() => { /* fallback: cart UI uses uploadedImage / MOCKUP_URLS */ });
+
     return true;
   };
 
@@ -4479,13 +4505,18 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               return (
                 <div key={it.id} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "14px 0", borderBottom: `1px solid ${COLORS.border}` }}>
                   <div style={{ width: isMobile ? 72 : 62, height: isMobile ? 72 : 62, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <img src={it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                    <img src={it.mockupUrl || it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: it.mockupUrl ? "cover" : "contain" }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
-                      {it.color && <span title={it.color} style={{ width: 13, height: 13, borderRadius: "50%", background: it.color, border: "1px solid rgba(255,255,255,0.3)", display: "inline-block", flexShrink: 0 }} />}
+                      {it.color && (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                          <span aria-hidden="true" style={{ width: 13, height: 13, borderRadius: "50%", background: it.color, border: "1px solid rgba(255,255,255,0.3)", display: "inline-block", flexShrink: 0 }} />
+                          <span>{colorName(it.color, lang)}</span>
+                        </span>
+                      )}
                     </div>
                     {extras && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{extras}</div>}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
