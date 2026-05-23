@@ -3403,6 +3403,20 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
     </button>
   );
 
+  // Instagram icon link — square button, matches the cart button's style.
+  const instagramButton = (
+    <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label="אינסטגרם"
+      style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0, transition: "all 0.2s" }}
+      onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
+      onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+      </svg>
+    </a>
+  );
+
   return (
     <>
     <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
@@ -3453,6 +3467,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
       {/* Auth + Lang - RIGHT (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
         {cartButton}
+        {instagramButton}
         {user ? (
           <button onClick={onLogout} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, padding: "7px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
@@ -3485,6 +3500,18 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
           : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accent, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
         }
+        <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label="אינסטגרם"
+          onClick={() => setMobileMenu(false)}
+          style={{ background: "transparent", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%", boxSizing: "border-box", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all 0.2s" }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+          </svg>
+          <span>אינסטגרם</span>
+        </a>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
           {Object.keys(LANGS).map(l => (
             <button key={l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accent : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
