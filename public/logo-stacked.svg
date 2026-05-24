@@ -32,8 +32,8 @@
   <circle cx="300" cy="395" r="3" fill="#FF6B35"/>
   <line x1="310" y1="395" x2="380" y2="395" stroke="#FF6B35" stroke-width="1.2"/>
 
-  <text x="300" y="435" text-anchor="middle" class="brand-he" font-size="20" fill="#cfcfcf" letter-spacing="2" text-rendering="geometricPrecision">עיצוב מקורי · נשמה מקומית</text>
-  <text x="300" y="465" text-anchor="middle" class="meta" font-size="16" fill="#888888" text-rendering="geometricPrecision">Original Design · Local Soul</text>
+  <text x="300" y="435" text-anchor="middle" class="brand-he" font-size="20" fill="#cfcfcf" letter-spacing="2" text-rendering="geometricPrecision">מעוצב לסגנון שלך</text>
+  <text x="300" y="465" text-anchor="middle" class="meta" font-size="16" fill="#888888" text-rendering="geometricPrecision">Designed for Your Style</text>
 
   <circle cx="60" cy="540" r="3" fill="#FF6B35"/>
   <text x="76" y="546" class="tracked" font-size="13" fill="#aaaaaa" text-rendering="geometricPrecision">MUGS · SHIRTS · STICKERS</text>

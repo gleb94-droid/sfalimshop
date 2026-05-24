@@ -1,6 +1,967 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { createClient } from '@supabase/supabase-js'
+
+// Mug Studio is code-split: the studio component (≈25KB) and its dynamic
+// `import('three')` (≈190KB gz) ship in their own chunks and load ONLY when a
+// visitor opens #mug-studio. The main app bundle stays free of three.js.
+const MugStudio = lazy(() => import('./MugStudio.jsx'));
 const supabase = createClient('https://ubvgrxlxtelulwjtfudd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE')
+
+// ============================================================================
+// FloatingProductCard — כרטיס מוצר מרחף עם אפקט הטיה + זוהר הולוגרפי חם
+// ----------------------------------------------------------------------------
+// • קובץ אחד, ללא תלות חיצונית. ה-CSS מוטמע בתוך הרכיב (מוזרק פעם אחת ל-<head>).
+// • JSX רגיל (לא TypeScript). תואם Vite 4.5 / esbuild 0.18.
+// • שימוש אך ורק ב-template literals (גרשיים הפוכים) — אפס חיבור מחרוזות עם +.
+// • משתמש ב-React.* כדי שלא יתנגש עם ה-import של React הקיים ב-App.jsx שלך.
+//
+// אופן שימוש (דוגמה):
+//   <FloatingProductCard
+//     imageUrl="https://.../tshirt.jpg"
+//     name="חולצת אוברסייז קלאסית"
+//     description="כותנה 100% • גזרה רחבה ונוחה לכל יום"
+//     price="₪149"
+//     status="במלאי • משלוח תוך 48 שעות"
+//     buttonText="הוסף לעגלה"
+//     onAddToCart={() => console.log('added')}
+//   />
+// ============================================================================
+
+const FLOATING_CARD_STYLE_ID = `floating-product-card-styles`;
+
+const FLOATING_CARD_CSS = `
+.fpc-wrapper {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --pointer-from-center: 0;
+  --pointer-from-top: 0.5;
+  --pointer-from-left: 0.5;
+  --card-opacity: 0;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+  --background-x: 50%;
+  --background-y: 50%;
+  --grain: none;
+  --icon: none;
+  --behind-gradient: none;
+  --inner-gradient: none;
+  --sunpillar-1: hsl(8, 100%, 62%);
+  --sunpillar-2: hsl(20, 100%, 60%);
+  --sunpillar-3: hsl(32, 100%, 58%);
+  --sunpillar-4: hsl(42, 100%, 60%);
+  --sunpillar-5: hsl(50, 100%, 66%);
+  --sunpillar-6: hsl(38, 100%, 74%);
+  --sunpillar-clr-1: var(--sunpillar-1);
+  --sunpillar-clr-2: var(--sunpillar-2);
+  --sunpillar-clr-3: var(--sunpillar-3);
+  --sunpillar-clr-4: var(--sunpillar-4);
+  --sunpillar-clr-5: var(--sunpillar-5);
+  --sunpillar-clr-6: var(--sunpillar-6);
+  --card-radius: 30px;
+  --brand-orange: #f97316;
+  --brand-orange-hover: #fb8a3c;
+  perspective: 500px;
+  transform: translate3d(0, 0, 0.1px);
+  position: relative;
+  touch-action: none;
+  direction: rtl;
+}
+.fpc-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  background: inherit;
+  background-position: inherit;
+  border-radius: inherit;
+  transition: all 0.5s ease;
+  filter: contrast(2) saturate(2) blur(36px);
+  transform: scale(0.8) translate3d(0, 0, 0.1px);
+  background-size: 100% 100%;
+  background-image: var(--behind-gradient);
+}
+.fpc-wrapper:hover,
+.fpc-wrapper.active {
+  --card-opacity: 1;
+}
+.fpc-wrapper:hover::before,
+.fpc-wrapper.active::before {
+  filter: contrast(1) saturate(2) blur(40px) opacity(1);
+  transform: scale(0.9) translate3d(0, 0, 0.1px);
+}
+.fpc-card {
+  height: 80svh;
+  max-height: 540px;
+  display: grid;
+  aspect-ratio: 0.718;
+  border-radius: var(--card-radius);
+  position: relative;
+  background-blend-mode: color-dodge, normal, normal, normal;
+  animation: fpc-glow-bg 12s linear infinite;
+  box-shadow:
+    rgba(0, 0, 0, 0.8) calc((var(--pointer-from-left) * 10px) - 3px) calc((var(--pointer-from-top) * 20px) - 6px) 20px -5px,
+    0 0 40px -8px rgba(249, 115, 22, 0.55);
+  transition: transform 1s ease;
+  transform: translate3d(0, 0, 0.1px) rotateX(0deg) rotateY(0deg);
+  background-size: 100% 100%;
+  background-position: 0 0, 0 0, 50% 50%, 0 0;
+  background-image:
+    radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y),
+      hsla(24, 100%, 75%, var(--card-opacity)) 4%,
+      hsla(24, 80%, 55%, calc(var(--card-opacity) * 0.75)) 10%,
+      hsla(20, 60%, 40%, calc(var(--card-opacity) * 0.5)) 50%,
+      hsla(20, 0%, 20%, 0) 100%),
+    radial-gradient(35% 52% at 55% 20%, #fb923cc4 0%, #f9731600 100%),
+    radial-gradient(100% 100% at 50% 50%, #f97316ff 1%, #f9731600 76%),
+    conic-gradient(from 124deg at 50% 50%, #f97316ff 0%, #fb923cff 40%, #fb923cff 60%, #f97316ff 100%);
+  overflow: hidden;
+}
+.fpc-card:hover,
+.fpc-card.active {
+  transition: none;
+  transform: translate3d(0, 0, 0.1px) rotateX(var(--rotate-y)) rotateY(var(--rotate-x));
+}
+.fpc-card * {
+  display: grid;
+  grid-area: 1/-1;
+  border-radius: var(--card-radius);
+  transform: translate3d(0, 0, 0.1px);
+  pointer-events: none;
+}
+.fpc-inside {
+  inset: 1px;
+  position: absolute;
+  background-image: var(--inner-gradient);
+  background-color: #0d0d0d;
+  transform: translate3d(0, 0, 0.01px);
+}
+.fpc-shine {
+  mask-image: var(--icon);
+  mask-mode: luminance;
+  mask-repeat: repeat;
+  mask-size: 150%;
+  mask-position: top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x));
+  transition: filter 0.6s ease;
+  filter: brightness(0.66) contrast(1.33) saturate(0.33) opacity(0.5);
+  animation: fpc-holo-bg 18s linear infinite;
+  mix-blend-mode: color-dodge;
+}
+.fpc-shine,
+.fpc-shine::after {
+  --space: 5%;
+  --angle: -45deg;
+  transform: translate3d(0, 0, 1px);
+  overflow: hidden;
+  z-index: 3;
+  background: transparent;
+  background-size: cover;
+  background-position: center;
+  background-image:
+    repeating-linear-gradient(0deg,
+      var(--sunpillar-clr-1) calc(var(--space) * 1),
+      var(--sunpillar-clr-2) calc(var(--space) * 2),
+      var(--sunpillar-clr-3) calc(var(--space) * 3),
+      var(--sunpillar-clr-4) calc(var(--space) * 4),
+      var(--sunpillar-clr-5) calc(var(--space) * 5),
+      var(--sunpillar-clr-6) calc(var(--space) * 6),
+      var(--sunpillar-clr-1) calc(var(--space) * 7)),
+    repeating-linear-gradient(var(--angle),
+      #0d0d0d 0%,
+      hsl(28, 25%, 55%) 3.8%,
+      hsl(28, 45%, 62%) 4.5%,
+      hsl(28, 25%, 55%) 5.2%,
+      #0d0d0d 10%,
+      #0d0d0d 12%),
+    radial-gradient(farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 0%, 0.1) 12%,
+      hsla(0, 0%, 0%, 0.15) 20%,
+      hsla(0, 0%, 0%, 0.25) 120%);
+  background-position: 0 var(--background-y), var(--background-x) var(--background-y), center;
+  background-blend-mode: color, hard-light;
+  background-size: 500% 500%, 300% 300%, 200% 200%;
+  background-repeat: repeat;
+}
+.fpc-shine::before,
+.fpc-shine::after {
+  content: '';
+  background-position: center;
+  background-size: cover;
+  grid-area: 1/1;
+  opacity: 0;
+}
+.fpc-card:hover .fpc-shine,
+.fpc-card.active .fpc-shine {
+  filter: brightness(0.85) contrast(1.5) saturate(0.6);
+  animation: none;
+}
+.fpc-card:hover .fpc-shine::before,
+.fpc-card.active .fpc-shine::before,
+.fpc-card:hover .fpc-shine::after,
+.fpc-card.active .fpc-shine::after {
+  opacity: 1;
+}
+.fpc-shine::before {
+  background-image:
+    linear-gradient(45deg,
+      var(--sunpillar-4),
+      var(--sunpillar-5),
+      var(--sunpillar-6),
+      var(--sunpillar-1),
+      var(--sunpillar-2),
+      var(--sunpillar-3)),
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), hsl(28, 35%, 65%) 0%, hsla(28, 30%, 25%, 0.2) 90%),
+    var(--grain);
+  background-size: 250% 250%, 100% 100%, 220px 220px;
+  background-position: var(--pointer-x) var(--pointer-y), center, calc(var(--pointer-x) * 0.01) calc(var(--pointer-y) * 0.01);
+  background-blend-mode: color-dodge;
+  filter: brightness(calc(2 - var(--pointer-from-center))) contrast(calc(var(--pointer-from-center) + 2)) saturate(calc(0.5 + var(--pointer-from-center)));
+  mix-blend-mode: luminosity;
+}
+.fpc-shine::after {
+  background-position: 0 var(--background-y), calc(var(--background-x) * 0.4) calc(var(--background-y) * 0.5), center;
+  background-size: 200% 300%, 700% 700%, 100% 100%;
+  mix-blend-mode: difference;
+  filter: brightness(0.8) contrast(1.5);
+}
+.fpc-glare {
+  transform: translate3d(0, 0, 1.1px);
+  overflow: hidden;
+  background-image: radial-gradient(farthest-corner circle at var(--pointer-x) var(--pointer-y),
+    hsl(28, 80%, 78%) 12%,
+    hsla(20, 50%, 18%, 0.8) 90%);
+  mix-blend-mode: overlay;
+  filter: brightness(0.85) contrast(1.2);
+  z-index: 4;
+}
+.fpc-avatar-content {
+  mix-blend-mode: normal;
+  overflow: hidden;
+}
+.fpc-avatar-content .fpc-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  filter: none;
+}
+.fpc-avatar-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 55%,
+      rgba(0, 0, 0, 0.45) 80%,
+      rgba(0, 0, 0, 0.75) 100%);
+  pointer-events: none;
+}
+.fpc-user-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 7;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 18px;
+  row-gap: 10px;
+  background: rgba(20, 20, 20, 0.55);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: 15px;
+  padding: 12px 14px;
+  pointer-events: auto;
+  direction: rtl;
+}
+.fpc-user-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.fpc-user-text {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
+}
+.fpc-handle {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--brand-orange);
+  line-height: 1;
+  letter-spacing: 0.2px;
+}
+.fpc-status {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.fpc-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.75);
+  display: inline-block;
+}
+.fpc-contact-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--brand-orange);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.45);
+}
+.fpc-contact-btn:hover {
+  background-color: var(--brand-orange-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.6);
+}
+.fpc-content {
+  max-height: 100%;
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+  transform: translate3d(calc(var(--pointer-from-left) * -6px + 3px), calc(var(--pointer-from-top) * -6px + 3px), 0.1px) !important;
+  z-index: 5;
+  mix-blend-mode: normal;
+}
+.fpc-details {
+  width: 100%;
+  position: absolute;
+  top: 1.4em;
+  display: flex;
+  flex-direction: column;
+  padding: 0 1.5em;
+  direction: rtl;
+}
+.fpc-details h3 {
+  font-weight: 700;
+  margin: 0;
+  font-size: min(4.5svh, 2.4em);
+  line-height: 1.15;
+  text-align: right;
+  background-image: linear-gradient(to bottom, #ffffff, #f97316);
+  background-size: 1em 1.5em;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.fpc-details p {
+  font-weight: 600;
+  position: relative;
+  top: 4px;
+  font-size: 15px;
+  margin: 0;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+.fpc-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--shimmer-angle, 0deg) at 50% 50%,
+    #f97316 0%,
+    #fbbf24 20%,
+    #fcd34d 35%,
+    #fbbf24 50%,
+    #f97316 65%,
+    #ea580c 80%,
+    #f97316 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.45;
+  z-index: 6;
+  animation: fpc-shimmer-rotate 8s linear infinite;
+  transition: opacity 0.5s ease, padding 0.5s ease;
+}
+.fpc-card:hover::after,
+.fpc-card.active::after {
+  opacity: 0.85;
+  padding: 2px;
+}
+@property --shimmer-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes fpc-shimmer-rotate {
+  0% { --shimmer-angle: 0deg; }
+  100% { --shimmer-angle: 360deg; }
+}
+@keyframes fpc-glow-bg {
+  0% { --bgrotate: 0deg; }
+  100% { --bgrotate: 360deg; }
+}
+@keyframes fpc-holo-bg {
+  0% { background-position: 0 var(--background-y), 0 0, center; }
+  100% { background-position: 0 var(--background-y), 90% 90%, center; }
+}
+@media (max-width: 768px) {
+  .fpc-card { height: 70svh; max-height: 450px; }
+  .fpc-details { top: 1em; }
+  .fpc-details h3 { font-size: min(4svh, 2em); }
+  .fpc-details p { font-size: 13px; }
+  .fpc-user-info { bottom: 15px; left: 15px; right: 15px; padding: 10px 12px; }
+  .fpc-user-details { gap: 10px; }
+  .fpc-handle { font-size: 17px; }
+  .fpc-status { font-size: 11px; }
+  .fpc-contact-btn { padding: 8px 14px; font-size: 13px; }
+}
+@media (max-width: 480px) {
+  .fpc-card { height: 60svh; max-height: 380px; }
+  .fpc-details { top: 0.8em; }
+  .fpc-details h3 { font-size: min(3.5svh, 1.7em); }
+  .fpc-details p { font-size: 12px; }
+  .fpc-user-info { bottom: 12px; left: 12px; right: 12px; padding: 10px 12px; border-radius: 14px; }
+  .fpc-user-details { gap: 8px; }
+  .fpc-handle { font-size: 16px; }
+  .fpc-status { font-size: 10px; }
+  .fpc-contact-btn { padding: 8px 12px; font-size: 12px; }
+}
+`;
+
+const DEFAULT_BEHIND_GRADIENT = `radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y),hsla(24,100%,70%,var(--card-opacity)) 4%,hsla(28,80%,55%,calc(var(--card-opacity)*0.75)) 10%,hsla(20,60%,40%,calc(var(--card-opacity)*0.5)) 50%,hsla(20,0%,20%,0) 100%),radial-gradient(35% 52% at 55% 20%,#f9731680 0%,#f9731600 100%),radial-gradient(100% 100% at 50% 50%,#fb923c 1%,#f9731600 76%),conic-gradient(from 124deg at 50% 50%,#f97316ff 0%,#fb923cff 40%,#fb923cff 60%,#f97316ff 100%)`;
+const DEFAULT_INNER_GRADIENT = `linear-gradient(145deg,#1a1a1a 0%,#0d0d0d 100%)`;
+
+const ANIMATION_CONFIG = {
+  SMOOTH_DURATION: 600,
+  INITIAL_DURATION: 1500,
+  INITIAL_X_OFFSET: 70,
+  INITIAL_Y_OFFSET: 60,
+  DEVICE_BETA_OFFSET: 20
+};
+
+const fpcClamp = (value, min = 0, max = 100) => Math.min(Math.max(value, min), max);
+const fpcRound = (value, precision = 3) => parseFloat(value.toFixed(precision));
+const fpcAdjust = (value, fromMin, fromMax, toMin, toMax) =>
+  fpcRound(toMin + (toMax - toMin) * (value - fromMin) / (fromMax - fromMin));
+const fpcEaseInOutCubic = (x) =>
+  x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+function ensureFloatingCardStyles() {
+  if (typeof document === `undefined`) return;
+  if (document.getElementById(FLOATING_CARD_STYLE_ID)) return;
+  const styleEl = document.createElement(`style`);
+  styleEl.id = FLOATING_CARD_STYLE_ID;
+  styleEl.textContent = FLOATING_CARD_CSS;
+  document.head.appendChild(styleEl);
+}
+
+const FloatingProductCardComponent = ({
+  imageUrl = `https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80`,
+  name = `חולצת אוברסייז קלאסית`,
+  description = `כותנה 100% • גזרה רחבה ונוחה לכל יום`,
+  price = `₪149`,
+  status = `במלאי • משלוח תוך 48 שעות`,
+  buttonText = `הוסף לעגלה`,
+  className = ``,
+  enableTilt = true,
+  enableMobileTilt = false,
+  mobileTiltSensitivity = 5,
+  onAddToCart
+}) => {
+  const wrapRef = React.useRef(null);
+  const cardRef = React.useRef(null);
+
+  React.useEffect(() => {
+    ensureFloatingCardStyles();
+  }, []);
+
+  const animationHandlers = React.useMemo(() => {
+    if (!enableTilt) return null;
+    let rafId = null;
+    const updateCardTransform = (offsetX, offsetY, card, wrap) => {
+      const width = card.clientWidth;
+      const height = card.clientHeight;
+      const percentX = fpcClamp(100 / width * offsetX);
+      const percentY = fpcClamp(100 / height * offsetY);
+      const centerX = percentX - 50;
+      const centerY = percentY - 50;
+      const properties = {
+        '--pointer-x': `${percentX}%`,
+        '--pointer-y': `${percentY}%`,
+        '--background-x': `${fpcAdjust(percentX, 0, 100, 35, 65)}%`,
+        '--background-y': `${fpcAdjust(percentY, 0, 100, 35, 65)}%`,
+        '--pointer-from-center': `${fpcClamp(Math.hypot(percentY - 50, percentX - 50) / 50, 0, 1)}`,
+        '--pointer-from-top': `${percentY / 100}`,
+        '--pointer-from-left': `${percentX / 100}`,
+        '--rotate-x': `${fpcRound(-(centerX / 5))}deg`,
+        '--rotate-y': `${fpcRound(centerY / 4)}deg`
+      };
+      Object.entries(properties).forEach(([property, value]) => {
+        wrap.style.setProperty(property, value);
+      });
+    };
+    const createSmoothAnimation = (duration, startX, startY, card, wrap) => {
+      const startTime = performance.now();
+      const targetX = wrap.clientWidth / 2;
+      const targetY = wrap.clientHeight / 2;
+      const animationLoop = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = fpcClamp(elapsed / duration);
+        const easedProgress = fpcEaseInOutCubic(progress);
+        const currentX = fpcAdjust(easedProgress, 0, 1, startX, targetX);
+        const currentY = fpcAdjust(easedProgress, 0, 1, startY, targetY);
+        updateCardTransform(currentX, currentY, card, wrap);
+        if (progress < 1) {
+          rafId = requestAnimationFrame(animationLoop);
+        }
+      };
+      rafId = requestAnimationFrame(animationLoop);
+    };
+    return {
+      updateCardTransform,
+      createSmoothAnimation,
+      cancelAnimation: () => {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      }
+    };
+  }, [enableTilt]);
+
+  const handlePointerMove = React.useCallback((event) => {
+    const card = cardRef.current;
+    const wrap = wrapRef.current;
+    if (!card || !wrap || !animationHandlers) return;
+    const rect = card.getBoundingClientRect();
+    animationHandlers.updateCardTransform(
+      event.clientX - rect.left,
+      event.clientY - rect.top,
+      card,
+      wrap
+    );
+  }, [animationHandlers]);
+
+  const handlePointerEnter = React.useCallback(() => {
+    const card = cardRef.current;
+    const wrap = wrapRef.current;
+    if (!card || !wrap || !animationHandlers) return;
+    animationHandlers.cancelAnimation();
+    wrap.classList.add(`active`);
+    card.classList.add(`active`);
+  }, [animationHandlers]);
+
+  const handlePointerLeave = React.useCallback((event) => {
+    const card = cardRef.current;
+    const wrap = wrapRef.current;
+    if (!card || !wrap || !animationHandlers) return;
+    animationHandlers.createSmoothAnimation(
+      ANIMATION_CONFIG.SMOOTH_DURATION,
+      event.offsetX,
+      event.offsetY,
+      card,
+      wrap
+    );
+    wrap.classList.remove(`active`);
+    card.classList.remove(`active`);
+  }, [animationHandlers]);
+
+  const handleDeviceOrientation = React.useCallback((event) => {
+    const card = cardRef.current;
+    const wrap = wrapRef.current;
+    if (!card || !wrap || !animationHandlers) return;
+    const { beta, gamma } = event;
+    if (!beta || !gamma) return;
+    animationHandlers.updateCardTransform(
+      card.clientHeight / 2 + gamma * mobileTiltSensitivity,
+      card.clientWidth / 2 + (beta - ANIMATION_CONFIG.DEVICE_BETA_OFFSET) * mobileTiltSensitivity,
+      card,
+      wrap
+    );
+  }, [animationHandlers, mobileTiltSensitivity]);
+
+  React.useEffect(() => {
+    if (!enableTilt || !animationHandlers) return;
+    const card = cardRef.current;
+    const wrap = wrapRef.current;
+    if (!card || !wrap) return;
+    const handleClick = () => {
+      if (!enableMobileTilt || location.protocol !== `https:`) return;
+      if (typeof window.DeviceMotionEvent?.requestPermission === `function`) {
+        window.DeviceMotionEvent.requestPermission().then((state) => {
+          if (state === `granted`) {
+            window.addEventListener(`deviceorientation`, handleDeviceOrientation);
+          }
+        }).catch((err) => console.error(err));
+      } else {
+        window.addEventListener(`deviceorientation`, handleDeviceOrientation);
+      }
+    };
+    card.addEventListener(`pointerenter`, handlePointerEnter);
+    card.addEventListener(`pointermove`, handlePointerMove);
+    card.addEventListener(`pointerleave`, handlePointerLeave);
+    card.addEventListener(`click`, handleClick);
+    const initialX = wrap.clientWidth - ANIMATION_CONFIG.INITIAL_X_OFFSET;
+    const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
+    animationHandlers.updateCardTransform(initialX, initialY, card, wrap);
+    animationHandlers.createSmoothAnimation(
+      ANIMATION_CONFIG.INITIAL_DURATION,
+      initialX,
+      initialY,
+      card,
+      wrap
+    );
+    return () => {
+      card.removeEventListener(`pointerenter`, handlePointerEnter);
+      card.removeEventListener(`pointermove`, handlePointerMove);
+      card.removeEventListener(`pointerleave`, handlePointerLeave);
+      card.removeEventListener(`click`, handleClick);
+      window.removeEventListener(`deviceorientation`, handleDeviceOrientation);
+      animationHandlers.cancelAnimation();
+    };
+  }, [
+    enableTilt,
+    enableMobileTilt,
+    animationHandlers,
+    handlePointerMove,
+    handlePointerEnter,
+    handlePointerLeave,
+    handleDeviceOrientation
+  ]);
+
+  const cardStyle = React.useMemo(() => ({
+    '--behind-gradient': DEFAULT_BEHIND_GRADIENT,
+    '--inner-gradient': DEFAULT_INNER_GRADIENT
+  }), []);
+
+  const handleContactClick = React.useCallback(() => {
+    if (onAddToCart) onAddToCart();
+  }, [onAddToCart]);
+
+  return (
+    <div
+      ref={wrapRef}
+      className={`fpc-wrapper ${className}`.trim()}
+      style={cardStyle}
+      dir="rtl">
+      <section ref={cardRef} className="fpc-card">
+        <div className="fpc-inside">
+          <div className="fpc-content fpc-avatar-content">
+            <img
+              className="fpc-avatar"
+              src={imageUrl}
+              alt={name || `מוצר`}
+              loading="lazy"
+              onError={(e) => { e.target.style.display = `none`; }} />
+          </div>
+          <div className="fpc-shine" />
+          <div className="fpc-glare" />
+          <div className="fpc-content">
+            <div className="fpc-details">
+              <h3>{name}</h3>
+              <p>{description}</p>
+            </div>
+          </div>
+          <div className="fpc-user-info">
+            <div className="fpc-user-details">
+              <div className="fpc-user-text">
+                <div className="fpc-handle">{price}</div>
+                <div className="fpc-status">
+                  <span className="fpc-status-dot" aria-hidden="true" />
+                  {status}
+                </div>
+              </div>
+            </div>
+            <button
+              className="fpc-contact-btn"
+              onClick={handleContactClick}
+              style={{ pointerEvents: `auto` }}
+              type="button"
+              aria-label={buttonText}>
+              {buttonText}
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>);
+};
+
+const FloatingProductCard = React.memo(FloatingProductCardComponent);
+
+// ============================================================================
+// HomeFloatingBloomCarousel — מציג את כל דמויות BLOOM כקרוסלת כרטיסים מרחפים.
+// טוען מ-Supabase, מתחלף אוטומטית כל 5 שניות (נעצר ב-hover), עם נקודות + swipe.
+// כפתור כל דמות מנווט ל-#pets/<slug> שלה (אותה לוגיקת slug כמו ב-PetsPage).
+// ============================================================================
+function HomeFloatingBloomCarousel({ lang, setPage }) {
+  const [designs, setDesigns] = useState([]);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartXRef = useRef(null);
+
+  // Refs mirror the latest state so the click handler can read activeIdx/designs
+  // at click time — not at render time. Without this, each card captures its own
+  // slug in a closure and which-button-actually-fires depends on z-stacking quirks
+  // of the overlapping cards. With refs, every card's button reads the same source
+  // of truth and navigates to whatever character is currently shown.
+  const activeIdxRef = useRef(0);
+  const designsRef = useRef([]);
+  useEffect(() => { activeIdxRef.current = activeIdx; }, [activeIdx]);
+  useEffect(() => { designsRef.current = designs; }, [designs]);
+
+  // Inject a one-time stylesheet rule that disables pointer events on the entire
+  // subtree of inactive cards. Required because FloatingProductCard's button and
+  // info bar set inline `pointer-events: auto`, which beats an inline `none` on a
+  // wrapper. The !important rule wins over the inline declaration, so clicks on
+  // stacked (invisible) cards are blocked and only the visible card is hoverable.
+  useEffect(() => {
+    if (typeof document === `undefined`) return;
+    const STYLE_ID = `bloom-carousel-inactive-styles`;
+    if (document.getElementById(STYLE_ID)) return;
+    const styleEl = document.createElement(`style`);
+    styleEl.id = STYLE_ID;
+    styleEl.textContent = `.bloom-carousel-inactive, .bloom-carousel-inactive * { pointer-events: none !important; }`;
+    document.head.appendChild(styleEl);
+  }, []);
+
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("pet_designs")
+          .select("id,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,mockup_url,design_url")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+        if (error) throw error;
+        if (cancelled || !data) return;
+        // Fisher-Yates shuffle so each fresh page load starts with a different
+        // character. Runs once (this effect has empty deps + setDesigns is only
+        // called here) so the order is stable for the rest of the session —
+        // it never reshuffles while the user is watching.
+        const shuffled = data.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = shuffled[i];
+          shuffled[i] = shuffled[j];
+          shuffled[j] = tmp;
+        }
+        setDesigns(shuffled);
+      } catch (err) {
+        console.error(`Failed to load BLOOM carousel:`, err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Auto-advance every 5s, paused on hover or while user is mid-swipe.
+  useEffect(() => {
+    if (isPaused || designs.length <= 1) return;
+    const id = setInterval(() => {
+      setActiveIdx((i) => (i + 1) % designs.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [isPaused, designs.length]);
+
+  if (!designs.length) return null;
+
+  const statusByLang = {
+    he: `מוצר כוכב · BLOOM`,
+    en: `Star product · BLOOM`,
+    ru: `Звезда · BLOOM`,
+  };
+  const buttonByLang = {
+    he: `BLOOM →`,
+    en: `BLOOM →`,
+    ru: `BLOOM →`,
+  };
+  const eyebrowByLang = {
+    he: `הכוכבים שלנו`,
+    en: `Our stars`,
+    ru: `Наши звёзды`,
+  };
+
+  const buildSlug = (name) => {
+    const s = (name || ``).toLowerCase().replace(/[^a-z0-9]+/g, `-`).replace(/^-+|-+$/g, ``);
+    return s;
+  };
+
+  // Single click handler shared by every card in the stack. Reads the latest
+  // active index and designs list from refs at click time, so the navigation
+  // target always matches the character currently visible — never stale.
+  const handleViewActiveCharacter = () => {
+    const list = designsRef.current;
+    const idx = activeIdxRef.current;
+    const d = list && list[idx];
+    if (!d || typeof setPage !== `function`) return;
+    const slug = buildSlug(d.name_en) || String(d.id);
+    setPage(`pets/${slug}`);
+  };
+
+  const goPrev = () => setActiveIdx((i) => (i - 1 + designs.length) % designs.length);
+  const goNext = () => setActiveIdx((i) => (i + 1) % designs.length);
+
+  // Touch swipe — threshold 40px so taps and tiny drifts don't trigger nav.
+  // Same direction semantics as a typical carousel: swipe LEFT = next, RIGHT = prev.
+  const onTouchStart = (e) => {
+    if (!e.touches.length) return;
+    touchStartXRef.current = e.touches[0].clientX;
+    setIsPaused(true);
+  };
+  const onTouchEnd = (e) => {
+    const startX = touchStartXRef.current;
+    touchStartXRef.current = null;
+    setIsPaused(false);
+    if (startX == null || !e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0) goNext(); else goPrev();
+  };
+
+  return (
+    <section
+      style={{
+        width: `100%`,
+        background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.18) 0%, transparent 60%), ${COLORS.bg}`,
+        padding: isMobile ? `96px 16px 32px` : `120px 24px 48px`,
+        display: `flex`,
+        flexDirection: `column`,
+        alignItems: `center`,
+        direction: lang === `he` ? `rtl` : `ltr`,
+        boxSizing: `border-box`,
+      }}>
+      <div
+        style={{
+          display: `inline-block`,
+          background: COLORS.accentDim,
+          border: `1px solid rgba(255,107,53,0.3)`,
+          borderRadius: 100,
+          padding: `6px 18px`,
+          marginBottom: 20,
+          color: COLORS.accent,
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: `0.1em`,
+          textTransform: `uppercase`,
+          fontFamily: `'Varela Round',sans-serif`,
+        }}>
+        {`✦ ${eyebrowByLang[lang] || eyebrowByLang.he} ✦`}
+      </div>
+
+      {/* Carousel stack — all cards rendered, cross-fade via opacity. */}
+      <div
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
+        style={{
+          position: `relative`,
+          width: isMobile ? 280 : 360,
+          maxWidth: `100%`,
+        }}>
+        {designs.map((d, idx) => {
+          const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
+          const animal = d[`animal_${lang}`] || d.animal_he || d.animal_en || ``;
+          const description = [tagline, animal].filter(Boolean).join(` · `);
+          const displayName = (d.name_en || d.name_he || ``).toUpperCase();
+          const isActive = idx === activeIdx;
+          return (
+            <div
+              key={d.id}
+              className={isActive ? `` : `bloom-carousel-inactive`}
+              aria-hidden={!isActive}
+              style={{
+                position: idx === 0 ? `relative` : `absolute`,
+                top: 0,
+                left: 0,
+                right: 0,
+                opacity: isActive ? 1 : 0,
+                transition: `opacity 0.6s ease-in-out`,
+              }}>
+              <FloatingProductCard
+                imageUrl={d.mockup_url}
+                name={displayName}
+                description={description}
+                price={`₪${Number(d.price_shirt) || 129}`}
+                status={statusByLang[lang] || statusByLang.he}
+                buttonText={buttonByLang[lang] || buttonByLang.he}
+                onAddToCart={handleViewActiveCharacter}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Dots row — direction LTR always so first dot is consistently on the left. */}
+      <div
+        role="tablist"
+        aria-label={lang === `he` ? `בחר דמות` : lang === `ru` ? `Выбрать персонажа` : `Choose character`}
+        style={{
+          display: `flex`,
+          flexWrap: `wrap`,
+          justifyContent: `center`,
+          gap: 10,
+          marginTop: 28,
+          maxWidth: 360,
+          direction: `ltr`,
+        }}>
+        {designs.map((d, idx) => {
+          const isActive = idx === activeIdx;
+          const label = d[`name_${lang}`] || d.name_he || d.name_en || `${idx + 1}`;
+          return (
+            <button
+              key={d.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-label={label}
+              onClick={() => setActiveIdx(idx)}
+              style={{
+                width: isActive ? 28 : 10,
+                height: 10,
+                borderRadius: 999,
+                background: isActive ? `#f97316` : `rgba(255,255,255,0.25)`,
+                border: `none`,
+                cursor: `pointer`,
+                padding: 0,
+                transition: `width 0.3s ease, background-color 0.3s ease`,
+              }}
+            />
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 const COLORS = {
   bg: "#0f0f0f", bgCard: "#1a1a1a", border: "#2a2a2a",
@@ -202,6 +1163,7 @@ const LANGS = {
 // === Business info & legal policies ===
 const BUSINESS_INFO = {
   name: { he: "ספלים שופ", en: "Sfalim Shop", ru: "Sfalim Shop" },
+  tagline: { he: "מעוצב לסגנון שלך", en: "Designed for Your Style", ru: "Создано в вашем стиле" },
   vatId: "321630279", // עוסק פטור
   address: { he: "רח׳ י\"א הספורטאים 28, באר שבע", en: "11 HaSportaim St. 28, Be'er Sheva, Israel", ru: "ул. 11 Спортсменов 28, Беэр-Шева, Израиль" },
   phone: "054-6841662",
@@ -565,6 +1527,65 @@ const MOCKUP_URLS = {
   sticker:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
   sticker_sq: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/square%20sticker.png",
 };
+
+// SmartImage — drop-in replacement for <img> on product images served from
+// Supabase Storage. The first cold-cache fetch occasionally fails and shows
+// a broken-image glyph until the user refreshes. SmartImage retries up to
+// 3 times with a 500ms back-off, appending ?retry=N as a cache-buster on
+// each retry, and paints a gray placeholder background until the image
+// successfully loads (or all retries are exhausted). The cache-buster is
+// only applied to http(s) URLs so that data:/blob:/relative URLs are left
+// untouched.
+function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
+  const [attempt, setAttempt] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  const timerRef = useRef(null);
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 500;
+
+  useEffect(() => {
+    setAttempt(0);
+    setLoaded(false);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [src]);
+
+  const isRemote = typeof src === "string" && /^https?:/i.test(src);
+  const finalSrc = !src
+    ? src
+    : (attempt === 0 || !isRemote)
+      ? src
+      : `${src}${src.includes("?") ? "&" : "?"}retry=${attempt}`;
+
+  const handleError = (e) => {
+    if (attempt < MAX_RETRIES) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setAttempt((a) => a + 1), RETRY_DELAY_MS);
+    }
+    if (onError) onError(e);
+  };
+
+  const handleLoad = (e) => {
+    setLoaded(true);
+    if (onLoad) onLoad(e);
+  };
+
+  const mergedStyle = {
+    ...style,
+    backgroundColor: loaded ? (style && style.backgroundColor) : "#222",
+  };
+
+  return (
+    <img
+      {...rest}
+      src={finalSrc}
+      alt={alt}
+      style={mergedStyle}
+      onError={handleError}
+      onLoad={handleLoad}
+    />
+  );
+}
+
 // 2. קומפוננטת הבסיס המתוקנת - נקייה ובלי פילטרים ששוברים את הרקע
 function ProductMockupBase({ productKey, color, imageUrl, imagePos, secondImageUrl, secondImagePos }) {
   const canvasRef = useRef(null);
@@ -603,7 +1624,7 @@ function ProductMockupBase({ productKey, color, imageUrl, imagePos, secondImageU
 
   return (
     <div style={{ position:"relative", width:"100%", paddingTop:"100%", borderRadius:12 }}>
-      <img src={mockupUrl} alt="product" style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", zIndex:0, opacity: canvasOk ? 0 : 1, transition:"opacity 0.2s" }} />
+      <SmartImage src={mockupUrl} alt="product" style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", zIndex:0, opacity: canvasOk ? 0 : 1, transition:"opacity 0.2s" }} />
       <canvas ref={canvasRef} style={{ position:"absolute", inset:0, width:"100%", height:"100%", zIndex:1, opacity: canvasOk ? 1 : 0, transition:"opacity 0.2s" }} />
       {imageUrl && (
         <img src={imageUrl} alt="design" style={{ position:"absolute", left:`${(imagePos.x/400)*100}%`, top:`${(imagePos.y/400)*100}%`, width:`${(imagePos.size/400)*100}%`, height:`${(imagePos.size/400)*100}%`, objectFit:"contain", zIndex:2, pointerEvents:"none" }} />
@@ -1247,7 +2268,7 @@ function TrackPage({ lang, user }) {
                               <div style={{ background: COLORS.bg, borderRadius: 12, border: `1px solid ${COLORS.border}`, padding: 8, width: 180 }}>
                                 {order.mockup_url ? (
                                   // BLOOM orders: show the exact ready-made mockup the customer saw at checkout.
-                                  <img src={order.mockup_url} alt={lang === "he" ? "תצוגת ההזמנה" : lang === "ru" ? "Превью заказа" : "Order preview"} style={{ width: "100%", display: "block", borderRadius: 8 }} />
+                                  <SmartImage src={order.mockup_url} alt={lang === "he" ? "תצוגת ההזמנה" : lang === "ru" ? "Превью заказа" : "Order preview"} style={{ width: "100%", display: "block", borderRadius: 8 }} />
                                 ) : (
                                   // Custom orders: re-composite the design at the position the customer chose.
                                   (() => {
@@ -1576,7 +2597,7 @@ function AdminPage({ lang }) {
                                     <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
                                       {it.mockup_url ? (
                                         // Show the ready-made mockup the customer actually saw (BLOOM orders).
-                                        <img src={it.mockup_url} alt="Order preview" style={{ width: "100%", display: "block", borderRadius: 6 }} />
+                                        <SmartImage src={it.mockup_url} alt="Order preview" style={{ width: "100%", display: "block", borderRadius: 6 }} />
                                       ) : (
                                         // Older / custom orders: re-composite the design at the saved position.
                                         (() => {
@@ -1684,7 +2705,7 @@ function AdminPage({ lang }) {
                 return (
                   <div key={d.id} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
                     <div style={{ width: 44, height: 44, borderRadius: 8, background: d.mockup_bg || COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-                      {thumb && <img src={thumb} alt={dName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                      {thumb && <SmartImage src={thumb} alt={dName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                     </div>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", flex: 1, minWidth: 120 }}>{dName}</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -1774,7 +2795,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
     return (
       <div key={it.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 0", borderBottom: `1px solid ${COLORS.border}` }}>
         <div style={{ width: 48, height: 48, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bg, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <img src={it.mockupUrl || it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: it.mockupUrl ? "cover" : "contain" }} />
+          <SmartImage src={it.mockupUrl || it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: it.mockupUrl ? "cover" : "contain" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
@@ -2396,8 +3417,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         const itemTotal = it.itemPrice + (i === 0 ? SHIPPING_PRICE : 0);
 
         // Snapshot what the customer saw into one flattened mockup image.
-        // BLOOM items already carry a ready-made mockup — keep it.
-        let mockup_url = it.mockupUrl || null;
+        // BLOOM items already carry a public mockup URL (uploadDesignImage
+        // returns http(s) URLs as-is). Mug Studio items carry a data URL —
+        // uploadDesignImage uploads it to the designs bucket and returns the
+        // public URL. Shirt items have mockupUrl=null and fall through to
+        // the regen block below.
+        let mockup_url = it.mockupUrl ? await uploadDesignImage(it.mockupUrl) : null;
         if (!mockup_url) {
           try {
             const mockupPng = await generateOrderMockup(
@@ -2457,7 +3482,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       allowLeaveRef.current = true;
       setStep(4);
     } catch (e) {
-      alert("Error: " + (e.message || e));
+      alert(`Error: ${e.message || e}`);
     }
     setSubmitting(false);
   };
@@ -2596,7 +3621,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                     <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
                     <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                      <SmartImage src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
@@ -2944,7 +3969,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
               <div style={{ position: "relative" }}>
                 <label style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
-                <input type="text" value={form.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(v + (form.city ? ", " + form.city : ", Israel")); }} onBlur={() => setTimeout(() => setShowAddrSugg(false), 200)} placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" />
+                <input type="text" value={form.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }} onBlur={() => setTimeout(() => setShowAddrSugg(false), 200)} placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" />
                 {addrLoading && <div style={{ position: "absolute", left: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</div>}
                 {showAddrSugg && addrSuggestions.length > 0 && (
                   <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
@@ -3165,7 +4190,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     setSelectedProduct(null);
                     setUploadedImage(null);
                   } catch (e) {
-                    alert("Error: " + (e.message || e));
+                    alert(`Error: ${e.message || e}`);
                   }
                   setPaymentProcessing(false);
                 }}
@@ -3468,17 +4493,23 @@ function ParticlesBackground() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let animId;
+    let animId = null;
+
+    const isMobile = window.matchMedia('(hover: none)').matches || window.innerWidth < 768;
+    const PARTICLE_COUNT = isMobile ? 30 : 75;
 
     const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     resize();
     window.addEventListener('resize', resize);
 
     // Dot particles
-    const particles = Array.from({ length: 75 }, (_, i) => ({
+    const particles = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       r: i < 8 ? Math.random() * 3 + 2 : i < 25 ? Math.random() * 1.5 + 0.8 : Math.random() * 0.8 + 0.2,
@@ -3536,27 +4567,43 @@ function ParticlesBackground() {
         if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
       });
 
-      // Connections between nearby particles
-      particles.forEach((p1, i) => {
-        particles.slice(i + 1).forEach(p2 => {
-          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-          if (dist < 100) {
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = '#FF6B35';
-            ctx.globalAlpha = (1 - dist / 100) * 0.06;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+      // Connections between nearby particles — skipped on mobile for perf
+      if (!isMobile) {
+        for (let i = 0; i < particles.length; i++) {
+          const p1 = particles[i];
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < 100 * 100) {
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = '#FF6B35';
+              ctx.globalAlpha = (1 - distSq / 10000) * 0.06;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
           }
-        });
-      });
+        }
+      }
 
       ctx.globalAlpha = 1;
       animId = requestAnimationFrame(draw);
     };
-    draw();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+
+    const start = () => { if (animId == null) animId = requestAnimationFrame(draw); };
+    const stop = () => { if (animId != null) { cancelAnimationFrame(animId); animId = null; } };
+    const onVisibility = () => { if (document.hidden) stop(); else start(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    start();
+
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('resize', resize);
+    };
   }, []);
 
   return (
@@ -3570,27 +4617,53 @@ function ParticlesBackground() {
 
 // Cursor Glow Effect
 function CursorGlow() {
-  const [pos, setPos] = useState({ x: -200, y: -200 });
-  const [visible, setVisible] = useState(false);
+  const elRef = useRef(null);
 
   useEffect(() => {
-    const move = (e) => { setPos({ x: e.clientX, y: e.clientY }); setVisible(true); };
-    const leave = () => setVisible(false);
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(hover: none)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const el = elRef.current;
+    if (!el) return;
+
+    let pendingX = -200;
+    let pendingY = -200;
+    let rafId = null;
+
+    const flush = () => {
+      rafId = null;
+      el.style.transform = `translate3d(${pendingX - 200}px, ${pendingY - 200}px, 0)`;
+    };
+
+    const move = (e) => {
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      el.style.opacity = '1';
+      if (rafId === null) rafId = requestAnimationFrame(flush);
+    };
+    const leave = () => { el.style.opacity = '0'; };
+
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseleave', leave);
-    return () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseleave', leave); };
+    return () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseleave', leave);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return (
-    <div style={{
+    <div ref={elRef} style={{
       position: 'fixed', pointerEvents: 'none', zIndex: 9999,
-      left: pos.x - 200, top: pos.y - 200,
+      left: 0, top: 0,
       width: 400, height: 400,
       borderRadius: '50%',
       background: 'radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%)',
       transition: 'opacity 0.3s',
-      opacity: visible ? 1 : 0,
-      transform: 'translate(0, 0)',
+      opacity: 0,
+      transform: 'translate3d(-400px, -400px, 0)',
+      willChange: 'transform, opacity',
     }} />
   );
 }
@@ -3855,8 +4928,13 @@ function ProductBadges({ product, lang }) {
 function Hero({ setPage, lang }) {
   const t = LANGS[lang];
   const products = PRODUCTS(t);
-  const pText = useParallax(0.15);
-  const pCards = useParallax(0.32);
+  // Parallax offsets are CAPPED so they don't keep growing with scroll. Without
+  // a cap, the cards' translateY grew unbounded (scrollY * 0.32) and visually
+  // overflowed past the Hero's bottom, sliding behind the Footer (zIndex: 5) and
+  // making the bottom row of cards look hidden. A small cap keeps the parallax
+  // feel without letting the cards leave their section.
+  const pText = Math.min(useParallax(0.15), 60);
+  const pCards = Math.min(useParallax(0.32), 50);
   const [vw, setVw] = useState(typeof window !== "undefined" ? window.innerWidth : 1280);
   useEffect(() => {
     const handle = () => setVw(window.innerWidth);
@@ -3866,7 +4944,7 @@ function Hero({ setPage, lang }) {
   const isMobile = vw < 768;
   const gridCols = vw >= 768 ? "repeat(3, 1fr)" : vw >= 480 ? "repeat(2, 1fr)" : "1fr";
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 60px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
       <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Varela Round',sans-serif" }}>{t.hero.badge}</div>
       <h1 className="reveal" data-delay="1" style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
@@ -3880,9 +4958,9 @@ function Hero({ setPage, lang }) {
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
         >{t.hero.ctaSecondary} →</button>
       </span>
-      </div>
-      <div className="reveal" data-delay="4" style={{ marginTop: isMobile ? 32 : 40, width: "100%", maxWidth: 720, padding: "0 8px", boxSizing: "border-box" }}>
+      <div className="reveal" data-delay="4" style={{ marginTop: isMobile ? 48 : 64, width: "100%", maxWidth: 720, padding: "0 8px", boxSizing: "border-box" }}>
         <TrustRow lang={lang} />
+      </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 768 ? 820 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
@@ -3892,7 +4970,7 @@ function Hero({ setPage, lang }) {
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
             <ProductBadges product={p} lang={lang} />
             <div style={{ width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              <SmartImage src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
             <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
             <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
@@ -4065,11 +5143,10 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
 // Main App
 
 // ============ ACCESSIBILITY ============
-function AccessibilityMenu({ lang, cartOpen }) {
+function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
   const [open, setOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
   const [highContrast, setHighContrast] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth <= 768);
@@ -4083,7 +5160,7 @@ function AccessibilityMenu({ lang, cartOpen }) {
   if (cartOpen && isMobile) return null;
 
   useEffect(() => {
-    document.documentElement.style.fontSize = fontSize + '%';
+    document.documentElement.style.fontSize = `${fontSize}%`;
   }, [fontSize]);
 
   useEffect(() => {
@@ -4526,7 +5603,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               return (
                 <div key={it.id} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "14px 0", borderBottom: `1px solid ${COLORS.border}` }}>
                   <div style={{ width: isMobile ? 72 : 62, height: isMobile ? 72 : 62, flexShrink: 0, borderRadius: 8, overflow: "hidden", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <img src={it.mockupUrl || it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: it.mockupUrl ? "cover" : "contain" }} />
+                    <SmartImage src={it.mockupUrl || it.uploadedImage || MOCKUP_URLS[it.productId]} alt={it.productName} style={{ width: "100%", height: "100%", objectFit: it.mockupUrl ? "cover" : "contain" }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
@@ -4611,7 +5688,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'policies', 'reset-password'];
+ const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'policies', 'reset-password', 'mug-studio'];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -4648,6 +5725,9 @@ export default function App() {
   const [userClosedCart, setUserClosedCart] = useState(false);
   // When true, OrderPage opens straight on the checkout details step.
   const [pendingCheckout, setPendingCheckout] = useState(false);
+  // Lifted from AccessibilityMenu so the background animation components
+  // (ParticlesBackground, CursorGlow) can be skipped entirely when on.
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   // Centralised open/close helpers — every caller that touches cartOpen
   // should go through these so userClosedCart stays accurate.
@@ -4660,9 +5740,13 @@ export default function App() {
   // The user can still open the drawer manually from the nav icon if they want.
 
   const setPage = (newPage) => {
-    const hash = newPage === 'home' ? '' : newPage;
-    window.history.pushState({ page: newPage }, '', '#' + hash);
-    setPageState(newPage);
+    // Support sub-routes like "pets/<slug>" — store only the root in React state
+    // so page === "pets" checks still match, while the URL hash keeps the full path
+    // so route-aware pages (e.g. PetsPage) can read the slug via window.location.hash.
+    const root = String(newPage).split('/')[0];
+    const hash = root === 'home' ? '' : newPage;
+    window.history.pushState({ page: root }, '', `#${hash}`);
+    setPageState(root);
   };
 
   // Hand a ready-made BLOOM item to OrderPage's cart, then jump to the order page.
@@ -4713,6 +5797,57 @@ export default function App() {
     setCart(c => [...c, cartItem]);
 
     // Toast: include the product name and a CTA to open the cart drawer.
+    const productLabel = cartItem.productName;
+    const tmpl = lang === "he" ? `${productLabel} נוסף לסל!` : lang === "ru" ? `${productLabel} добавлен в корзину!` : `${productLabel} added to cart!`;
+    setCartToast(tmpl);
+    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
+    cartToastTimer.current = setTimeout(() => setCartToast(null), 3000);
+  };
+
+  // Mug Studio → cart. Mirrors the BLOOM/shirt pattern: the cart line carries
+  // the customer-arranged mockup (mockupUrl) AND the print-ready 300dpi flat
+  // PNG (uploadedImage). The existing OrderPage checkout submit already
+  // uploads both via uploadDesignImage → orders.mockup_url + orders.design_url,
+  // and the admin order view already shows mockup_url as the preview
+  // thumbnail with design_url available as a download link — no schema
+  // changes needed. mugStudio.layers carries the per-layer transform JSON
+  // locally so the layout is reproducible from sources if we ever wire it to DB.
+  const addMugStudioToCart = (payload) => {
+    const tNow = LANGS[lang] || LANGS.he;
+    const prod = PRODUCTS(tNow).find(p => p.id === `mug`);
+    if (!prod || !prod.variants.length) return;
+    const v = prod.variants[0];
+    const colorHex = prod.colors[0];
+    const unitPrice = Number(v.price) || 0;
+    const cartItem = {
+      id: Date.now() + Math.random(),
+      productId: prod.id,
+      productName: prod.name,
+      variantId: v.id,
+      variantLabel: v.label,
+      colorIdx: 0,
+      color: colorHex,
+      qty: 1,
+      uploadedImage: payload.printPng || null,
+      mockupUrl: payload.mockupPng || null,
+      // Existing shirt-schema fields kept at safe defaults — the mug's print
+      // layout is baked into uploadedImage (the 300dpi PNG), so the admin's
+      // shirt-style re-compositor isn't used for this product.
+      imagePos: { x: 200, y: 150, size: 100 },
+      backPrint: false,
+      backDesign: { enabled: false, sameAsMain: true, image: null },
+      secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
+      sleeveLeft: { enabled: false, sameAsMain: true, image: null },
+      sleeveRight: { enabled: false, sameAsMain: true, image: null },
+      mugStudio: {
+        layers: payload.layers || [],
+        printArea: payload.printArea || null,
+      },
+      unitPrice,
+      itemPrice: unitPrice,
+    };
+    setCart(c => [...c, cartItem]);
+
     const productLabel = cartItem.productName;
     const tmpl = lang === "he" ? `${productLabel} נוסף לסל!` : lang === "ru" ? `${productLabel} добавлен в корзину!` : `${productLabel} added to cart!`;
     setCartToast(tmpl);
@@ -5037,18 +6172,20 @@ export default function App() {
         .footer-contact-link { color: inherit; text-decoration: none; transition: color 0.25s ease; }
         .footer-contact-link:hover { color: #FF6B35; }
       `}</style>
-      <ParticlesBackground />
-      <CursorGlow />
+      {!reduceMotion && <ParticlesBackground />}
+      {!reduceMotion && <CursorGlow />}
       {(() => {
         const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
-        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride && page !== 'policies') {
+        // mug-studio is a demo route reviewable on preview deployments without
+        // exposing the live store — owner reviews 3D mug customizer before launch.
+        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride && page !== 'policies' && page !== 'mug-studio') {
           return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} />;
         }
         return (
           <>
-            <AccessibilityMenu lang={lang} cartOpen={cartOpen} />
+            <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} />
-            {page === "home" && <><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} />}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
@@ -5058,6 +6195,29 @@ export default function App() {
             {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
+            {page === "mug-studio" && (
+              <Suspense fallback={
+                <div style={{
+                  minHeight: "100vh", background: COLORS.bg, color: COLORS.gray,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontFamily: "'Varela Round',sans-serif", padding: "80px 20px",
+                }}>
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{
+                      width: 40, height: 40, margin: "0 auto 14px",
+                      border: `3px solid ${COLORS.border}`, borderTopColor: COLORS.accent,
+                      borderRadius: "50%", animation: "mugSpin 0.9s linear infinite",
+                    }} />
+                    <div style={{ fontSize: 14 }}>
+                      {lang === "he" ? "טוען את סטודיו הספלים..." : lang === "ru" ? "Загрузка студии кружек..." : "Loading mug studio..."}
+                    </div>
+                  </div>
+                  <style>{`@keyframes mugSpin { to { transform: rotate(360deg); } }`}</style>
+                </div>
+              }>
+                <MugStudio lang={lang} setPage={setPage} onAddToCart={addMugStudioToCart} />
+              </Suspense>
+            )}
             <Footer lang={lang} setPage={setPage} />
             <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} />
             {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
@@ -5667,7 +6827,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
         alignItems: "center",
         justifyContent: "center",
       }}>
-        <img
+        <SmartImage
           src={imgSrc}
           alt={name}
           loading="lazy"
@@ -5907,7 +7067,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
               cursor: "zoom-in",
               touchAction: "pan-y",
             }}>
-            <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
+            <SmartImage src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
             <PetBadges design={design} lang={lang} />
 
             {/* Prev/next chevrons — visible only when there are 2+ designs.
@@ -6159,7 +7319,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
             cursor: "zoom-out",
             animation: "petZoomFadeIn 0.2s ease-out",
           }}>
-          <img src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", boxShadow: "0 30px 80px rgba(0,0,0,0.6)" }} />
+          <SmartImage src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", boxShadow: "0 30px 80px rgba(0,0,0,0.6)" }} />
           <button
             onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
             aria-label={t.modalClose}
@@ -6249,6 +7409,20 @@ function MaintenancePage({ lang, setLang, setPage }) {
         <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 14 }}>
           Instagram @sfalimshop
         </a>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 36, opacity: 0.85 }}>
+          <div style={{ width: 22, height: 1, background: "rgba(255,107,53,0.4)" }}></div>
+          <div style={{ width: 4, height: 4, background: "rgba(255,107,53,0.6)", borderRadius: "50%" }}></div>
+          <div style={{ width: 22, height: 1, background: "rgba(255,107,53,0.4)" }}></div>
+        </div>
+        <div style={{
+          marginTop: 14,
+          color: "#888",
+          fontFamily: lang === "he" ? "'Heebo',sans-serif" : "'Playfair Display',serif",
+          fontStyle: lang === "he" ? "normal" : "italic",
+          fontWeight: 400,
+          fontSize: 14,
+          letterSpacing: lang === "he" ? "0.04em" : "0.02em"
+        }}>{BUSINESS_INFO.tagline[lang]}</div>
       </div>
       <div style={{ position: "absolute", bottom: 56, fontSize: 12, color: "#666", fontFamily: "'Varela Round',sans-serif", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "center", padding: "0 16px" }}>
         <a href="/privacy" style={{ color: "#888", textDecoration: "none" }}>
@@ -6362,8 +7536,13 @@ function Footer({ lang, setPage }) {
     <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "48px 24px 24px", marginTop: 60, direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 40 }}>
         <div>
-          <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, marginBottom: 14, letterSpacing: "0.3px" }}>{BUSINESS_INFO.name[lang]}</div>
-          <div style={{ width: 32, height: 2, background: "rgba(255,107,53,0.5)", marginBottom: 18, borderRadius: 2 }}></div>
+          <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, marginBottom: 8, letterSpacing: "0.3px" }}>{BUSINESS_INFO.name[lang]}</div>
+          <div style={{ color: "#a8a8a8", fontFamily: lang === "he" ? "'Heebo',sans-serif" : "'Playfair Display',serif", fontStyle: lang === "he" ? "normal" : "italic", fontWeight: 400, fontSize: 13, letterSpacing: lang === "he" ? "0.04em" : "0.02em", marginBottom: 14 }}>{BUSINESS_INFO.tagline[lang]}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 18 }}>
+            <div style={{ width: 18, height: 2, background: "rgba(255,107,53,0.5)", borderRadius: 2 }}></div>
+            <div style={{ width: 4, height: 4, background: "rgba(255,107,53,0.7)", borderRadius: "50%" }}></div>
+            <div style={{ width: 18, height: 2, background: "rgba(255,107,53,0.5)", borderRadius: 2 }}></div>
+          </div>
           <div style={{ color: "#888", fontSize: 13, fontFamily: "'Varela Round',sans-serif", lineHeight: 1.9 }}>
             <div style={{ marginBottom: 4 }}>{BUSINESS_INFO.address[lang]}</div>
             <div style={{ marginBottom: 4 }}>

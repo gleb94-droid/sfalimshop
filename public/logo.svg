@@ -35,5 +35,5 @@
   <circle cx="520" cy="173" r="2.6" fill="#FF6B35"/>
   <line x1="530" y1="173" x2="610" y2="173" stroke="#FF6B35" stroke-width="1.2"/>
 
-  <text x="520" y="200" text-anchor="middle" class="brand-he" font-size="15" fill="#a8a8a8" letter-spacing="3" text-rendering="geometricPrecision">עיצוב מקורי · נשמה מקומית</text>
+  <text x="520" y="200" text-anchor="middle" class="brand-he" font-size="15" fill="#a8a8a8" letter-spacing="3" text-rendering="geometricPrecision">מעוצב לסגנון שלך</text>
 </svg>
