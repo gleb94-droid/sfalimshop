@@ -178,6 +178,7 @@ module.exports = async function handler(req, res) {
     console.log(`[og] branch=notfound reason=empty-handle`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/`);
+    res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
     return;
   }
@@ -188,6 +189,7 @@ module.exports = async function handler(req, res) {
     console.log(`[og] branch=notfound handle=${handle}`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/`);
+    res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
     return;
   }
@@ -196,6 +198,7 @@ module.exports = async function handler(req, res) {
     console.log(`[og] branch=human handle=${handle} → /#pets/${handle}`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/#pets/${encodeURIComponent(handle)}`);
+    res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
     return;
   }
@@ -204,6 +207,11 @@ module.exports = async function handler(req, res) {
   const html = buildCrawlerHtml(design, handle);
   res.statusCode = 200;
   res.setHeader(`Content-Type`, `text/html; charset=utf-8`);
-  res.setHeader(`Cache-Control`, `public, s-maxage=300, stale-while-revalidate=600`);
+  // DO NOT add a public Cache-Control here. Vercel's edge cache is keyed by
+  // URL alone, so caching a crawler-branch 200 poisons subsequent non-crawler
+  // requests at the same URL (they get the cached HTML instead of being
+  // routed back through the function for a 302). The function is cheap and
+  // BLOOM is 12 rows; just run it every time.
+  res.setHeader(`Cache-Control`, `private, no-store`);
   res.end(html);
 };
