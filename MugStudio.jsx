@@ -263,16 +263,21 @@ export default function MugStudio({ lang, setPage, onAddToCart }) {
     ectx.strokeRect(1, 1, ed.width - 2, ed.height - 2);
     ectx.setLineDash([]);
 
+    // ONE shared print-area definition: PRINT_W_MM × PRINT_H_MM, mapped 1:1
+    // across editor, 3D composite, and export. The earlier SAFETY_MM clip
+    // pulled the composite's visible region in by 2mm on every edge, so the
+    // same `scale` produced a fraction ~1.8% larger on the 3D mug than in
+    // the editor/export. Removed — the 54° handle gap at PRINT_ARC_FRAC=0.85
+    // is already ample clearance for the ~14° handle, no safety pull-in.
     const MUG_CIRC_MM = PRINT_W_MM / PRINT_ARC_FRAC;
     const MUG_HEIGHT_MM = 102;
-    const SAFETY_MM = 2;
     const texW = 2048;
     const PX_PER_MM = texW / MUG_CIRC_MM;
     const texH = Math.round(MUG_HEIGHT_MM * PX_PER_MM);
-    const printPxLeft = Math.round(((MUG_CIRC_MM - PRINT_W_MM) / 2 + SAFETY_MM) * PX_PER_MM);
-    const printPxTop = Math.round(((MUG_HEIGHT_MM - PRINT_H_MM) / 2 + SAFETY_MM) * PX_PER_MM);
-    const printPxWidth = Math.round((PRINT_W_MM - 2 * SAFETY_MM) * PX_PER_MM);
-    const printPxHeight = Math.round((PRINT_H_MM - 2 * SAFETY_MM) * PX_PER_MM);
+    const printPxLeft = Math.round(((MUG_CIRC_MM - PRINT_W_MM) / 2) * PX_PER_MM);
+    const printPxTop = Math.round(((MUG_HEIGHT_MM - PRINT_H_MM) / 2) * PX_PER_MM);
+    const printPxWidth = Math.round(PRINT_W_MM * PX_PER_MM);
+    const printPxHeight = Math.round(PRINT_H_MM * PX_PER_MM);
     comp.width = texW;
     comp.height = texH;
     const cctx = comp.getContext(`2d`);
@@ -537,10 +542,49 @@ export default function MugStudio({ lang, setPage, onAddToCart }) {
     }, `image/png`);
   });
 
+  // Mockup PNG = the customer-arranged composite, annotated with the print
+  // boundary + handle-gap shading. The LIVE 3D texture keeps using the raw
+  // (un-annotated) composite — only this saved snapshot carries the overlays
+  // so the admin instantly sees the mug surface laid flat: the orange dashed
+  // rectangle is the printable area; the shaded strips are the handle gap
+  // and the top/bottom mug-color margins.
   const renderMockupPNG = () => {
-    const c = compositeCanvasRef.current;
-    if (!c) return null;
-    try { return c.toDataURL(`image/png`); } catch (_e) { return null; }
+    const src = compositeCanvasRef.current;
+    if (!src) return null;
+    try {
+      const out = document.createElement(`canvas`);
+      out.width = src.width;
+      out.height = src.height;
+      const octx = out.getContext(`2d`);
+      octx.drawImage(src, 0, 0);
+
+      // Annotation boundaries must match the (now safety-free) composite
+      // clip rect so the orange dashed rectangle outlines the real print
+      // region edge-to-edge.
+      const MUG_CIRC_MM = PRINT_W_MM / PRINT_ARC_FRAC;
+      const MUG_HEIGHT_MM = 102;
+      const PX_PER_MM = src.width / MUG_CIRC_MM;
+      const left = Math.round(((MUG_CIRC_MM - PRINT_W_MM) / 2) * PX_PER_MM);
+      const top = Math.round(((MUG_HEIGHT_MM - PRINT_H_MM) / 2) * PX_PER_MM);
+      const width = Math.round(PRINT_W_MM * PX_PER_MM);
+      const height = Math.round(PRINT_H_MM * PX_PER_MM);
+
+      // Tint the non-printable region (handle gap + top/bottom margins)
+      octx.fillStyle = `rgba(0,0,0,0.06)`;
+      octx.fillRect(0, 0, left, src.height);
+      octx.fillRect(left + width, 0, src.width - (left + width), src.height);
+      octx.fillRect(left, 0, width, top);
+      octx.fillRect(left, top + height, width, src.height - (top + height));
+
+      // Orange dashed boundary around the printable area
+      octx.strokeStyle = `#FF6B35`;
+      octx.setLineDash([18, 12]);
+      octx.lineWidth = 4;
+      octx.strokeRect(left, top, width, height);
+      octx.setLineDash([]);
+
+      return out.toDataURL(`image/png`);
+    } catch (_e) { return null; }
   };
 
   const effectiveDpi = layers.length === 0 ? null : Math.min(...layers.map((l) => {
@@ -561,15 +605,52 @@ export default function MugStudio({ lang, setPage, onAddToCart }) {
     a.remove();
   };
 
+  // Print-ready PDF — page size is the REAL print area in mm so the printer
+  // can output 1:1 without scaling. jsPDF is dynamic-imported so the library
+  // (~330KB) lands in its own chunk and is fetched only when the customer
+  // actually adds a mug to cart. Reuses the same 300dpi composed PNG, so
+  // exactly what the customer arranged is what gets embedded — no resampling.
+  const renderPrintPDF = async (printPngDataUrl) => {
+    if (!printPngDataUrl) return null;
+    try {
+      const mod = await import(`jspdf`);
+      const JsPDFCtor = mod.jsPDF || mod.default;
+      // Target = A4 PORTRAIT (210 × 297mm) — the sheet that goes into the
+      // EPSON SC-F100. The customer's mug print sits as ONE horizontal wrap
+      // band at the TOP of the sheet (≈10mm top margin), horizontally
+      // centered, at its TRUE physical mug size (PRINT_W_MM × PRINT_H_MM,
+      // 1:1, 300dpi — identical to the studio design step). Below the band
+      // the page stays blank; the rest of the A4 is reserved for trim /
+      // notes / additional prints later.
+      const TOP_MARGIN_MM = 10;
+      const doc = new JsPDFCtor({
+        orientation: `portrait`,
+        unit: `mm`,
+        format: `a4`,
+        compress: true,
+      });
+      const pageW = doc.internal.pageSize.getWidth();   // 210mm
+      const offsetX = (pageW - PRINT_W_MM) / 2;
+      const offsetY = TOP_MARGIN_MM;
+      doc.addImage(printPngDataUrl, `PNG`, offsetX, offsetY, PRINT_W_MM, PRINT_H_MM);
+      return doc.output(`datauristring`);
+    } catch (e) {
+      console.error(`Failed to generate print PDF`, e);
+      return null;
+    }
+  };
+
   const onAdd = async () => {
     if (layers.length === 0 || !onAddToCart) return;
     setBusy(true);
     try {
       const printPng = await renderPrintPNG();
       const mockupPng = renderMockupPNG();
+      const printPdf = await renderPrintPDF(printPng);
       onAddToCart({
         printPng,
         mockupPng,
+        printPdf,
         layers: layers.map((l) => ({
           src: l.src,
           posMm: { x: l.posMm.x, y: l.posMm.y },

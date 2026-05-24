@@ -5,6 +5,12 @@ import { createClient } from '@supabase/supabase-js'
 // `import('three')` (≈190KB gz) ship in their own chunks and load ONLY when a
 // visitor opens #mug-studio. The main app bundle stays free of three.js.
 const MugStudio = lazy(() => import('./MugStudio.jsx'));
+
+// Read-only 3D mug reconstruction for the admin order detail. Shares the
+// three chunk with MugStudio (Rollup dedupes the dynamic import), so loading
+// admin doesn't pay the three.js cost twice — it pays it once, on demand,
+// and only when a mug order is expanded.
+const MugPreview = lazy(() => import('./MugPreview.jsx'));
 const supabase = createClient('https://ubvgrxlxtelulwjtfudd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE')
 
 // ============================================================================
@@ -2593,6 +2599,32 @@ function AdminPage({ lang }) {
                                     {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>L-SL</div>}
                                     {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>R-SL</div>}
                                   </div>
+                                  {(() => {
+                                    // Read-only 3D mug reconstruction for the admin. Reuses the
+                                    // order's baked print PNG (it.design_url) as the cylinder
+                                    // texture — that PNG already has every layer (incl. second
+                                    // design from extra_prints) composited at exact transform,
+                                    // so the 3D matches what the customer arranged 1:1. Lazy
+                                    // loaded (MugPreview + three) so admin pages stay light.
+                                    const pname = it.product?.toLowerCase() || "";
+                                    const isMug = pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка");
+                                    if (!isMug || !it.design_url) return null;
+                                    const pa = (it.extra_prints && it.extra_prints.mug_studio && it.extra_prints.mug_studio.printArea) || null;
+                                    return (
+                                      <div style={{ marginBottom: 8 }}>
+                                        <Suspense fallback={
+                                          <div style={{ width: "100%", height: 240, background: "#0f0f0f", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.gray, fontSize: 11 }}>
+                                            {lang === "he" ? "טוען תצוגת ספל…" : lang === "ru" ? "Загрузка кружки…" : "Loading 3D mug…"}
+                                          </div>
+                                        }>
+                                          <MugPreview printDesignUrl={it.design_url} printArea={pa} height={240} />
+                                        </Suspense>
+                                        <div style={{ fontSize: 10, color: COLORS.gray, textAlign: "center", marginTop: 4 }}>
+                                          {lang === "he" ? "גרור את הספל לסיבוב" : lang === "ru" ? "Потяните, чтобы повернуть" : "Drag to rotate"}
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
                                   {it.design_url && (
                                     <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
                                       {it.mockup_url ? (
@@ -2608,16 +2640,56 @@ function AdminPage({ lang }) {
                                       )}
                                     </div>
                                   )}
+                                  {(() => {
+                                    // Mug-studio orders carry per-layer transforms in extra_prints.mug_studio.
+                                    // Show them as a readable text block — the saved layout, reproducible.
+                                    const pname = it.product?.toLowerCase() || "";
+                                    const isMug = pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка");
+                                    const studio = isMug && it.extra_prints && it.extra_prints.mug_studio;
+                                    if (!studio || !studio.layers || studio.layers.length === 0) return null;
+                                    const pa = studio.printArea || {};
+                                    return (
+                                      <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "8px 10px", marginBottom: 8, fontSize: 11, lineHeight: 1.55, color: COLORS.gray }}>
+                                        <div style={{ color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em", fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>
+                                          {`Mug placement · ${pa.width_mm || "?"}×${pa.height_mm || "?"}mm @ ${pa.dpi || "?"}dpi`}
+                                        </div>
+                                        {studio.layers.map((l, i) => (
+                                          <div key={i} style={{ color: COLORS.white, fontFamily: "'IBM Plex Mono',monospace", fontSize: 11 }}>
+                                            {`L${i + 1}: X ${Math.round(l.posMm?.x ?? 0)}mm · Y ${Math.round(l.posMm?.y ?? 0)}mm · ${(Number(l.scale) || 1).toFixed(2)}× · ${Math.round(Number(l.rotDeg) || 0)}°`}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    );
+                                  })()}
                                   {it.design_url && (
                                     <button onClick={async () => {
                                       const response = await fetch(it.design_url);
                                       const blob = await response.blob();
                                       const url = window.URL.createObjectURL(blob);
                                       const a = document.createElement('a');
-                                      a.href = url; a.download = `design-${it.id}.png`;
+                                      const pname = it.product?.toLowerCase() || "";
+                                      const isMug = pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка");
+                                      a.href = url; a.download = isMug ? `mug-print-${it.id}.png` : `design-${it.id}.png`;
                                       document.body.appendChild(a); a.click();
                                       document.body.removeChild(a); window.URL.revokeObjectURL(url);
-                                    }} style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
+                                    }} style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ {(() => {
+                                      const pname = it.product?.toLowerCase() || "";
+                                      const isMug = pname.includes("mug") || pname.includes("ספל") || pname.includes("кружка");
+                                      return isMug ? "Print file (300dpi)" : "Download";
+                                    })()}</button>
+                                  )}
+                                  {it.print_pdf_url && (
+                                    <button onClick={async () => {
+                                      const response = await fetch(it.print_pdf_url);
+                                      const blob = await response.blob();
+                                      const url = window.URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url; a.download = `mug-print-${it.id}.pdf`;
+                                      document.body.appendChild(a); a.click();
+                                      document.body.removeChild(a); window.URL.revokeObjectURL(url);
+                                    }} style={{ background: "rgba(255,107,53,0.25)", border: "1px solid #FF6B35", color: "#fff", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", marginLeft: 4, fontFamily: "'Varela Round',sans-serif" }}>
+                                      ⬇️ {lang === "he" ? "הורד קובץ הדפסה (PDF)" : lang === "ru" ? "Скачать файл печати (PDF)" : "Download print file (PDF)"}
+                                    </button>
                                   )}
                                   {/* Extra design downloads */}
                                   {[
@@ -3212,7 +3284,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     try {
       const res = await fetch(dataUrl);
       const blob = await res.blob();
-      const ext = blob.type.includes('png') ? 'png' : 'jpg';
+      const ext = blob.type.includes('pdf') ? 'pdf' : blob.type.includes('png') ? 'png' : 'jpg';
       const fileName = `design-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { data, error } = await supabase.storage.from('designs').upload(fileName, blob, { contentType: blob.type, upsert: false });
       if (data && !error) {
@@ -3406,12 +3478,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         const itVariant = itProduct?.variants.find(v => v.id === it.variantId);
         if (!itProduct || !itVariant) continue;
 
-        const [design_url, second_front_url, back_design_url, sleeve_left_url, sleeve_right_url] = await Promise.all([
+        const [design_url, second_front_url, back_design_url, sleeve_left_url, sleeve_right_url, print_pdf_url] = await Promise.all([
           uploadDesignImage(it.uploadedImage),
           it.secondFront.enabled && !it.secondFront.sameAsMain ? uploadDesignImage(it.secondFront.image) : Promise.resolve(null),
           it.backPrint && it.backDesign.image && !it.backDesign.sameAsMain ? uploadDesignImage(it.backDesign.image) : Promise.resolve(null),
           it.sleeveLeft.enabled && it.sleeveLeft.image && !it.sleeveLeft.sameAsMain ? uploadDesignImage(it.sleeveLeft.image) : Promise.resolve(null),
           it.sleeveRight.enabled && it.sleeveRight.image && !it.sleeveRight.sameAsMain ? uploadDesignImage(it.sleeveRight.image) : Promise.resolve(null),
+          // Mug-studio print PDF (page size = real print area in mm). Null for
+          // shirt/sticker items — they don't carry printPdfData.
+          it.printPdfData ? uploadDesignImage(it.printPdfData) : Promise.resolve(null),
         ]);
 
         const itemTotal = it.itemPrice + (i === 0 ? SHIPPING_PRICE : 0);
@@ -3459,6 +3534,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           back_design_url: it.backPrint ? (it.backDesign.sameAsMain ? design_url : back_design_url) : null,
           sleeve_left_url: it.sleeveLeft.enabled ? (it.sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
           sleeve_right_url: it.sleeveRight.enabled ? (it.sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
+          // For mug-studio orders, stash the per-layer transforms in the
+          // existing extra_prints JSONB column (already on the orders table,
+          // previously unused). Carries the saved transform JSON the admin
+          // needs to reproduce the layout: {layers:[{posMm,scale,rotDeg}],
+          // printArea:{width_mm,height_mm,dpi,arc_frac}}.
+          extra_prints: it.mugStudio ? { mug_studio: it.mugStudio } : null,
+          // Print-ready PDF (page size = real print area in mm, 1:1). Mug
+          // orders only; shirt/sticker items have print_pdf_url = null.
+          print_pdf_url: print_pdf_url,
+          // Primary design rotation in degrees (mug-studio orders only).
+          // Shirt/sticker items leave this null (it.designRotation is undefined).
+          design_rotation: (typeof it.designRotation === "number") ? it.designRotation : null,
           order_group: orderGroupId,
         };
 
@@ -3615,11 +3702,21 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <TrustRow lang={lang} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {products.map((p, idx) => (
-                <div key={p.id} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
-                  style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
+              {products.map((p, idx) => {
+                // Mugs route into the 3D Mug Studio (#mug-studio) instead of the
+                // generic upload step. The studio bakes the print PNG + composite
+                // mockup and adds the mug to this same cart via addMugStudioToCart.
+                const isMug = p.id === "mug";
+                const mugCta = lang === "he" ? "עצב ספל בתלת-ממד ←" : lang === "ru" ? "Создать кружку в 3D →" : "Design your mug in 3D →";
+                const goToStudio = () => setPage("mug-studio");
+                const handleCardClick = isMug
+                  ? goToStudio
+                  : () => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); };
+                return (
+                <div key={p.id} onClick={handleCardClick}
+                  style={{ background: (!isMug && selectedProduct === p.id) ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${(!isMug && selectedProduct === p.id) ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
-                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
+                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: (!isMug && selectedProduct === p.id) ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
                     <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <SmartImage src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     </div>
@@ -3633,11 +3730,19 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {t.product.options}</span></div>
                     </div>
                   </div>
-                  {selectedProduct === p.id && <span style={{ color: COLORS.accent, flexShrink: 0 }}>✓</span>}
+                  {isMug ? (
+                    <button onClick={(e) => { e.stopPropagation(); goToStudio(); }}
+                      style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: isMobile ? "8px 10px" : "10px 14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: isMobile ? 11 : 13, fontWeight: 700, lineHeight: 1.3, textAlign: "center", maxWidth: isMobile ? 110 : 180, flexShrink: 0, boxShadow: `0 4px 14px rgba(255,107,53,0.3)` }}>
+                      {mugCta}
+                    </button>
+                  ) : (
+                    selectedProduct === p.id && <span style={{ color: COLORS.accent, flexShrink: 0 }}>✓</span>
+                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
-            <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accent : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>{t.product.continue}</button>
+            <button onClick={() => { if (!selectedProduct) return; if (selectedProduct === "mug") { setPage("mug-studio"); return; } setStep(2); }} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accent : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>{t.product.continue}</button>
           </div>
         )}
 
@@ -5830,10 +5935,27 @@ export default function App() {
       qty: 1,
       uploadedImage: payload.printPng || null,
       mockupUrl: payload.mockupPng || null,
-      // Existing shirt-schema fields kept at safe defaults — the mug's print
-      // layout is baked into uploadedImage (the 300dpi PNG), so the admin's
-      // shirt-style re-compositor isn't used for this product.
-      imagePos: { x: 200, y: 150, size: 100 },
+      // Print-ready PDF data URL — page size = real print area in mm so the
+      // printer outputs 1:1. Uploaded at checkout and stored in orders.print_pdf_url.
+      printPdfData: payload.printPdf || null,
+      // Populate the legacy shirt-schema transform fields from the FIRST layer
+      // so design_x/y/size carry meaningful data (mm and scale×100) even if a
+      // viewer ignores extra_prints. The shirt-style re-compositor isn't used
+      // for mug (mockup_url is always set), so these values are documentation
+      // for the admin, not a render input.
+      imagePos: (() => {
+        const first = payload.layers && payload.layers[0];
+        return first
+          ? { x: Math.round(first.posMm.x), y: Math.round(first.posMm.y), size: Math.round(first.scale * 100) }
+          : { x: 0, y: 0, size: 100 };
+      })(),
+      // Persisted in orders.design_rotation. Full per-layer rotations also
+      // live in extra_prints.mug_studio.layers — design_rotation is a
+      // convenience for the primary layer.
+      designRotation: (() => {
+        const first = payload.layers && payload.layers[0];
+        return first ? Math.round(Number(first.rotDeg) || 0) : 0;
+      })(),
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
       secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
@@ -5853,6 +5975,15 @@ export default function App() {
     setCartToast(tmpl);
     if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
     cartToastTimer.current = setTimeout(() => setCartToast(null), 3000);
+
+    // Advance to the order details / checkout step — same path the cart
+    // drawer uses. pendingCheckout = true makes OrderPage mount on step 3
+    // (the customer-details form) instead of the product picker, so the
+    // mug studio's "Add to cart" CTA behaves like the regular product
+    // flow's commitCurrentItem → setStep(3): item lands in the cart and
+    // the customer is sent straight to checkout.
+    setPendingCheckout(true);
+    if (page !== "order") setPage("order");
   };
 
   // Cart line update — used by the CartDrawer +/- buttons. Drops the line
