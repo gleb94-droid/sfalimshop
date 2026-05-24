@@ -3219,7 +3219,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         const { data: urlData } = supabase.storage.from('designs').getPublicUrl(fileName);
         return urlData.publicUrl;
       }
-    } catch (e) { console.log('Upload error:', e); }
+    } catch (e) { console.error(`Upload error:`, e); }
     return null;
   };
 
@@ -7392,12 +7392,15 @@ function MaintenancePage({ lang, setLang, setPage }) {
   const m = messages[lang] || messages.he;
   return (
     <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: 24, zIndex: 10, direction: lang === "he" ? "rtl" : "ltr" }}>
-      <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 8 }}>
-        {["he", "en", "ru"].map(l => (
-          <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? "#FF6B35" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
-            {l.toUpperCase()}
-          </button>
-        ))}
+      <div style={{ position: "absolute", top: 20, insetInlineEnd: 20, display: "flex", gap: 8 }}>
+        {["he", "en", "ru"].map(l => {
+          const langName = l === "he" ? `עברית` : l === "ru" ? `Русский` : `English`;
+          return (
+            <button key={l} onClick={() => setLang(l)} aria-label={langName} aria-pressed={lang === l} lang={l} style={{ background: lang === l ? "#FF6B35" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "8px 12px", minWidth: 40, minHeight: 32, cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+              {l.toUpperCase()}
+            </button>
+          );
+        })}
       </div>
       <div style={{ textAlign: "center", maxWidth: 520 }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
