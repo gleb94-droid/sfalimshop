@@ -1017,6 +1017,17 @@ const MAINTENANCE_MODE = true;
 // and stays code-split — flip to true to re-enable.
 const MUG_STUDIO_ENABLED = false;
 
+// 🔒 CUSTOM STICKERS — when false, the round + square "design-your-own"
+// sticker products are hidden from the order customizer's product list and
+// the Hero showcase grid. Flip to true to re-enable. The PRODUCTS entries,
+// LANGS labels, PRODUCT_IDS list, sticker mockup components and PLACEMENTS
+// / SIZE_OPTIONS stay intact so: (a) BLOOM character sticker orders
+// (PetModal handleOrder("sticker") → addBloomToCart → PRODUCTS.find) keep
+// working, (b) historical sticker orders in admin / track still re-render
+// their mockups via ProductMockupBase, and (c) localizeProduct still
+// translates saved sticker product names across languages.
+const CUSTOM_STICKERS_ENABLED = false;
+
 const IL_PREFIXES = [
   { value: "050" }, { value: "052" }, { value: "053" },
   { value: "054" }, { value: "055" }, { value: "057" }, { value: "058" },
@@ -1455,6 +1466,18 @@ const PRODUCTS = (t) => [
   { id: "sticker",    name: t.products.sticker,   desc: { he: "מדבקת ויניל עגולה · עמידה במים ובשמש", en: "Round vinyl sticker · water- and UV-resistant", ru: "Круглый виниловый стикер · водо- и UV-устойчивый" }, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
   { id: "sticker_sq", name: t.products.sticker_sq, desc: { he: "מדבקת ויניל מרובעת · עמידה במים ובשמש", en: "Square vinyl sticker · water- and UV-resistant", ru: "Квадратный виниловый стикер · водо- и UV-устойчивый" }, is_new: true, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
 ];
+
+// Customer-facing slice of PRODUCTS for the order wizard and Hero showcase.
+// Honors the CUSTOM_STICKERS_ENABLED flag — when false, both sticker IDs are
+// filtered out at the DISPLAY layer only. The full PRODUCTS array is left
+// untouched so internal lookups by id (BLOOM sticker orders, admin history
+// re-renders, localizeProduct) keep functioning.
+const CUSTOM_STICKER_IDS = ['sticker', 'sticker_sq'];
+const getCustomProducts = (t) => {
+  const all = PRODUCTS(t);
+  if (CUSTOM_STICKERS_ENABLED) return all;
+  return all.filter(p => !CUSTOM_STICKER_IDS.includes(p.id));
+};
 
 // Format a price range for product cards: "₪89" if min===max, otherwise "₪89–₪99".
 const formatPriceRange = (variants) => {
@@ -2931,7 +2954,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
 
 function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart, updateCartQty, pendingCheckout, clearPendingCheckout }) {
   const t = LANGS[lang];
-  const products = PRODUCTS(t);
+  const products = getCustomProducts(t);
   const [step, setStep] = useState((pendingBloomItem || pendingCheckout) ? 3 : 1);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -4955,7 +4978,7 @@ function ProductBadges({ product, lang }) {
 
 function Hero({ setPage, lang }) {
   const t = LANGS[lang];
-  const products = PRODUCTS(t);
+  const products = getCustomProducts(t);
   // Parallax offsets are CAPPED so they don't keep growing with scroll. Without
   // a cap, the cards' translateY grew unbounded (scrollY * 0.32) and visually
   // overflowed past the Hero's bottom, sliding behind the Footer (zIndex: 5) and
