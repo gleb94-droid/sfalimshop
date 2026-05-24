@@ -763,7 +763,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       try {
         const { data, error } = await supabase
           .from("pet_designs")
-          .select("id,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,mockup_url,design_url")
+          .select("id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,mockup_url,design_url")
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
         if (error) throw error;
@@ -814,6 +814,9 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     ru: `Наши звёзды`,
   };
 
+  // Defensive name → slug fallback. pet_designs.slug is the canonical
+  // identifier (single source of truth); this only kicks in if a row is
+  // missing one. All current rows have a slug, so this rarely fires.
   const buildSlug = (name) => {
     const s = (name || ``).toLowerCase().replace(/[^a-z0-9]+/g, `-`).replace(/^-+|-+$/g, ``);
     return s;
@@ -827,7 +830,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     const idx = activeIdxRef.current;
     const d = list && list[idx];
     if (!d || typeof setPage !== `function`) return;
-    const slug = buildSlug(d.name_en) || String(d.id);
+    const slug = d.slug || buildSlug(d.name_en) || String(d.id);
     setPage(`pets/${slug}`);
   };
 
@@ -5439,7 +5442,7 @@ function AboutPage({ lang, setPage }) {
 // ============ CART TOAST — "added to cart" feedback bubble ============
 // Bottom sheet on mobile (full-width, big tap target). Pill in the top
 // inline-start corner on desktop. Auto-dismisses via the parent timer.
-function CartToast({ message, lang, onClose, onViewCart }) {
+function CartToast({ message, lang, onClose, onViewCart, actionLabel, onAction }) {
   const isRTL = lang === "he";
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
   useEffect(() => {
@@ -5447,7 +5450,15 @@ function CartToast({ message, lang, onClose, onViewCart }) {
     window.addEventListener("resize", handle);
     return () => window.removeEventListener("resize", handle);
   }, []);
-  const viewLabel = lang === "he" ? "צפה בסל" : lang === "ru" ? "Открыть корзину" : "View cart";
+  // The default action is "View cart" — used by addBloomToCart / addMugStudioToCart.
+  // Callers (e.g. the Share button on PetModal) can override with actionLabel/onAction
+  // to swap in a different CTA — e.g. "Share on WhatsApp". When both are present,
+  // they win over the legacy onViewCart wiring. If actionLabel is empty/null,
+  // the action button is hidden entirely.
+  const defaultLabel = lang === "he" ? "צפה בסל" : lang === "ru" ? "Открыть корзину" : "View cart";
+  const buttonLabel = actionLabel !== undefined ? actionLabel : defaultLabel;
+  const buttonHandler = onAction || onViewCart;
+  const showButton = Boolean(buttonLabel && buttonHandler);
   return (
     <div
       role="status"
@@ -5477,17 +5488,19 @@ function CartToast({ message, lang, onClose, onViewCart }) {
       }}>
       <span aria-hidden="true" style={{ color: "#4ade80", fontSize: 22, lineHeight: 1, flexShrink: 0 }}>✓</span>
       <span style={{ flex: 1, fontSize: 14, lineHeight: 1.35 }}>{message}</span>
-      <button onClick={onViewCart} type="button" style={{
-        background: COLORS.accent, border: "none", color: "#fff",
-        padding: isMobile ? "10px 14px" : "8px 14px",
-        borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 700,
-        fontFamily: "'Varela Round',sans-serif", flexShrink: 0,
-        minHeight: isMobile ? 40 : "auto", touchAction: "manipulation",
-        transition: "background 0.2s",
-      }}
-      onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
-      onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
-      >{viewLabel}</button>
+      {showButton && (
+        <button onClick={buttonHandler} type="button" style={{
+          background: COLORS.accent, border: "none", color: "#fff",
+          padding: isMobile ? "10px 14px" : "8px 14px",
+          borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 700,
+          fontFamily: "'Varela Round',sans-serif", flexShrink: 0,
+          minHeight: isMobile ? 40 : "auto", touchAction: "manipulation",
+          transition: "background 0.2s",
+        }}
+        onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
+        onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
+        >{buttonLabel}</button>
+      )}
       {!isMobile && (
         <button onClick={onClose} type="button" aria-label="dismiss" style={{
           background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer",
@@ -5787,6 +5800,23 @@ export default function App() {
   const [cartToast, setCartToast] = useState(null);
   const cartToastTimer = useRef(null);
 
+  // Optional CTA override for the toast. null → use the toast's built-in
+  // "View cart" default (existing add-to-cart behavior). An object overrides
+  // both the button label and click handler — used by the Share flow to
+  // surface a "Share on WhatsApp" action alongside "Link copied!".
+  const [cartToastAction, setCartToastAction] = useState(null);
+
+  // Shared toast helper for messages that need a custom CTA (e.g. Share →
+  // "Link copied" with a WhatsApp shortcut). Existing addBloomToCart /
+  // addMugStudioToCart paths still set cartToast inline because they want
+  // the default "View cart" action — those don't need to change.
+  const showToast = useCallback((message, action) => {
+    setCartToast(message);
+    setCartToastAction(action || null);
+    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
+    cartToastTimer.current = setTimeout(() => { setCartToast(null); setCartToastAction(null); }, 3000);
+  }, []);
+
   // Build the same cart item OrderPage builds when it consumes pendingBloomItem,
   // and push it to the shared cart so the user can keep browsing BLOOM.
   // unitPrice is stored separately from itemPrice so CartDrawer +/- can
@@ -5824,9 +5854,7 @@ export default function App() {
     // Toast: include the product name and a CTA to open the cart drawer.
     const productLabel = cartItem.productName;
     const tmpl = lang === "he" ? `${productLabel} נוסף לסל!` : lang === "ru" ? `${productLabel} добавлен в корзину!` : `${productLabel} added to cart!`;
-    setCartToast(tmpl);
-    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
-    cartToastTimer.current = setTimeout(() => setCartToast(null), 3000);
+    showToast(tmpl);
   };
 
   // Mug Studio → cart. Mirrors the BLOOM/shirt pattern: the cart line carries
@@ -5878,9 +5906,7 @@ export default function App() {
 
     const productLabel = cartItem.productName;
     const tmpl = lang === "he" ? `${productLabel} נוסף לסל!` : lang === "ru" ? `${productLabel} добавлен в корзину!` : `${productLabel} added to cart!`;
-    setCartToast(tmpl);
-    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
-    cartToastTimer.current = setTimeout(() => setCartToast(null), 3000);
+    showToast(tmpl);
   };
 
   // Cart line update — used by the CartDrawer +/- buttons. Drops the line
@@ -6222,7 +6248,7 @@ export default function App() {
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} />
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
@@ -6257,7 +6283,14 @@ export default function App() {
             <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} />
             {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
                 top-corner pill on desktop. Action button opens the cart drawer. */}
-            {cartToast && <CartToast message={cartToast} lang={lang} onClose={() => setCartToast(null)} onViewCart={() => { setCartToast(null); openCart(); }} />}
+            {cartToast && <CartToast
+              message={cartToast}
+              lang={lang}
+              onClose={() => { setCartToast(null); setCartToastAction(null); }}
+              onViewCart={() => { setCartToast(null); setCartToastAction(null); openCart(); }}
+              actionLabel={cartToastAction?.label}
+              onAction={cartToastAction ? () => { setCartToast(null); setCartToastAction(null); cartToastAction.handler(); } : undefined}
+            />}
             <style>{`
               @keyframes cartToastInDesktop { from { opacity: 0; transform: translateX(${lang === "he" ? "100%" : "-100%"}); } to { opacity: 1; transform: translateX(0); } }
               @keyframes cartToastInMobile { from { opacity: 0; transform: translateY(120%); } to { opacity: 1; transform: translateY(0); } }
@@ -6364,7 +6397,7 @@ function PawPrintsBackground() {
 }
 
 // ============ PETS PAGE — BLOOM Collection / Pet Couture ============
-function PetsPage({ lang, setPage, onOrderBloom }) {
+function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
   const isRTL = lang === "he";
   const [designs, setDesigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -6455,8 +6488,14 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
   }, [designs, lang]);
 
   // URL-shareable BLOOM characters: #pets/<slug> opens that character.
-  // Slug is derived from English name (locale-independent so links are stable).
+  // pet_designs.slug is the SINGLE source of truth — the name_en-derived
+  // fallback only kicks in if a row is somehow missing one. All current rows
+  // have a slug, so this is essentially never used. Note: d.slug and
+  // d.name_en are NOT always the same string — e.g. name_en="Luna" has
+  // slug="rex", name_en="Milo" has slug="pearl". Resolving by name_en would
+  // give the wrong URL for those characters.
   const slugify = (d) => {
+    if (d?.slug) return d.slug;
     const name = (d?.name_en || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     return name || (d?.id != null ? String(d.id) : "");
   };
@@ -6542,6 +6581,9 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
       ctaTitle: "רוצה משהו אחר?",
       ctaSub: "צור עיצוב משלך ונדפיס אותו על מה שתבחר",
       ctaBtn: "הזמנת הדפסה מותאמת ←",
+      shareBtn: "שתפו",
+      shareCopied: "הקישור הועתק!",
+      shareWhatsApp: "שתפו בוואטסאפ",
     },
     en: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -6567,6 +6609,9 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
       ctaTitle: "Want something different?",
       ctaSub: "Create your own design and we'll print it on anything",
       ctaBtn: "Custom prints →",
+      shareBtn: "Share",
+      shareCopied: "Link copied!",
+      shareWhatsApp: "Share on WhatsApp",
     },
     ru: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -6592,6 +6637,9 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
       ctaTitle: "Хочешь что-то другое?",
       ctaSub: "Создай свой дизайн, и мы напечатаем его на чём угодно",
       ctaBtn: "Печать на заказ →",
+      shareBtn: "Поделиться",
+      shareCopied: "Ссылка скопирована!",
+      shareWhatsApp: "Поделиться в WhatsApp",
     },
   }[lang] || {};
 
@@ -6738,6 +6786,8 @@ function PetsPage({ lang, setPage, onOrderBloom }) {
           onNext={() => goPet(1)}
           currentIndex={selectedIdx + 1}
           total={designs.length}
+          shareSlug={slugify(selected)}
+          onShareToast={onShareToast}
         />
       )}
 
@@ -6930,7 +6980,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total }) {
+function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("basic");
@@ -6951,6 +7001,53 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
     if (diff > 50) onNext();
     else if (diff < -50) onPrev();
     touchStartX.current = null;
+  };
+
+  // Share: build a Hebrew share line (Israel = WhatsApp-heavy) pointing at the
+  // clean /p/<slug> URL — the serverless function at api/p/[handle].js serves
+  // per-product OG meta on that path for crawlers (WhatsApp/Facebook/etc.) and
+  // 302-redirects real browsers to /#pets/<slug> so the modal opens. The slug
+  // is the SAME derivation as the hash router's openPet (slugify(d) in
+  // PetsPage) so the link round-trips into the exact character.
+  const heName = design?.name_he || design?.name_en || name;
+  const shareUrl = shareSlug ? `https://www.sfalimshop.com/p/${shareSlug}` : `https://www.sfalimshop.com/`;
+  const shareText = `תראו את "${heName}" 🐾 מבית BLOOM של ספלים שופ`;
+  const shareTitle = `BLOOM · ${heName}`;
+
+  const openWhatsApp = () => {
+    const msg = encodeURIComponent(`${shareText} ${shareUrl}`);
+    window.open(`https://wa.me/?text=${msg}`, `_blank`, `noopener,noreferrer`);
+  };
+
+  const handleShare = async () => {
+    // Mobile / supported browsers: native share sheet (WhatsApp shows up there
+    // on iOS + Android, exactly the surface we want for IL users).
+    if (typeof navigator !== `undefined` && typeof navigator.share === `function`) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+        return;
+      } catch (err) {
+        // User cancelled the share sheet — silent, that's expected.
+        if (err && err.name === `AbortError`) return;
+        // Any other failure: fall through to clipboard so the user still has a way to share.
+        console.error(`Share failed, falling back to clipboard:`, err);
+      }
+    }
+    // Desktop / no Web Share API: copy the URL to clipboard and offer
+    // a WhatsApp deep link via the toast action button.
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+    } catch (err) {
+      console.error(`Clipboard write failed:`, err);
+    }
+    if (typeof onShareToast === `function`) {
+      onShareToast(
+        t.shareCopied || `Link copied!`,
+        { label: t.shareWhatsApp || `Share on WhatsApp`, handler: openWhatsApp },
+      );
+    }
   };
 
   // Shirt type → OrderPage product. Sizes match the PRODUCTS variant ids.
@@ -7082,6 +7179,42 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
         onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; e.currentTarget.style.borderColor = COLORS.border; }}
         aria-label={t.modalClose}
         >×</button>
+
+        {/* Share button — sits next to the close button, on the same side as
+            close so they read as a header control cluster. Same circle/blur
+            treatment so it visually belongs. On mobile the native share sheet
+            shows WhatsApp first for IL users; on desktop it copies the link
+            and offers a WhatsApp tab via the toast. */}
+        <button onClick={handleShare} type="button" style={{
+          position: "absolute",
+          top: 16,
+          [isRTL ? "left" : "right"]: 64,
+          height: 40,
+          padding: "0 14px",
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(10px)",
+          border: `1px solid ${COLORS.border}`,
+          borderRadius: 20,
+          color: COLORS.white,
+          cursor: "pointer",
+          fontSize: 13,
+          fontWeight: 600,
+          fontFamily: "'Varela Round',sans-serif",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          zIndex: 10,
+          transition: "all 0.2s",
+          touchAction: "manipulation",
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.borderColor = COLORS.accent; }}
+        onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; e.currentTarget.style.borderColor = COLORS.border; }}
+        aria-label={t.shareBtn || `Share`}
+        title={t.shareBtn || `Share`}
+        >
+          <span aria-hidden="true" style={{ fontSize: 16, lineHeight: 1 }}>↗</span>
+          <span>{t.shareBtn || `Share`}</span>
+        </button>
 
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0 }}>
           {/* Image */}
