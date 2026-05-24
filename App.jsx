@@ -3481,10 +3481,34 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         }
       }
 
-      // Save context for the payment step (DON'T send email yet — email sends AFTER payment confirmed)
+      // Fire order-confirmation + admin-alert emails exactly once, right after the
+      // orders insert succeeds. Non-blocking: failures are logged but never block
+      // the checkout flow. Moved out of the payment-soon modal CTA so the email
+      // sends regardless of how that modal is closed.
+      const confirmedTotal = cartItemsTotal + SHIPPING_PRICE;
+      Promise.all([
+        supabase.functions.invoke(`send-order-confirmation`, {
+          body: {
+            customerName: form.name,
+            customerEmail: form.email,
+            product: cart.map(c => c.productName).join(`, `),
+            variant: `${cart.length} items`,
+            quantity: cart.reduce((s, c) => s + c.qty, 0),
+            total: confirmedTotal,
+            orderId: orderGroupId,
+            orderGroup: orderGroupId,
+            language: lang,
+          },
+        }),
+        supabase.functions.invoke(`send-admin-order-alert`, {
+          body: { orderGroup: orderGroupId },
+        }),
+      ]).catch(emailErr => console.error(`Order email send failed:`, emailErr));
+
+      // Save context for the payment step.
       setPendingOrderGroupId(orderGroupId);
       setPendingOrderIds(createdOrderIds);
-      setPendingTotal(cartItemsTotal + SHIPPING_PRICE);
+      setPendingTotal(confirmedTotal);
 
       allowLeaveRef.current = true;
       setStep(4);
@@ -4222,30 +4246,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 15, letterSpacing: "0.05em" }}>{pendingOrderGroupId ? `SXP-${pendingOrderGroupId.slice(-8).toUpperCase()}` : ""}</div>
                   </div>
                   <button
-                    onClick={async () => {
+                    onClick={() => {
+                      // Emails already fired when the order was inserted (in handleSubmit) —
+                      // this CTA just acknowledges the modal and advances to confirmation.
                       setShowPaymentSoonModal(false);
-                      try {
-                        await Promise.all([
-                          supabase.functions.invoke("send-order-confirmation", {
-                            body: {
-                              customerName: form.name,
-                              customerEmail: form.email,
-                              product: cart.map(c => c.productName).join(", "),
-                              variant: `${cart.length} items`,
-                              quantity: cart.reduce((s, c) => s + c.qty, 0),
-                              total: pendingTotal,
-                              orderId: pendingOrderGroupId,
-                              orderGroup: pendingOrderGroupId,
-                              language: lang,
-                            },
-                          }),
-                          supabase.functions.invoke("send-admin-order-alert", {
-                            body: { orderGroup: pendingOrderGroupId },
-                          }),
-                        ]);
-                      } catch (emailErr) {
-                        console.error("Email send error:", emailErr);
-                      }
                       setCart([]);
                       setStep(5);
                     }}
@@ -6081,6 +6085,11 @@ export default function App() {
         body { background: #0f0f0f; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
+        /* WCAG 2.4.7 — visible keyboard focus. Mouse clicks suppressed via :focus-visible. */
+        :focus { outline: none; }
+        :focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
+        input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
+
         /* === Premium Animations === */
 
         /* Trust badge: staggered entry + breathing pulse on icon */
@@ -7563,7 +7572,7 @@ function Footer({ lang, setPage }) {
             <div>
               <a href={`mailto:${BUSINESS_INFO.email}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.email}</a>
             </div>
-            <div style={{ marginTop: 12, color: "#555", fontSize: 11, letterSpacing: "0.03em" }}>{lang === "he" ? "ח.פ." : lang === "ru" ? "Бизнес-ID" : "Business ID"} {BUSINESS_INFO.vatId} {lang === "he" ? "(עוסק פטור)" : lang === "ru" ? "(освобождённый предприниматель)" : "(Exempt Dealer)"}</div>
+            <div style={{ marginTop: 12, color: "#b0b0b0", fontSize: 11, letterSpacing: "0.03em" }}>{lang === "he" ? "ח.פ." : lang === "ru" ? "Бизнес-ID" : "Business ID"} {BUSINESS_INFO.vatId} {lang === "he" ? "(עוסק פטור)" : lang === "ru" ? "(освобождённый предприниматель)" : "(Exempt Dealer)"}</div>
           </div>
         </div>
         <div>
