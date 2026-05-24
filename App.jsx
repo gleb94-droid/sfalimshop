@@ -668,12 +668,17 @@ const FloatingProductCardComponent = ({
       <section ref={cardRef} className="fpc-card">
         <div className="fpc-inside">
           <div className="fpc-content fpc-avatar-content">
-            <img
+            {/* SmartImage — same self-healing pattern (3 retries + cache-bust +
+                graceful placeholder) used by every other product/mockup image
+                in the app. Previously a raw <img> with a destructive onError
+                that hid the element forever on a single cold-cache miss, which
+                is why the BLOOM "stars" carousel sometimes shipped blank on
+                first visit until the user refreshed. */}
+            <SmartImage
               className="fpc-avatar"
               src={imageUrl}
               alt={name || `מוצר`}
-              loading="lazy"
-              onError={(e) => { e.target.style.display = `none`; }} />
+              loading="lazy" />
           </div>
           <div className="fpc-shine" />
           <div className="fpc-glare" />
@@ -1540,12 +1545,14 @@ const MOCKUP_URLS = {
 // a broken-image glyph until the user refreshes. SmartImage retries up to
 // 3 times with a 500ms back-off, appending ?retry=N as a cache-buster on
 // each retry, and paints a gray placeholder background until the image
-// successfully loads (or all retries are exhausted). The cache-buster is
-// only applied to http(s) URLs so that data:/blob:/relative URLs are left
-// untouched.
+// successfully loads. The cache-buster is only applied to http(s) URLs so
+// that data:/blob:/relative URLs are left untouched. If all retries fail,
+// renders a plain placeholder div instead of an <img> so the browser never
+// paints the broken-image glyph.
 function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
   const [attempt, setAttempt] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
   const timerRef = useRef(null);
   const MAX_RETRIES = 3;
   const RETRY_DELAY_MS = 500;
@@ -1553,6 +1560,7 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
   useEffect(() => {
     setAttempt(0);
     setLoaded(false);
+    setFailed(false);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [src]);
 
@@ -1567,6 +1575,8 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
     if (attempt < MAX_RETRIES) {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setAttempt((a) => a + 1), RETRY_DELAY_MS);
+    } else {
+      setFailed(true);
     }
     if (onError) onError(e);
   };
@@ -1580,6 +1590,10 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
     ...style,
     backgroundColor: loaded ? (style && style.backgroundColor) : "#222",
   };
+
+  if (failed) {
+    return <div {...rest} role="img" aria-label={alt} style={mergedStyle} />;
+  }
 
   return (
     <img
