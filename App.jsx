@@ -4543,9 +4543,21 @@ function MagneticButton({ children, strength = 0.3, radius = 28, style, classNam
 function ParticlesBackground() {
   const canvasRef = useRef(null);
 
+  // Skip entirely on touch / coarse-pointer / small screens. The rAF loop
+  // paints 5 large radial-gradient orbs with globalCompositeOperation
+  // 'lighter' every frame plus dot particles — on mobile that exhausts
+  // GPU/memory and the browser repeatedly reloads the tab. Matches the
+  // gating pattern already used by CursorGlow / useParallax / MagneticButton.
+  const skip = typeof window !== "undefined" && (
+    window.matchMedia("(hover: none)").matches ||
+    window.matchMedia("(pointer: coarse)").matches ||
+    window.innerWidth < 768
+  );
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (skip) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -4655,7 +4667,9 @@ function ParticlesBackground() {
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
     };
-  }, []);
+  }, [skip]);
+
+  if (skip) return null;
 
   return (
     <canvas ref={canvasRef} style={{
@@ -5205,11 +5219,6 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
     return () => window.removeEventListener("resize", handle);
   }, []);
 
-  // Cart drawer slides in from inline-end (right in LTR, left in RTL). Anchor
-  // the a11y button to inline-start so the two never share the same edge.
-  // On mobile the cart is full-width, so just hide the button while it's open.
-  if (cartOpen && isMobile) return null;
-
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}%`;
   }, [fontSize]);
@@ -5233,6 +5242,14 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
       if (style) style.remove();
     }
   }, [reduceMotion]);
+
+  // Cart drawer slides in from inline-end (right in LTR, left in RTL). Anchor
+  // the a11y button to inline-start so the two never share the same edge.
+  // On mobile the cart is full-width, so just hide the button while it's open.
+  // Early-return MUST sit after every hook call above — otherwise toggling
+  // cartOpen on mobile changes how many hooks React sees per render and the
+  // component crashes (Rules of Hooks).
+  if (cartOpen && isMobile) return null;
 
   const t = {
     he: { title: 'נגישות', textSize: 'גודל טקסט', contrast: 'ניגודיות גבוהה', motion: 'הפחת אנימציות', reset: 'איפוס', close: 'סגור' },
