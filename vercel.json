@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/p/:handle",
-      "destination": "/api/p/:handle"
+      "destination": "/api/og?handle=:handle"
     },
     {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
