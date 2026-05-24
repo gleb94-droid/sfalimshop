@@ -1,41 +1,36 @@
 // =============================================================================
-// /p/<handle> — per-BLOOM-character link-preview function
+// /p/<handle> link previews — statically-named Vercel Serverless Function.
 // -----------------------------------------------------------------------------
-// Vercel Node Serverless Function. Lives OUTSIDE the SPA bundle (single-file
-// rule in CLAUDE.md applies to App.jsx, not to api/*).
+// This is a Vite SPA project, NOT Next.js. Vercel only resolves dynamic API
+// segments (`api/p/[handle].js`) under Next.js. On a plain Vite project the
+// bracket file is treated as a static literal and `/api/p/<anything>` returns
+// 404, so a `/p/:handle` rewrite that targets it silently falls through to
+// the SPA catch-all (which is what happened in production — every /p/<slug>
+// served index.html with the generic OG tags and never hit a function).
 //
-// Behavior:
-//   1. Look up the BLOOM character in Supabase pet_designs by slug (same slug
-//      derivation the SPA uses for #pets/<slug>, so links round-trip).
-//   2. If the request UA matches a known social-card crawler → 200 HTML with
-//      per-product OG/Twitter meta. Crawlers do NOT execute JS, so we must
-//      serve real <meta> tags inline.
-//   3. If it's a real browser → 302 to the SPA hash route so the modal opens.
-//   4. Unknown handle → 302 to "/" (home).
+// Fix: a STATICALLY-named function (`api/og.js`) is always resolvable on any
+// Vercel project. The vercel.json rewrite passes the handle as a query
+// string so the function reads it from req.query.handle.
 //
-// SECURITY: reads only the PUBLIC anon key (already public in App.jsx for the
-// client). NEVER use the service_role key here. Env vars are preferred so the
-// values can be rotated without a code change; if either var is missing we
-// fall back to the existing public values to keep previews working.
+// Behavior (unchanged from the previous attempt):
+//   1. Look up the BLOOM character in Supabase pet_designs by slug column.
+//   2. Social-crawler UA → 200 HTML with per-character OG/Twitter tags.
+//   3. Real browser → 302 to /#pets/<handle> so the SPA opens the modal.
+//   4. Unknown handle → 302 to /.
 //
-// LAUNCH STEP: while MAINTENANCE is true, the crawler HTML carries
-// `<meta name="robots" content="noindex, nofollow">`. Flip MAINTENANCE to
-// false at launch — same gate as the three robots meta tags in index.html.
+// SECURITY: PUBLIC anon key only (already shipped in the client bundle).
+// LAUNCH STEP: while MAINTENANCE is true the crawler HTML carries
+// `noindex, nofollow`. Flip to false at launch — same gate as index.html.
 // =============================================================================
 
 const MAINTENANCE = true;
 
-// Public values — already shipped in the client bundle. The function only
-// reads `pet_designs` (RLS already allows anon SELECT on active rows).
 const FALLBACK_SUPABASE_URL = `https://ubvgrxlxtelulwjtfudd.supabase.co`;
 const FALLBACK_SUPABASE_ANON_KEY = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE`;
 
 const SITE_ORIGIN = `https://www.sfalimshop.com`;
 const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`;
 
-// Conservative social-crawler list. Case-insensitive substring match against
-// the User-Agent header. WhatsApp shows up as "WhatsApp/<ver>". Googlebot is
-// included so search engines can also see the rich card.
 const CRAWLER_PATTERNS = [
   `facebookexternalhit`,
   `facebot`,
@@ -59,9 +54,6 @@ function isCrawler(userAgent) {
   return false;
 }
 
-// Minimal HTML escape for values we drop into <meta content="..."> attributes
-// and the <title> tag. Quotes + tag-delimiters only — that's enough for an
-// attribute context.
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, `&amp;`)
@@ -75,9 +67,6 @@ async function lookupDesign(handle) {
   const url = process.env.SUPABASE_URL || FALLBACK_SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
 
-  // Direct column match on pet_designs.slug — the canonical identifier the
-  // SPA hash router uses. Single-row fetch (limit=1) keeps cold start cheap.
-  // Public anon key only; RLS already allows anon SELECT on active rows.
   const safeHandle = encodeURIComponent(String(handle || ``).toLowerCase());
   const select = `id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,mockup_url,design_url`;
   const endpoint = `${url}/rest/v1/pet_designs?slug=eq.${safeHandle}&is_active=eq.true&select=${select}&limit=1`;
@@ -88,12 +77,15 @@ async function lookupDesign(handle) {
         Authorization: `Bearer ${anonKey}`,
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.log(`[og] supabase non-ok status=${res.status} handle=${handle}`);
+      return null;
+    }
     const rows = await res.json();
     if (!Array.isArray(rows) || rows.length === 0) return null;
     return rows[0];
   } catch (err) {
-    console.error(`pet_designs fetch failed:`, err);
+    console.error(`[og] pet_designs fetch failed:`, err);
     return null;
   }
 }
@@ -153,8 +145,8 @@ function buildCrawlerHtml(d, handle) {
 }
 
 module.exports = async function handler(req, res) {
-  // /api/p/[handle] — `handle` from the dynamic route; fall back to the last
-  // path segment so a direct call also works in local dev.
+  // Resolve handle. vercel.json rewrite passes it as ?handle=<slug>; fall back
+  // to scraping the path for local dev / direct calls.
   let handle = ``;
   if (req.query && typeof req.query.handle === `string`) {
     handle = req.query.handle;
@@ -162,16 +154,28 @@ module.exports = async function handler(req, res) {
     handle = req.query.handle[0] || ``;
   }
   if (!handle && req.url) {
-    const path = req.url.split(`?`)[0];
-    const segments = path.split(`/`).filter(Boolean);
-    handle = segments[segments.length - 1] || ``;
+    try {
+      const parsed = new URL(req.url, `https://x.invalid`);
+      handle = parsed.searchParams.get(`handle`) || ``;
+      if (!handle) {
+        const segments = parsed.pathname.split(`/`).filter(Boolean);
+        handle = segments[segments.length - 1] || ``;
+      }
+    } catch (err) {
+      // ignore — handle stays empty and we'll redirect to /
+    }
   }
   handle = String(handle || ``).toLowerCase();
 
-  const ua = req.headers && (req.headers[`user-agent`] || req.headers[`User-Agent`]);
+  const ua = (req.headers && (req.headers[`user-agent`] || req.headers[`User-Agent`])) || ``;
   const crawler = isCrawler(ua);
 
+  // Single structured log line per invocation — visible in Vercel runtime logs.
+  // Branch decision is appended below after the lookup so we log it once.
+  console.log(`[og] method=${req.method} url=${req.url} handle=${handle} ua=${String(ua).slice(0, 120)}`);
+
   if (!handle) {
+    console.log(`[og] branch=notfound reason=empty-handle`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/`);
     res.end();
@@ -181,7 +185,7 @@ module.exports = async function handler(req, res) {
   const design = await lookupDesign(handle);
 
   if (!design) {
-    // Unknown handle — bounce to home so the user lands somewhere sensible.
+    console.log(`[og] branch=notfound handle=${handle}`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/`);
     res.end();
@@ -189,19 +193,17 @@ module.exports = async function handler(req, res) {
   }
 
   if (!crawler) {
-    // Real browser — send them to the SPA hash route that opens the modal.
+    console.log(`[og] branch=human handle=${handle} → /#pets/${handle}`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/#pets/${encodeURIComponent(handle)}`);
     res.end();
     return;
   }
 
-  // Crawler — serve the per-product preview HTML.
+  console.log(`[og] branch=crawler handle=${handle} name=${pickName(design)}`);
   const html = buildCrawlerHtml(design, handle);
   res.statusCode = 200;
   res.setHeader(`Content-Type`, `text/html; charset=utf-8`);
-  // Short edge cache; OG previews are scraped once and re-fetched rarely, but
-  // we don't want stale cards if Gleb edits a row.
   res.setHeader(`Cache-Control`, `public, s-maxage=300, stale-while-revalidate=600`);
   res.end(html);
 };
