@@ -33,15 +33,6 @@ const FALLBACK_SUPABASE_ANON_KEY = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3M
 const SITE_ORIGIN = `https://www.sfalimshop.com`;
 const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`;
 
-// Match the App.jsx slugify exactly (App.jsx ~6459) so /p/<handle> resolves to
-// the same character as #pets/<handle>. Lowercases name_en, replaces every
-// non-alphanumeric run with a single dash, trims leading/trailing dashes.
-function slugify(d) {
-  const raw = (d && d.name_en ? d.name_en : ``).toLowerCase().replace(/[^a-z0-9]+/g, `-`).replace(/^-+|-+$/g, ``);
-  if (raw) return raw;
-  return d && d.id != null ? String(d.id) : ``;
-}
-
 // Conservative social-crawler list. Case-insensitive substring match against
 // the User-Agent header. WhatsApp shows up as "WhatsApp/<ver>". Googlebot is
 // included so search engines can also see the rich card.
@@ -84,10 +75,12 @@ async function lookupDesign(handle) {
   const url = process.env.SUPABASE_URL || FALLBACK_SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
 
-  // Direct REST against pet_designs — avoids pulling the supabase-js client
-  // into a serverless cold start for a single read. Public anon key only.
-  const endpoint = `${url}/rest/v1/pet_designs?select=id,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,mockup_url,design_url&is_active=eq.true`;
-  let rows = [];
+  // Direct column match on pet_designs.slug — the canonical identifier the
+  // SPA hash router uses. Single-row fetch (limit=1) keeps cold start cheap.
+  // Public anon key only; RLS already allows anon SELECT on active rows.
+  const safeHandle = encodeURIComponent(String(handle || ``).toLowerCase());
+  const select = `id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,mockup_url,design_url`;
+  const endpoint = `${url}/rest/v1/pet_designs?slug=eq.${safeHandle}&is_active=eq.true&select=${select}&limit=1`;
   try {
     const res = await fetch(endpoint, {
       headers: {
@@ -96,14 +89,13 @@ async function lookupDesign(handle) {
       },
     });
     if (!res.ok) return null;
-    rows = await res.json();
-    if (!Array.isArray(rows)) return null;
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    return rows[0];
   } catch (err) {
     console.error(`pet_designs fetch failed:`, err);
     return null;
   }
-  const target = String(handle || ``).toLowerCase();
-  return rows.find(d => slugify(d) === target) || null;
 }
 
 function pickName(d) {

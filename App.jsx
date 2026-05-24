@@ -763,7 +763,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       try {
         const { data, error } = await supabase
           .from("pet_designs")
-          .select("id,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,mockup_url,design_url")
+          .select("id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,mockup_url,design_url")
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
         if (error) throw error;
@@ -814,6 +814,9 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     ru: `Наши звёзды`,
   };
 
+  // Defensive name → slug fallback. pet_designs.slug is the canonical
+  // identifier (single source of truth); this only kicks in if a row is
+  // missing one. All current rows have a slug, so this rarely fires.
   const buildSlug = (name) => {
     const s = (name || ``).toLowerCase().replace(/[^a-z0-9]+/g, `-`).replace(/^-+|-+$/g, ``);
     return s;
@@ -827,7 +830,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     const idx = activeIdxRef.current;
     const d = list && list[idx];
     if (!d || typeof setPage !== `function`) return;
-    const slug = buildSlug(d.name_en) || String(d.id);
+    const slug = d.slug || buildSlug(d.name_en) || String(d.id);
     setPage(`pets/${slug}`);
   };
 
@@ -6485,8 +6488,14 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
   }, [designs, lang]);
 
   // URL-shareable BLOOM characters: #pets/<slug> opens that character.
-  // Slug is derived from English name (locale-independent so links are stable).
+  // pet_designs.slug is the SINGLE source of truth — the name_en-derived
+  // fallback only kicks in if a row is somehow missing one. All current rows
+  // have a slug, so this is essentially never used. Note: d.slug and
+  // d.name_en are NOT always the same string — e.g. name_en="Luna" has
+  // slug="rex", name_en="Milo" has slug="pearl". Resolving by name_en would
+  // give the wrong URL for those characters.
   const slugify = (d) => {
+    if (d?.slug) return d.slug;
     const name = (d?.name_en || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     return name || (d?.id != null ? String(d.id) : "");
   };
