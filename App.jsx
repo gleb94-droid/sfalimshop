@@ -1002,6 +1002,13 @@ const ANALYTICS = {
 // Visit ?staff=1 to access login during maintenance.
 const MAINTENANCE_MODE = true;
 
+// 🔒 MUG STUDIO ACCESS — when false, the #mug-studio route is removed from
+// VALID_PAGES (so the hash router falls back to 'home'), the render block
+// is short-circuited, the add-to-cart helper no-ops, and the maintenance
+// gate no longer makes any exception for it. MugStudio.jsx stays on disk
+// and stays code-split — flip to true to re-enable.
+const MUG_STUDIO_ENABLED = false;
+
 const IL_PREFIXES = [
   { value: "050" }, { value: "052" }, { value: "053" },
   { value: "054" }, { value: "055" }, { value: "057" }, { value: "058" },
@@ -5688,7 +5695,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'policies', 'reset-password', 'mug-studio'];
+ const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -5813,6 +5820,9 @@ export default function App() {
   // changes needed. mugStudio.layers carries the per-layer transform JSON
   // locally so the layout is reproducible from sources if we ever wire it to DB.
   const addMugStudioToCart = (payload) => {
+    // Hard-gated by MUG_STUDIO_ENABLED so the helper no-ops when the
+    // route is disabled — even if something still holds a stale ref.
+    if (!MUG_STUDIO_ENABLED) return;
     const tNow = LANGS[lang] || LANGS.he;
     const prod = PRODUCTS(tNow).find(p => p.id === `mug`);
     if (!prod || !prod.variants.length) return;
@@ -6176,9 +6186,11 @@ export default function App() {
       {!reduceMotion && <CursorGlow />}
       {(() => {
         const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
-        // mug-studio is a demo route reviewable on preview deployments without
-        // exposing the live store — owner reviews 3D mug customizer before launch.
-        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride && page !== 'policies' && page !== 'mug-studio') {
+        // Maintenance gate. Only 'policies' is exposed during maintenance
+        // (legal pages need to stay reachable for Google verification + SEO).
+        // The previous mug-studio exception is removed — that route is now
+        // controlled by MUG_STUDIO_ENABLED above and respects MAINTENANCE_MODE.
+        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride && page !== 'policies') {
           return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} />;
         }
         return (
@@ -6195,7 +6207,7 @@ export default function App() {
             {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
-            {page === "mug-studio" && (
+            {MUG_STUDIO_ENABLED && page === "mug-studio" && (
               <Suspense fallback={
                 <div style={{
                   minHeight: "100vh", background: COLORS.bg, color: COLORS.gray,
