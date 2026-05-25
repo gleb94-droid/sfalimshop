@@ -885,6 +885,17 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         {`✦ ${eyebrowByLang[lang] || eyebrowByLang.he} ✦`}
       </div>
 
+      {/* Reveal wrapper for the entire showcase (carousel + dots). Lives
+          OUTSIDE FloatingProductCard's tilt transform so the inner card's
+          holographic tilt/auto-animation isn't disturbed; .reveal animates
+          this wrapper's translateY only on first mount. data-delay="2"
+          stages it just after the eyebrow badge above. */}
+      <div className="reveal" data-delay="2" style={{
+        display: `flex`,
+        flexDirection: `column`,
+        alignItems: `center`,
+        width: `100%`,
+      }}>
       {/* Carousel stack — all cards rendered, cross-fade via opacity. */}
       <div
         onMouseEnter={() => setIsPaused(true)}
@@ -967,6 +978,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
             />
           );
         })}
+      </div>
       </div>
     </section>
   );
