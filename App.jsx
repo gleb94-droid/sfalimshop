@@ -5074,7 +5074,7 @@ function Hero({ setPage, lang }) {
 function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick }) {
   const t = LANGS[lang];
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   // Trigger a one-shot scale bump on the badge whenever cartCount goes up,
   // so the user gets visual confirmation that an item was just added.
   const [bumpKey, setBumpKey] = useState(0);
@@ -5085,7 +5085,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
   }, [cartCount]);
 
   useEffect(() => {
-    const handle = () => setIsMobile(window.innerWidth < 768);
+    const handle = () => setIsMobile(window.innerWidth <= 1024);
     window.addEventListener('resize', handle);
     return () => window.removeEventListener('resize', handle);
   }, []);
