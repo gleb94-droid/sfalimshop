@@ -4572,23 +4572,23 @@ function ParticlesBackground({ homeActive }) {
     const ctx = canvas.getContext('2d');
     let animId = null;
 
-    const PARTICLE_COUNT = lightweight ? 12 : 75;
+    const PARTICLE_COUNT = lightweight ? 20 : 75;
 
     const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     resize();
     window.addEventListener('resize', resize);
 
-    // Dot particles. Lightweight mobile mode uses small low-alpha dots with
-    // slower drift; desktop keeps the existing tiered size/alpha mix.
+    // Dot particles. Lightweight mobile mode uses ~20 visibly bright orange
+    // dots gently drifting; desktop keeps the existing tiered size/alpha mix.
     const particles = lightweight
-      ? Array.from({ length: PARTICLE_COUNT }, () => ({
+      ? Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
           x: Math.random() * window.innerWidth,
           y: Math.random() * window.innerHeight,
-          r: Math.random() * 1.2 + 0.6,
-          dx: (Math.random() - 0.5) * 0.15,
-          dy: (Math.random() - 0.5) * 0.15,
-          alpha: Math.random() * 0.18 + 0.08,
-          color: '#FF6B35',
+          r: Math.random() * 2 + 1.5,
+          dx: (Math.random() - 0.5) * 0.25,
+          dy: (Math.random() - 0.5) * 0.25,
+          alpha: Math.random() * 0.35 + 0.35,
+          color: i % 4 === 0 ? '#ff8c5a' : '#FF6B35',
           pulse: Math.random() * Math.PI * 2,
         }))
       : Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
