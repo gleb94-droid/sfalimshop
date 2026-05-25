@@ -4540,72 +4540,48 @@ function MagneticButton({ children, strength = 0.3, radius = 28, style, classNam
 }
 
 // Particles + Floating Emojis Background
-function ParticlesBackground({ homeActive }) {
+function ParticlesBackground() {
   const canvasRef = useRef(null);
-
-  // Three modes:
-  //   - desktop (any page) → FULL effect (5 glowing orbs with 'lighter'
-  //     blending + 75 dot particles + connection lines). Unchanged from
-  //     pre-mobile-fix behavior.
-  //   - mobile + homeActive=true → render nothing. The home page already has
-  //     the BLOOM carousel + parallax Hero; layering orbs on top exhausted
-  //     mobile GPUs and triggered tab reloads.
-  //   - mobile + homeActive=false → LIGHTWEIGHT mode: no orbs, no 'lighter'
-  //     compositing, ~12 plain dot particles, no connection lines. Cheap
-  //     enough for the maintenance screen, BLOOM/pets, about, order, etc.
-  // Mobile detection matches CursorGlow / useParallax / MagneticButton.
-  const isMobile = typeof window !== "undefined" && (
-    window.matchMedia("(hover: none)").matches ||
-    window.matchMedia("(pointer: coarse)").matches ||
-    window.innerWidth < 768
-  );
-  const suppress = isMobile && homeActive === true;
-  const lightweight = isMobile && !suppress;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (suppress) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let animId = null;
 
-    const PARTICLE_COUNT = lightweight ? 20 : 75;
+    // Mobile detection matches CursorGlow / useParallax / MagneticButton.
+    // On mobile the full effect runs but at a ~30fps cap (FRAME_MIN_MS)
+    // and with fewer dot particles; orbs are drawn from pre-rendered
+    // sprites so the GPU never re-rasterises radial gradients per frame.
+    // That combination is what restores the original look without
+    // re-triggering the mobile reload loop.
+    const isMobile = window.matchMedia('(hover: none)').matches ||
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.innerWidth < 768;
+    const PARTICLE_COUNT = isMobile ? 30 : 75;
+    const FRAME_MIN_MS = isMobile ? 33 : 0; // ~30fps cap on mobile, uncapped on desktop
 
     const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     resize();
     window.addEventListener('resize', resize);
 
-    // Dot particles. Lightweight mobile mode uses ~20 visibly bright orange
-    // dots gently drifting; desktop keeps the existing tiered size/alpha mix.
-    const particles = lightweight
-      ? Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          r: Math.random() * 2 + 1.5,
-          dx: (Math.random() - 0.5) * 0.25,
-          dy: (Math.random() - 0.5) * 0.25,
-          alpha: Math.random() * 0.35 + 0.35,
-          color: i % 4 === 0 ? '#ff8c5a' : '#FF6B35',
-          pulse: Math.random() * Math.PI * 2,
-        }))
-      : Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          r: i < 8 ? Math.random() * 3 + 2 : i < 25 ? Math.random() * 1.5 + 0.8 : Math.random() * 0.8 + 0.2,
-          dx: (Math.random() - 0.5) * 0.3,
-          dy: (Math.random() - 0.5) * 0.3,
-          alpha: i < 8 ? Math.random() * 0.35 + 0.15 : Math.random() * 0.2 + 0.05,
-          color: i < 12 ? '#FF6B35' : i < 22 ? '#ff8c5a' : '#ffffff',
-          pulse: Math.random() * Math.PI * 2,
-        }));
+    // Dot particles — tiered size/alpha mix (original look).
+    const particles = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: i < 8 ? Math.random() * 3 + 2 : i < 25 ? Math.random() * 1.5 + 0.8 : Math.random() * 0.8 + 0.2,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      alpha: i < 8 ? Math.random() * 0.35 + 0.15 : Math.random() * 0.2 + 0.05,
+      color: i < 12 ? '#FF6B35' : i < 22 ? '#ff8c5a' : '#ffffff',
+      pulse: Math.random() * Math.PI * 2,
+    }));
 
     // Ambient glowing orbs — large, soft, drifting (premium feel).
-    // Skipped entirely in lightweight mode (the 'lighter' radial gradients
-    // every frame were what overloaded mobile GPUs in the first place).
-    const orbs = lightweight ? [] : [
+    const orbs = [
       { baseX: 0.2, baseY: 0.3, baseR: 320, color: '255, 107, 53', alpha: 0.10, speed: 0.00018, phase: 0 },
       { baseX: 0.8, baseY: 0.7, baseR: 280, color: '255, 140, 90', alpha: 0.08, speed: 0.00022, phase: Math.PI / 2 },
       { baseX: 0.5, baseY: 0.15, baseR: 240, color: '255, 107, 53', alpha: 0.06, speed: 0.00028, phase: Math.PI },
@@ -4613,33 +4589,56 @@ function ParticlesBackground({ homeActive }) {
       { baseX: 0.7, baseY: 0.5, baseR: 200, color: '255, 200, 150', alpha: 0.045, speed: 0.00032, phase: Math.PI / 3 },
     ];
 
-    const draw = () => {
+    // OPTIMISATION A — pre-render each orb's radial gradient ONCE into an
+    // offscreen 256x256 canvas. The gradient depends only on color + alpha
+    // (both constant per orb), so it can be cached for the lifetime of
+    // the effect. The draw loop then uses ctx.drawImage to blit the
+    // sprite scaled to the orb's current radius — orders of magnitude
+    // cheaper than ctx.createRadialGradient + arc fill every frame.
+    const SPRITE_SIZE = 256;
+    orbs.forEach((o) => {
+      const off = document.createElement('canvas');
+      off.width = SPRITE_SIZE;
+      off.height = SPRITE_SIZE;
+      const octx = off.getContext('2d');
+      const sc = SPRITE_SIZE / 2;
+      const g = octx.createRadialGradient(sc, sc, 0, sc, sc, sc);
+      g.addColorStop(0, `rgba(${o.color}, ${o.alpha})`);
+      g.addColorStop(0.45, `rgba(${o.color}, ${o.alpha * 0.35})`);
+      g.addColorStop(1, `rgba(${o.color}, 0)`);
+      octx.fillStyle = g;
+      octx.fillRect(0, 0, SPRITE_SIZE, SPRITE_SIZE);
+      o.sprite = off;
+    });
+
+    // OPTIMISATION B — frame-rate cap on mobile. rAF still fires at the
+    // display rate, but the heavy clear+composite+draw block only runs
+    // when at least FRAME_MIN_MS has elapsed since the last paint. The
+    // animation timing inside draw() is t-based (Date.now()) so motion
+    // stays in sync regardless of how many frames are skipped.
+    let lastFrameMs = 0;
+
+    const draw = (now) => {
+      animId = requestAnimationFrame(draw);
+      if (FRAME_MIN_MS > 0 && now - lastFrameMs < FRAME_MIN_MS) return;
+      lastFrameMs = now;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const t2 = Date.now() / 1000;
       const tMs = Date.now();
 
-      // Ambient orbs — soft glowing background atmosphere. Desktop only;
-      // lightweight mobile mode skips this whole block (no 'lighter'
-      // compositing at all, plain source-over for the particles below).
-      if (!lightweight) {
-        ctx.globalCompositeOperation = 'lighter';
-        orbs.forEach(o => {
-          const driftX = Math.sin(tMs * o.speed + o.phase) * 70;
-          const driftY = Math.cos(tMs * o.speed * 0.7 + o.phase) * 50;
-          const cx = canvas.width * o.baseX + driftX;
-          const cy = canvas.height * o.baseY + driftY;
-          const radius = o.baseR + Math.sin(t2 * 0.4 + o.phase) * 25;
-          const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-          gradient.addColorStop(0, `rgba(${o.color}, ${o.alpha})`);
-          gradient.addColorStop(0.45, `rgba(${o.color}, ${o.alpha * 0.35})`);
-          gradient.addColorStop(1, `rgba(${o.color}, 0)`);
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        ctx.globalCompositeOperation = 'source-over';
-      }
+      // Ambient orbs — soft glowing background atmosphere via cached
+      // sprites with 'lighter' compositing for the original bloom feel.
+      ctx.globalCompositeOperation = 'lighter';
+      orbs.forEach(o => {
+        const driftX = Math.sin(tMs * o.speed + o.phase) * 70;
+        const driftY = Math.cos(tMs * o.speed * 0.7 + o.phase) * 50;
+        const cx = canvas.width * o.baseX + driftX;
+        const cy = canvas.height * o.baseY + driftY;
+        const radius = o.baseR + Math.sin(t2 * 0.4 + o.phase) * 25;
+        ctx.drawImage(o.sprite, cx - radius, cy - radius, radius * 2, radius * 2);
+      });
+      ctx.globalCompositeOperation = 'source-over';
 
       // Dot particles
       particles.forEach(p => {
@@ -4655,9 +4654,9 @@ function ParticlesBackground({ homeActive }) {
         if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
       });
 
-      // Connections between nearby particles — desktop only (lightweight
-      // mobile mode never reaches this branch).
-      if (!lightweight) {
+      // Connections between nearby particles — desktop only (O(n²) over
+      // 75 particles; skipped on mobile to keep the 30fps cap honest).
+      if (!isMobile) {
         for (let i = 0; i < particles.length; i++) {
           const p1 = particles[i];
           for (let j = i + 1; j < particles.length; j++) {
@@ -4679,7 +4678,6 @@ function ParticlesBackground({ homeActive }) {
       }
 
       ctx.globalAlpha = 1;
-      animId = requestAnimationFrame(draw);
     };
 
     const start = () => { if (animId == null) animId = requestAnimationFrame(draw); };
@@ -4693,27 +4691,12 @@ function ParticlesBackground({ homeActive }) {
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
     };
-    // Re-initialise the loop when the render mode changes — e.g. navigating
-    // from the maintenance screen (lightweight) into the home page on
-    // mobile (suppress=true) tears the canvas down cleanly.
-  }, [suppress, lightweight]);
-
-  if (suppress) return null;
+  }, []);
 
   return (
     <canvas ref={canvasRef} style={{
       position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-      pointerEvents: 'none',
-      // Desktop stays at zIndex 0 (unchanged stacking — orbs + lines sit
-      // behind everything as before). Lightweight mobile mode lifts the
-      // canvas to zIndex 2 so the dots sit above page backgrounds (e.g.
-      // PetsPage root's opaque COLORS.bg) and above page content sections
-      // at position:relative; zIndex:1 (PetsPage sections, AboutPage, etc.)
-      // — without competing with Hero/Footer (z:5), sticky bars (z:50),
-      // Nav (z:100), modals (z:1000+) or toasts (z:9999). pointerEvents:
-      // 'none' means the bumped canvas can't intercept taps.
-      zIndex: lightweight ? 2 : 0,
-      opacity: 0.85,
+      pointerEvents: 'none', zIndex: 0, opacity: 0.85,
     }} />
   );
 }
@@ -6310,20 +6293,8 @@ export default function App() {
         .footer-contact-link { color: inherit; text-decoration: none; transition: color 0.25s ease; }
         .footer-contact-link:hover { color: #FF6B35; }
       `}</style>
-      {(() => {
-        // Lifted out of the IIFE below so the ParticlesBackground mount can
-        // also see it without duplicating the URL parse. homeActive is true
-        // only when the REAL Hero/carousel home page is on screen — when
-        // the maintenance screen is covering the home route, homeActive is
-        // false and mobile gets the lightweight particle background.
-        const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
-        const maintenanceView = MAINTENANCE_MODE && !isAdmin && !isStaffOverride && page !== "policies";
-        const homeActive = page === "home" && !maintenanceView;
-        return <>
-          {!reduceMotion && <ParticlesBackground homeActive={homeActive} />}
-          {!reduceMotion && <CursorGlow />}
-        </>;
-      })()}
+      {!reduceMotion && <ParticlesBackground />}
+      {!reduceMotion && <CursorGlow />}
       {(() => {
         const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
         // Maintenance gate. Only 'policies' is exposed during maintenance
@@ -6415,6 +6386,14 @@ function PawPrintsBackground() {
     const ctx = canvas.getContext("2d");
     let animId;
 
+    // Mobile fps cap — keeps the BLOOM page light when paws + particles
+    // run on the same screen. Desktop is unchanged.
+    const isMobile = window.matchMedia("(hover: none)").matches ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.innerWidth < 768;
+    const FRAME_MIN_MS = isMobile ? 33 : 0;
+    let lastFrameMs = 0;
+
     const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     resize();
     window.addEventListener("resize", resize);
@@ -6456,7 +6435,11 @@ function PawPrintsBackground() {
       color: Math.random() > 0.5 ? "#FF6B35" : "#ff8c5a",
     }));
 
-    const draw = () => {
+    const draw = (now) => {
+      animId = requestAnimationFrame(draw);
+      if (FRAME_MIN_MS > 0 && now - lastFrameMs < FRAME_MIN_MS) return;
+      lastFrameMs = now;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       paws.forEach((p) => {
         drawPaw(p.x, p.y, p.size, p.rot, p.alpha, p.color);
@@ -6472,9 +6455,8 @@ function PawPrintsBackground() {
         if (p.x > canvas.width + p.size * 2) p.x = -p.size;
       });
       ctx.globalAlpha = 1;
-      animId = requestAnimationFrame(draw);
     };
-    draw();
+    animId = requestAnimationFrame(draw);
 
     return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
   }, []);
