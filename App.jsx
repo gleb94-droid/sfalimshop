@@ -726,7 +726,13 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const [isPaused, setIsPaused] = useState(false);
-  const touchStartXRef = useRef(null);
+
+  // Touch-drag state — refs only so updating the transform every touchmove
+  // (60fps) never triggers a React re-render.
+  const dragStartXRef = useRef(null);     // x at touchstart; null = not dragging
+  const draggingRef = useRef(false);      // distinguishes drag from idle / scroll
+  const activeCardRef = useRef(null);     // DOM node of currently active card
+  const stackRef = useRef(null);          // wraps the stacked card layers
 
   // Mount-driven reveal for the carousel card. The previous version waited
   // for the image to load — but when the browser had it cached, "load" fired
@@ -870,21 +876,99 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const goPrev = () => setActiveIdx((i) => (i - 1 + designs.length) % designs.length);
   const goNext = () => setActiveIdx((i) => (i + 1) % designs.length);
 
-  // Touch swipe — threshold 40px so taps and tiny drifts don't trigger nav.
-  // Same direction semantics as a typical carousel: swipe LEFT = next, RIGHT = prev.
+  // ============ TOUCH DRAG — 1:1 follow + rubber-band + spring/slide-out ============
+  // The active card translates with the finger every frame (translate3d for
+  // GPU compositing → 60fps), with a tanh rubber-band so far swipes feel
+  // resistant instead of flying off. On release: past threshold → slide the
+  // card out in the swipe direction while the cross-fade reveals the next
+  // character; under threshold → spring back to centre. Direction convention
+  // matches Instagram/TikTok (swipe LEFT = next) regardless of RTL.
+  const RUBBER_PX = 220;     // tanh asymptote — max visual displacement
+  const SWIPE_THRESHOLD = 40;
+  const SLIDE_OUT_PX = 420;
+  const RETURN_TIMING = `transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease`;
+
+  const prefersReducedMotion = typeof window !== `undefined` &&
+    window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
+
   const onTouchStart = (e) => {
     if (!e.touches.length) return;
-    touchStartXRef.current = e.touches[0].clientX;
+    dragStartXRef.current = e.touches[0].clientX;
+    draggingRef.current = true;
     setIsPaused(true);
+    if (prefersReducedMotion) return;
+    // Kill the CSS transition on the active card so the touchmove transform
+    // tracks the finger 1:1 (no easing lag).
+    const node = activeCardRef.current;
+    if (node) node.style.transition = `none`;
   };
+
+  const onTouchMove = (e) => {
+    if (!draggingRef.current || prefersReducedMotion) return;
+    if (dragStartXRef.current == null || !e.touches.length) return;
+    const dx = e.touches[0].clientX - dragStartXRef.current;
+    // Rubber-band: smoothly soften the displacement as |dx| grows — at small
+    // values it's near-linear (1:1 with finger), at large values it asymptotes
+    // to ±RUBBER_PX so the card never flies away with the finger.
+    const eased = RUBBER_PX * Math.tanh(dx / RUBBER_PX);
+    const node = activeCardRef.current;
+    if (node) node.style.transform = `translate3d(${eased}px, 0, 0)`;
+  };
+
   const onTouchEnd = (e) => {
-    const startX = touchStartXRef.current;
-    touchStartXRef.current = null;
+    if (!draggingRef.current) { setIsPaused(false); return; }
+    draggingRef.current = false;
     setIsPaused(false);
-    if (startX == null || !e.changedTouches.length) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) < 40) return;
-    if (dx < 0) goNext(); else goPrev();
+
+    const startX = dragStartXRef.current;
+    dragStartXRef.current = null;
+    if (startX == null) return;
+
+    const endX = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : startX;
+    const dx = endX - startX;
+    const node = activeCardRef.current;
+
+    // Reduced-motion path: just decide swipe vs no-op, no transform animation.
+    if (prefersReducedMotion) {
+      if (node) {
+        node.style.transition = `none`;
+        node.style.transform = `translate3d(0, 0, 0)`;
+      }
+      if (Math.abs(dx) >= SWIPE_THRESHOLD) {
+        if (dx < 0) goNext(); else goPrev();
+      }
+      return;
+    }
+
+    if (!node) return;
+    // Re-enable smooth easing for both the transform and the cross-fade so
+    // the slide-out and the new card's opacity fade overlap naturally.
+    node.style.transition = RETURN_TIMING;
+
+    if (Math.abs(dx) >= SWIPE_THRESHOLD) {
+      // Past threshold — slide the card out and advance immediately. The
+      // outgoing card's opacity transitions 1 → 0 over 0.3s while its
+      // transform finishes over 0.28s, so the two animations overlap.
+      const direction = dx < 0 ? -1 : 1; // -1 = next (slide left), +1 = prev (slide right)
+      const slidNode = node;
+      slidNode.style.transform = `translate3d(${direction * SLIDE_OUT_PX}px, 0, 0)`;
+      if (direction < 0) goNext(); else goPrev();
+      // After the cross-fade + slide-out finish the now-invisible old card
+      // still has the off-screen transform stuck on it. Reset it so it
+      // doesn't appear off-screen when the cycle eventually returns to it.
+      setTimeout(() => {
+        if (!slidNode) return;
+        slidNode.style.transition = `none`;
+        slidNode.style.transform = `translate3d(0, 0, 0)`;
+        // Force reflow so the cleared state lands before the next time this
+        // node becomes active.
+        void slidNode.offsetWidth;
+        slidNode.style.transition = `opacity 0.3s ease`;
+      }, 500);
+    } else {
+      // Under threshold — spring back to centre.
+      node.style.transform = `translate3d(0, 0, 0)`;
+    }
   };
 
   return (
@@ -931,17 +1015,24 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         alignItems: `center`,
         width: `100%`,
       }}>
-      {/* Carousel stack — all cards rendered, cross-fade via opacity. */}
+      {/* Carousel stack — all cards rendered, cross-fade via opacity, active
+          card follows the finger via translate3d during touchmove. */}
       <div
+        ref={stackRef}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onTouchCancel={onTouchEnd}
         style={{
           position: `relative`,
           width: isMobile ? 280 : 360,
           maxWidth: `100%`,
+          // pan-y lets vertical page scrolling pass through, so the user can
+          // scroll the page normally while horizontal gestures are captured
+          // as carousel swipes — no scroll-jank fight between the two.
+          touchAction: `pan-y`,
         }}>
         {designs.map((d, idx) => {
           const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
@@ -952,6 +1043,8 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
           return (
             <div
               key={d.id}
+              ref={isActive ? activeCardRef : null}
+              data-bloom-card=""
               className={isActive ? `` : `bloom-carousel-inactive`}
               aria-hidden={!isActive}
               style={{
@@ -960,7 +1053,9 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 left: 0,
                 right: 0,
                 opacity: isActive ? 1 : 0,
-                transition: `opacity 0.6s ease-in-out`,
+                transform: `translate3d(0, 0, 0)`,
+                willChange: isActive ? `transform, opacity` : `auto`,
+                transition: `opacity 0.3s ease`,
               }}>
               <FloatingProductCard
                 imageUrl={d.mockup_url}
