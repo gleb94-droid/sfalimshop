@@ -6305,7 +6305,7 @@ export default function App() {
         .reveal {
           opacity: 0;
           transform: translateY(36px);
-          transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1), transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
           will-change: opacity, transform;
         }
         .reveal.revealed { opacity: 1; transform: translateY(0); will-change: auto; }
