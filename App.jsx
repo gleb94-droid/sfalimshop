@@ -4703,7 +4703,17 @@ function ParticlesBackground({ homeActive }) {
   return (
     <canvas ref={canvasRef} style={{
       position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-      pointerEvents: 'none', zIndex: 0, opacity: 0.85,
+      pointerEvents: 'none',
+      // Desktop stays at zIndex 0 (unchanged stacking — orbs + lines sit
+      // behind everything as before). Lightweight mobile mode lifts the
+      // canvas to zIndex 2 so the dots sit above page backgrounds (e.g.
+      // PetsPage root's opaque COLORS.bg) and above page content sections
+      // at position:relative; zIndex:1 (PetsPage sections, AboutPage, etc.)
+      // — without competing with Hero/Footer (z:5), sticky bars (z:50),
+      // Nav (z:100), modals (z:1000+) or toasts (z:9999). pointerEvents:
+      // 'none' means the bumped canvas can't intercept taps.
+      zIndex: lightweight ? 2 : 0,
+      opacity: 0.85,
     }} />
   );
 }
