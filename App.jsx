@@ -867,6 +867,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         boxSizing: `border-box`,
       }}>
       <div
+        className="reveal"
         style={{
           display: `inline-block`,
           background: COLORS.accentDim,
@@ -2269,8 +2270,8 @@ function TrackPage({ lang, user }) {
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
-        <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h2>
-        <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
+        <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h2>
+        <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
 
         <AccountSettings lang={lang} />
 
@@ -2283,12 +2284,12 @@ function TrackPage({ lang, user }) {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {(filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).map(order => {
+              {(filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).map((order, idx) => {
                 const si = getStageIndex(order.status);
                 const stage = ORDER_STAGES[si] || ORDER_STAGES[0];
                 const isOpen = selected === order.id;
                 return (
-                  <div key={order.id} style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
+                  <div key={order.id} className="reveal" data-delay={String((idx % 6) + 1)} style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
                     <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div onClick={() => setSelected(isOpen ? null : order.id)} style={{ flex: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div>
@@ -3680,14 +3681,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </button>
               </div>
             )}
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h2>
-            <p style={{ color: COLORS.gray, marginBottom: 20 }}>{t.product.sub}</p>
-            <div style={{ marginBottom: 24 }}>
+            <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h2>
+            <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 20 }}>{t.product.sub}</p>
+            <div className="reveal" data-delay="2" style={{ marginBottom: 24 }}>
               <TrustRow lang={lang} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {products.map((p, idx) => (
-                <div key={p.id} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
+                <div key={p.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
                   style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                     <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
@@ -3714,8 +3715,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         {step === 2 && product && (
           <div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h2>
-            <p style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
+            <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h2>
+            <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
                   <div ref={mockupRef}
@@ -4965,8 +4966,8 @@ function Reviews({ lang }) {
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))", gap: isMobile ? 16 : 24 }}>
-        {reviews.map((r) => (
-          <article key={r.id} className="reveal" aria-label={t.aria} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? "20px 18px" : "26px 24px", display: "flex", flexDirection: "column", gap: 12, transition: "border-color 0.25s, transform 0.25s" }}
+        {reviews.map((r, idx) => (
+          <article key={r.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} aria-label={t.aria} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? "20px 18px" : "26px 24px", display: "flex", flexDirection: "column", gap: 12, transition: "border-color 0.25s, transform 0.25s" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-4px)"; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; }}>
             <ReviewStars rating={r.rating} label={t.aria} />
@@ -6042,21 +6043,65 @@ export default function App() {
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
 
-    // Small delay to let DOM mount after page change
-    const timer = setTimeout(() => {
-      document.querySelectorAll(".reveal:not(.revealed)").forEach(el => observer.observe(el));
+    // Track per-batch fallback timers so we can clear them on cleanup.
+    const batchTimers = new Set();
+
+    // Attach the IntersectionObserver to a batch of newly-discovered
+    // .reveal nodes and ALSO schedule a 1.5s force-reveal so nothing in
+    // this batch can stay invisible — important for async-mounted content
+    // (Supabase-driven BLOOM carousel, reviews, pet cards) that arrives
+    // after the initial DOM scan and might never intersect (e.g. mounted
+    // already above the fold while the user is scrolled down).
+    const trackBatch = (nodes) => {
+      if (!nodes.length) return;
+      nodes.forEach(el => observer.observe(el));
+      const tid = setTimeout(() => {
+        nodes.forEach(el => el.classList.add("revealed"));
+        batchTimers.delete(tid);
+      }, 1500);
+      batchTimers.add(tid);
+    };
+
+    // Initial scan after the page swap finishes mounting.
+    const initialTimer = setTimeout(() => {
+      const initial = Array.from(document.querySelectorAll(".reveal:not(.revealed)"));
+      trackBatch(initial);
     }, 50);
 
-    // Safety net: force-reveal anything still hidden after 1.5s
-    // Prevents the "empty page on refresh" bug when observer fails to fire
+    // Safety net for the very first render: force-reveal anything still
+    // hidden after 1.5s. Backstop for the rare case where the IO never
+    // attaches (very slow scripts, broken page swap, etc).
     const safetyTimer = setTimeout(() => {
       document.querySelectorAll(".reveal:not(.revealed)").forEach(el => el.classList.add("revealed"));
     }, 1500);
 
+    // MutationObserver picks up .reveal nodes added by async data fetches
+    // (e.g. BLOOM character cards from Supabase). Each batch is observed
+    // AND given its own 1.5s force-reveal fallback via trackBatch().
+    const mo = new MutationObserver(mutations => {
+      const found = [];
+      mutations.forEach(m => {
+        m.addedNodes.forEach(node => {
+          if (node.nodeType !== 1) return;
+          if (node.classList && node.classList.contains("reveal") && !node.classList.contains("revealed")) {
+            found.push(node);
+          }
+          if (node.querySelectorAll) {
+            node.querySelectorAll(".reveal:not(.revealed)").forEach(el => found.push(el));
+          }
+        });
+      });
+      if (found.length) trackBatch(found);
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+
     return () => {
-      clearTimeout(timer);
+      clearTimeout(initialTimer);
       clearTimeout(safetyTimer);
+      batchTimers.forEach(tid => clearTimeout(tid));
+      batchTimers.clear();
       observer.disconnect();
+      mo.disconnect();
     };
   }, [page]);
 
@@ -6247,17 +6292,17 @@ export default function App() {
         /* ============ SCROLL REVEAL — fade up on intersection ============ */
         .reveal {
           opacity: 0;
-          transform: translateY(28px);
-          transition: opacity 0.75s cubic-bezier(.2,.6,.2,1), transform 0.75s cubic-bezier(.2,.6,.2,1);
+          transform: translateY(22px);
+          transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
           will-change: opacity, transform;
         }
         .reveal.revealed { opacity: 1; transform: translateY(0); will-change: auto; }
-        .reveal[data-delay="1"] { transition-delay: 0.08s; }
-        .reveal[data-delay="2"] { transition-delay: 0.16s; }
-        .reveal[data-delay="3"] { transition-delay: 0.24s; }
-        .reveal[data-delay="4"] { transition-delay: 0.32s; }
-        .reveal[data-delay="5"] { transition-delay: 0.4s; }
-        .reveal[data-delay="6"] { transition-delay: 0.48s; }
+        .reveal[data-delay="1"] { transition-delay: 0.07s; }
+        .reveal[data-delay="2"] { transition-delay: 0.14s; }
+        .reveal[data-delay="3"] { transition-delay: 0.21s; }
+        .reveal[data-delay="4"] { transition-delay: 0.28s; }
+        .reveal[data-delay="5"] { transition-delay: 0.35s; }
+        .reveal[data-delay="6"] { transition-delay: 0.42s; }
         @media (prefers-reduced-motion: reduce) {
           .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
         }
@@ -6820,18 +6865,19 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
             gap: isMobile ? 12 : 24,
           }}>
             {designs.map((d, i) => (
-              <PetCard
-                key={d.id}
-                design={d}
-                lang={lang}
-                index={i}
-                name={getDesignName(d)}
-                animal={getAnimal(d)}
-                tagline={getTagline(d)}
-                priceFrom={t.priceFrom}
-                onClick={() => openPet(d)}
-                isMobile={isMobile}
-              />
+              <div key={d.id} className="reveal" data-delay={String((i % 6) + 1)}>
+                <PetCard
+                  design={d}
+                  lang={lang}
+                  index={i}
+                  name={getDesignName(d)}
+                  animal={getAnimal(d)}
+                  tagline={getTagline(d)}
+                  priceFrom={t.priceFrom}
+                  onClick={() => openPet(d)}
+                  isMobile={isMobile}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -7743,14 +7789,14 @@ function PoliciesPage({ lang }) {
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 24px 60px", direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
-      <h1 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 42, marginBottom: 8 }}>
+      <h1 className="reveal" style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 42, marginBottom: 8 }}>
         {lang === "he" ? "מדיניות ותקנון" : lang === "ru" ? "Политика и условия" : "Policies & Terms"}
       </h1>
-      <p style={{ color: "#999", fontSize: 15, marginBottom: 32, fontFamily: "'Varela Round',sans-serif" }}>
+      <p className="reveal" data-delay="1" style={{ color: "#999", fontSize: 15, marginBottom: 32, fontFamily: "'Varela Round',sans-serif" }}>
         {BUSINESS_INFO.name[lang]}
       </p>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
+      <div className="reveal" data-delay="2" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
         {POLICY_SECTIONS.map(s => (
           <button key={s.id} onClick={() => goSection(s.id)} style={{ background: activeSection === s.id ? "#FF6B35" : "#1a1a1a", color: activeSection === s.id ? "#fff" : "#999", border: `1px solid ${activeSection === s.id ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
             {s.title[lang]}
@@ -7758,7 +7804,7 @@ function PoliciesPage({ lang }) {
         ))}
       </div>
 
-      <div style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
+      <div className="reveal" data-delay="3" style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
         <h2 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
           {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
         </h2>
@@ -7797,7 +7843,7 @@ function Footer({ lang, setPage }) {
   return (
     <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "48px 24px 24px", marginTop: 60, direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 40 }}>
-        <div>
+        <div className="reveal" data-delay="1">
           <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, marginBottom: 8, letterSpacing: "0.3px" }}>{BUSINESS_INFO.name[lang]}</div>
           <div style={{ color: "#a8a8a8", fontFamily: lang === "he" ? "'Heebo',sans-serif" : "'Playfair Display',serif", fontStyle: lang === "he" ? "normal" : "italic", fontWeight: 400, fontSize: 13, letterSpacing: lang === "he" ? "0.04em" : "0.02em", marginBottom: 14 }}>{BUSINESS_INFO.tagline[lang]}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 18 }}>
@@ -7816,7 +7862,7 @@ function Footer({ lang, setPage }) {
             <div style={{ marginTop: 12, color: "#b0b0b0", fontSize: 11, letterSpacing: "0.03em" }}>{lang === "he" ? "ח.פ." : lang === "ru" ? "Бизнес-ID" : "Business ID"} {BUSINESS_INFO.vatId} {lang === "he" ? "(עוסק פטור)" : lang === "ru" ? "(освобождённый предприниматель)" : "(Exempt Dealer)"}</div>
           </div>
         </div>
-        <div>
+        <div className="reveal" data-delay="2">
           <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
             {lang === "he" ? "מידע משפטי" : lang === "ru" ? "Юр. информация" : "Legal"}
           </div>
@@ -7828,7 +7874,7 @@ function Footer({ lang, setPage }) {
             ))}
           </div>
         </div>
-        <div>
+        <div className="reveal" data-delay="3">
           <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
             {lang === "he" ? "עקבו אחרינו" : lang === "ru" ? "Соцсети" : "Follow Us"}
           </div>
