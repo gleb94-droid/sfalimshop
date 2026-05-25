@@ -728,20 +728,35 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const [isPaused, setIsPaused] = useState(false);
   const touchStartXRef = useRef(null);
 
-  // Image-load-driven reveal for the carousel card. The global .reveal scroll
-  // observer fires when the wrapper enters the viewport, which on slow phones
-  // happens BEFORE the Supabase image loads — so the float-in finished while
-  // the card was still empty and the image then "popped" in. Instead we keep
-  // the card hidden until either:
-  //   (a) onImageLoad fires from one of the FloatingProductCard images, or
-  //   (b) a 2000ms safety timer elapses (never leave the card invisible —
-  //       covers slow connections, image-load failures, etc.).
-  // Idempotent: subsequent setCardRevealed(true) calls during the 5s rotation
-  // are no-ops, so the float only plays once on first mount.
+  // Mount-driven reveal for the carousel card. The previous version waited
+  // for the image to load — but when the browser had it cached, "load" fired
+  // synchronously and React added .is-in before the initial hidden frame ever
+  // painted, so the CSS transition was skipped (the card just appeared).
+  //
+  // Fix: render the wrapper in the hidden state (.bloom-card-reveal without
+  // .is-in), then flip .is-in after a guaranteed paint of the hidden state.
+  // Double requestAnimationFrame is the canonical "wait for next layout +
+  // paint" pattern — the first rAF fires before the upcoming paint, the
+  // second fires after it. By the time we setCardRevealed(true), the
+  // browser has committed the opacity:0/translateY(36px) starting frame to
+  // the screen, so the transition reliably plays on every device and every
+  // load (cached or not). The float no longer depends on image timing at all.
+  //
+  // SAFETY: belt-and-braces 1000ms timer in case rAF never fires (background
+  // tab, scheduler oddities). The card is also forced visible by the
+  // @media (prefers-reduced-motion: reduce) CSS override.
   const [cardRevealed, setCardRevealed] = useState(false);
   useEffect(() => {
-    const tid = setTimeout(() => setCardRevealed(true), 2000);
-    return () => clearTimeout(tid);
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setCardRevealed(true));
+    });
+    const safety = setTimeout(() => setCardRevealed(true), 1000);
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+      clearTimeout(safety);
+    };
   }, []);
 
   // Refs mirror the latest state so the click handler can read activeIdx/designs
@@ -955,7 +970,6 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 status={statusByLang[lang] || statusByLang.he}
                 buttonText={buttonByLang[lang] || buttonByLang.he}
                 onAddToCart={handleViewActiveCharacter}
-                onImageLoad={() => setCardRevealed(true)}
               />
             </div>
           );
@@ -1646,13 +1660,21 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
     if (onLoad) onLoad(e);
   };
 
-  const mergedStyle = {
+  const placeholderStyle = {
     ...style,
     backgroundColor: loaded ? (style && style.backgroundColor) : "#222",
   };
+  // Fade the <img> in once it actually loads — the gray #222 placeholder
+  // background stays visible underneath until the bitmap is ready, so the
+  // character image materialises softly instead of popping.
+  const imgStyle = {
+    ...placeholderStyle,
+    opacity: loaded ? 1 : 0,
+    transition: `opacity 0.5s ease`,
+  };
 
   if (failed) {
-    return <div {...rest} role="img" aria-label={alt} style={mergedStyle} />;
+    return <div {...rest} role="img" aria-label={alt} style={placeholderStyle} />;
   }
 
   return (
@@ -1660,7 +1682,7 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
       {...rest}
       src={finalSrc}
       alt={alt}
-      style={mergedStyle}
+      style={imgStyle}
       onError={handleError}
       onLoad={handleLoad}
     />
