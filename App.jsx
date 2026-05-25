@@ -487,7 +487,8 @@ const FloatingProductCardComponent = ({
   enableTilt = true,
   enableMobileTilt = false,
   mobileTiltSensitivity = 5,
-  onAddToCart
+  onAddToCart,
+  onImageLoad
 }) => {
   const wrapRef = React.useRef(null);
   const cardRef = React.useRef(null);
@@ -678,7 +679,8 @@ const FloatingProductCardComponent = ({
               className="fpc-avatar"
               src={imageUrl}
               alt={name || `מוצר`}
-              loading="lazy" />
+              loading="lazy"
+              onLoad={onImageLoad} />
           </div>
           <div className="fpc-shine" />
           <div className="fpc-glare" />
@@ -725,6 +727,22 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartXRef = useRef(null);
+
+  // Image-load-driven reveal for the carousel card. The global .reveal scroll
+  // observer fires when the wrapper enters the viewport, which on slow phones
+  // happens BEFORE the Supabase image loads — so the float-in finished while
+  // the card was still empty and the image then "popped" in. Instead we keep
+  // the card hidden until either:
+  //   (a) onImageLoad fires from one of the FloatingProductCard images, or
+  //   (b) a 2000ms safety timer elapses (never leave the card invisible —
+  //       covers slow connections, image-load failures, etc.).
+  // Idempotent: subsequent setCardRevealed(true) calls during the 5s rotation
+  // are no-ops, so the float only plays once on first mount.
+  const [cardRevealed, setCardRevealed] = useState(false);
+  useEffect(() => {
+    const tid = setTimeout(() => setCardRevealed(true), 2000);
+    return () => clearTimeout(tid);
+  }, []);
 
   // Refs mirror the latest state so the click handler can read activeIdx/designs
   // at click time — not at render time. Without this, each card captures its own
@@ -885,12 +903,14 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         {`✦ ${eyebrowByLang[lang] || eyebrowByLang.he} ✦`}
       </div>
 
-      {/* Reveal wrapper for the entire showcase (carousel + dots). Lives
-          OUTSIDE FloatingProductCard's tilt transform so the inner card's
-          holographic tilt/auto-animation isn't disturbed; .reveal animates
-          this wrapper's translateY only on first mount. data-delay="2"
-          stages it just after the eyebrow badge above. */}
-      <div className="reveal" data-delay="2" style={{
+      {/* Image-load-driven reveal wrapper for the entire showcase (carousel +
+          dots). Lives OUTSIDE FloatingProductCard's tilt transform so the
+          inner card's holographic tilt/auto-animation isn't disturbed.
+          Uses the local .bloom-card-reveal class (NOT the global .reveal
+          observer) so the float-in waits for the image to load instead of
+          for the wrapper to enter the viewport — fixes the "pop in after
+          floating" bug on slow phones. */}
+      <div className={`bloom-card-reveal${cardRevealed ? ` is-in` : ``}`} style={{
         display: `flex`,
         flexDirection: `column`,
         alignItems: `center`,
@@ -935,6 +955,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 status={statusByLang[lang] || statusByLang.he}
                 buttonText={buttonByLang[lang] || buttonByLang.he}
                 onAddToCart={handleViewActiveCharacter}
+                onImageLoad={() => setCardRevealed(true)}
               />
             </div>
           );
@@ -6317,6 +6338,19 @@ export default function App() {
         .reveal[data-delay="6"] { transition-delay: 0.60s; }
         @media (prefers-reduced-motion: reduce) {
           .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+        }
+
+        /* Image-load-driven reveal for the home BLOOM carousel card.
+           Same visual feel as .reveal but flipped imperatively by React
+           when the SmartImage's onLoad fires (or the 2s safety timer). */
+        .bloom-card-reveal {
+          opacity: 0;
+          transform: translateY(36px);
+          transition: opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1), transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .bloom-card-reveal.is-in { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) {
+          .bloom-card-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
         }
         .trust-badge {
           opacity: 0;
