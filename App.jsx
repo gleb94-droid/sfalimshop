@@ -5117,9 +5117,12 @@ function Reviews({ lang }) {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))", gap: isMobile ? 16 : 24 }}>
         {reviews.map((r, idx) => (
-          <article key={r.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} aria-label={t.aria} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? "20px 18px" : "26px 24px", display: "flex", flexDirection: "column", gap: 12, transition: "border-color 0.25s, transform 0.25s" }}
+          <article key={r.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} aria-label={t.aria} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? "20px 18px" : "26px 24px", display: "flex", flexDirection: "column", gap: 12, transition: "border-color 0.25s, transform 0.18s cubic-bezier(.2,.6,.2,1)" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-4px)"; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; }}>
+            onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; }}
+            onTouchStart={e => { e.currentTarget.style.transform = "scale(0.97)"; }}
+            onTouchEnd={e => { e.currentTarget.style.transform = "translateY(0)"; }}
+            onTouchCancel={e => { e.currentTarget.style.transform = "translateY(0)"; }}>
             <ReviewStars rating={r.rating} label={t.aria} />
             <blockquote style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: isMobile ? 16 : 18, lineHeight: 1.55, margin: 0 }}>
               “{body(r)}”
@@ -5214,9 +5217,12 @@ function Hero({ setPage, lang }) {
       <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 768 ? 820 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
           <div key={p.id} onClick={() => setPage("order")} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
-            style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.3s, box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
+            style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+            onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+            onTouchStart={e => { e.currentTarget.style.transform = "scale(0.97)"; }}
+            onTouchEnd={e => { e.currentTarget.style.transform = "translateY(0)"; }}
+            onTouchCancel={e => { e.currentTarget.style.transform = "translateY(0)"; }}>
             <ProductBadges product={p} lang={lang} />
             <div style={{ width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <SmartImage src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
@@ -5355,12 +5361,12 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
 
     {/* Mobile dropdown */}
     {mobileMenu && (
-      <div style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
         {["home", "order", "pets", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "left", width: "100%" }}>{t.nav[p]}</button>
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
-        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.track}</button>}
-        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "left", width: "100%" }}>{t.nav.admin}</button>}
+        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
+        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
         {user
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
@@ -7194,6 +7200,9 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onTouchStart={e => { e.currentTarget.style.transform = "scale(0.97)"; }}
+      onTouchEnd={e => { e.currentTarget.style.transform = "translateY(0)"; }}
+      onTouchCancel={e => { e.currentTarget.style.transform = "translateY(0)"; }}
       style={{
         cursor: "pointer",
         background: "transparent",
@@ -7201,7 +7210,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
         borderRadius: 14,
         overflow: "hidden",
         clipPath,
-        transition: "clip-path 0.4s cubic-bezier(.2,.6,.2,1), transform 0.35s cubic-bezier(.2,.6,.2,1), box-shadow 0.35s cubic-bezier(.2,.6,.2,1), border-color 0.35s",
+        transition: "clip-path 0.4s cubic-bezier(.2,.6,.2,1), transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.35s cubic-bezier(.2,.6,.2,1), border-color 0.35s",
         transform: hovered ? "translateY(-6px)" : "translateY(0)",
         boxShadow: hovered ? "0 18px 48px rgba(0,0,0,0.4), 0 0 30px rgba(255,107,53,0.15)" : "none",
       }}>
@@ -7554,7 +7563,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                   style={{
                     position: "absolute",
                     top: "50%",
-                    left: isMobile ? 8 : 12,
+                    insetInlineStart: isMobile ? 8 : 12,
                     transform: "translateY(-50%)",
                     width: isMobile ? 52 : 44,
                     height: isMobile ? 52 : 44,
@@ -7573,7 +7582,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                     transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
                   }}>
                   <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="15 18 9 12 15 6" />
+                    <polyline points={lang === "he" ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
                   </svg>
                 </button>
                 <button
@@ -7584,7 +7593,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                   style={{
                     position: "absolute",
                     top: "50%",
-                    right: isMobile ? 8 : 12,
+                    insetInlineEnd: isMobile ? 8 : 12,
                     transform: "translateY(-50%)",
                     width: isMobile ? 52 : 44,
                     height: isMobile ? 52 : 44,
@@ -7603,7 +7612,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                     transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
                   }}>
                   <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="9 18 15 12 9 6" />
+                    <polyline points={lang === "he" ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
                   </svg>
                 </button>
 
@@ -7863,7 +7872,7 @@ function MaintenancePage({ lang, setLang, setPage }) {
   const m = messages[lang] || messages.he;
   return (
     <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: 24, zIndex: 10, direction: lang === "he" ? "rtl" : "ltr" }}>
-      <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 8 }}>
+      <div style={{ position: "absolute", top: 20, insetInlineEnd: 20, display: "flex", gap: 8 }}>
         {["he", "en", "ru"].map(l => (
           <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? "#FF6B35" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
             {l.toUpperCase()}
