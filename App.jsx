@@ -4543,9 +4543,18 @@ function MagneticButton({ children, strength = 0.3, radius = 28, style, classNam
 function ParticlesBackground() {
   const canvasRef = useRef(null);
 
+  // Phone = touch device with a NARROW screen. Tablets (touch but width
+  // >= 768) and desktop (hover/fine pointer) keep the full effect with
+  // sprite-cached orbs + 30fps cap. Phones alone bailed because the
+  // optimised loop still triggered the reload loop there.
+  const isPhone = typeof window !== "undefined" &&
+    (window.matchMedia("(hover: none)").matches || window.matchMedia("(pointer: coarse)").matches) &&
+    window.innerWidth < 768;
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (isPhone) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -4691,7 +4700,9 @@ function ParticlesBackground() {
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
     };
-  }, []);
+  }, [isPhone]);
+
+  if (isPhone) return null;
 
   return (
     <canvas ref={canvasRef} style={{
@@ -6377,9 +6388,17 @@ export default function App() {
 function PawPrintsBackground() {
   const canvasRef = useRef(null);
 
+  // Phone = touch device with a NARROW screen. Mirrors the gate in
+  // ParticlesBackground so the BLOOM page doesn't run two heavy canvases
+  // on phones; tablets (touch, width >= 768) and desktop keep the paws.
+  const isPhone = typeof window !== "undefined" &&
+    (window.matchMedia("(hover: none)").matches || window.matchMedia("(pointer: coarse)").matches) &&
+    window.innerWidth < 768;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (isPhone) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -6459,7 +6478,9 @@ function PawPrintsBackground() {
     animId = requestAnimationFrame(draw);
 
     return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
-  }, []);
+  }, [isPhone]);
+
+  if (isPhone) return null;
 
   return (
     <canvas ref={canvasRef} style={{
