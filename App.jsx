@@ -6292,17 +6292,17 @@ export default function App() {
         /* ============ SCROLL REVEAL — fade up on intersection ============ */
         .reveal {
           opacity: 0;
-          transform: translateY(22px);
-          transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          transform: translateY(36px);
+          transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
           will-change: opacity, transform;
         }
         .reveal.revealed { opacity: 1; transform: translateY(0); will-change: auto; }
-        .reveal[data-delay="1"] { transition-delay: 0.07s; }
-        .reveal[data-delay="2"] { transition-delay: 0.14s; }
-        .reveal[data-delay="3"] { transition-delay: 0.21s; }
-        .reveal[data-delay="4"] { transition-delay: 0.28s; }
-        .reveal[data-delay="5"] { transition-delay: 0.35s; }
-        .reveal[data-delay="6"] { transition-delay: 0.42s; }
+        .reveal[data-delay="1"] { transition-delay: 0.10s; }
+        .reveal[data-delay="2"] { transition-delay: 0.20s; }
+        .reveal[data-delay="3"] { transition-delay: 0.30s; }
+        .reveal[data-delay="4"] { transition-delay: 0.40s; }
+        .reveal[data-delay="5"] { transition-delay: 0.50s; }
+        .reveal[data-delay="6"] { transition-delay: 0.60s; }
         @media (prefers-reduced-motion: reduce) {
           .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
         }
