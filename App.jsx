@@ -2729,22 +2729,22 @@ function AdminPage({ lang }) {
                   <div key={order.id}
                     style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "16px 20px", transition: "border-color 0.2s" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <div onClick={() => setSelected(isOpen ? null : order.id)} style={{ flex: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                      <div onClick={() => setSelected(isOpen ? null : order.id)} style={{ flex: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
                           <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColors[order.status] || COLORS.accent, boxShadow: `0 0 8px ${statusColors[order.status] || COLORS.accent}`, flexShrink: 0 }} />
-                          <div>
+                          <div style={{ minWidth: 0 }}>
                             <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginLeft: 8, marginRight: 8, background: "rgba(255,107,53,0.15)", padding: "2px 10px", borderRadius: 10, letterSpacing: "0.05em" }}>{group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13 }}>{isMulti ? group.map(o => `${localizeProduct(o.product, lang)} ×${o.quantity}`).join(" · ") : `${localizeProduct(order.product, lang)} · ${localizeVariant(order.variant, lang)} · ×${order.quantity}`}</div>
                           </div>
                         </div>
-                        <div style={{ textAlign: "right" }}>
+                        <div style={{ textAlign: "end" }}>
                           <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{groupTotal}</div>
                           <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 4, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 6px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
                           <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
                           {order.completed_at && <div style={{ color: COLORS.success, fontSize: 11, marginTop: 2 }}>✓ {timeBetween(order.created_at, order.completed_at, lang)}</div>}
                         </div>
                       </div>
-                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(group.map(o => o.id)); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 13, marginLeft: 12, flexShrink: 0, fontWeight: 700 }}>×</button>
+                      <button onClick={e => { e.stopPropagation(); setDeleteConfirm(group.map(o => o.id)); }} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: "#ef4444", borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 13, marginInlineStart: 12, flexShrink: 0, fontWeight: 700 }}>×</button>
                     </div>
 
                     {isOpen && (
@@ -3153,6 +3153,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [leaveWarning, setLeaveWarning] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  // Below 360px the 5-step labels run out of room and clip; track this
+  // separately so we can hide the labels entirely on tiny screens while
+  // keeping the numbered circles.
+  const [isVeryNarrow, setIsVeryNarrow] = useState(window.innerWidth < 360);
   const fileRef = useRef();
   const mockupRef = useRef();
   const mockupImageRef = useRef();
@@ -3161,7 +3165,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const touchHandlersRef = useRef({});
 
   useEffect(() => {
-    const handle = () => setIsMobile(window.innerWidth < 768);
+    const handle = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsVeryNarrow(window.innerWidth < 360);
+    };
     window.addEventListener('resize', handle);
     return () => window.removeEventListener('resize', handle);
   }, []);
@@ -3753,9 +3760,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       <div style={{ maxWidth: step === 3 ? 1100 : 700, margin: "0 auto", padding: "24px 24px 60px", transition: "max-width 0.25s ease" }}>
         <div style={{ display: "flex", marginBottom: 40 }}>
           {t.steps.map((s, i) => (
-            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
               <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: step >= i + 1 ? COLORS.accent : COLORS.bgCard, border: `2px solid ${step >= i + 1 ? COLORS.accent : COLORS.border}`, color: step >= i + 1 ? "#fff" : COLORS.gray, fontSize: 13, fontWeight: 600 }}>{step > i + 1 ? "✓" : i + 1}</div>
-              <div style={{ fontSize: 11, color: step === i + 1 ? COLORS.accent : COLORS.gray, marginTop: 6 }}>{s}</div>
+              {!isVeryNarrow && <div style={{ fontSize: isMobile ? 10 : 11, color: step === i + 1 ? COLORS.accent : COLORS.gray, marginTop: 6, textAlign: "center", lineHeight: 1.25 }}>{s}</div>}
             </div>
           ))}
         </div>
@@ -4204,12 +4211,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                 )}
               </div>
-              <div style={{ display: "flex", gap: 10 }}>
-                <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <div style={{ flex: "1 1 140px", minWidth: 140 }}>
                   <label style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
                   <input type="text" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: "1 1 140px", minWidth: 140 }}>
                   <label style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
                   <input type="text" value={form.postalCode} maxLength={7} onChange={e => setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") }))} placeholder="1234567" style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
