@@ -953,7 +953,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 imageUrl={d.mockup_shirt_url || d.mockup_url}
                 name={displayName}
                 description={description}
-                price={`₪${Number(d.price_shirt) || 129}`}
+                price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
                 status={statusByLang[lang] || statusByLang.he}
                 buttonText={buttonByLang[lang] || buttonByLang.he}
                 onAddToCart={handleViewActiveCharacter}
@@ -4313,9 +4313,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 if (paymentProcessing) return;
                 setPaymentProcessing(true);
                 try {
+                  // items_summary is a short free-text description on the
+                  // Tranzila page (60 chars max per the edge function), not a
+                  // line-items array. Build something humanish like
+                  // "BLOOM Luna shirt · Mug · Sticker (3 items)".
+                  const titles = cart.map(it => it?.title || it?.characterName || ``).filter(Boolean);
+                  const itemsSummary = (titles.slice(0, 2).join(` · `) || `Sfalim order`) + (cart.length > 2 ? ` (+${cart.length - 2})` : ``);
                   const { data, error } = await supabase.functions.invoke(`create-payment`, {
                     body: {
-                      order_id: pendingOrderGroupId,
+                      // The deployed edge function accepts either order_group
+                      // (text key shared by all rows in this checkout) or
+                      // order_id (uuid). pendingOrderGroupId is the text key.
+                      order_group: pendingOrderGroupId,
                       amount: pendingTotal,
                       currency: `ILS`,
                       customer: {
@@ -4323,10 +4332,22 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         email: form.email,
                         phone: `${form.phonePrefix}-${form.phoneNumber}`,
                       },
-                      items_summary: cart.map(it => ({ id: it.id, title: it.title, qty: it.qty, price: it.unitPrice })),
+                      items_summary: itemsSummary,
                     },
                   });
-                  if (error) throw error;
+                  // Supabase client returns 503 errors as FunctionsHttpError;
+                  // we want to land back on the existing "coming soon" UX
+                  // (which is graceful, since the order rows are already
+                  // saved and emails already sent) instead of an alert.
+                  if (error) {
+                    const code = String(error.message || ``).toLowerCase();
+                    if (code.includes(`payments_disabled`) || code.includes(`503`)) {
+                      setPaymentProcessing(false);
+                      setShowPaymentSoonModal(true);
+                      return;
+                    }
+                    throw error;
+                  }
                   if (data && data.redirect_url) {
                     window.location.href = data.redirect_url;
                     return;
@@ -6760,6 +6781,11 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null); // currently opened character in modal
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
+  // Browse filters. species: `all`|`dog`|`cat`. query: substring matched
+  // case-insensitively against names + breed_he/en/ru + breed_aliases.
+  // Legacy rows (species IS NULL) only show under the All tab.
+  const [speciesFilter, setSpeciesFilter] = useState(`all`);
+  const [breedQuery, setBreedQuery] = useState(``);
   const pHero = useParallax(0.18);
   const pOrb1 = useParallax(0.4);
   const pOrb2 = useParallax(-0.3);
@@ -6907,24 +6933,54 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
     window.history.replaceState({ page: "pets" }, "", "#pets");
   };
 
-  // Step left/right through the BLOOM collection while the modal is open.
+  // Derived browse list. The grid and the modal's prev/next walk this list,
+  // so when the user has filtered to "Cats" the arrows step through cats only.
+  // If `selected` is set but falls outside the filtered list (e.g. came in
+  // via deep link with a filter on), we still let it through to the modal —
+  // the user opened it intentionally. The arrows then walk filteredForNav,
+  // which falls back to all designs when the selected character isn't in the
+  // filtered view so navigation never dead-ends.
+  const filtered = React.useMemo(() => {
+    let list = designs;
+    if (speciesFilter !== `all`) list = list.filter(d => d.species === speciesFilter);
+    const q = breedQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter(d => {
+        const hay = [
+          d.name_he, d.name_en, d.name_ru,
+          d.breed_he, d.breed_en, d.breed_ru,
+          d.breed_aliases,
+        ].filter(Boolean).join(` `).toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    return list;
+  }, [designs, speciesFilter, breedQuery]);
+
+  const filteredForNav = filtered.length > 0 && (!selected || filtered.some(d => d.id === selected.id))
+    ? filtered
+    : designs;
+
+  // Step left/right through the (filtered) BLOOM list while the modal is open.
   // dir = +1 → next, -1 → previous; index wraps with modulo so it loops forever.
   // We use replaceState (not pushState) so the back button still returns to /pets
   // rather than walking through every design the user previewed.
   const goPet = (dir) => {
-    if (!selected || !designs.length) return;
-    const idx = designs.findIndex(d => d.id === selected.id);
+    const list = filteredForNav;
+    if (!selected || !list.length) return;
+    const idx = list.findIndex(d => d.id === selected.id);
     if (idx < 0) return;
-    const len = designs.length;
+    const len = list.length;
     const nextIdx = ((idx + dir) % len + len) % len;
-    const d = designs[nextIdx];
+    const d = list[nextIdx];
     setSelected(d);
     const slug = slugify(d);
     if (slug) window.history.replaceState({ page: "pets" }, "", `#pets/${slug}`);
   };
 
-  // Position of the currently-open design — passed to the modal for the "3 / 12" counter.
-  const selectedIdx = selected ? designs.findIndex(d => d.id === selected.id) : -1;
+  // Position of the currently-open design within the (filtered) list — passed
+  // to the modal for the "3 / 12" counter so it matches the arrow navigation.
+  const selectedIdx = selected ? filteredForNav.findIndex(d => d.id === selected.id) : -1;
 
   // Translations
   const t = {
@@ -6955,6 +7011,12 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       shareBtn: "שתפו",
       shareCopied: "הקישור הועתק!",
       shareWhatsApp: "שתפו בוואטסאפ",
+      tabAll: "הכל",
+      tabDogs: "כלבים",
+      tabCats: "חתולים",
+      searchPlaceholder: "חיפוש לפי גזע (לדוגמה: קורגי, פיטבול)",
+      noResults: "לא נמצאו דמויות שתואמות לחיפוש שלך",
+      clearFilters: "נקה סינון",
     },
     en: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -6983,6 +7045,12 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       shareBtn: "Share",
       shareCopied: "Link copied!",
       shareWhatsApp: "Share on WhatsApp",
+      tabAll: "All",
+      tabDogs: "Dogs",
+      tabCats: "Cats",
+      searchPlaceholder: "Search by breed (e.g. corgi, pitbull)",
+      noResults: "No characters match your search",
+      clearFilters: "Clear filters",
     },
     ru: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -7011,6 +7079,12 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       shareBtn: "Поделиться",
       shareCopied: "Ссылка скопирована!",
       shareWhatsApp: "Поделиться в WhatsApp",
+      tabAll: "Все",
+      tabDogs: "Собаки",
+      tabCats: "Кошки",
+      searchPlaceholder: "Поиск по породе (напр. корги, питбуль)",
+      noResults: "По вашему запросу ничего не найдено",
+      clearFilters: "Сбросить фильтры",
     },
   }[lang] || {};
 
@@ -7066,16 +7140,89 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
 
       {/* ===== COLLECTION GRID ===== */}
       <section style={{ position: "relative", zIndex: 1, padding: isMobile ? "20px 16px 80px" : "40px 40px 120px", maxWidth: 1400, margin: "0 auto" }}>
-        <div className="reveal" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40, flexWrap: "wrap", gap: 12 }}>
+        <div className="reveal" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
           <div>
             <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", marginBottom: 8 }}>
               {t.collectionEyebrow}
             </div>
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: 0 }}>
-              {t.collectionCount ? t.collectionCount(designs.length) : ``}
+              {t.collectionCount ? t.collectionCount(filtered.length) : ``}
             </h2>
           </div>
         </div>
+
+        {/* Browse filters: dog/cat tabs + breed search. Hidden while loading
+            or when the collection is empty (no point showing filters over
+            zero results from a fetch failure). The tabs always show the
+            three options — counts beside them so the user knows what to
+            expect before clicking. */}
+        {!loading && designs.length > 0 && (
+          <div className="reveal" style={{ display: "flex", flexDirection: isMobile ? `column` : `row`, alignItems: isMobile ? `stretch` : `center`, gap: 12, marginBottom: 32, flexWrap: "wrap" }}>
+            <div role="tablist" aria-label={t.collectionEyebrow} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {[
+                { id: `all`, label: t.tabAll, count: designs.length },
+                { id: `dog`, label: t.tabDogs, count: designs.filter(d => d.species === `dog`).length },
+                { id: `cat`, label: t.tabCats, count: designs.filter(d => d.species === `cat`).length },
+              ].map(tab => {
+                const active = speciesFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setSpeciesFilter(tab.id)}
+                    style={{
+                      background: active ? COLORS.accent : `transparent`,
+                      color: active ? `#fff` : COLORS.gray,
+                      border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+                      borderRadius: 999,
+                      padding: `8px 16px`,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      fontFamily: `'Varela Round',sans-serif`,
+                      cursor: `pointer`,
+                      transition: `background 0.2s, color 0.2s, border-color 0.2s`,
+                    }}>
+                    {tab.label} <span style={{ opacity: 0.7, marginInlineStart: 4 }}>{tab.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ flex: 1, minWidth: isMobile ? `auto` : 240, position: `relative` }}>
+              <input
+                type="search"
+                value={breedQuery}
+                onChange={(e) => setBreedQuery(e.target.value)}
+                placeholder={t.searchPlaceholder}
+                aria-label={t.searchPlaceholder}
+                style={{
+                  width: `100%`,
+                  background: COLORS.bgCard,
+                  color: COLORS.white,
+                  border: `1px solid ${COLORS.border}`,
+                  borderRadius: 8,
+                  padding: `10px 14px`,
+                  fontSize: 14,
+                  fontFamily: `'Varela Round',sans-serif`,
+                  outline: `none`,
+                  boxSizing: `border-box`,
+                  direction: isRTL ? `rtl` : `ltr`,
+                }}
+                onFocus={e => { e.target.style.borderColor = COLORS.accent; }}
+                onBlur={e => { e.target.style.borderColor = COLORS.border; }}
+              />
+            </div>
+            {(speciesFilter !== `all` || breedQuery) && (
+              <button
+                type="button"
+                onClick={() => { setSpeciesFilter(`all`); setBreedQuery(``); }}
+                style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `8px 14px`, fontSize: 12, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>
+                {t.clearFilters}
+              </button>
+            )}
+          </div>
+        )}
 
         {loading && (
           <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Varela Round',sans-serif" }}>
@@ -7090,13 +7237,19 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
           </div>
         )}
 
-        {!loading && designs.length > 0 && (
+        {!loading && designs.length > 0 && filtered.length === 0 && (
+          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18 }}>
+            {t.noResults}
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
           <div style={{
             display: "grid",
             gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(280px, 1fr))",
             gap: isMobile ? 12 : 24,
           }}>
-            {designs.map((d, i) => (
+            {filtered.map((d, i) => (
               <div key={d.id} className="reveal" data-delay={String((i % 6) + 1)}>
                 <PetCard
                   design={d}
@@ -7157,7 +7310,7 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
           onPrev={() => goPet(-1)}
           onNext={() => goPet(1)}
           currentIndex={selectedIdx + 1}
-          total={designs.length}
+          total={filteredForNav.length}
           shareSlug={slugify(selected)}
           onShareToast={onShareToast}
         />
@@ -7432,12 +7585,14 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   ];
   const SHIRT_SIZES = ["s", "m", "l", "xl", "xxl"];
 
-  // Live shirt price comes straight from the PRODUCTS variant prices,
-  // so it updates whenever the type or size changes.
+  // BLOOM shirt prices come from the design's own price columns, not the
+  // custom-upload PRODUCTS variants — basic and oversized are flat per row,
+  // shared across all sizes. Falls back to legacy design.price_shirt if a
+  // (typically pre-migration) row is missing the new column.
   const shirtProductId = shirtType === "oversized" ? "oversized" : "tshirt";
-  const shirtProductDef = PRODUCTS(LANGS[lang]).find(p => p.id === shirtProductId);
-  const shirtVariantDef = shirtProductDef ? shirtProductDef.variants.find(v => v.id === shirtSize) : null;
-  const shirtPrice = shirtVariantDef ? shirtVariantDef.price : (design.price_shirt || 0);
+  const shirtPrice = shirtType === "oversized"
+    ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
+    : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
 
   // Add this BLOOM character to the order cart with its design already fixed.
   // Shirt carries the chosen type, size and color; mug/sticker keep defaults.
