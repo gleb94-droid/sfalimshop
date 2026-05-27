@@ -786,7 +786,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     if (document.getElementById(STYLE_ID)) return;
     const styleEl = document.createElement(`style`);
     styleEl.id = STYLE_ID;
-    styleEl.textContent = `.bloom-carousel-inactive, .bloom-carousel-inactive * { pointer-events: none !important; }`;
+    styleEl.textContent = `.bloom-carousel-inactive, .bloom-carousel-inactive * { pointer-events: none !important; } .bloom-carousel-inactive, .bloom-carousel-inactive * { animation-play-state: paused !important; }`;
     document.head.appendChild(styleEl);
   }, []);
 
@@ -981,6 +981,10 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 right: 0,
                 opacity: isActive ? 1 : 0,
                 transition: `opacity 0.3s ease`,
+                transform: `translateZ(0)`,
+                backfaceVisibility: `hidden`,
+                WebkitBackfaceVisibility: `hidden`,
+                willChange: `opacity`,
               }}>
               <FloatingProductCard
                 imageUrl={d.mockup_url}
