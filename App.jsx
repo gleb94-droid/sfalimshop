@@ -6436,6 +6436,14 @@ export default function App() {
         @media (prefers-reduced-motion: reduce) {
           .bloom-card-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
         }
+
+        /* Shared by PetModal arrows and the home BLOOM carousel arrows.
+           Defined globally so the hover glow / press scale / focus ring work
+           on the home page too, not only while PetModal is mounted. */
+        .bloom-nav-btn:hover { background: rgba(0,0,0,0.7) !important; color: #fff !important; transform: translateY(-50%) scale(1.15) !important; box-shadow: 0 0 24px rgba(255,107,53,0.5); }
+        .bloom-nav-btn:focus-visible { outline: 2px solid #FF6B35; outline-offset: 2px; }
+        .bloom-nav-btn:active { transform: translateY(-50%) scale(1.05) !important; }
+
         .trust-badge {
           opacity: 0;
           animation: badgeFadeIn 0.5s cubic-bezier(.2,.6,.2,1) forwards;
@@ -7787,9 +7795,6 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
         @keyframes petModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes petModalSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes petZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .bloom-nav-btn:hover { background: rgba(0,0,0,0.7) !important; color: #fff !important; transform: translateY(-50%) scale(1.15) !important; box-shadow: 0 0 24px rgba(255,107,53,0.5); }
-        .bloom-nav-btn:focus-visible { outline: 2px solid #FF6B35; outline-offset: 2px; }
-        .bloom-nav-btn:active { transform: translateY(-50%) scale(1.05) !important; }
       `}</style>
     </div>
   );
