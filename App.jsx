@@ -946,8 +946,11 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 opacity: isActive ? 1 : 0,
                 transition: `opacity 0.3s ease`,
               }}>
+              {/* mockup_shirt_url is the new product-on-shirt photo; it
+                  rolls out gradually per character. Fall back to mockup_url
+                  (clean/hero image) until each row has its shirt mockup. */}
               <FloatingProductCard
-                imageUrl={d.mockup_url}
+                imageUrl={d.mockup_shirt_url || d.mockup_url}
                 name={displayName}
                 description={description}
                 price={`₪${Number(d.price_shirt) || 129}`}
@@ -1113,6 +1116,21 @@ const MUG_STUDIO_ENABLED = false;
 // translates saved sticker product names across languages.
 const CUSTOM_STICKERS_ENABLED = false;
 
+// 💳 PAYMENTS — when false, the "Pay" button shows the existing "coming soon"
+// modal (order rows are already inserted in step 3, emails already sent, so
+// the experience stays graceful). When true, the same button calls the
+// `create-payment` Supabase edge function with { order_id, amount, currency,
+// customer, items_summary } and redirects to the Tranzila page it returns.
+// Flip to true ONLY after: (a) `create-payment` is deployed, (b) supplier
+// number is set in env `TRANZILA_SUPPLIER`, (c) `tranzila-webhook` callback
+// flips orders.payment_status correctly in a sandbox test.
+const PAYMENTS_ENABLED = false;
+
+// Versioned key for the in-browser cart mirror. Bump the suffix if the cart
+// item shape changes in a non-backwards-compatible way, so stale shapes
+// don't trip up the new code on a returning visitor.
+const CART_STORAGE_KEY = `sxp_cart_v1`;
+
 const IL_PREFIXES = [
   { value: "050" }, { value: "052" }, { value: "053" },
   { value: "054" }, { value: "055" }, { value: "057" }, { value: "058" },
@@ -1152,7 +1170,7 @@ const LANGS = {
   he: {
     dir: "rtl", label: "HE",
     nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
-    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "העיצוב שלך.", h1line2: "על הכל.", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
+    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
@@ -1192,7 +1210,7 @@ const LANGS = {
   en: {
     dir: "ltr", label: "EN",
     nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
-    hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Your design.", h1line2: "On everything.", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
+    hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
     reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
@@ -1232,7 +1250,7 @@ const LANGS = {
   ru: {
     dir: "ltr", label: "RU",
     nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
-    hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Ваш дизайн.", h1line2: "На всём.", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
+    hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
     reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
@@ -4277,12 +4295,48 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
             </div>
 
-            {/* Pay button - the most prominent element */}
+            {/* Pay button - the most prominent element. Behavior is gated by
+                the global PAYMENTS_ENABLED flag (near MAINTENANCE_MODE): when
+                off, we show the existing "coming soon" modal (order rows are
+                already inserted in step 3, so the customer experience stays
+                graceful); when on, we call the create-payment edge function
+                and redirect to Tranzila. */}
             <MagneticButton
               block
               strength={0.25}
               radius={24}
-              onClick={() => setShowPaymentSoonModal(true)}
+              onClick={async () => {
+                if (!PAYMENTS_ENABLED) {
+                  setShowPaymentSoonModal(true);
+                  return;
+                }
+                if (paymentProcessing) return;
+                setPaymentProcessing(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke(`create-payment`, {
+                    body: {
+                      order_id: pendingOrderGroupId,
+                      amount: pendingTotal,
+                      currency: `ILS`,
+                      customer: {
+                        name: form.name,
+                        email: form.email,
+                        phone: `${form.phonePrefix}-${form.phoneNumber}`,
+                      },
+                      items_summary: cart.map(it => ({ id: it.id, title: it.title, qty: it.qty, price: it.unitPrice })),
+                    },
+                  });
+                  if (error) throw error;
+                  if (data && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                    return;
+                  }
+                  throw new Error(`No redirect_url returned from create-payment`);
+                } catch (e) {
+                  setPaymentProcessing(false);
+                  alert(`Payment error: ${e.message || e}`);
+                }
+              }}
               disabled={paymentProcessing}
               style={{
                 width: "100%",
@@ -5932,8 +5986,34 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pendingBloomItem, setPendingBloomItem] = useState(null);
   // The order cart lives here (not inside OrderPage) so it survives navigation
-  // between the BLOOM collection and the order page while shopping.
-  const [cart, setCart] = useState([]);
+  // between the BLOOM collection and the order page while shopping. It's also
+  // persisted to localStorage (hydrated lazily on mount, written on every
+  // change) so a tab reload or accidental browser-close doesn't wipe what
+  // the customer has been assembling. In-memory state stays the source of
+  // truth; localStorage is just a mirror. Cart items can contain large
+  // data-URL design/mockup blobs (multi-MB), so the writer is wrapped in a
+  // try/catch — on QuotaExceeded we fail silently rather than crash the app.
+  const [cart, setCart] = useState(() => {
+    if (typeof window === `undefined`) return [];
+    try {
+      const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+  useEffect(() => {
+    if (typeof window === `undefined`) return;
+    try {
+      if (cart.length === 0) window.localStorage.removeItem(CART_STORAGE_KEY);
+      else window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch {
+      // QuotaExceeded — likely a cart with several large data-URL mockups.
+      // Persistence is a nice-to-have; the in-memory cart still works.
+    }
+  }, [cart]);
   const [cartOpen, setCartOpen] = useState(false);
   // True once the user has explicitly closed the cart drawer (or proceeded to
   // checkout from it). The /order auto-open effect respects this flag so the
@@ -6764,6 +6844,20 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
     };
   }, [designs, lang]);
 
+  // Per-character document.title for deep-linked tabs/bookmarks. Restored on
+  // cleanup so closing the modal returns the title to whatever the global
+  // page-title effect set for /pets. We don't touch OG meta tags client-side:
+  // social crawlers read those before the SPA renders, so client-side updates
+  // wouldn't affect share previews — that needs SSR/prerender to actually work.
+  useEffect(() => {
+    if (typeof document === `undefined` || !selected) return;
+    const charName = selected[`name_${lang}`] || selected.name_en || selected.name_he || ``;
+    if (!charName) return;
+    const prev = document.title;
+    document.title = `${charName} · BLOOM · Sfalim Shop`;
+    return () => { document.title = prev; };
+  }, [selected, lang]);
+
   // URL-shareable BLOOM characters: #pets/<slug> opens that character.
   // pet_designs.slug is the SINGLE source of truth — the name_en-derived
   // fallback only kicks in if a row is somehow missing one. All current rows
@@ -6838,10 +6932,10 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
       heading: "Bloom.",
       subheading: "אוסף מובחר. דמויות עם נשמה.",
-      subheading2: "12 דיוקנאות בשמן — לכל אחד אופי משלו.",
+      subheading2: (n) => `${n} דיוקנאות בשמן — לכל אחד אופי משלו.`,
       scroll: "גלה את האוסף",
       collectionEyebrow: "האוסף",
-      collectionCount: "12 דמויות",
+      collectionCount: (n) => `${n} דמויות`,
       loading: "טוען אוסף...",
       empty: "האוסף בקרוב",
       priceFrom: "החל מ-₪",
@@ -6866,10 +6960,10 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
       heading: "Bloom.",
       subheading: "A curated collection. Characters with soul.",
-      subheading2: "12 oil portraits, each one with its own personality.",
+      subheading2: (n) => `${n} oil portraits, each one with its own personality.`,
       scroll: "Browse the collection",
       collectionEyebrow: "THE COLLECTION",
-      collectionCount: "12 CHARACTERS",
+      collectionCount: (n) => `${n} CHARACTERS`,
       loading: "Loading collection...",
       empty: "Collection coming soon",
       priceFrom: "From ₪",
@@ -6894,10 +6988,10 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
       heading: "Bloom.",
       subheading: "Кураторская коллекция. Персонажи с душой.",
-      subheading2: "12 масляных портретов, каждый со своим характером.",
+      subheading2: (n) => `${n} масляных портретов, каждый со своим характером.`,
       scroll: "Просмотреть коллекцию",
       collectionEyebrow: "КОЛЛЕКЦИЯ",
-      collectionCount: "12 ПЕРСОНАЖЕЙ",
+      collectionCount: (n) => `${n} ПЕРСОНАЖЕЙ`,
       loading: "Загрузка коллекции...",
       empty: "Коллекция скоро появится",
       priceFrom: "От ₪",
@@ -6966,7 +7060,7 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
           {t.subheading}
         </p>
         <p className="reveal" data-delay="4" style={{ color: "#555", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
-          {t.subheading2}
+          {t.subheading2 ? t.subheading2(designs.length) : ``}
         </p>
       </section>
 
@@ -6978,7 +7072,7 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
               {t.collectionEyebrow}
             </div>
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: 0 }}>
-              {t.collectionCount}
+              {t.collectionCount ? t.collectionCount(designs.length) : ``}
             </h2>
           </div>
         </div>
