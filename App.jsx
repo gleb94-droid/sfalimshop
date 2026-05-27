@@ -913,103 +913,103 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         alignItems: `center`,
         width: `100%`,
       }}>
-      {/* Carousel row — prev arrow / card stack / next arrow as flex siblings.
-          Under RTL the row auto-flips so the start-side arrow lands on the
-          right in Hebrew; the chevron polyline is mirrored by lang separately
-          so the on-screen direction always matches reading direction. The
-          mouseEnter/Leave handlers live here (not on the card stack) so
-          hovering the arrows also pauses auto-advance. */}
+      {/* Card stack — positioning context for the prev/next arrows. Centered
+          on the row via margin auto; arrows below sit absolutely just outside
+          its left/right edges so spacing stays symmetric and consistent
+          regardless of viewport width. */}
       <div
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         style={{
-          display: `flex`,
-          alignItems: `center`,
-          justifyContent: `center`,
-          gap: isMobile ? 4 : 12,
-          width: `100%`,
+          position: `relative`,
+          width: isMobile ? 256 : 360,
           maxWidth: `100%`,
+          margin: `0 auto`,
         }}>
-        {designs.length > 1 && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); goPrev(); }}
-            aria-label={lang === `he` ? `דמות קודמת` : lang === `ru` ? `Предыдущий персонаж` : `Previous character`}
-            className="bloom-home-arrow"
-            style={{
-              flexShrink: 0,
-              padding: isMobile ? 6 : 8,
-              display: `flex`,
-              alignItems: `center`,
-              justifyContent: `center`,
-              touchAction: `manipulation`,
-            }}>
-            <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polyline points={lang === `he` ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
-            </svg>
-          </button>
-        )}
+        {designs.map((d, idx) => {
+          const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
+          const animal = d[`animal_${lang}`] || d.animal_he || d.animal_en || ``;
+          const description = [tagline, animal].filter(Boolean).join(` · `);
+          const displayName = (d.name_en || d.name_he || ``).toUpperCase();
+          const isActive = idx === activeIdx;
+          return (
+            <div
+              key={d.id}
+              data-bloom-card=""
+              className={isActive ? `` : `bloom-carousel-inactive`}
+              aria-hidden={!isActive}
+              style={{
+                position: idx === 0 ? `relative` : `absolute`,
+                top: 0,
+                left: 0,
+                right: 0,
+                opacity: isActive ? 1 : 0,
+                transition: `opacity 0.3s ease`,
+              }}>
+              <FloatingProductCard
+                imageUrl={d.mockup_url}
+                name={displayName}
+                description={description}
+                price={`₪${Number(d.price_shirt) || 129}`}
+                status={statusByLang[lang] || statusByLang.he}
+                buttonText={buttonByLang[lang] || buttonByLang.he}
+                onAddToCart={handleViewActiveCharacter}
+              />
+            </div>
+          );
+        })}
 
-        {/* Card stack — all designs rendered, cross-fade via opacity. */}
-        <div
-          style={{
-            position: `relative`,
-            width: isMobile ? 248 : 360,
-            maxWidth: `100%`,
-            flexShrink: 1,
-          }}>
-          {designs.map((d, idx) => {
-            const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
-            const animal = d[`animal_${lang}`] || d.animal_he || d.animal_en || ``;
-            const description = [tagline, animal].filter(Boolean).join(` · `);
-            const displayName = (d.name_en || d.name_he || ``).toUpperCase();
-            const isActive = idx === activeIdx;
-            return (
-              <div
-                key={d.id}
-                data-bloom-card=""
-                className={isActive ? `` : `bloom-carousel-inactive`}
-                aria-hidden={!isActive}
-                style={{
-                  position: idx === 0 ? `relative` : `absolute`,
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  opacity: isActive ? 1 : 0,
-                  transition: `opacity 0.3s ease`,
-                }}>
-                <FloatingProductCard
-                  imageUrl={d.mockup_url}
-                  name={displayName}
-                  description={description}
-                  price={`₪${Number(d.price_shirt) || 129}`}
-                  status={statusByLang[lang] || statusByLang.he}
-                  buttonText={buttonByLang[lang] || buttonByLang.he}
-                  onAddToCart={handleViewActiveCharacter}
-                />
-              </div>
-            );
-          })}
-        </div>
-
+        {/* Bare-chevron prev/next arrows — absolute children of the card stack
+            so they hug the card edges with a symmetric, deterministic gap.
+            insetInlineStart/End flips automatically for RTL; the polyline
+            inside the svg is mirrored by lang so direction matches reading
+            direction. Siblings of the mapped cards (NOT inside any inactive
+            wrapper) so clicks aren't blocked. */}
         {designs.length > 1 && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); goNext(); }}
-            aria-label={lang === `he` ? `דמות הבאה` : lang === `ru` ? `Следующий персонаж` : `Next character`}
-            className="bloom-home-arrow"
-            style={{
-              flexShrink: 0,
-              padding: isMobile ? 6 : 8,
-              display: `flex`,
-              alignItems: `center`,
-              justifyContent: `center`,
-              touchAction: `manipulation`,
-            }}>
-            <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polyline points={lang === `he` ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
-            </svg>
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); goPrev(); }}
+              aria-label={lang === `he` ? `דמות קודמת` : lang === `ru` ? `Предыдущий персонаж` : `Previous character`}
+              className="bloom-home-arrow"
+              style={{
+                position: `absolute`,
+                top: `50%`,
+                insetInlineStart: isMobile ? -38 : -52,
+                transform: `translateY(-50%)`,
+                zIndex: 4,
+                padding: isMobile ? 6 : 8,
+                display: `flex`,
+                alignItems: `center`,
+                justifyContent: `center`,
+                touchAction: `manipulation`,
+              }}>
+              <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points={lang === `he` ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); goNext(); }}
+              aria-label={lang === `he` ? `דמות הבאה` : lang === `ru` ? `Следующий персонаж` : `Next character`}
+              className="bloom-home-arrow"
+              style={{
+                position: `absolute`,
+                top: `50%`,
+                insetInlineEnd: isMobile ? -38 : -52,
+                transform: `translateY(-50%)`,
+                zIndex: 4,
+                padding: isMobile ? 6 : 8,
+                display: `flex`,
+                alignItems: `center`,
+                justifyContent: `center`,
+                touchAction: `manipulation`,
+              }}>
+              <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points={lang === `he` ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
+              </svg>
+            </button>
+          </>
         )}
       </div>
 
@@ -6434,10 +6434,14 @@ export default function App() {
         .bloom-nav-btn:active { transform: translateY(-50%) scale(1.05) !important; }
 
         /* Bare chevron buttons used in the home BLOOM carousel — no circular
-           background, sit in the page gutters next to the card. */
+           background, sit in the gutters just outside the card edges.
+           Hover/active force translateY(-50%) with !important to keep the
+           vertical centering that the inline absolute positioning relies on
+           (otherwise the bare scale() transform would replace it and the
+           arrow would jump down). */
         .bloom-home-arrow { background: transparent; border: none; cursor: pointer; color: #FF6B35; transition: transform 0.18s cubic-bezier(.2,.6,.2,1), color 0.18s; }
-        .bloom-home-arrow:hover { color: #fff; transform: scale(1.2); }
-        .bloom-home-arrow:active { transform: scale(1.05); }
+        .bloom-home-arrow:hover { color: #fff; transform: translateY(-50%) scale(1.2) !important; }
+        .bloom-home-arrow:active { transform: translateY(-50%) scale(1.05) !important; }
         .bloom-home-arrow:focus-visible { outline: 2px solid #FF6B35; outline-offset: 2px; }
 
         .trust-badge {
