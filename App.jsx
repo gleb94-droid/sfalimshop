@@ -981,10 +981,6 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 right: 0,
                 opacity: isActive ? 1 : 0,
                 transition: `opacity 0.3s ease`,
-                transform: `translateZ(0)`,
-                backfaceVisibility: `hidden`,
-                WebkitBackfaceVisibility: `hidden`,
-                willChange: `opacity`,
               }}>
               <FloatingProductCard
                 imageUrl={d.mockup_url}
