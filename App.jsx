@@ -4974,7 +4974,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   // line-items array. Build something humanish like
                   // "BLOOM Luna shirt · Mug · Sticker (3 items)".
                   const titles = cart.map(it => it?.title || it?.characterName || ``).filter(Boolean);
-                  const itemsSummary = (titles.slice(0, 2).join(` · `) || `Sfalim order`) + (cart.length > 2 ? ` (+${cart.length - 2})` : ``);
+                  const headline = titles.slice(0, 2).join(` · `) || `Sfalim order`;
+                  const overflow = cart.length > 2 ? ` (+${cart.length - 2})` : ``;
+                  const itemsSummary = `${headline}${overflow}`;
                   const { data, error } = await supabase.functions.invoke(`create-payment`, {
                     body: {
                       // The deployed edge function accepts either order_group
@@ -7550,7 +7552,11 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
       "@type": "ItemList",
       "name": "BLOOM Collection",
       "itemListElement": designs.map((d, i) => {
-        const prices = [d.price_sticker, d.price_mug, d.price_shirt]
+        // Contract pricing: BLOOM products are mug / shirt basic / shirt
+        // oversized / sticker pack. Legacy price_shirt / price_sticker are
+        // intentionally excluded so the lowPrice/highPrice that Google
+        // surfaces matches what the catalog actually charges today.
+        const prices = [d.price_sticker_pack, d.price_mug, d.price_shirt_basic, d.price_shirt_oversized]
           .map(Number)
           .filter((n) => Number.isFinite(n) && n > 0);
         const product = {
@@ -8416,9 +8422,10 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
       });
       return;
     }
+    // Single-sticker purchase was retired (stickers are pack-only / free
+    // gift now), so the only remaining non-shirt kind is `mug`.
     const map = {
-      mug:     { productId: "mug",     price: design.price_mug },
-      sticker: { productId: "sticker", price: design.price_sticker },
+      mug: { productId: "mug", price: design.price_mug },
     };
     const choice = map[kind];
     if (!choice) return;
