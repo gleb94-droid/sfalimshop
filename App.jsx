@@ -795,7 +795,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       try {
         const { data, error } = await supabase
           .from("pet_designs")
-          .select("id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,mockup_url,design_url")
+          .select("id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,price_shirt_basic,mockup_url,mockup_shirt_url,mockup_mug_url,design_url")
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
         if (error) throw error;
@@ -1065,7 +1065,16 @@ const COLORS = {
   white: "#ffffff", gray: "#888888", grayLight: "#555555", success: "#4ade80",
 };
 
+// Legacy flat shipping fee. Kept for any code path that hasn't been moved
+// onto the Locker/Home selector yet (defensive — every active path now uses
+// the per-method constants below).
 const SHIPPING_PRICE = 30;
+// Locker (delivery point pickup) is the cheaper, faster default. Home is
+// door-to-door courier. shippingMethod state in OrderPage chooses between
+// them; orders.extra_prints.shipping_method records the customer's choice.
+const SHIPPING_LOCKER = 20;
+const SHIPPING_HOME = 35;
+const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 
 // ============ BLOOM shirt colors — 5 basic options for the Pet Couture collection ============
@@ -2524,10 +2533,42 @@ function AdminPage({ lang }) {
   // BLOOM characters — manage the is_bestseller / is_new flags from here.
   const [petDesigns, setPetDesigns] = useState([]);
   const [petsLoading, setPetsLoading] = useState(true);
+  // Inline edit / add forms for the catalog manager. editingDesignId points at
+  // the row currently expanded in edit mode; addingDesign is a flag for the
+  // "+ Add new" blank form at the top. designForm carries the live form state.
+  // Same shape for sticker_packs.
+  const BLANK_DESIGN = {
+    slug: ``, name_he: ``, name_en: ``, name_ru: ``,
+    animal_he: ``, animal_en: ``, animal_ru: ``,
+    tagline_he: ``, tagline_en: ``, tagline_ru: ``,
+    species: `dog`, breed_he: ``, breed_en: ``, breed_ru: ``, breed_aliases: ``,
+    price_shirt: 129, price_mug: 59, price_sticker: 25,
+    price_shirt_basic: 99, price_shirt_oversized: 119, price_sticker_pack: 35,
+    mockup_url: ``, mockup_shirt_url: ``, mockup_mug_url: ``, design_url: ``, mockup_bg: ``,
+    sort_order: 0, is_active: true, is_bestseller: false, is_new: false,
+  };
+  const BLANK_PACK = {
+    slug: ``, name_he: ``, name_en: ``, name_ru: ``,
+    species: `mixed`, price: 35, image_url: ``, item_slugs: ``,
+    sort_order: 0, is_active: true,
+  };
+  const [editingDesignId, setEditingDesignId] = useState(null);
+  const [addingDesign, setAddingDesign] = useState(false);
+  const [designForm, setDesignForm] = useState(BLANK_DESIGN);
+  const [stickerPacks, setStickerPacks] = useState([]);
+  const [packsLoading, setPacksLoading] = useState(true);
+  const [editingPackId, setEditingPackId] = useState(null);
+  const [addingPack, setAddingPack] = useState(false);
+  const [packForm, setPackForm] = useState(BLANK_PACK);
+  // Lightweight global busy flag so the form disables its Save button while
+  // an upload + insert is in flight (prevents double-save from impatient
+  // double-clicks).
+  const [catalogBusy, setCatalogBusy] = useState(false);
 
   useEffect(() => {
     fetchOrders();
     fetchPetDesigns();
+    fetchStickerPacks();
     const sub = supabase.channel("orders-changes").on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders).subscribe();
     return () => sub.unsubscribe();
   }, []);
@@ -2547,6 +2588,15 @@ function AdminPage({ lang }) {
     setPetsLoading(false);
   };
 
+  const fetchStickerPacks = async () => {
+    const { data } = await supabase
+      .from("sticker_packs")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    setStickerPacks(data || []);
+    setPacksLoading(false);
+  };
+
   // Optimistic toggle for is_bestseller / is_new. Reverts on DB error.
   const togglePetFlag = async (id, field, value) => {
     setPetDesigns(prev => prev.map(d => d.id === id ? { ...d, [field]: value } : d));
@@ -2554,6 +2604,162 @@ function AdminPage({ lang }) {
     if (error) {
       console.error(`Failed to update ${field}:`, error);
       setPetDesigns(prev => prev.map(d => d.id === id ? { ...d, [field]: !value } : d));
+    }
+  };
+
+  // Upload a File from the admin form to the named Storage bucket and return
+  // the public URL. Bucket must already exist + be public (mockups, designs).
+  // Filenames are randomized to avoid collisions and let the same row be
+  // re-uploaded without an upsert.
+  const uploadAdminImage = async (bucket, file, prefix) => {
+    if (!file) return null;
+    const ext = (file.name?.split(`.`).pop() || `webp`).toLowerCase().replace(/[^a-z0-9]/g, ``) || `webp`;
+    const fileName = `${prefix || `admin`}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from(bucket).upload(fileName, file, {
+      contentType: file.type || `image/${ext}`,
+      upsert: false,
+    });
+    if (error) {
+      console.error(`Upload to ${bucket} failed:`, error);
+      throw error;
+    }
+    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
+    return urlData.publicUrl;
+  };
+
+  // Save a pet_designs row. existingId === null means INSERT, else UPDATE.
+  // formValues carries the raw form state; we coerce numeric fields and
+  // strip empty strings to nulls so the DB doesn't store "" for optional cols.
+  const savePetDesign = async (formValues, existingId) => {
+    setCatalogBusy(true);
+    try {
+      const row = {
+        slug: formValues.slug?.trim() || null,
+        name_he: formValues.name_he || null,
+        name_en: formValues.name_en || null,
+        name_ru: formValues.name_ru || null,
+        animal_he: formValues.animal_he || null,
+        animal_en: formValues.animal_en || null,
+        animal_ru: formValues.animal_ru || null,
+        tagline_he: formValues.tagline_he || null,
+        tagline_en: formValues.tagline_en || null,
+        tagline_ru: formValues.tagline_ru || null,
+        species: formValues.species || null,
+        breed_he: formValues.breed_he || null,
+        breed_en: formValues.breed_en || null,
+        breed_ru: formValues.breed_ru || null,
+        breed_aliases: formValues.breed_aliases || null,
+        price_shirt: Number(formValues.price_shirt) || null,
+        price_mug: Number(formValues.price_mug) || null,
+        price_sticker: Number(formValues.price_sticker) || null,
+        price_shirt_basic: Number(formValues.price_shirt_basic) || null,
+        price_shirt_oversized: Number(formValues.price_shirt_oversized) || null,
+        price_sticker_pack: Number(formValues.price_sticker_pack) || null,
+        mockup_url: formValues.mockup_url || null,
+        mockup_shirt_url: formValues.mockup_shirt_url || null,
+        mockup_mug_url: formValues.mockup_mug_url || null,
+        design_url: formValues.design_url || null,
+        mockup_bg: formValues.mockup_bg || null,
+        sort_order: Number(formValues.sort_order) || 0,
+        is_active: !!formValues.is_active,
+        is_bestseller: !!formValues.is_bestseller,
+        is_new: !!formValues.is_new,
+      };
+      if (existingId) {
+        const { error } = await supabase.from(`pet_designs`).update(row).eq(`id`, existingId);
+        if (error) throw error;
+      } else {
+        if (!row.slug) {
+          alert(`Slug is required`);
+          setCatalogBusy(false);
+          return false;
+        }
+        const { error } = await supabase.from(`pet_designs`).insert(row);
+        if (error) throw error;
+      }
+      await fetchPetDesigns();
+      setEditingDesignId(null);
+      setAddingDesign(false);
+      return true;
+    } catch (e) {
+      console.error(`Save pet_designs failed:`, e);
+      alert(`Save failed: ${e.message || e}`);
+      return false;
+    } finally {
+      setCatalogBusy(false);
+    }
+  };
+
+  const deletePetDesign = async (id) => {
+    if (!window.confirm(`Delete this BLOOM design permanently? Existing orders that reference it stay intact, but it will disappear from the catalog and home carousel.`)) return;
+    setCatalogBusy(true);
+    try {
+      const { error } = await supabase.from(`pet_designs`).delete().eq(`id`, id);
+      if (error) throw error;
+      await fetchPetDesigns();
+      if (editingDesignId === id) setEditingDesignId(null);
+    } catch (e) {
+      console.error(`Delete pet_designs failed:`, e);
+      alert(`Delete failed: ${e.message || e}`);
+    } finally {
+      setCatalogBusy(false);
+    }
+  };
+
+  const saveStickerPack = async (formValues, existingId) => {
+    setCatalogBusy(true);
+    try {
+      const items = (formValues.item_slugs || ``).split(`,`).map(s => s.trim()).filter(Boolean);
+      const row = {
+        slug: formValues.slug?.trim() || null,
+        name_he: formValues.name_he || null,
+        name_en: formValues.name_en || null,
+        name_ru: formValues.name_ru || null,
+        species: formValues.species || `mixed`,
+        price: Number(formValues.price) || 35,
+        image_url: formValues.image_url || null,
+        item_slugs: items,
+        sort_order: Number(formValues.sort_order) || 0,
+        is_active: !!formValues.is_active,
+      };
+      if (existingId) {
+        const { error } = await supabase.from(`sticker_packs`).update(row).eq(`id`, existingId);
+        if (error) throw error;
+      } else {
+        if (!row.slug) {
+          alert(`Slug is required`);
+          setCatalogBusy(false);
+          return false;
+        }
+        const { error } = await supabase.from(`sticker_packs`).insert(row);
+        if (error) throw error;
+      }
+      await fetchStickerPacks();
+      setEditingPackId(null);
+      setAddingPack(false);
+      return true;
+    } catch (e) {
+      console.error(`Save sticker_packs failed:`, e);
+      alert(`Save failed: ${e.message || e}`);
+      return false;
+    } finally {
+      setCatalogBusy(false);
+    }
+  };
+
+  const deleteStickerPack = async (id) => {
+    if (!window.confirm(`Delete this sticker pack permanently?`)) return;
+    setCatalogBusy(true);
+    try {
+      const { error } = await supabase.from(`sticker_packs`).delete().eq(`id`, id);
+      if (error) throw error;
+      await fetchStickerPacks();
+      if (editingPackId === id) setEditingPackId(null);
+    } catch (e) {
+      console.error(`Delete sticker_packs failed:`, e);
+      alert(`Delete failed: ${e.message || e}`);
+    } finally {
+      setCatalogBusy(false);
     }
   };
 
@@ -2838,18 +3044,39 @@ function AdminPage({ lang }) {
           )
         }
 
-        {/* ===== BLOOM character flags (is_bestseller / is_new) ===== */}
+        {/* ===== BLOOM catalog manager — full CRUD for pet_designs ===== */}
         <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
-          <div style={{ marginBottom: 20 }}>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>BLOOM</h2>
-            <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
-              {petsLoading
-                ? (lang === "he" ? "טוען..." : lang === "ru" ? "Загрузка..." : "Loading...")
-                : `${petDesigns.length} ${lang === "he" ? "דמויות" : lang === "ru" ? "персонажей" : "characters"}`}
-            </p>
+          <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
+            <div>
+              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>BLOOM</h2>
+              <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
+                {petsLoading
+                  ? (lang === "he" ? "טוען..." : lang === "ru" ? "Загрузка..." : "Loading...")
+                  : `${petDesigns.length} ${lang === "he" ? "דמויות" : lang === "ru" ? "персонажей" : "characters"}`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setAddingDesign(true); setEditingDesignId(null); setDesignForm(BLANK_DESIGN); }}
+              style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              {lang === `he` ? `+ הוסף דמות` : lang === `ru` ? `+ Добавить персонажа` : `+ Add character`}
+            </button>
           </div>
 
-          {!petsLoading && petDesigns.length === 0 && (
+          {addingDesign && (
+            <DesignEditor
+              form={designForm}
+              setForm={setDesignForm}
+              busy={catalogBusy}
+              onSave={() => savePetDesign(designForm, null)}
+              onCancel={() => { setAddingDesign(false); setDesignForm(BLANK_DESIGN); }}
+              onDelete={null}
+              uploadAdminImage={uploadAdminImage}
+              lang={lang}
+            />
+          )}
+
+          {!petsLoading && petDesigns.length === 0 && !addingDesign && (
             <div style={{ textAlign: "center", padding: "32px 0", color: COLORS.gray, fontSize: 14 }}>
               {lang === "he" ? "אין דמויות עדיין" : lang === "ru" ? "Персонажей пока нет" : "No characters yet"}
             </div>
@@ -2859,35 +3086,152 @@ function AdminPage({ lang }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {petDesigns.map((d) => {
                 const dName = d[`name_${lang}`] || d.name_en || d.name_he || "—";
-                const thumb = d.mockup_url || d.design_url;
+                const thumb = d.mockup_shirt_url || d.mockup_url || d.design_url;
+                const isEditing = editingDesignId === d.id;
                 return (
-                  <div key={d.id} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 8, background: d.mockup_bg || COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-                      {thumb && <SmartImage src={thumb} alt={dName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                  <div key={d.id}>
+                    <div style={{ background: COLORS.bgCard, border: `1px solid ${isEditing ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 8, background: d.mockup_bg || COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                        {thumb && <SmartImage src={thumb} alt={dName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 120 }}>
+                        <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif" }}>{dName}</div>
+                        <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>
+                          {[d.species, d.breed_en || d.breed_he, d.is_active ? `` : (lang === `he` ? `כבוי` : lang === `ru` ? `выкл` : `inactive`)].filter(Boolean).join(` · `)}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button onClick={() => togglePetFlag(d.id, "is_bestseller", !d.is_bestseller)}
+                          aria-pressed={!!d.is_bestseller}
+                          style={{
+                            background: d.is_bestseller ? COLORS.accent : "transparent",
+                            border: `1px solid ${d.is_bestseller ? COLORS.accent : COLORS.border}`,
+                            color: d.is_bestseller ? "#fff" : COLORS.gray,
+                            borderRadius: 6, padding: "6px 12px", cursor: "pointer",
+                            fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
+                            transition: "all 0.2s",
+                          }}>{t.badges.bestseller}</button>
+                        <button onClick={() => togglePetFlag(d.id, "is_new", !d.is_new)}
+                          aria-pressed={!!d.is_new}
+                          style={{
+                            background: d.is_new ? COLORS.accent : "transparent",
+                            border: `1px solid ${d.is_new ? COLORS.accent : COLORS.border}`,
+                            color: d.is_new ? "#fff" : COLORS.gray,
+                            borderRadius: 6, padding: "6px 12px", cursor: "pointer",
+                            fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
+                            transition: "all 0.2s",
+                          }}>{t.badges.new}</button>
+                        <button
+                          onClick={() => {
+                            if (isEditing) { setEditingDesignId(null); return; }
+                            setEditingDesignId(d.id);
+                            setAddingDesign(false);
+                            setDesignForm({ ...BLANK_DESIGN, ...d, breed_aliases: d.breed_aliases || `` });
+                          }}
+                          style={{ background: isEditing ? COLORS.accent : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
+                          {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
+                        </button>
+                      </div>
                     </div>
-                    <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", flex: 1, minWidth: 120 }}>{dName}</div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button onClick={() => togglePetFlag(d.id, "is_bestseller", !d.is_bestseller)}
-                        aria-pressed={!!d.is_bestseller}
-                        style={{
-                          background: d.is_bestseller ? COLORS.accent : "transparent",
-                          border: `1px solid ${d.is_bestseller ? COLORS.accent : COLORS.border}`,
-                          color: d.is_bestseller ? "#fff" : COLORS.gray,
-                          borderRadius: 6, padding: "6px 12px", cursor: "pointer",
-                          fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
-                          transition: "all 0.2s",
-                        }}>{t.badges.bestseller}</button>
-                      <button onClick={() => togglePetFlag(d.id, "is_new", !d.is_new)}
-                        aria-pressed={!!d.is_new}
-                        style={{
-                          background: d.is_new ? COLORS.accent : "transparent",
-                          border: `1px solid ${d.is_new ? COLORS.accent : COLORS.border}`,
-                          color: d.is_new ? "#fff" : COLORS.gray,
-                          borderRadius: 6, padding: "6px 12px", cursor: "pointer",
-                          fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
-                          transition: "all 0.2s",
-                        }}>{t.badges.new}</button>
+                    {isEditing && (
+                      <DesignEditor
+                        form={designForm}
+                        setForm={setDesignForm}
+                        busy={catalogBusy}
+                        onSave={() => savePetDesign(designForm, d.id)}
+                        onCancel={() => setEditingDesignId(null)}
+                        onDelete={() => deletePetDesign(d.id)}
+                        uploadAdminImage={uploadAdminImage}
+                        lang={lang}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* ===== Sticker packs catalog manager — full CRUD for sticker_packs ===== */}
+        <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
+            <div>
+              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+                {lang === `he` ? `חבילות מדבקות` : lang === `ru` ? `Наборы наклеек` : `Sticker packs`}
+              </h2>
+              <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
+                {packsLoading
+                  ? (lang === `he` ? `טוען...` : lang === `ru` ? `Загрузка...` : `Loading...`)
+                  : `${stickerPacks.length} ${lang === `he` ? `חבילות` : lang === `ru` ? `наборов` : `packs`}`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setAddingPack(true); setEditingPackId(null); setPackForm(BLANK_PACK); }}
+              style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              {lang === `he` ? `+ הוסף חבילה` : lang === `ru` ? `+ Добавить набор` : `+ Add pack`}
+            </button>
+          </div>
+
+          {addingPack && (
+            <PackEditor
+              form={packForm}
+              setForm={setPackForm}
+              busy={catalogBusy}
+              onSave={() => saveStickerPack(packForm, null)}
+              onCancel={() => { setAddingPack(false); setPackForm(BLANK_PACK); }}
+              onDelete={null}
+              uploadAdminImage={uploadAdminImage}
+              lang={lang}
+            />
+          )}
+
+          {!packsLoading && stickerPacks.length === 0 && !addingPack && (
+            <div style={{ textAlign: `center`, padding: `32px 0`, color: COLORS.gray, fontSize: 14 }}>
+              {lang === `he` ? `אין חבילות עדיין` : lang === `ru` ? `Наборов пока нет` : `No packs yet`}
+            </div>
+          )}
+
+          {stickerPacks.length > 0 && (
+            <div style={{ display: `flex`, flexDirection: `column`, gap: 8 }}>
+              {stickerPacks.map((p) => {
+                const pName = p[`name_${lang}`] || p.name_en || p.name_he || `—`;
+                const isEditing = editingPackId === p.id;
+                return (
+                  <div key={p.id}>
+                    <div style={{ background: COLORS.bgCard, border: `1px solid ${isEditing ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `10px 14px`, display: `flex`, alignItems: `center`, gap: 14, flexWrap: `wrap` }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 8, background: COLORS.bg, display: `flex`, alignItems: `center`, justifyContent: `center`, overflow: `hidden`, flexShrink: 0 }}>
+                        {p.image_url && <SmartImage src={p.image_url} alt={pName} style={{ width: `100%`, height: `100%`, objectFit: `contain` }} />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 120 }}>
+                        <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: `'Playfair Display',serif` }}>{pName}</div>
+                        <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>
+                          {[p.species, `₪${p.price}`, `${(p.item_slugs || []).length} ${lang === `he` ? `מדבקות` : lang === `ru` ? `наклеек` : `stickers`}`, p.is_active ? `` : (lang === `he` ? `כבוי` : lang === `ru` ? `выкл` : `inactive`)].filter(Boolean).join(` · `)}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (isEditing) { setEditingPackId(null); return; }
+                          setEditingPackId(p.id);
+                          setAddingPack(false);
+                          setPackForm({ ...BLANK_PACK, ...p, item_slugs: (p.item_slugs || []).join(`, `) });
+                        }}
+                        style={{ background: isEditing ? COLORS.accent : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
+                        {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
+                      </button>
                     </div>
+                    {isEditing && (
+                      <PackEditor
+                        form={packForm}
+                        setForm={setPackForm}
+                        busy={catalogBusy}
+                        onSave={() => saveStickerPack(packForm, p.id)}
+                        onCancel={() => setEditingPackId(null)}
+                        onDelete={() => deleteStickerPack(p.id)}
+                        uploadAdminImage={uploadAdminImage}
+                        lang={lang}
+                      />
+                    )}
                   </div>
                 );
               })}
@@ -2899,12 +3243,233 @@ function AdminPage({ lang }) {
   );
 }
 
+// ============ Admin catalog: shared field helpers and editor components ============
+// Both editors share the same input style + label pattern. The form components
+// take the form state by ref (form + setForm) so the parent (AdminPage) keeps
+// ownership and can flush it to Supabase on Save. Image rows accept either a
+// pasted URL or a file picker that uploads into the named Storage bucket.
+
+function AdminFieldLabel({ children }) {
+  return <label style={{ display: `block`, color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: `uppercase`, letterSpacing: `0.08em`, marginBottom: 6 }}>{children}</label>;
+}
+
+function AdminInput({ value, onChange, type, placeholder, disabled, dir }) {
+  return <input
+    type={type || `text`}
+    value={value ?? ``}
+    onChange={(e) => onChange(type === `number` ? e.target.value : e.target.value)}
+    placeholder={placeholder}
+    disabled={disabled}
+    dir={dir}
+    style={{ width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: `8px 10px`, fontSize: 13, fontFamily: `'Varela Round',sans-serif`, boxSizing: `border-box`, outline: `none` }}
+    onFocus={(e) => { e.target.style.borderColor = COLORS.accent; }}
+    onBlur={(e) => { e.target.style.borderColor = COLORS.border; }}
+  />;
+}
+
+function AdminImageRow({ label, value, onChange, bucket, prefix, uploadAdminImage, busy }) {
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef();
+  const handleFile = async (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setUploading(true);
+    try {
+      const url = await uploadAdminImage(bucket, f, prefix);
+      if (url) onChange(url);
+    } catch (err) {
+      alert(`Upload failed: ${err.message || err}`);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = ``;
+    }
+  };
+  return (
+    <div>
+      <AdminFieldLabel>{label}</AdminFieldLabel>
+      <div style={{ display: `flex`, gap: 8, alignItems: `center`, flexWrap: `wrap` }}>
+        <input
+          type="text"
+          value={value || ``}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://..."
+          dir="ltr"
+          style={{ flex: 1, minWidth: 200, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: `8px 10px`, fontSize: 12, fontFamily: `monospace`, boxSizing: `border-box`, outline: `none` }}
+          onFocus={(e) => { e.target.style.borderColor = COLORS.accent; }}
+          onBlur={(e) => { e.target.style.borderColor = COLORS.border; }}
+        />
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: `none` }} />
+        <button type="button" disabled={busy || uploading} onClick={() => fileRef.current?.click()} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `8px 12px`, fontSize: 12, fontWeight: 700, cursor: busy || uploading ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, whiteSpace: `nowrap` }}>
+          {uploading ? `…` : `Upload`}
+        </button>
+        {value && <img src={value} alt="" style={{ width: 32, height: 32, borderRadius: 4, objectFit: `cover`, border: `1px solid ${COLORS.border}` }} />}
+      </div>
+    </div>
+  );
+}
+
+function DesignEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadAdminImage, lang }) {
+  const set = (k) => (v) => setForm(prev => ({ ...prev, [k]: v }));
+  const labels = {
+    he: { slug: `מזהה (slug)`, names: `שמות`, animal: `סוג חיה`, tagline: `סלוגן`, species: `מין`, dog: `כלב`, cat: `חתול`, breed: `גזע`, aliases: `שמות נוספים לחיפוש (מופרדים בפסיק)`, prices: `מחירים`, images: `תמונות`, mockupHero: `תמונה ראשית (mockup_url)`, mockupShirt: `חולצה (mockup_shirt_url)`, mockupMug: `ספל (mockup_mug_url)`, design: `עיצוב נקי (design_url)`, bg: `רקע (mockup_bg)`, sort: `סדר`, active: `פעיל`, save: `שמור`, cancel: `ביטול`, del: `מחק`, flags: `דגלים`, bestseller: `רב מכר`, fresh: `חדש` },
+    en: { slug: `Slug`, names: `Names`, animal: `Animal type`, tagline: `Tagline`, species: `Species`, dog: `Dog`, cat: `Cat`, breed: `Breed`, aliases: `Search aliases (comma separated)`, prices: `Prices`, images: `Images`, mockupHero: `Hero (mockup_url)`, mockupShirt: `Shirt (mockup_shirt_url)`, mockupMug: `Mug (mockup_mug_url)`, design: `Clean design (design_url)`, bg: `Background (mockup_bg)`, sort: `Sort order`, active: `Active`, save: `Save`, cancel: `Cancel`, del: `Delete`, flags: `Flags`, bestseller: `Bestseller`, fresh: `New` },
+    ru: { slug: `Slug`, names: `Названия`, animal: `Тип животного`, tagline: `Слоган`, species: `Вид`, dog: `Собака`, cat: `Кошка`, breed: `Порода`, aliases: `Синонимы для поиска (через запятую)`, prices: `Цены`, images: `Изображения`, mockupHero: `Главное (mockup_url)`, mockupShirt: `Футболка (mockup_shirt_url)`, mockupMug: `Кружка (mockup_mug_url)`, design: `Чистый дизайн (design_url)`, bg: `Фон (mockup_bg)`, sort: `Порядок`, active: `Активен`, save: `Сохранить`, cancel: `Отмена`, del: `Удалить`, flags: `Метки`, bestseller: `Хит`, fresh: `Новинка` },
+  };
+  const L = labels[lang] || labels.he;
+  return (
+    <div style={{ background: COLORS.bg, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: 18, marginTop: 10, marginBottom: 10, display: `flex`, flexDirection: `column`, gap: 14 }}>
+      <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(220px, 1fr))`, gap: 12 }}>
+        <div><AdminFieldLabel>{L.slug}</AdminFieldLabel><AdminInput value={form.slug} onChange={set(`slug`)} placeholder="01_corgi" dir="ltr" /></div>
+        <div><AdminFieldLabel>{L.species}</AdminFieldLabel>
+          <div style={{ display: `flex`, gap: 8 }}>
+            {[`dog`, `cat`].map(sp => (
+              <button key={sp} type="button" onClick={() => set(`species`)(sp)} style={{ flex: 1, background: form.species === sp ? COLORS.accent : `transparent`, color: form.species === sp ? `#fff` : COLORS.gray, border: `1px solid ${form.species === sp ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: `8px 10px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{sp === `dog` ? L.dog : L.cat}</button>
+            ))}
+          </div>
+        </div>
+        <div><AdminFieldLabel>{L.sort}</AdminFieldLabel><AdminInput type="number" value={form.sort_order} onChange={set(`sort_order`)} /></div>
+      </div>
+      <div>
+        <AdminFieldLabel>{L.names}</AdminFieldLabel>
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 8 }}>
+          <AdminInput value={form.name_he} onChange={set(`name_he`)} placeholder="עברית" dir="rtl" />
+          <AdminInput value={form.name_en} onChange={set(`name_en`)} placeholder="English" dir="ltr" />
+          <AdminInput value={form.name_ru} onChange={set(`name_ru`)} placeholder="Русский" dir="ltr" />
+        </div>
+      </div>
+      <div>
+        <AdminFieldLabel>{L.breed}</AdminFieldLabel>
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 8 }}>
+          <AdminInput value={form.breed_he} onChange={set(`breed_he`)} placeholder="עברית" dir="rtl" />
+          <AdminInput value={form.breed_en} onChange={set(`breed_en`)} placeholder="English" dir="ltr" />
+          <AdminInput value={form.breed_ru} onChange={set(`breed_ru`)} placeholder="Русский" dir="ltr" />
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <AdminFieldLabel>{L.aliases}</AdminFieldLabel>
+          <AdminInput value={form.breed_aliases} onChange={set(`breed_aliases`)} placeholder="corgi, קורגי, корги" dir="ltr" />
+        </div>
+      </div>
+      <div>
+        <AdminFieldLabel>{L.animal}</AdminFieldLabel>
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 8 }}>
+          <AdminInput value={form.animal_he} onChange={set(`animal_he`)} placeholder="עברית" dir="rtl" />
+          <AdminInput value={form.animal_en} onChange={set(`animal_en`)} placeholder="English" dir="ltr" />
+          <AdminInput value={form.animal_ru} onChange={set(`animal_ru`)} placeholder="Русский" dir="ltr" />
+        </div>
+      </div>
+      <div>
+        <AdminFieldLabel>{L.tagline}</AdminFieldLabel>
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 8 }}>
+          <AdminInput value={form.tagline_he} onChange={set(`tagline_he`)} placeholder="עברית" dir="rtl" />
+          <AdminInput value={form.tagline_en} onChange={set(`tagline_en`)} placeholder="English" dir="ltr" />
+          <AdminInput value={form.tagline_ru} onChange={set(`tagline_ru`)} placeholder="Русский" dir="ltr" />
+        </div>
+      </div>
+      <div>
+        <AdminFieldLabel>{L.prices} (₪)</AdminFieldLabel>
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(140px, 1fr))`, gap: 8 }}>
+          <div><AdminFieldLabel>mug</AdminFieldLabel><AdminInput type="number" value={form.price_mug} onChange={set(`price_mug`)} /></div>
+          <div><AdminFieldLabel>shirt basic</AdminFieldLabel><AdminInput type="number" value={form.price_shirt_basic} onChange={set(`price_shirt_basic`)} /></div>
+          <div><AdminFieldLabel>shirt oversized</AdminFieldLabel><AdminInput type="number" value={form.price_shirt_oversized} onChange={set(`price_shirt_oversized`)} /></div>
+          <div><AdminFieldLabel>sticker pack</AdminFieldLabel><AdminInput type="number" value={form.price_sticker_pack} onChange={set(`price_sticker_pack`)} /></div>
+          <div><AdminFieldLabel>legacy shirt</AdminFieldLabel><AdminInput type="number" value={form.price_shirt} onChange={set(`price_shirt`)} /></div>
+          <div><AdminFieldLabel>legacy sticker</AdminFieldLabel><AdminInput type="number" value={form.price_sticker} onChange={set(`price_sticker`)} /></div>
+        </div>
+      </div>
+      <div style={{ display: `flex`, flexDirection: `column`, gap: 10 }}>
+        <AdminFieldLabel>{L.images}</AdminFieldLabel>
+        <AdminImageRow label={L.mockupHero} value={form.mockup_url} onChange={set(`mockup_url`)} bucket="mockups" prefix="bloom-hero" uploadAdminImage={uploadAdminImage} busy={busy} />
+        <AdminImageRow label={L.mockupShirt} value={form.mockup_shirt_url} onChange={set(`mockup_shirt_url`)} bucket="mockups" prefix="bloom-shirt" uploadAdminImage={uploadAdminImage} busy={busy} />
+        <AdminImageRow label={L.mockupMug} value={form.mockup_mug_url} onChange={set(`mockup_mug_url`)} bucket="mockups" prefix="bloom-mug" uploadAdminImage={uploadAdminImage} busy={busy} />
+        <AdminImageRow label={L.design} value={form.design_url} onChange={set(`design_url`)} bucket="designs" prefix="bloom-design" uploadAdminImage={uploadAdminImage} busy={busy} />
+        <div><AdminFieldLabel>{L.bg}</AdminFieldLabel><AdminInput value={form.mockup_bg} onChange={set(`mockup_bg`)} placeholder="#0d0d0d" dir="ltr" /></div>
+      </div>
+      <div>
+        <AdminFieldLabel>{L.flags}</AdminFieldLabel>
+        <div style={{ display: `flex`, gap: 16, flexWrap: `wrap` }}>
+          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+            <input type="checkbox" checked={!!form.is_active} onChange={(e) => set(`is_active`)(e.target.checked)} />
+            {L.active}
+          </label>
+          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+            <input type="checkbox" checked={!!form.is_bestseller} onChange={(e) => set(`is_bestseller`)(e.target.checked)} />
+            {L.bestseller}
+          </label>
+          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+            <input type="checkbox" checked={!!form.is_new} onChange={(e) => set(`is_new`)(e.target.checked)} />
+            {L.fresh}
+          </label>
+        </div>
+      </div>
+      <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
+        <div style={{ display: `flex`, gap: 8 }}>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
+        </div>
+        {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
+      </div>
+    </div>
+  );
+}
+
+function PackEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadAdminImage, lang }) {
+  const set = (k) => (v) => setForm(prev => ({ ...prev, [k]: v }));
+  const L = {
+    he: { slug: `מזהה (slug)`, names: `שמות`, species: `מין`, dog: `כלב`, cat: `חתול`, mixed: `מעורב`, price: `מחיר (₪)`, image: `תמונה`, items: `מדבקות בחבילה (slugs מופרדים בפסיק)`, sort: `סדר`, active: `פעיל`, save: `שמור`, cancel: `ביטול`, del: `מחק` },
+    en: { slug: `Slug`, names: `Names`, species: `Species`, dog: `Dog`, cat: `Cat`, mixed: `Mixed`, price: `Price (₪)`, image: `Image`, items: `Stickers in pack (comma-separated slugs)`, sort: `Sort order`, active: `Active`, save: `Save`, cancel: `Cancel`, del: `Delete` },
+    ru: { slug: `Slug`, names: `Названия`, species: `Вид`, dog: `Собаки`, cat: `Кошки`, mixed: `Смешанный`, price: `Цена (₪)`, image: `Изображение`, items: `Наклейки в наборе (slug через запятую)`, sort: `Порядок`, active: `Активен`, save: `Сохранить`, cancel: `Отмена`, del: `Удалить` },
+  }[lang] || {};
+  return (
+    <div style={{ background: COLORS.bg, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: 18, marginTop: 10, marginBottom: 10, display: `flex`, flexDirection: `column`, gap: 14 }}>
+      <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`, gap: 12 }}>
+        <div><AdminFieldLabel>{L.slug}</AdminFieldLabel><AdminInput value={form.slug} onChange={set(`slug`)} placeholder="dogs_pack_top10" dir="ltr" /></div>
+        <div><AdminFieldLabel>{L.species}</AdminFieldLabel>
+          <div style={{ display: `flex`, gap: 6 }}>
+            {[[`dog`, L.dog], [`cat`, L.cat], [`mixed`, L.mixed]].map(([sp, lab]) => (
+              <button key={sp} type="button" onClick={() => set(`species`)(sp)} style={{ flex: 1, background: form.species === sp ? COLORS.accent : `transparent`, color: form.species === sp ? `#fff` : COLORS.gray, border: `1px solid ${form.species === sp ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: `8px 6px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lab}</button>
+            ))}
+          </div>
+        </div>
+        <div><AdminFieldLabel>{L.price}</AdminFieldLabel><AdminInput type="number" value={form.price} onChange={set(`price`)} /></div>
+        <div><AdminFieldLabel>{L.sort}</AdminFieldLabel><AdminInput type="number" value={form.sort_order} onChange={set(`sort_order`)} /></div>
+      </div>
+      <div>
+        <AdminFieldLabel>{L.names}</AdminFieldLabel>
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 8 }}>
+          <AdminInput value={form.name_he} onChange={set(`name_he`)} placeholder="עברית" dir="rtl" />
+          <AdminInput value={form.name_en} onChange={set(`name_en`)} placeholder="English" dir="ltr" />
+          <AdminInput value={form.name_ru} onChange={set(`name_ru`)} placeholder="Русский" dir="ltr" />
+        </div>
+      </div>
+      <AdminImageRow label={L.image} value={form.image_url} onChange={set(`image_url`)} bucket="mockups" prefix="pack" uploadAdminImage={uploadAdminImage} busy={busy} />
+      <div>
+        <AdminFieldLabel>{L.items}</AdminFieldLabel>
+        <AdminInput value={form.item_slugs} onChange={set(`item_slugs`)} placeholder="01_golden_retriever, 09_labrador, ..." dir="ltr" />
+      </div>
+      <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+        <input type="checkbox" checked={!!form.is_active} onChange={(e) => set(`is_active`)(e.target.checked)} />
+        {L.active}
+      </label>
+      <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
+        <div style={{ display: `flex`, gap: 8 }}>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
+        </div>
+        {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
+      </div>
+    </div>
+  );
+}
+
 // Order Page
 // ============ ORDER SUMMARY — sticky sidebar on desktop, collapsible top bar on mobile ============
 // Lives inside step 3 of the OrderPage so the customer always sees what
 // they're about to pay for, with inline qty/remove controls.
-function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
+function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPrice }) {
   const isRTL = lang === "he";
+  // Falls back to the legacy flat rate if the parent hasn't passed a chosen
+  // method yet (defensive — every OrderPage caller now provides it).
+  const effectiveShipping = Number.isFinite(shippingPrice) ? shippingPrice : SHIPPING_PRICE;
   const TR = {
     he: { title: "ההזמנה שלך", items: "פריטים", subtotal: "סכום ביניים", shipping: "משלוח", free: "חינם", total: "סה״כ", empty: "הסל ריק", expand: "הצג סיכום", collapse: "הסתר סיכום", inc: "הוסף", dec: "הפחת", remove: "הסר" },
     en: { title: "Your order", items: "items", subtotal: "Subtotal", shipping: "Shipping", free: "Free", total: "Total", empty: "Cart is empty", expand: "Show summary", collapse: "Hide summary", inc: "Increase", dec: "Decrease", remove: "Remove" },
@@ -2927,7 +3492,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile }) {
 
   const subtotal = cart.reduce((s, it) => s + (Number(it.itemPrice) || 0), 0);
   const itemCount = cart.reduce((s, it) => s + (Number(it.qty) || 1), 0);
-  const shipping = cart.length > 0 ? SHIPPING_PRICE : 0;
+  const shipping = cart.length > 0 ? effectiveShipping : 0;
   const total = subtotal + shipping;
 
   const qtyBtnStyle = {
@@ -3098,6 +3663,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [pendingTotal, setPendingTotal] = useState(0);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [showPaymentSoonModal, setShowPaymentSoonModal] = useState(false);
+  // Shipping method (Locker / Home). Locker is the cheaper default — most
+  // Israeli customers prefer pickup-point delivery. The chosen price feeds
+  // into total math + the per-line shipping row in the order insert, and
+  // the method itself is stored on each row's extra_prints.shipping_method.
+  const [shippingMethod, setShippingMethod] = useState(`locker`);
+  const shippingPrice = SHIPPING_RATES[shippingMethod] ?? SHIPPING_LOCKER;
   const [backPrint, setBackPrint] = useState(false);
   const BACK_PRINT_PRICE = 39;
   const SECOND_FRONT_PRICE = 20;
@@ -3342,7 +3913,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
     + (sleeveRight.enabled ? SLEEVE_PRICE : 0) : 0;
   const hasOrderInProgress = cart.length > 0 || (step === 2 && variant);
-  const total = (cartItemsTotal + currentItemTotal) + (hasOrderInProgress ? SHIPPING_PRICE : 0);
+  const total = (cartItemsTotal + currentItemTotal) + (hasOrderInProgress ? shippingPrice : 0);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
@@ -3567,6 +4138,45 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       const createdOrderIds = [];
       for (let i = 0; i < cart.length; i++) {
         const it = cart[i];
+
+        // BLOOM sticker packs are a flat product — no design upload, no
+        // customizer, no per-side prints. Build a minimal row and skip the
+        // shirt-style image pipeline below.
+        if (it.productId === `sticker_pack`) {
+          const packImage = it.stickerPack?.imageUrl || it.mockupUrl || null;
+          const packItemTotal = it.itemPrice + (i === 0 ? shippingPrice : 0);
+          const packRow = {
+            customer_name: form.name, customer_email: form.email, customer_phone: phone,
+            customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
+            product: it.productName,
+            variant: it.variantLabel || it.variantId || `pack`,
+            color: null,
+            quantity: it.qty,
+            total: packItemTotal,
+            notes: form.notes,
+            status: `pending_payment`,
+            payment_status: `idle`,
+            currency: `ILS`,
+            user_id: user?.id || null,
+            design_url: packImage,
+            mockup_url: packImage,
+            product_color: null,
+            language: lang,
+            back_print: false,
+            extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: shippingMethod },
+            order_group: orderGroupId,
+          };
+          if (user) {
+            const { data: orderData, error } = await supabase.from(`orders`).insert(packRow).select().single();
+            if (error) throw error;
+            if (orderData?.id) createdOrderIds.push(orderData.id);
+          } else {
+            const { error } = await supabase.from(`orders`).insert(packRow);
+            if (error) throw error;
+          }
+          continue;
+        }
+
         const itProduct = products.find(p => p.id === it.productId);
         const itVariant = itProduct?.variants.find(v => v.id === it.variantId);
         if (!itProduct || !itVariant) continue;
@@ -3579,7 +4189,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           it.sleeveRight.enabled && it.sleeveRight.image && !it.sleeveRight.sameAsMain ? uploadDesignImage(it.sleeveRight.image) : Promise.resolve(null),
         ]);
 
-        const itemTotal = it.itemPrice + (i === 0 ? SHIPPING_PRICE : 0);
+        const itemTotal = it.itemPrice + (i === 0 ? shippingPrice : 0);
 
         // Snapshot what the customer saw into one flattened mockup image.
         // BLOOM items already carry a public mockup URL (uploadDesignImage
@@ -3625,6 +4235,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           sleeve_left_url: it.sleeveLeft.enabled ? (it.sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
           sleeve_right_url: it.sleeveRight.enabled ? (it.sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
           order_group: orderGroupId,
+          // Shipping method on every row so the admin can route the package
+          // correctly (locker drop-off vs courier door-to-door). The total
+          // already reflects the chosen rate; this just records the customer
+          // choice. Stored on extra_prints (jsonb) to avoid a schema change.
+          extra_prints: { shipping_method: shippingMethod },
         };
 
         if (user) {
@@ -3643,7 +4258,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       // orders insert succeeds. Non-blocking: failures are logged but never block
       // the checkout flow. Moved out of the payment-soon modal CTA so the email
       // sends regardless of how that modal is closed.
-      const confirmedTotal = cartItemsTotal + SHIPPING_PRICE;
+      const confirmedTotal = cartItemsTotal + shippingPrice;
       Promise.all([
         supabase.functions.invoke(`send-order-confirmation`, {
           body: {
@@ -3790,7 +4405,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     {lang === "he" ? `${cart.length} פריטים בסל` : lang === "ru" ? `${cart.length} товаров в корзине` : `${cart.length} items in cart`}
                   </div>
                   <div style={{ color: COLORS.white, fontSize: 13, marginTop: 2 }}>
-                    {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + SHIPPING_PRICE}
+                    {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + shippingPrice}
                   </div>
                 </div>
                 <button onClick={() => setStep(3)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
@@ -4109,7 +4724,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
-                  <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{t.customize.shipping}</span><span>₪{SHIPPING_PRICE}</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{t.customize.shipping}</span><span>₪{shippingPrice}</span></div>
                   {backPrint && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "גב" : "Back"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
                   {secondFront.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "עיצוב נוסף בחזית" : "2nd Front"}</span><span>+₪{SECOND_FRONT_PRICE}</span></div>}
                   {sleeveLeft.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול שמאל" : "Left Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
@@ -4140,7 +4755,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             alignItems: "stretch",
           }}>
             {/* Mobile: collapsible summary at the very top of the form column */}
-            {isMobile && <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={true} />}
+            {isMobile && <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={true} shippingPrice={shippingPrice} />}
 
             {/* Form column — wider on desktop (flex 1.5 vs sidebar's 1) */}
             <div style={{ flex: isMobile ? "none" : "1.5", width: "100%", minWidth: 0 }}>
@@ -4181,6 +4796,47 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <input type="text" value={form.postalCode} maxLength={7} onChange={e => setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") }))} placeholder="1234567" style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
               </div>
+              {/* Shipping method — Locker (cheaper, pickup-point) vs Home
+                  (door-to-door courier). Persisted onto every order row via
+                  extra_prints.shipping_method; the chosen rate feeds the
+                  totals via shippingPrice (above). */}
+              <div>
+                <label style={labelStyle}>
+                  {lang === `he` ? `שיטת משלוח` : lang === `ru` ? `Способ доставки` : `Shipping method`}
+                </label>
+                <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
+                  {[
+                    { id: `locker`, price: SHIPPING_LOCKER, label_he: `נקודת איסוף`, label_en: `Pickup locker`, label_ru: `Пункт выдачи`, sub_he: `מהיר וזול`, sub_en: `Fast & affordable`, sub_ru: `Быстро и дёшево` },
+                    { id: `home`, price: SHIPPING_HOME, label_he: `שליח עד הבית`, label_en: `Home delivery`, label_ru: `Курьер на дом`, sub_he: `נוחות מקסימלית`, sub_en: `Door to door`, sub_ru: `Прямо к двери` },
+                  ].map(opt => {
+                    const active = shippingMethod === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setShippingMethod(opt.id)}
+                        style={{
+                          flex: `1 1 160px`,
+                          background: active ? `rgba(255,107,53,0.1)` : COLORS.bgCard,
+                          border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+                          color: COLORS.white,
+                          borderRadius: 10,
+                          padding: `12px 14px`,
+                          textAlign: lang === `he` ? `right` : `left`,
+                          cursor: `pointer`,
+                          fontFamily: `'Varela Round',sans-serif`,
+                          transition: `border-color 0.2s, background 0.2s`,
+                        }}>
+                        <div style={{ display: `flex`, justifyContent: `space-between`, alignItems: `center`, gap: 8 }}>
+                          <span style={{ fontWeight: 700, fontSize: 14 }}>{opt[`label_${lang}`] || opt.label_en}</span>
+                          <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14 }}>{`₪${opt.price}`}</span>
+                        </div>
+                        <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{opt[`sub_${lang}`] || opt.sub_en}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <div><label style={labelStyle}>{t.form.notes}</label><textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
@@ -4219,7 +4875,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             {/* Desktop sticky summary column */}
             {!isMobile && (
               <div style={{ flex: "1", width: "100%", minWidth: 280, maxWidth: 360 }}>
-                <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={false} />
+                <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={false} shippingPrice={shippingPrice} />
               </div>
             )}
           </div>
@@ -4275,7 +4931,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 12 }}>
                   <span>{t.payment.shipping}</span>
-                  <span>₪{SHIPPING_PRICE}</span>
+                  <span>₪{shippingPrice}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: `1px solid ${COLORS.border}` }}>
                   <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{t.payment.total}</span>
@@ -6137,6 +6793,54 @@ export default function App() {
     showToast(tmpl);
   };
 
+  // BLOOM sticker pack → cart. Packs are a standalone product (no design
+  // upload, no customizer), so we build the same line-item shape the rest of
+  // the cart code consumes but with safe defaults for the shirt-style fields.
+  // The pack image goes in mockupUrl so the cart drawer + order summary show
+  // it; the pack identity (slug + items list) is preserved on cartItem.stickerPack
+  // for the order-insert branch and for any future admin/fulfilment hooks.
+  const addStickerPackToCart = (pack) => {
+    if (!pack) return;
+    const packName = pack[`name_${lang}`] || pack.name_he || pack.name_en || `Sticker Pack`;
+    const unitPrice = Number(pack.price) || 35;
+    const cartItem = {
+      id: Date.now() + Math.random(),
+      productId: `sticker_pack`,
+      productName: packName,
+      // variantId carries the pack slug so checkout/admin can resolve it.
+      variantId: pack.slug || `pack`,
+      variantLabel: packName,
+      colorIdx: 0,
+      color: null,
+      qty: 1,
+      uploadedImage: null,
+      mockupUrl: pack.image_url || null,
+      // Shirt-style fields kept at safe defaults — they're never read for a
+      // sticker_pack but the cart UI/order-insert code touches some of them.
+      imagePos: { x: 0, y: 0, size: 0 },
+      backPrint: false,
+      backDesign: { enabled: false, sameAsMain: true, image: null },
+      secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 0, y: 0, size: 0 } },
+      sleeveLeft: { enabled: false, sameAsMain: true, image: null },
+      sleeveRight: { enabled: false, sameAsMain: true, image: null },
+      stickerPack: {
+        slug: pack.slug || ``,
+        species: pack.species || ``,
+        items: Array.isArray(pack.item_slugs) ? pack.item_slugs : [],
+        imageUrl: pack.image_url || null,
+      },
+      unitPrice,
+      itemPrice: unitPrice,
+    };
+    setCart(c => [...c, cartItem]);
+    const tmpl = lang === `he`
+      ? `${packName} נוסף לסל!`
+      : lang === `ru`
+        ? `${packName} добавлен в корзину!`
+        : `${packName} added to cart!`;
+    showToast(tmpl);
+  };
+
   // Mug Studio → cart. Mirrors the BLOOM/shirt pattern: the cart line carries
   // the customer-arranged mockup (mockupUrl) AND the print-ready 300dpi flat
   // PNG (uploadedImage). The existing OrderPage checkout submit already
@@ -6605,7 +7309,7 @@ export default function App() {
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} />
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
@@ -6775,9 +7479,10 @@ function PawPrintsBackground() {
 }
 
 // ============ PETS PAGE — BLOOM Collection / Pet Couture ============
-function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
+function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast }) {
   const isRTL = lang === "he";
   const [designs, setDesigns] = useState([]);
+  const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null); // currently opened character in modal
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
@@ -6797,17 +7502,30 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
     return () => window.removeEventListener("resize", handle);
   }, []);
 
-  // Fetch the collection
+  // Fetch the collection + sticker packs in parallel. A pack fetch failure
+  // doesn't block the grid — packs are an add-on offering, not the main UI.
   useEffect(() => {
     (async () => {
       try {
-        const { data, error } = await supabase
-          .from("pet_designs")
-          .select("*")
-          .eq("is_active", true)
-          .order("sort_order", { ascending: true });
-        if (error) throw error;
-        setDesigns(data || []);
+        const [designsRes, packsRes] = await Promise.all([
+          supabase
+            .from("pet_designs")
+            .select("*")
+            .eq("is_active", true)
+            .order("sort_order", { ascending: true }),
+          supabase
+            .from("sticker_packs")
+            .select("*")
+            .eq("is_active", true)
+            .order("sort_order", { ascending: true }),
+        ]);
+        if (designsRes.error) throw designsRes.error;
+        setDesigns(designsRes.data || []);
+        if (packsRes.error) {
+          console.error("Failed to load BLOOM sticker packs:", packsRes.error);
+        } else {
+          setPacks(packsRes.data || []);
+        }
       } catch (err) {
         console.error("Failed to load BLOOM collection:", err);
       } finally {
@@ -7017,6 +7735,11 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       searchPlaceholder: "חיפוש לפי גזע (לדוגמה: קורגי, פיטבול)",
       noResults: "לא נמצאו דמויות שתואמות לחיפוש שלך",
       clearFilters: "נקה סינון",
+      packsEyebrow: "חבילות מדבקות",
+      packsHeading: "10 מדבקות באריזה אחת",
+      packAddToCart: "הוסף לסל",
+      madeToOrder: "נוצר בהזמנה",
+      dispatchTime: "זמן ייצור 3-5 ימי עסקים",
     },
     en: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -7051,6 +7774,11 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       searchPlaceholder: "Search by breed (e.g. corgi, pitbull)",
       noResults: "No characters match your search",
       clearFilters: "Clear filters",
+      packsEyebrow: "Sticker packs",
+      packsHeading: "10 stickers per pack",
+      packAddToCart: "Add to cart",
+      madeToOrder: "Made to order",
+      dispatchTime: "Production 3-5 business days",
     },
     ru: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -7085,6 +7813,11 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
       searchPlaceholder: "Поиск по породе (напр. корги, питбуль)",
       noResults: "По вашему запросу ничего не найдено",
       clearFilters: "Сбросить фильтры",
+      packsEyebrow: "Наборы наклеек",
+      packsHeading: "10 наклеек в наборе",
+      packAddToCart: "В корзину",
+      madeToOrder: "Сделано на заказ",
+      dispatchTime: "Производство 3-5 рабочих дней",
     },
   }[lang] || {};
 
@@ -7240,6 +7973,71 @@ function PetsPage({ lang, setPage, onOrderBloom, onShareToast }) {
         {!loading && designs.length > 0 && filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18 }}>
             {t.noResults}
+          </div>
+        )}
+
+        {/* Sticker packs — featured bundles, shown above the grid once data
+            loads. Each pack adds a single sticker_pack line to the cart at
+            its bundled price. Single-character stickers are NOT sold here
+            (free gift only). */}
+        {!loading && packs.length > 0 && typeof onAddStickerPack === `function` && (
+          <div className="reveal" style={{ marginBottom: 40 }}>
+            <div style={{ color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `2px`, marginBottom: 8 }}>
+              {t.packsEyebrow}
+            </div>
+            <h3 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? `1.4rem` : `1.8rem`, color: COLORS.white, margin: `0 0 16px 0` }}>
+              {t.packsHeading}
+            </h3>
+            <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(auto-fit, minmax(280px, 1fr))`, gap: isMobile ? 12 : 20 }}>
+              {packs.map((pack) => {
+                const packName = pack[`name_${lang}`] || pack.name_he || pack.name_en;
+                return (
+                  <div key={pack.id} style={{
+                    background: COLORS.bgCard,
+                    border: `1px solid ${COLORS.border}`,
+                    borderRadius: 14,
+                    overflow: `hidden`,
+                    display: `flex`,
+                    flexDirection: isMobile ? `row` : `column`,
+                    transition: `border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1)`,
+                  }}
+                    onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-4px)`; }}
+                    onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
+                    <div style={{ width: isMobile ? 120 : `100%`, aspectRatio: isMobile ? `1` : `4/3`, background: `#0d0d0d`, display: `flex`, alignItems: `center`, justifyContent: `center`, flexShrink: 0 }}>
+                      <SmartImage src={pack.image_url} alt={packName} loading="lazy" style={{ width: `100%`, height: `100%`, objectFit: `contain`, padding: 8 }} />
+                    </div>
+                    <div style={{ padding: isMobile ? `12px 14px` : 18, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
+                      <h4 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? 17 : 20, color: COLORS.white, margin: 0 }}>{packName}</h4>
+                      <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 12 }}>
+                        {`${(pack.item_slugs || []).length} ${lang === `he` ? `מדבקות` : lang === `ru` ? `наклеек` : `stickers`}`}
+                      </div>
+                      <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginTop: `auto`, gap: 10 }}>
+                        <span style={{ color: COLORS.accent, fontFamily: `'Playfair Display',serif`, fontWeight: 700, fontSize: 18 }}>{`₪${pack.price}`}</span>
+                        <button
+                          type="button"
+                          onClick={() => onAddStickerPack(pack)}
+                          style={{
+                            background: COLORS.accent,
+                            color: `#fff`,
+                            border: `none`,
+                            borderRadius: 8,
+                            padding: `8px 16px`,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            fontFamily: `'Varela Round',sans-serif`,
+                            cursor: `pointer`,
+                            transition: `background 0.2s`,
+                          }}
+                          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; }}
+                          onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}>
+                          {t.packAddToCart}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -7402,7 +8200,10 @@ function PetBadges({ design, lang }) {
 // ============ PET CARD — gallery tile ============
 function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClick, isMobile }) {
   const [hovered, setHovered] = useState(false);
-  const imgSrc = design.mockup_url || design.design_url;
+  // Prefer the new product-mockup (breed on a shirt) — it shows the user the
+  // actual product they'd be buying. Falls back to the clean hero image, then
+  // the raw design transparent PNG if neither shipped for this row yet.
+  const imgSrc = design.mockup_shirt_url || design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
 
   // Editorial corner-cut on hover (desktop only — no hover on touch)
@@ -7499,7 +8300,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
           paddingTop: 14,
           borderTop: `1px solid ${COLORS.border}`,
         }}>
-          <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{priceFrom}{design.price_sticker}</span>
+          <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{priceFrom}{Number(design.price_mug) || Number(design.price_sticker) || 59}</span>
           <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>→</span>
         </div>
       </div>
@@ -7514,7 +8315,9 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   const [shirtType, setShirtType] = useState("basic");
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
-  const imgSrc = design.mockup_url || design.design_url;
+  // Lead with the shirt product mockup since shirts are the headline BLOOM
+  // product; falls back to the clean hero image, then the raw design.
+  const imgSrc = design.mockup_shirt_url || design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
   // Show navigation arrows only when there are at least 2 designs to flip between.
   const canNavigate = typeof onPrev === "function" && typeof onNext === "function" && total > 1;
@@ -7988,12 +8791,24 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
               </div>
             </div>
 
-            {/* Product buttons */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+            {/* Product buttons. Single stickers used to be a paid option here
+                — now they're a free gift only, and customers who want stickers
+                buy a bundled pack from the PetsPage packs section instead. */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
               <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => handleOrder("shirt")} disabled={!design.design_url} />
               <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => handleOrder("mug")} disabled={!design.design_url} />
-              <ProductOption label={t.stickerLabel} price={design.price_sticker} onClick={() => handleOrder("sticker")} disabled={!design.design_url} />
             </div>
+            {/* Made-to-order caption. Reassures the customer that delivery
+                isn't same-day and sets expectations on production lead time. */}
+            {(t.madeToOrder || t.dispatchTime) && (
+              <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginBottom: 24, padding: `10px 12px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8 }}>
+                <span style={{ width: 6, height: 6, borderRadius: `50%`, background: COLORS.accent, flexShrink: 0 }} />
+                <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
+                  {t.madeToOrder && <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, letterSpacing: `0.04em` }}>{t.madeToOrder}</span>}
+                  {t.dispatchTime && <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Varela Round',sans-serif` }}>{t.dispatchTime}</span>}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
