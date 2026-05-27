@@ -727,13 +727,6 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Touch swipe — refs only so updating doesn't re-render. Just the x at
-  // touchstart; the active card itself never moves with the finger (we
-  // cross-fade via opacity on commit). Keeps mobile GPU light: the active
-  // card carries backdrop-filter + several infinite animations + large
-  // shadows, and translating it every frame caused jank on phones.
-  const touchStartXRef = useRef(null);
-
   // Mount-driven reveal for the carousel card. The previous version waited
   // for the image to load — but when the browser had it cached, "load" fired
   // synchronously and React added .is-in before the initial hidden frame ever
@@ -876,30 +869,6 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const goPrev = () => setActiveIdx((i) => (i - 1 + designs.length) % designs.length);
   const goNext = () => setActiveIdx((i) => (i + 1) % designs.length);
 
-  // Touch swipe — minimal version. The card never moves with the finger;
-  // we only record the start x, pause auto-rotation, and on release decide
-  // whether the gesture crossed the threshold. Past it, goNext/goPrev fire
-  // and the opacity transition (~0.3s) does the cross-fade. Under it,
-  // nothing happens. This keeps the GPU idle during the gesture, which
-  // matters because the visible card carries a backdrop-filter blur plus
-  // three infinite animations plus heavy shadows — moving it every frame
-  // janks mid-range phones. Direction matches Instagram/TikTok: swipe LEFT
-  // = next, RIGHT = prev (independent of RTL).
-  const onTouchStart = (e) => {
-    if (!e.touches.length) return;
-    touchStartXRef.current = e.touches[0].clientX;
-    setIsPaused(true);
-  };
-  const onTouchEnd = (e) => {
-    const startX = touchStartXRef.current;
-    touchStartXRef.current = null;
-    setIsPaused(false);
-    if (startX == null || !e.changedTouches.length) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) < 40) return;
-    if (dx < 0) goNext(); else goPrev();
-  };
-
   return (
     <section
       style={{
@@ -944,23 +913,15 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         alignItems: `center`,
         width: `100%`,
       }}>
-      {/* Carousel stack — all cards rendered, cross-fade via opacity. The
-          card itself never moves during the swipe; commit advances activeIdx
-          and the opacity transition handles the visual change. */}
+      {/* Carousel stack — all cards rendered, cross-fade via opacity. Advance
+          via the arrow buttons below or the dots row; auto-advance ticks every 5s. */}
       <div
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        onTouchCancel={onTouchEnd}
         style={{
           position: `relative`,
           width: isMobile ? 280 : 360,
           maxWidth: `100%`,
-          // pan-y lets vertical page scrolling pass through, so the user can
-          // scroll the page normally while horizontal gestures are captured
-          // as carousel swipes — no scroll-jank fight between the two.
-          touchAction: `pan-y`,
         }}>
         {designs.map((d, idx) => {
           const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
@@ -994,6 +955,74 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
             </div>
           );
         })}
+
+        {/* Prev/next arrows — siblings of the cards (NOT inside any inactive
+            wrapper) so they stay clickable even when the active card swaps.
+            Same styling as PetModal's .bloom-nav-btn for visual consistency. */}
+        {designs.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); goPrev(); }}
+              aria-label={lang === `he` ? `דמות קודמת` : lang === `ru` ? `Предыдущий персонаж` : `Previous character`}
+              className="bloom-nav-btn"
+              style={{
+                position: `absolute`,
+                top: `50%`,
+                insetInlineStart: isMobile ? 8 : 12,
+                transform: `translateY(-50%)`,
+                width: isMobile ? 52 : 44,
+                height: isMobile ? 52 : 44,
+                border: `none`,
+                borderRadius: `50%`,
+                background: `rgba(0,0,0,0.55)`,
+                color: COLORS.accent,
+                cursor: `pointer`,
+                display: `flex`,
+                alignItems: `center`,
+                justifyContent: `center`,
+                zIndex: 4,
+                backdropFilter: `blur(8px)`,
+                WebkitBackdropFilter: `blur(8px)`,
+                touchAction: `manipulation`,
+                transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s`,
+              }}>
+              <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points={lang === `he` ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); goNext(); }}
+              aria-label={lang === `he` ? `דמות הבאה` : lang === `ru` ? `Следующий персонаж` : `Next character`}
+              className="bloom-nav-btn"
+              style={{
+                position: `absolute`,
+                top: `50%`,
+                insetInlineEnd: isMobile ? 8 : 12,
+                transform: `translateY(-50%)`,
+                width: isMobile ? 52 : 44,
+                height: isMobile ? 52 : 44,
+                border: `none`,
+                borderRadius: `50%`,
+                background: `rgba(0,0,0,0.55)`,
+                color: COLORS.accent,
+                cursor: `pointer`,
+                display: `flex`,
+                alignItems: `center`,
+                justifyContent: `center`,
+                zIndex: 4,
+                backdropFilter: `blur(8px)`,
+                WebkitBackdropFilter: `blur(8px)`,
+                touchAction: `manipulation`,
+                transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s`,
+              }}>
+              <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points={lang === `he` ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
 
       {/* Dots row — direction LTR always so first dot is consistently on the left. */}
