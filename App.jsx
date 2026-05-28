@@ -742,10 +742,15 @@ const BloomCardLite = React.memo(function BloomCardLite({
         gap: 12,
         boxShadow: `0 8px 24px rgba(0,0,0,0.35)`,
       }}>
+      {/* BLOOM images are 1414×2000 (≈0.707 w/h, 5:7 portrait) with the orange
+          frame baked into the artwork. Match the container to that native ratio
+          and use object-fit: contain so the WHOLE framed image is visible
+          edge-to-edge with no crop — the orange side bars are part of the image
+          and must not be sliced off. Same ratio the desktop .fpc-card uses. */}
       <div style={{
         position: `relative`,
         width: `100%`,
-        aspectRatio: `1 / 1`,
+        aspectRatio: `1414 / 2000`,
         background: COLORS.bg,
         borderRadius: 12,
         overflow: `hidden`,
@@ -755,7 +760,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
           alt={name || ``}
           loading="lazy"
           decoding="async"
-          style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }}
+          style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }}
         />
       </div>
       <div style={{ display: `flex`, flexDirection: `column`, gap: 4 }}>
