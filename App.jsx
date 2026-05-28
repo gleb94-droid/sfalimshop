@@ -1215,6 +1215,7 @@ const LANGS = {
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
     products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
+    bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור" },
   },
   en: {
     dir: "ltr", label: "EN",
@@ -1255,6 +1256,7 @@ const LANGS = {
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
     products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
+    bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close" },
   },
   ru: {
     dir: "ltr", label: "RU",
@@ -1295,6 +1297,7 @@ const LANGS = {
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
     products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
+    bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть" },
   },
 };
 
@@ -3704,6 +3707,21 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     return () => window.removeEventListener('resize', handle);
   }, []);
 
+  // Order is already persisted by the time the "payment coming soon" modal
+  // appears, so any close path (CTA, ×, Escape, backdrop click) should land
+  // the customer on the confirmation step.
+  const dismissPaymentSoonModal = () => {
+    setShowPaymentSoonModal(false);
+    setCart([]);
+    setStep(5);
+  };
+  useEffect(() => {
+    if (!showPaymentSoonModal) return;
+    const onKey = (e) => { if (e.key === "Escape") dismissPaymentSoonModal(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showPaymentSoonModal]);
+
   // Non-passive touch listeners — re-attach when step 2 renders (mockupRef becomes available)
   useEffect(() => {
     if (step !== 2) return;
@@ -4627,9 +4645,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                           <div />
                           <button onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
                           <div />
-                          <button onClick={() => nudge(-5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>←</button>
+                          <button onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
                           <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 12, color: COLORS.gray }}>✛</span></div>
-                          <button onClick={() => nudge(5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>→</button>
+                          <button onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
                           <div />
                           <button onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
                           <div />
@@ -5107,8 +5125,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
             {/* Payment-coming-soon modal */}
             {showPaymentSoonModal && (
-              <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)" }}>
-                <div style={{ background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
+              <div
+                onClick={(e) => { if (e.target === e.currentTarget) dismissPaymentSoonModal(); }}
+                style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)" }}
+              >
+                <div style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
+                  <button
+                    onClick={dismissPaymentSoonModal}
+                    aria-label={LANGS[lang].bloom.closeModal}
+                    style={{ position: "absolute", top: 12, insetInlineEnd: 12, width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Varela Round',sans-serif" }}
+                  >
+                    ×
+                  </button>
                   <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
                     <span style={{ width: 14, height: 14, borderRadius: "50%", background: COLORS.accent, display: "inline-block", boxShadow: `0 0 30px rgba(255,107,53,0.7)`, animation: "maintPulse 2s ease-in-out infinite" }}></span>
                   </div>
@@ -5119,13 +5147,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 15, letterSpacing: "0.05em" }}>{pendingOrderGroupId ? `SXP-${pendingOrderGroupId.slice(-8).toUpperCase()}` : ""}</div>
                   </div>
                   <button
-                    onClick={() => {
-                      // Emails already fired when the order was inserted (in handleSubmit) —
-                      // this CTA just acknowledges the modal and advances to confirmation.
-                      setShowPaymentSoonModal(false);
-                      setCart([]);
-                      setStep(5);
-                    }}
+                    onClick={dismissPaymentSoonModal}
                     style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}
                   >
                     {t.payment.soonBtn}
@@ -5959,7 +5981,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
 
   // Instagram icon link — square button, matches the cart button's style.
   const instagramButton = (
-    <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label="אינסטגרם"
+    <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
       style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0, transition: "all 0.2s" }}
       onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
       onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
@@ -6054,7 +6076,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
           : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accent, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
         }
-        <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label="אינסטגרם"
+        <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
           onClick={() => setMobileMenu(false)}
           style={{ background: "transparent", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%", boxSizing: "border-box", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
@@ -6064,7 +6086,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
           </svg>
-          <span>אינסטגרם</span>
+          <span>{t.bloom.instagramAria}</span>
         </a>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
           {Object.keys(LANGS).map(l => (
@@ -8307,7 +8329,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
           borderTop: `1px solid ${COLORS.border}`,
         }}>
           <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{priceFrom}{Number(design.price_mug) || Number(design.price_sticker) || 59}</span>
-          <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>→</span>
+          <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>{lang === "he" ? "←" : "→"}</span>
         </div>
       </div>
     </div>
@@ -8680,7 +8702,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
           {/* Info */}
           <div style={{ padding: isMobile ? "28px 24px" : "40px 36px", display: "flex", flexDirection: "column" }}>
             <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 10, letterSpacing: "2px", marginBottom: 16, textTransform: "uppercase" }}>
-              BLOOM Collection
+              {`BLOOM ${LANGS[lang].bloom.collection}`}
             </div>
 
             <h2 style={{
