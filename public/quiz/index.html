@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>איזו דמות BLOOM אתה? 🐾 | ספלים שופ</title>
+<meta property="og:title" content="איזו דמות BLOOM אתה? 🐾">
+<meta property="og:description" content="10 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
+<meta name="description" content="10 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ספלים שופ">
+<meta property="og:url" content="https://sfalimshop.com/quiz">
+<meta property="og:image" content="https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/bloom/01_golden_retriever-clean.webp">
+<meta property="og:image:alt" content="BLOOM · ספלים שופ">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="איזו דמות BLOOM אתה? 🐾">
+<meta name="twitter:description" content="10 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
+<meta name="twitter:image" content="https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/bloom/01_golden_retriever-clean.webp">
+<link rel="canonical" href="https://sfalimshop.com/quiz">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap');
+  :root{--accent:#FF6B35;--accent2:#ff8c5a;--ink:#2a2118;--muted:#8a7d6f;--card:#fffaf4;--line:#f0e4d6;--bronze:#c7813f;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Heebo','Segoe UI',Arial,sans-serif;color:var(--ink);background:linear-gradient(160deg,#fff5ec 0%,#ffe7d4 55%,#ffd9bf 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .quiz{width:100%;max-width:560px;}
+  .screen{display:none;animation:fade .4s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  .brand{text-align:center;font-size:13px;font-weight:800;letter-spacing:3px;color:var(--bronze);margin-bottom:14px;}
+  .hero{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:34px 26px;text-align:center;box-shadow:0 20px 50px rgba(199,129,63,.18);}
+  .hero .emoji{font-size:54px;line-height:1;}
+  .hero h1{font-size:30px;font-weight:900;margin:14px 0 6px;line-height:1.2;}
+  .hero h1 span{color:var(--accent);}
+  .hero p{color:var(--muted);font-size:15px;margin-bottom:22px;}
+  .btn{display:inline-block;background:var(--accent);color:#fff;border:none;border-radius:99px;padding:15px 34px;font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 8px 20px rgba(255,107,53,.35);}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(255,107,53,.45);}
+  .mini{font-size:12px;color:var(--muted);margin-top:14px;}
+  .qhead{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--bronze);margin-bottom:10px;}
+  .pbar{height:9px;background:#fff;border-radius:99px;overflow:hidden;margin-bottom:22px;box-shadow:inset 0 1px 3px rgba(0,0,0,.06);}
+  .pbar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .35s;}
+  .qtext{font-size:23px;font-weight:800;margin-bottom:20px;line-height:1.35;}
+  .answers{display:flex;flex-direction:column;gap:12px;}
+  .answer{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px 18px;font-family:inherit;font-size:16px;font-weight:600;text-align:right;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
+  .answer:hover{border-color:var(--accent);background:#fff;transform:translateX(-4px);}
+  .answer .e{font-size:22px;flex:none;}
+  .result{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:28px 24px;text-align:center;box-shadow:0 20px 50px rgba(199,129,63,.2);}
+  .result .lead{font-size:15px;color:var(--muted);font-weight:600;}
+  .result .petimg{width:230px;max-width:78%;margin:14px auto 6px;display:block;filter:drop-shadow(0 12px 24px rgba(0,0,0,.25));}
+  .result h2{font-size:28px;font-weight:900;margin-top:6px;}
+  .result h2 .ttl{display:block;font-size:17px;color:var(--accent);font-weight:800;margin-top:2px;}
+  .result .desc{font-size:15.5px;color:#5c5142;line-height:1.6;margin:14px 4px 22px;}
+  .cta{display:block;text-decoration:none;background:var(--accent);color:#fff;border-radius:99px;padding:15px;font-size:16px;font-weight:800;box-shadow:0 8px 20px rgba(255,107,53,.35);margin-bottom:18px;}
+  .share-title{font-size:13px;font-weight:800;color:var(--bronze);letter-spacing:1px;margin-bottom:10px;}
+  .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+  .sbtn{flex:1;min-width:130px;border:none;border-radius:14px;padding:13px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:filter .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .sbtn:hover{filter:brightness(1.05);}
+  .sbtn.wa{background:#25D366;color:#fff;}
+  .sbtn.gen{background:#fff;color:var(--ink);border:2px solid var(--line);}
+  .restart{background:none;border:none;color:var(--muted);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="quiz">
+  <section class="screen active" id="start">
+    <div class="brand">BLOOM · ספלים שופ</div>
+    <div class="hero">
+      <div class="emoji">🐾</div>
+      <h1>איזו דמות <span>BLOOM</span> אתה?</h1>
+      <p>10 שאלות קצרות יגלו איזו חיה מבין <b>70</b> הדמויות הכי מתאימה לאופי שלך. מוכן לגלות?</p>
+      <button class="btn" onclick="start()">בואו נתחיל ✨</button>
+      <div class="mini">~דקה אחת · 70 דמויות אפשריות 🐶🐱</div>
+    </div>
+  </section>
+  <section class="screen" id="question">
+    <div class="qhead"><span id="qcount"></span><span>BLOOM</span></div>
+    <div class="pbar"><span id="pfill"></span></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="answers" id="answers"></div>
+  </section>
+  <section class="screen" id="result">
+    <div class="brand">התוצאה שלך 🎉</div>
+    <div class="result">
+      <div class="lead">אתה הכי...</div>
+      <img class="petimg" id="rimg" alt="" src="">
+      <h2 id="rname"></h2>
+      <p class="desc" id="rdesc"></p>
+      <a class="cta" id="rcta" href="#" target="_blank">🎁 קח את הדמות שלך הביתה →</a>
+      <div class="share-title">שתף את התוצאה 👇</div>
+      <div class="share-row">
+        <button class="sbtn wa" onclick="shareWA()">💬 וואטסאפ</button>
+        <button class="sbtn gen" onclick="shareGen()">🔗 שיתוף / העתקה</button>
+      </div>
+      <button class="restart" onclick="restart()">↺ עשה את המבחן שוב</button>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // ===== CONFIG =====
+  const SHOP_URL="https://sfalimshop.com";
+  const QUIZ_URL="https://sfalimshop.com/quiz";
+  const IMG_BASE="https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/bloom/";
+
+  // ===== 70 PETS =====  t=[energy,social,elegance,bold,brains,warmth] (1-5)
+  const PETS=[
+   {s:"01_golden_retriever",n:"גולדן רטריבר",ti:"הנשמה הזהובה",em:"🌟",d:"חם, נאמן ואופטימי בלי סוף — חבר אמת.",t:[3,5,3,2,3,5]},
+   {s:"02_labradoodle",n:"לברדודל",ti:"הדוב הטדי",em:"🧸",d:"תערובת מושלמת של שובבות וחיבוקים.",t:[4,4,3,2,3,5]},
+   {s:"03_poodle",n:"פודל",ti:"האריסטוקרט",em:"🎩",d:"מתוחכם, מטופח וחכם — וגאה בזה.",t:[3,3,5,2,5,3]},
+   {s:"04_american_pit_bull",n:"פיט בול אמריקאי",ti:"השריר עם הלב",em:"💪",d:"מראה קשוח, נשמה של חיבוקן.",t:[4,4,2,4,3,5]},
+   {s:"05_red_nose_pitbull",n:"רד נואז פיטבול",ti:"הלוחם המתוק",em:"❤️‍🔥",d:"אנרגיה ונאמנות בלי גבול, עם חיוך גדול.",t:[4,3,2,4,3,5]},
+   {s:"06_chihuahua",n:"צ'יוואווה",ti:"הקטן עם האטיטיוד",em:"🔥",d:"גוף זעיר, אישיות של אריה.",t:[3,4,3,5,2,4]},
+   {s:"07_german_shepherd",n:"רועה גרמני",ti:"המפקד",em:"🎖️",d:"חכם, נאמן ולוקח אחריות — מנהיג טבעי.",t:[4,3,3,4,5,4]},
+   {s:"08_great_dane",n:"דני ענק",ti:"הענק העדין",em:"🦴",d:"גודל מרשים, לב ענק, נפש רגועה.",t:[2,3,4,3,3,5]},
+   {s:"09_labrador",n:"לברדור",ti:"הלב של המסיבה",em:"🎉",d:"כולם אוהבים אותך — ובצדק.",t:[4,5,2,2,3,5]},
+   {s:"10_pekingese",n:"פקיני",ti:"הקיסר הקטן",em:"👑",d:"גאה, מלכותי וקצת מפונק — ומגיע לך.",t:[1,2,5,3,2,3]},
+   {s:"11_corgi",n:"קורגי",ti:"הקסם הקטן",em:"✨",d:"קומה נמוכה, אגו ענק (בקטע חמוד).",t:[4,4,3,4,3,4]},
+   {s:"12_shih_tzu",n:"שיצו",ti:"נסיך הסלון",em:"🛋️",d:"נולד לפינוק ואוהב תשומת לב.",t:[2,4,4,2,2,5]},
+   {s:"13_husky",n:"האסקי",ti:"ההרפתקן הפראי",em:"🏔️",d:"רוח חופשית, אנרגיה אינסופית, קצת דרמה.",t:[5,4,2,4,3,3]},
+   {s:"14_doberman",n:"דוברמן",ti:"המגן הנאמן",em:"🛡️",d:"עוצמה ונאמנות — ולב ענק מאחורי המבט.",t:[4,2,4,5,4,4]},
+   {s:"15_yorkshire_terrier",n:"יורקשייר טרייר",ti:"הפצצה הקטנה",em:"💎",d:"קטן, מטופח, ובלי פחד מאף אחד.",t:[3,3,4,4,3,4]},
+   {s:"16_canaan_dog",n:"כלב כנעני",ti:"המקומי הגאה",em:"🇮🇱",d:"עצמאי, חכם ונאמן — וגאה בשורשים.",t:[3,2,2,3,4,3]},
+   {s:"17_pomeranian",n:"פומרניאן",ti:"כדור הפרווה",em:"🧶",d:"קטן, פלאפי, ובטוח שהוא הכי חשוב בחדר.",t:[4,4,4,4,2,4]},
+   {s:"18_english_bulldog",n:"בולדוג אנגלי",ti:"הבוס הרגוע",em:"😤",d:"עקשן, נינוח, ועושה הכל בקצב שלו.",t:[1,3,3,3,2,4]},
+   {s:"19_dachshund",n:"תחש",ti:"הנקניקיה האמיצה",em:"🌭",d:"קצר ברגליים, ארוך באומץ.",t:[3,3,2,4,3,4]},
+   {s:"20_border_collie",n:"בורדר קולי",ti:"הגאון",em:"🧠",d:"החכם בחבורה — ממוקד וקצת פרפקציוניסט.",t:[5,3,3,3,5,3]},
+   {s:"21_pug",n:"פאג",ti:"הליצן המתוק",em:"🤪",d:"מצחיק, חמוד ומאוהב באוכל.",t:[2,4,2,2,2,5]},
+   {s:"22_boxer",n:"בוקסר",ti:"הילד הגדול",em:"🥊",d:"אנרגיה של גור בגוף של אלוף.",t:[5,4,2,3,3,5]},
+   {s:"23_cocker_spaniel",n:"קוקר ספניאל",ti:"המתוק שבחבורה",em:"🍯",d:"עדין, חברותי ומלא אהבה.",t:[3,4,3,2,3,5]},
+   {s:"24_bichon_frise",n:"בישון פריזה",ti:"ענן השמחה",em:"☁️",d:"כדור פרווה לבן שמפיץ שמחה.",t:[3,4,4,2,2,5]},
+   {s:"25_jack_russell_terrier",n:"ג'ק ראסל",ti:"הכדור האנרגטי",em:"⚡",d:"אנרגיה אינסופית ושכל חד — אף פעם לא משעמם.",t:[5,3,2,4,4,3]},
+   {s:"26_australian_shepherd",n:"רועה אוסטרלי",ti:"ספורטאי הנשמה",em:"🏅",d:"אנרגיה, חוכמה ונאמנות — תמיד מוכן לפעולה.",t:[5,3,3,3,4,4]},
+   {s:"27_beagle",n:"ביגל",ti:"החוקר העליז",em:"🔍",d:"אף סקרן, לב גדול, תמיד בעקבות הריח הבא.",t:[4,4,2,3,3,4]},
+   {s:"28_rottweiler",n:"רוטוויילר",ti:"השומר העדין",em:"🐻",d:"עוצמה ונוכחות — ונאמנות בלי גבול.",t:[3,2,3,5,4,4]},
+   {s:"29_bernese_mountain_dog",n:"ברנזי",ti:"הדוב הטוב",em:"🏔️",d:"ענק רגוע עם לב חם ונשמה עדינה.",t:[2,3,3,2,3,5]},
+   {s:"30_french_bulldog",n:"בולדוג צרפתי",ti:"מלך הצ'יל",em:"😎",d:"רגוע, מגניב, ונותן לעולם לבוא אליו.",t:[2,4,3,3,2,4]},
+   {s:"31_maltese",n:"מלטז",ti:"הנסיך הלבן",em:"🤍",d:"לבן, מטופח ומפונק — אצולה אמיתית.",t:[2,3,5,2,2,4]},
+   {s:"32_shar_pei",n:"שר-פיי",ti:"החכם הקמוט",em:"🧩",d:"מראה ייחודי, נפש רגועה ושכל עתיק.",t:[2,2,3,3,4,3]},
+   {s:"33_dalmatian",n:"דלמטי",ti:"הכוכב המנוקד",em:"⭐",d:"בולט בכל חדר, אנרגטי ומלא חיים.",t:[5,4,3,4,3,4]},
+   {s:"34_basset_hound",n:"באסט האונד",ti:"העצלן המקסים",em:"😴",d:"אוזניים ארוכות, קצב איטי, לב ענק.",t:[1,3,2,2,3,5]},
+   {s:"35_cane_corso",n:"קנה קורסו",ti:"השומר האציל",em:"⚔️",d:"נוכחות מרשימה ונאמנות בלתי מתפשרת.",t:[3,2,4,5,4,4]},
+   {s:"36_cavalier_king_charles",n:"קוואליר",ti:"הרוזן הרך",em:"👑",d:"עדינות מלכותית ולב מלא אהבה.",t:[2,4,4,2,3,5]},
+   {s:"37_chow_chow",n:"צ'או צ'או",ti:"האריה הקטן",em:"🦁",d:"פרוותי, גאה ועצמאי — אוהב במידה שלו.",t:[2,2,5,3,3,2]},
+   {s:"38_samoyed",n:"סמוייד",ti:"החיוך המושלג",em:"❄️",d:"ענן לבן שתמיד מחייך ומפיץ אופטימיות.",t:[3,5,4,2,3,5]},
+   {s:"39_schnauzer",n:"שנאוצר",ti:"הג'נטלמן המזוקן",em:"🧔",d:"מטופח, חכם ובעל אופי — עם זקן מכובד.",t:[3,3,4,3,4,3]},
+   {s:"40_shiba_inu",n:"שיבא אינו",ti:"הסמוראי",em:"🥷",d:"גאה, עצמאי ומלא כבוד עצמי.",t:[3,2,4,4,4,2]},
+   {s:"41_westie",n:"ווסטי",ti:"הלבן הנועז",em:"🤍",d:"קטן, לבן, ובטוח בעצמו בלי בושה.",t:[4,4,3,4,3,4]},
+   {s:"42_whippet",n:"וויפט",ti:"הרץ האלגנטי",em:"🏃",d:"מהיר כברק, אלגנטי, ובבית נינוח לגמרי.",t:[3,3,4,2,3,4]},
+   {s:"43_akita",n:"אקיטה",ti:"הלוחם הנאמן",em:"🗾",d:"כבוד, נאמנות ושקט של לוחם אמיתי.",t:[3,2,4,4,4,4]},
+   {s:"44_belgian_malinois",n:"מלינואה בלגי",ti:"הפרו",em:"🎯",d:"אנרגיה, חוכמה ומיקוד — ספורטאי-על.",t:[5,2,3,4,5,3]},
+   {s:"45_vizsla",n:"ויזלה",ti:"הצל הנאמן",em:"🧡",d:"אנרגטי, רגיש, ולא עוזב אותך לרגע.",t:[5,4,3,3,4,5]},
+   {s:"46_bull_terrier",n:"בול טרייר",ti:"הליצן הנועז",em:"🥚",d:"פרצוף ייחודי, אופי שובב, ולב של זהב.",t:[4,3,2,4,3,4]},
+   {s:"47_spitz",n:"שפיץ",ti:"כדור האנרגיה",em:"🎈",d:"פלאפי, ערני, ותמיד מוכן לאקשן.",t:[4,4,4,3,3,4]},
+   {s:"48_tuxedo",n:"חתול טוקסידו",ti:"הג'נטלמן",em:"🤵",d:"לבוש חליפה מהלידה — מגניב ומלא חן.",t:[3,4,4,3,3,4]},
+   {s:"49_sphynx",n:"ספינקס",ti:"החריג המגניב",em:"🦄",d:"ללא פרווה, מלא אופי — לא כמו אף אחד.",t:[4,4,3,5,4,3]},
+   {s:"50_siamese",n:"סיאמי",ti:"הדיווה",em:"💅",d:"קולני, דעתן ותמיד במרכז ההצגה.",t:[4,5,4,5,4,3]},
+   {s:"51_russian_blue",n:"רוסי כחול",ti:"המסתורי האלגנטי",em:"🌫️",d:"שקט, מתבונן ומלא סטייל מאופק.",t:[2,2,5,2,4,3]},
+   {s:"52_scottish_fold",n:"סקוטיש פולד",ti:"המתוק עם האוזניים",em:"🥺",d:"אוזניים מקופלות, פנים מתוקות, נפש רגועה.",t:[2,3,4,2,3,5]},
+   {s:"53_persian",n:"חתול פרסי",ti:"המלכותי",em:"👑",d:"אלגנטי, מעודן ואוהב את הדברים היפים.",t:[1,2,5,2,2,3]},
+   {s:"54_ragdoll",n:"רגדול",ti:"בובת הסמרטוט",em:"🪆",d:"נמס בידיים — הכי רגוע וחיבוקן שיש.",t:[1,4,4,1,2,5]},
+   {s:"55_orange_tabby",n:"חתול ג'ינג'י",ti:"הג'ינג'י העליז",em:"🍊",d:"חברותי, אוהב אוכל, ומלא חום.",t:[3,5,2,3,2,5]},
+   {s:"56_maine_coon",n:"מיין קון",ti:"הענק הרך",em:"🦁",d:"ענק פרוותי עם נשמה עדינה ומלכותית.",t:[3,3,4,3,4,4]},
+   {s:"57_calico",n:"חתול קליקו",ti:"האמן הצבעוני",em:"🎨",d:"צבעוני, ייחודי, ובעל אופי משלו.",t:[3,3,3,4,3,3]},
+   {s:"58_domestic_shorthair",n:"חתול בית",ti:"הכל-יכול",em:"🐈",d:"מסתדר עם הכל, חכם וגמיש — קלאסיקה.",t:[3,3,2,3,3,4]},
+   {s:"59_british_shorthair",n:"בריטי קצר שיער",ti:"הג'נטלמן הרגוע",em:"🫖",d:"שקט, יציב ומכובד — דובון חי.",t:[2,2,4,2,3,3]},
+   {s:"60_black_cat",n:"חתול שחור",ti:"המסתורי",em:"🌙",d:"אלגנטי, מסתורי, ומביא מזל.",t:[3,2,4,4,3,3]},
+   {s:"61_bengal",n:"בנגלי",ti:"הנשמה הפראית",em:"🐆",d:"חצי חיית בית, חצי נמר — לא נכנס לקופסה.",t:[5,3,3,5,4,3]},
+   {s:"62_abyssinian",n:"חבשי",ti:"החוקר הזריז",em:"🏺",d:"סקרן, זריז ומלא חיים — תמיד בודק משהו.",t:[5,4,4,3,4,3]},
+   {s:"63_kanaani",n:"כנעני",ti:"המקומי הפראי",em:"🏜️",d:"עצמאי, חכם וגאה — חתול ישראלי אמיתי.",t:[4,2,3,4,4,2]},
+   {s:"64_egyptian_mau",n:"מאו מצרי",ti:"הנסיך המצרי",em:"🔺",d:"מהיר, אלגנטי ומלכותי — אצולה עתיקה.",t:[4,2,5,3,4,3]},
+   {s:"65_turkish_angora",n:"אנגורה טורקי",ti:"הרקדן הלבן",em:"🩰",d:"חינני, אלגנטי וחברותי — נשמה של רקדן.",t:[3,4,5,3,4,4]},
+   {s:"66_savannah",n:"סוואנה",ti:"החתול-נמר",em:"🌿",d:"גבוה, פראי ונועז — קרוב משפחה של נמר.",t:[5,3,4,5,4,3]},
+   {s:"67_norwegian_forest",n:"יער נורווגי",ti:"לוחם היער",em:"🌲",d:"פרוותי, חזק ורגוע — נסיך מהיערות.",t:[3,3,4,3,3,4]},
+   {s:"68_munchkin",n:"מנצ'קין",ti:"הקצרצר המקסים",em:"🐾",d:"רגליים קצרות, אישיות ענקית.",t:[3,4,3,3,3,4]},
+   {s:"69_birman",n:"בירמן",ti:"הקדוש הרך",em:"💙",d:"עיניים כחולות, נפש עדינה, חן מלכותי.",t:[2,3,5,2,3,5]},
+   {s:"70_devon_rex",n:"דבון רקס",ti:"השדון המתולתל",em:"🧚",d:"אוזניים ענקיות, סקרנות אינסופית, אופי של שדון.",t:[4,5,3,4,4,4]}
+  ];
+
+  // ===== 10 QUESTIONS ===== weights map to dims: en,so,el,bo,br,wa
+  const QUESTIONS=[
+   {q:"סוף שבוע מושלם בעיניך?",a:[
+     {e:"🏔️",t:"הרפתקה בטבע",w:{en:2,bo:1}},
+     {e:"🛋️",t:"ספה, סדרה וחטיפים",w:{wa:1,el:1}},
+     {e:"🥂",t:"בראנץ' שיק עם חברים",w:{el:2,so:1}},
+     {e:"🎉",t:"מסיבה עם המון אנשים",w:{so:2,en:1}}]},
+   {q:"איך חברים מתארים אותך?",a:[
+     {e:"❤️",t:"נאמן וחם",w:{wa:2}},
+     {e:"😄",t:"מצחיק וחברתי",w:{so:2}},
+     {e:"🎯",t:"חכם וממוקד",w:{br:2}},
+     {e:"🕶️",t:"מסתורי ונועז",w:{bo:2}}]},
+   {q:"הסטייל שלך?",a:[
+     {e:"🤍",t:"קלאסי ואלגנטי",w:{el:2}},
+     {e:"🌈",t:"צבעוני ובולט",w:{bo:2,so:1}},
+     {e:"👟",t:"ספורטיבי ונוח",w:{en:1,wa:1}},
+     {e:"🦄",t:"ייחודי ואקסצנטרי",w:{bo:1,br:1}}]},
+   {q:"מה הכי חשוב לך?",a:[
+     {e:"👨‍👩‍👧",t:"משפחה וחברים",w:{wa:2,so:1}},
+     {e:"🧭",t:"חופש והרפתקה",w:{en:2,bo:1}},
+     {e:"💎",t:"יוקרה ונוחות",w:{el:2}},
+     {e:"🧠",t:"ללמוד ולהתפתח",w:{br:2}}]},
+   {q:"במסיבה אתה...",a:[
+     {e:"🎤",t:"מרכז העניינים",w:{so:2,bo:1}},
+     {e:"💬",t:"מדבר עם כולם בחום",w:{so:1,wa:1}},
+     {e:"🤫",t:"בפינה עם קרובים",w:{wa:1,br:1}},
+     {e:"👀",t:"מתבונן בשקט מהצד",w:{el:1,br:1}}]},
+   {q:"רמת האנרגיה שלך?",a:[
+     {e:"⚡",t:"אינסופית, תמיד בתנועה",w:{en:2}},
+     {e:"🏃",t:"פעיל אבל מאוזן",w:{en:1,wa:1}},
+     {e:"😌",t:"רגוע ונינוח",w:{el:1,wa:1}},
+     {e:"🦥",t:"שומר אנרגיה לדברים החשובים",w:{el:1,br:1}}]},
+   {q:"איך אתה מקבל החלטות?",a:[
+     {e:"🧮",t:"בהיגיון וניתוח",w:{br:2}},
+     {e:"❤️",t:"עם הלב",w:{wa:2}},
+     {e:"🎲",t:"ספונטני ונועז",w:{bo:2,en:1}},
+     {e:"👑",t:"מה שהכי מתאים לי",w:{el:1,bo:1}}]},
+   {q:"איזה וייב מדבר אליך?",a:[
+     {e:"🌅",t:"חם וזהוב",w:{wa:2}},
+     {e:"🌸",t:"צבעוני ושמח",w:{so:1,en:1}},
+     {e:"🖤",t:"כהה ואלגנטי",w:{el:2,bo:1}},
+     {e:"🌿",t:"טבעי ורגוע",w:{wa:1,el:1}}]},
+   {q:"בחופשה אתה...",a:[
+     {e:"🗺️",t:"מטייל ומגלה",w:{en:2,bo:1}},
+     {e:"🏖️",t:"נח על החוף",w:{wa:1,el:1}},
+     {e:"🏨",t:"מלון יוקרה ופינוקים",w:{el:2}},
+     {e:"🎭",t:"חוויות ייחודיות",w:{bo:1,br:1,so:1}}]},
+   {q:"בעל החיים האידיאלי שלך?",a:[
+     {e:"🐕",t:"אנרגטי ושובב",w:{en:2}},
+     {e:"😻",t:"רגוע ומפנק",w:{el:1,wa:1}},
+     {e:"🧩",t:"חכם ומאתגר",w:{br:2}},
+     {e:"👑",t:"דרמטי ומלכותי",w:{el:1,bo:1}}]}
+  ];
+
+  // ===== LOGIC =====
+  const DIMS=['en','so','el','bo','br','wa'];
+  const TIDX={en:0,so:1,el:2,bo:3,br:4,wa:5};
+  const maxW={}; DIMS.forEach(d=>maxW[d]=0);
+  QUESTIONS.forEach(q=>DIMS.forEach(d=>{let m=0;q.a.forEach(a=>{if((a.w[d]||0)>m)m=a.w[d];});maxW[d]+=m;}));
+  let idx=0,acc={},current=null;
+  const $=id=>document.getElementById(id);
+  function show(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(s).classList.add('active');window.scrollTo(0,0);}
+  function start(){idx=0;acc={};DIMS.forEach(d=>acc[d]=0);show('question');render();}
+  function render(){
+    const q=QUESTIONS[idx];
+    $('qcount').textContent='שאלה '+(idx+1)+' מתוך '+QUESTIONS.length;
+    $('pfill').style.width=(idx/QUESTIONS.length*100)+'%';
+    $('qtext').textContent=q.q;
+    const box=$('answers');box.innerHTML='';
+    q.a.forEach(ans=>{const b=document.createElement('button');b.className='answer';b.innerHTML='<span class="e">'+ans.e+'</span><span>'+ans.t+'</span>';b.onclick=()=>pick(ans);box.appendChild(b);});
+  }
+  function pick(ans){DIMS.forEach(d=>acc[d]+=(ans.w[d]||0));idx++;if(idx<QUESTIONS.length)render();else finish();}
+  function finish(){
+    const u={};DIMS.forEach(d=>u[d]=maxW[d]?acc[d]/maxW[d]:0);
+    const scored=PETS.map(p=>{let dist=0;DIMS.forEach(d=>{const pn=(p.t[TIDX[d]]-1)/4;const diff=u[d]-pn;dist+=diff*diff;});return{p,dist};});
+    // weighted pick: closest matches strongly favored, but all 70 reachable
+    let wsum=0;const wts=scored.map(o=>{const w=1/Math.pow(o.dist+0.04,4);wsum+=w;return w;});
+    let r=Math.random()*wsum,ci=0;
+    for(let i=0;i<scored.length;i++){ci=i;r-=wts[i];if(r<=0)break;}
+    current=scored[ci].p;
+    $('pfill').style.width='100%';
+    $('rimg').src=IMG_BASE+current.s+'-clean.webp';$('rimg').alt=current.n;
+    $('rname').innerHTML=current.em+' '+current.n+'<span class="ttl">'+current.ti+'</span>';
+    $('rdesc').textContent=current.d;
+    $('rcta').href=SHOP_URL+'/#pets/'+current.s;
+    $('rcta').textContent='🎁 קח את ה'+current.n+' הביתה →';
+    show('result');
+  }
+  function restart(){show('start');}
+  // ===== SHARE =====
+  function shareUrl(){return QUIZ_URL||location.href.split('#')[0];}
+  function shareText(){return '🐾 גיליתי איזו דמות BLOOM אני: '+current.n+' — '+current.ti+'! '+current.em+'\nמה אתה? קח את המבחן הקצר 👇\n'+shareUrl();}
+  function shareWA(){window.open('https://wa.me/?text='+encodeURIComponent(shareText()),'_blank');}
+  function shareGen(){const data={title:'איזו דמות BLOOM אתה?',text:shareText(),url:shareUrl()};if(navigator.share)navigator.share(data).catch(()=>{});else copy(shareText());}
+  function copy(t){if(navigator.clipboard)navigator.clipboard.writeText(t).then(toast,()=>fb(t));else fb(t);}
+  function fb(t){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(ta);toast();}
+  function toast(){const el=$('toast');el.textContent='הקישור הועתק! שתף עם חברים 🐾';el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+  window.start=start;window.restart=restart;window.shareWA=shareWA;window.shareGen=shareGen;
+</script>
+</body>
+</html>

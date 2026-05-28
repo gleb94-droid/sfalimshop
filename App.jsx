@@ -1361,6 +1361,7 @@ const LANGS = {
   he: {
     dir: "rtl", label: "HE",
     nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
+    quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "10 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
@@ -1402,6 +1403,7 @@ const LANGS = {
   en: {
     dir: "ltr", label: "EN",
     nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
+    quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "10 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
@@ -1443,6 +1445,7 @@ const LANGS = {
   ru: {
     dir: "ltr", label: "RU",
     nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
+    quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "10 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
@@ -6113,6 +6116,10 @@ function Hero({ setPage, lang }) {
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
         >{t.hero.ctaSecondary} →</button>
+        <a href="/quiz" style={{ display: "inline-flex", alignItems: "center", background: COLORS.accentDim, color: COLORS.accent, border: `1px solid rgba(255,107,53,0.4)`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", textDecoration: "none", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, color 0.2s" }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentDim; e.currentTarget.style.color = COLORS.accent; }}
+        >{t.quiz.hero_cta}</a>
       </span>
       <div className="reveal" data-delay="4" style={{ marginTop: isMobile ? 48 : 64, width: "100%", maxWidth: 720, padding: "0 8px", boxSizing: "border-box" }}>
         <TrustRow lang={lang} />
@@ -6218,6 +6225,10 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
           onMouseOut={e => { if(page !== p) { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav[p]}</button>
         ))}
+        <a href="/quiz" style={{ background: "transparent", border: "1px solid transparent", color: COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textDecoration: "none", transition: "all 0.2s" }}
+          onMouseOver={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+          onMouseOut={e => { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}
+        >{t.quiz.nav}</a>
         {user && (
           <button onClick={() => setPage("track")} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "track") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
@@ -7714,6 +7725,7 @@ function PawPrintsBackground() {
 // ============ PETS PAGE — BLOOM Collection / Pet Couture ============
 function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast }) {
   const isRTL = lang === "he";
+  const quizT = LANGS[lang].quiz; // quiz banner copy lives in LANGS (single source)
   const [designs, setDesigns] = useState([]);
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8106,6 +8118,21 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
         <p className="reveal" data-delay="4" style={{ color: "#555", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
           {t.subheading2 ? t.subheading2(designs.length) : ``}
         </p>
+      </section>
+
+      {/* ===== BLOOM QUIZ BANNER (links to the static /quiz page) ===== */}
+      <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "0 16px 8px" : "0 40px" }}>
+        <a href="/quiz" style={{ textDecoration: "none", display: "block" }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", justifyContent: "space-between", gap: isMobile ? 14 : 24, background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 16, padding: isMobile ? "20px 22px" : "22px 32px", direction: LANGS[lang].dir, textAlign: isMobile ? "center" : "start", transition: "box-shadow 0.2s, border-color 0.2s" }}
+            onMouseOver={e => { e.currentTarget.style.boxShadow = "0 12px 30px rgba(255,107,53,0.18)"; e.currentTarget.style.borderColor = COLORS.accent; }}
+            onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "rgba(255,107,53,0.35)"; }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 20 : 24, marginBottom: 6 }}>{quizT.banner_title}</div>
+              <div style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: isMobile ? 13 : 15, lineHeight: 1.5 }}>{quizT.banner_sub}</div>
+            </div>
+            <span style={{ flexShrink: 0, background: COLORS.accent, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
+          </div>
+        </a>
       </section>
 
       {/* ===== COLLECTION GRID ===== */}
