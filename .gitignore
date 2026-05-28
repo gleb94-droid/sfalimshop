@@ -23,6 +23,7 @@ upload-bloom-normalized.ps1
 mug-*.jpeg
 # sticker print scratch
 _printtmp/
+_stickers_for_dima/
 
 # build/test artifacts and backups
 *.zip
