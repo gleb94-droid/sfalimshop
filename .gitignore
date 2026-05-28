@@ -15,3 +15,9 @@ bloom_slugs.txt
 bloom_normalize.sh
 bloom_trim_report.csv
 upload-bloom-normalized.ps1
+
+# playwright + test artifacts
+.playwright-mcp/
+mug-*.jpeg
+# sticker print scratch
+_printtmp/
