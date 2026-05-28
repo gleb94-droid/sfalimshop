@@ -998,12 +998,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   // active index and designs list from refs at click time, so the navigation
   // target always matches the character currently visible — never stale.
   const handleViewActiveCharacter = () => {
-    const list = designsRef.current;
-    const idx = activeIdxRef.current;
-    const d = list && list[idx];
-    if (!d || typeof setPage !== `function`) return;
-    const slug = d.slug || buildSlug(d.name_en) || String(d.id);
-    setPage(`pets/${slug}`);
+    if (typeof setPage === `function`) setPage(`pets`);
   };
 
   const goPrev = () => setActiveIdx((i) => (i - 1 + designs.length) % designs.length);
