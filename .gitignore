@@ -23,3 +23,12 @@ upload-bloom-normalized.ps1
 mug-*.jpeg
 # sticker print scratch
 _printtmp/
+
+# build/test artifacts and backups
+*.zip
+*.bak
+sample-*.pdf
+sample-*.png
+quiz-*.jpeg
+hero-quiz-cta.jpeg
+pets-quiz-banner.jpeg
