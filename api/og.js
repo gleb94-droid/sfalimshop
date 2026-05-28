@@ -28,6 +28,15 @@ const MAINTENANCE = true;
 const FALLBACK_SUPABASE_URL = `https://ubvgrxlxtelulwjtfudd.supabase.co`;
 const FALLBACK_SUPABASE_ANON_KEY = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE`;
 
+// M6: prefer the env-provided anon key; warn (don't throw) if it's missing so a
+// Vercel env misconfig surfaces in logs instead of silently using the public
+// fallback. Switch to a hard throw once SUPABASE_ANON_KEY is set in Vercel.
+if (!process.env.SUPABASE_ANON_KEY) {
+  console.warn(
+    `[og] SUPABASE_ANON_KEY env var not set — using public anon fallback. Set it in Vercel env for clean key rotation.`
+  );
+}
+
 const SITE_ORIGIN = `https://www.sfalimshop.com`;
 const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`;
 
