@@ -6,3 +6,12 @@ dist/
 
 # Claude Code local files
 .claude/
+
+# BLOOM image normalization review artifacts (local only, do not commit)
+bloom_src/
+bloom_normalized/
+bloom_montage.png
+bloom_slugs.txt
+bloom_normalize.sh
+bloom_trim_report.csv
+upload-bloom-normalized.ps1
