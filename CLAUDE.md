@@ -1,50 +1,217 @@
-# Sfalim Shop — Project Guide for Claude Code
+# CLAUDE.md — Sfalim Shop Project Context
 
-## What this is
-Sfalim Shop — a Hebrew-first print-on-demand store: custom shirts, mugs and stickers, plus an original collection called BLOOM (pet-portrait designs). Owner: Gleb, who is not a developer. Always reply in plain language and deliver working, ready-to-use code.
+Every project agent should read this file before acting. It is the **shared brain** for all subagents in `.claude/agents/`.
 
-## Tech stack
-- React 18 + Vite 4 (esbuild-based)
-- Supabase: Postgres DB, Auth, Storage, Edge Functions
-- Hosting: Vercel — pushing to main auto-deploys the site
-- Repo: gleb94-droid/sfalimshop
-- The entire app lives in ONE file at the repo root: `App.jsx` (~6000 lines). NOT in a `src/` folder. Entry point: `main.jsx` (also at root) → `App.jsx`. Keep it as one file unless explicitly told to split.
-- `vite.config.js` splits vendor chunks (react, supabase) — don't fight this in build edits.
+---
 
-## Hard rules — do NOT break these
-1. Strings: ONLY template literals (backticks). NEVER use + for string concatenation. The esbuild setup breaks on it. This is the single most important rule.
-2. One file. All app code stays in `App.jsx` at the repo root. Do not create new component files or a `src/` folder unless explicitly told to.
-3. Trilingual. Every user-facing string must exist in Hebrew, English, and Russian via the LANGS object. Hebrew is primary; English is the fallback.
-4. RTL + mobile. Hebrew renders right-to-left. Verify layouts do not break in RTL and on mobile (the app checks window.innerWidth < 768).
-5. Inline styling only, matching the existing dark + orange look. No CSS framework.
-6. Maintenance gate: MAINTENANCE_MODE = true shows a maintenance page to everyone except admin (gleb2009@gmail.com) and ?staff=1. Do not turn it off until payment is live.
-7. Before every commit, run npm run build to confirm it compiles. Only then commit and push.
+## 🏪 Project at a glance
 
-## Workflow
-- One task at a time, small commits, then push (Vercel deploys in ~1-2 min).
-- Never fabricate content (e.g., reviews). Leave a clear TODO and ask Gleb for real text/images.
-- After each change, tell Gleb in plain language what changed and how to see it.
+**Sfalim Shop** (sfalimshop.com) — Hebrew-first print-on-demand shop (t-shirts, mugs, stickers + the 70-character BLOOM pet portrait collection).
 
-## Brand
-Colors (COLORS object): bg #0f0f0f, card #1a1a1a, border #2a2a2a, accent #FF6B35, accentHover #ff8255, white #ffffff, gray #888888, success #4ade80. Fonts: headings Playfair Display, body Varela Round.
+- Owner: Gleb (admin email: `gleb2009@gmail.com`)
+- Israeli exempt dealer (עוסק פטור) #321630279
+- HaSportaim 28, Be'er Sheva, Israel
+- Customer email: `hello@sfalimshop.com`
+- Instagram: `@sfalimshop`
+- Status: **PRE-LAUNCH.** `MAINTENANCE_MODE = true` in App.jsx until the Tranzila payment integration is live.
 
-## Code map (inside App.jsx)
-- Constants: COLORS, BLOOM_SHIRT_COLORS (6 colors, BLOOM modal only), LANGS (he/en/ru), PRODUCTS(t) (mug, tshirt, oversized, dryfit, sticker, sticker_sq with variants/colors/printArea), MOCKUP_URLS (Supabase image per product — reuse for cards), MAINTENANCE_MODE flag (top of file).
-- Components: Nav, Hero, OrderPage (multi-step wizard with cart — takes `cart`, `setCart`, `updateCartQty`, `pendingCheckout`, `pendingBloomItem`), PetsPage + PetCard + PetModal + ProductOption (the BLOOM collection), AboutPage, PoliciesPage, Footer, AuthPage, TrackPage, AdminPage, MaintenancePage, App (hash-based routing, holds cart state).
+---
 
-## Supabase
-Tables: orders, order_status_history, admins, pet_designs (BLOOM: name_he/en/ru, animal_*, tagline_*, price_sticker/mug/shirt, mockup_url, design_url, mockup_bg, is_active, sort_order). Edge Functions: send-order-confirmation, send-admin-order-alert, send-status-update. The anon key in the file is public by design — never add private keys to client code.
+## 🛠️ Tech stack
 
-## Payments
-Tranzila — NOT yet connected (waiting on a supplier number). Do not wire real payments until Gleb provides credentials. The current "Pay" button intentionally opens a "coming soon" modal.
+- **React 18 + Vite 4.5** (esbuild 0.18 — **template literals only, no `+` string concat**)
+- **Supabase** (DB + Auth + Storage + Edge Functions), project ref `ubvgrxlxtelulwjtfudd`, **Pro tier** (daily backups, no pausing)
+- **Vercel hosting**, **Pro tier** (WAF available)
+- **GitHub:** `gleb94-droid/sfalimshop` (private)
 
-## Other files in the repo
-- `main.jsx` — React entry point (root-level, not in src/).
-- `supabase.js` — Supabase client setup. The anon key here is public by design.
-- `index.html` — Vite HTML entry.
-- `vercel.json` — deploy config.
-- `testimonials.sql` — SQL for the testimonials/reviews table.
-- `scripts/export-logos.mjs` — Puppeteer script that exports logo PNGs from `logo-preview.html` into `public/exports/`.
-- `logo-preview.html` — standalone page used by the export script (not part of the app).
-- `public/` — favicons, og-image, sitemap, robots, logo SVGs/PNGs.
-- Sibling docs (not loaded by the app): `DESIGN-FIXES.md`, `MARKETING-KIT.md`, `MIDJOURNEY-PROMPTS.md` — reference material for Gleb, safe to ignore unless asked.
+Local working dir on owner's machine: `C:/Users/Gleb/Documents/GitHub/sfalimshop`
+
+---
+
+## 📁 Repo structure
+
+```
+sfalimshop/
+├── App.jsx                        # THE ENTIRE APP (~9350 lines). At repo ROOT, NOT in src/.
+├── public/
+│   └── quiz/index.html            # Standalone BLOOM personality quiz, vanilla JS
+├── api/                           # Vercel serverless functions
+│   ├── og.js                      # OG meta image generation
+│   └── p/[handle].js              # /p/<slug> share URL handler
+├── supabase/functions/            # Edge Functions (Tranzila stubs in here)
+│   ├── create-payment/            # stub
+│   └── tranzila-webhook/          # stub
+├── vercel.json                    # Routes + CSP + security headers
+├── .claude/agents/                # Subagent library (TRACKED in git as of 2026-05-28)
+└── CLAUDE.md                      # THIS FILE
+```
+
+---
+
+## ⚠️ Critical conventions (NEVER violate)
+
+1. **Template literals only** — `` `text ${var}` ``. Never `"text " + var`. (esbuild 0.18 limit.)
+2. **Hebrew RTL primary**, English/Russian secondary.
+3. **Single-file React app** — all UI/logic lives in `App.jsx` at the repo root.
+4. **BLOOM slug numbering**: `01-47` = dogs, `48-70` = cats.
+5. **Windows ImageMagick**: use `magick identify` / `magick convert`. **Bare `convert` is a Windows disk tool** — it will NOT call ImageMagick.
+6. **Pixel Agents (VS Code ext.)** is unreliable for actual work — use the regular Claude Code terminal.
+
+---
+
+## 🗄️ Database schema (Supabase: `ubvgrxlxtelulwjtfudd`)
+
+### Tables
+
+| Table | Rows | Notes |
+|---|---|---|
+| `pet_designs` | 82 (70 active + 12 obsolete drafts) | 33 columns. Core catalog. |
+| `orders` | varies | RLS enabled |
+| `order_status_history` | audit log | RLS enabled |
+| `payment_events` | webhook audit log | RLS enabled |
+| `admins` | 1 (`gleb2009@gmail.com`) | Self-select RLS only |
+| `sticker_packs` | 2 | BLOOM sticker bundles |
+
+### `pet_designs` key columns
+
+- `slug` (e.g., `01_golden_retriever`, `48_tuxedo`)
+- `name_he` / `name_en` / `name_ru`
+- `animal_he` / `animal_en` / `animal_ru`
+- `tagline_he` / `tagline_en` / `tagline_ru`
+- `mockup_url` — BLOOM portrait (populated for all 82 rows)
+- `mockup_mug_url` — sofa-style mug photo (populated for 70 active rows)
+- `mockup_shirt_url` — shirt mockup (**NULL for all 70** — not added yet, code falls back gracefully)
+- `design_url` — raw transparent design
+- `mockup_bg` — fallback background color
+- `price_shirt`, `price_shirt_basic`, `price_shirt_oversized`, `price_mug`, `price_sticker`, `price_sticker_pack`
+- `is_active`, `is_bestseller`, `is_new`, `sort_order`
+- `species` (`dog` / `cat` / `NULL` — NULL for the 12 obsolete drafts)
+- `breed_he` / `breed_en` / `breed_ru`, `breed_aliases`
+
+### Storage buckets (all public)
+
+- **`mockups/`**
+  - `bloom/<slug>-clean.webp` — 1414×2000 BLOOM portrait (70 active files)
+  - `bloom/<slug>-mug.webp` — sofa lifestyle mug photo (70 files, ~355 KB avg)
+  - `mug.png`, `t shirt basic.png`, `oversize.png`, `dri fit t shirt.png`, `round sticker.png`, `square sticker.png` — generic product templates
+- **`pet-designs/`**
+  - `bloom/<slug>.webp` — raw transparent design (82 files)
+- **`designs/`**
+  - User-uploaded custom designs for orders
+
+### Useful queries
+
+```sql
+-- Active characters with mockup URLs
+SELECT slug, name_he, mockup_url, mockup_mug_url 
+FROM pet_designs WHERE is_active=true ORDER BY slug;
+
+-- Obsolete drafts (12)
+SELECT slug, name_he, species 
+FROM pet_designs WHERE is_active=false ORDER BY slug;
+
+-- Storage file stats
+SELECT bucket_id, name, metadata->>'size' AS bytes 
+FROM storage.objects 
+WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
+```
+
+---
+
+## 🧭 Key code locations in `App.jsx`
+
+| Feature | Approx Line | Notes |
+|---|---|---|
+| `LANGS` dict (i18n he/en/ru) | 1394 – 1500 | The translations |
+| `PRODUCTS` array | 1757 | mug/shirt/sticker with prices + printArea |
+| `MOCKUP_URLS` const | 1855 | Generic product templates |
+| `MugMockup` component | 1998 | Wraps `ProductMockupBase` for mug |
+| `pet_designs` SELECT | 945 | Fetches catalog columns |
+| `handleViewActiveCharacter` | ~1000 | BLOOM card → `/pets/` |
+| `FloatingProductCard` | 1101 | Home carousel card |
+| `BloomCardLite` | 1091 | Carousel variant |
+| `DesignEditor` (admin) | 3494 | Admin `pet_designs` editor |
+| `OrderPage` | 3814 | Order/checkout flow |
+| `PetsPage` | 7721 | BLOOM gallery |
+| `PetModal` | 8571 | Per-character detail modal |
+| `handleOrder` | 8661 | Adds BLOOM character to cart |
+| `ProductOption` | 9128 | Mug/shirt/sticker buttons |
+| `previewProduct` state | ~8581 | Drives mug/shirt preview swap (added 2026-05-28) |
+
+---
+
+## 🐾 Quiz (`public/quiz/index.html`)
+
+- **11 questions**: Q0 = species filter (🐶 / 🐱 / 🐾 both), Q1–Q10 = personality
+- **6 personality dimensions**: `en` (energy), `so` (social), `el` (elegance), `bo` (bold), `br` (brains), `wa` (warmth)
+- Weighted distance-matching against `PETS` array (70 items)
+- Q0 filters the `PETS` pool by `sp: 'dog' | 'cat' | 'any'`
+- ~300 lines vanilla JS, dark theme, back-to-shop button, WhatsApp share
+- Routed by Vercel: `/quiz` has **RELAXED** CSP (inline scripts allowed); rest of site has **STRICT** CSP
+
+---
+
+## 🚀 Vercel configuration
+
+- `vercel.json` — routes + security headers
+- Strict CSP everywhere EXCEPT `/quiz` (negative lookahead in path patterns to avoid CSP intersection)
+- HSTS, X-Frame-Options DENY, Referrer-Policy strict-origin
+- Domain: `sfalimshop.com` (Vercel-managed)
+- Pro tier: **WAF rate limiting available** (use for Tranzila webhook rate limit / order-submit anti-bot)
+
+---
+
+## ✅ Current status (snapshot 2026-05-28)
+
+- ✅ MAINTENANCE_MODE = true (visitors see maintenance screen)
+- ⏳ Tranzila registered, awaiting supplier number
+- ✅ 70 BLOOM active in DB (47 dogs + 23 cats)
+- ✅ 70 BLOOM portraits + 70 mug mockups in Supabase storage
+- ❌ 0 shirt mockups (TBD — code is ready, just needs the files)
+- ✅ Sticker print workflow ready (Roland PerfCutContour CMYK FOGRA39), awaiting Dima
+- ✅ Security baseline: H1 + M1 + M6 + M7 done; C1/C2/H2/H3 deferred to Tranzila integration
+- ✅ Quiz fully refreshed: Q0 species filter, dark theme, back button, WhatsApp share fix, OG image fix
+- ✅ BLOOM mug mockup wired into PetModal (preview swap + product-specific cart thumbnail)
+
+---
+
+## 🎓 Lessons learned (read before relevant tasks)
+
+- **Windows ImageMagick**: Use `magick identify` / `magick convert`. Bare `convert` is a Windows disk tool that will NOT do what you want.
+- **`.claude/` partial gitignore**: Only `.claude/agents/` is tracked. The rest (cache, projects, etc.) stays ignored.
+- **Supabase storage URLs are public** — no auth needed for `curl` / `HEAD`.
+- **BLOOM image standard**: 1414×2000, WebP, sRGB, target <500 KB.
+- **Mockup paths**: `mockups/bloom/<slug>-clean.webp`, `mockups/bloom/<slug>-mug.webp`, `pet-designs/bloom/<slug>.webp`.
+- **Pixel Agents** (VS Code ext.): unreliable for actual code work. Stick to regular Claude Code terminal.
+- **CSP**: Two CSP headers on the same path → browser intersects → most-restrictive applied. Use negative-lookahead in path patterns to avoid this.
+- **Staff bypass**: `?staff=1` query param bypasses MAINTENANCE_MODE for testing.
+- **Sticker spot color**: must be EXACTLY `PerfCutContour` (perforated cut, Roland convention), NOT `CutContour` or other spellings.
+
+---
+
+## 💬 Communication style
+
+- **Conversation language**: Hebrew (Gleb is Hebrew-first).
+- **Agent output**: English (consistent across all subagents).
+- **Style**: Concise, action-oriented, code-ready-to-paste, tables for comparisons, emoji for visual scanning, no excessive caveats.
+
+---
+
+## 💳 Tranzila integration (pending)
+
+- Files in `supabase/functions/`:
+  - `create-payment/` (stub)
+  - `tranzila-webhook/` (stub)
+- Env vars needed in Vercel:
+  - `TRANZILA_SUPPLIER` (pending from Tranzila)
+  - `TRANZILA_TK` (transaction key)
+  - `SUPABASE_SERVICE_ROLE_KEY` (Supabase admin key)
+- Open security tasks: C1, C2 (payment integrity), H2 (webhook HMAC), H3 (rate limit / WAF rules)
+
+---
+
+## 🤖 Agent roster (`.claude/agents/`)
+
+Pre-existing: `explorer`, `code-finder`, `supabase-helper`, `rtl-auditor`, `ramkol`
+Added 2026-05-27: `tranzila-specialist`, `i18n-translator`, `whatsapp-responder`, `seo-auditor`, `a11y-auditor`, `legal-content-checker`, `security-auditor`
+Added 2026-05-28: `mockup-qa`, `pre-deploy-orchestrator`, `order-helper`, `bloom-curator`, `canva-pipeline`, `sticker-print-helper`

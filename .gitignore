@@ -4,8 +4,10 @@ node_modules/
 # Build output
 dist/
 
-# Claude Code local files
-.claude/
+# Claude Code: track the agent definitions only, ignore caches/projects/locks
+.claude/*
+!.claude/agents/
+!.claude/agents/**
 
 # BLOOM image normalization review artifacts (local only, do not commit)
 bloom_src/
