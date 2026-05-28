@@ -271,7 +271,15 @@
   // ===== SHARE =====
   function shareUrl(){return QUIZ_URL||location.href.split('#')[0];}
   function shareText(){return '🐾 גיליתי איזו דמות BLOOM אני: '+current.n+' — '+current.ti+'! '+current.em+'\nמה אתה? קח את המבחן הקצר 👇\n'+shareUrl();}
-  function shareWA(){window.open('https://wa.me/?text='+encodeURIComponent(shareText()),'_blank');}
+  function shareWA(){
+    var t = encodeURIComponent(shareText());
+    var isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = 'whatsapp://send?text=' + t;
+    } else {
+      window.open('https://wa.me/?text=' + t, '_blank');
+    }
+  }
   function shareGen(){const data={title:'איזו דמות BLOOM אתה?',text:shareText(),url:shareUrl()};if(navigator.share)navigator.share(data).catch(()=>{});else copy(shareText());}
   function copy(t){if(navigator.clipboard)navigator.clipboard.writeText(t).then(toast,()=>fb(t));else fb(t);}
   function fb(t){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(ta);toast();}
