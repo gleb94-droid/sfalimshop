@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>איזו דמות BLOOM אתה? 🐾 | ספלים שופ</title>
 <meta property="og:title" content="איזו דמות BLOOM אתה? 🐾">
-<meta property="og:description" content="10 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
-<meta name="description" content="10 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
+<meta property="og:description" content="11 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
+<meta name="description" content="11 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ספלים שופ">
 <meta property="og:url" content="https://sfalimshop.com/quiz">
@@ -18,7 +18,7 @@
 <meta property="og:locale" content="he_IL">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="איזו דמות BLOOM אתה? 🐾">
-<meta name="twitter:description" content="10 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
+<meta name="twitter:description" content="11 שאלות קצרות יגלו איזו מ-70 חיות BLOOM הכי מתאימה לך. קח את המבחן!">
 <meta name="twitter:image" content="https://sfalimshop.com/quiz/og.jpg">
 <link rel="canonical" href="https://sfalimshop.com/quiz">
 <style>
@@ -74,7 +74,7 @@
     <div class="hero">
       <div class="emoji">🐾</div>
       <h1>איזו דמות <span>BLOOM</span> אתה?</h1>
-      <p>10 שאלות קצרות יגלו איזו חיה מבין <b>70</b> הדמויות הכי מתאימה לאופי שלך. מוכן לגלות?</p>
+      <p>11 שאלות קצרות יגלו איזו חיה מבין <b>70</b> הדמויות הכי מתאימה לאופי שלך. מוכן לגלות?</p>
       <button class="btn" onclick="start()">בואו נתחיל ✨</button>
       <div class="mini">~דקה אחת · 70 דמויות אפשריות 🐶🐱</div>
     </div>
@@ -188,6 +188,10 @@
 
   // ===== 10 QUESTIONS ===== weights map to dims: en,so,el,bo,br,wa
   const QUESTIONS=[
+   {q:`רגע ראשון — איפה הלב שלך?`,a:[
+     {e:`🐶`,t:`כלבים`,w:{},sp:`dog`},
+     {e:`🐱`,t:`חתולים`,w:{},sp:`cat`},
+     {e:`🐾`,t:`שניהם / לא משנה לי`,w:{},sp:`any`}]},
    {q:"סוף שבוע מושלם בעיניך?",a:[
      {e:"🏔️",t:"לקפוץ על טרק בצפון, וללון מתחת לכוכבים",w:{en:2,bo:1}},
      {e:"🛋️",t:"פיג'מה, סדרה, חטיפים — ואל תפריעו לי",w:{wa:1,el:1}},
@@ -245,10 +249,11 @@
   const TIDX={en:0,so:1,el:2,bo:3,br:4,wa:5};
   const maxW={}; DIMS.forEach(d=>maxW[d]=0);
   QUESTIONS.forEach(q=>DIMS.forEach(d=>{let m=0;q.a.forEach(a=>{if((a.w[d]||0)>m)m=a.w[d];});maxW[d]+=m;}));
+  let species=`any`;
   let idx=0,acc={},current=null;
   const $=id=>document.getElementById(id);
   function show(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(s).classList.add('active');window.scrollTo(0,0);}
-  function start(){idx=0;acc={};DIMS.forEach(d=>acc[d]=0);show('question');render();}
+  function start(){idx=0;acc={};DIMS.forEach(d=>acc[d]=0);species=`any`;show('question');render();}
   function render(){
     const q=QUESTIONS[idx];
     $('qcount').textContent='שאלה '+(idx+1)+' מתוך '+QUESTIONS.length;
@@ -257,10 +262,15 @@
     const box=$('answers');box.innerHTML='';
     q.a.forEach(ans=>{const b=document.createElement('button');b.className='answer';b.innerHTML='<span class="e">'+ans.e+'</span><span>'+ans.t+'</span>';b.onclick=()=>pick(ans);box.appendChild(b);});
   }
-  function pick(ans){DIMS.forEach(d=>acc[d]+=(ans.w[d]||0));idx++;if(idx<QUESTIONS.length)render();else finish();}
+  function pick(ans){if(ans.sp)species=ans.sp;DIMS.forEach(d=>acc[d]+=(ans.w[d]||0));idx++;if(idx<QUESTIONS.length)render();else finish();}
   function finish(){
     const u={};DIMS.forEach(d=>u[d]=maxW[d]?acc[d]/maxW[d]:0);
-    const scored=PETS.map(p=>{let dist=0;DIMS.forEach(d=>{const pn=(p.t[TIDX[d]]-1)/4;const diff=u[d]-pn;dist+=diff*diff;});return{p,dist};});
+    const pool = species===`any` ? PETS : PETS.filter(p=>{
+      const num = parseInt(p.s.substring(0,2),10);
+      const isDog = num>=1 && num<=47;
+      return species===`dog` ? isDog : !isDog;
+    });
+    const scored=pool.map(p=>{let dist=0;DIMS.forEach(d=>{const pn=(p.t[TIDX[d]]-1)/4;const diff=u[d]-pn;dist+=diff*diff;});return{p,dist};});
     // weighted pick: closest matches strongly favored, but all 70 reachable
     let wsum=0;const wts=scored.map(o=>{const w=1/Math.pow(o.dist+0.04,4);wsum+=w;return w;});
     let r=Math.random()*wsum,ci=0;

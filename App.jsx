@@ -1356,7 +1356,7 @@ const LANGS = {
   he: {
     dir: "rtl", label: "HE",
     nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
-    quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "10 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
+    quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
@@ -1398,7 +1398,7 @@ const LANGS = {
   en: {
     dir: "ltr", label: "EN",
     nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
-    quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "10 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
+    quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
@@ -1440,7 +1440,7 @@ const LANGS = {
   ru: {
     dir: "ltr", label: "RU",
     nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
-    quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "10 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
+    quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
