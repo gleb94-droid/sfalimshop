@@ -8574,9 +8574,14 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   const [shirtType, setShirtType] = useState("basic");
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
+  const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
   // Lead with the shirt product mockup since shirts are the headline BLOOM
   // product; falls back to the clean hero image, then the raw design.
-  const imgSrc = design.mockup_shirt_url || design.mockup_url || design.design_url;
+  // previewProduct (set when the user clicks a product) overrides the default.
+  const imgSrc =
+    (previewProduct === `mug` && design.mockup_mug_url) ||
+    (previewProduct === `shirt` && design.mockup_shirt_url) ||
+    design.mockup_shirt_url || design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
   // Show navigation arrows only when there are at least 2 designs to flip between.
   const canNavigate = typeof onPrev === "function" && typeof onNext === "function" && total > 1;
@@ -8662,7 +8667,10 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
     if (!design.design_url) return;
     // The polished image the customer is actually looking at in this modal —
     // saved on the order so the order preview matches what they saw.
-    const mockupUrl = design.mockup_url || design.design_url;
+    const mockupUrl =
+      kind === `mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `shirt` ? (design.mockup_shirt_url || design.mockup_url || design.design_url) :
+      (design.mockup_url || design.design_url);
     if (kind === "shirt") {
       onOrderBloom({
         productId: shirtProductId,
@@ -9055,8 +9063,8 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                 — now they're a free gift only, and customers who want stickers
                 buy a bundled pack from the PetsPage packs section instead. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
-              <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => handleOrder("shirt")} disabled={!design.design_url} />
-              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => handleOrder("mug")} disabled={!design.design_url} />
+              <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => { setPreviewProduct(`shirt`); handleOrder(`shirt`); }} disabled={!design.design_url} />
+              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => { setPreviewProduct(`mug`); handleOrder(`mug`); }} disabled={!design.design_url} />
             </div>
             {/* Made-to-order caption. Reassures the customer that delivery
                 isn't same-day and sets expectations on production lead time. */}
