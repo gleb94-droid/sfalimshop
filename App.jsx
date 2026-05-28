@@ -240,6 +240,7 @@ const FLOATING_CARD_CSS = `
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -760,7 +761,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
           alt={name || ``}
           loading="lazy"
           decoding="async"
-          style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }}
+          style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center`, display: `block` }}
         />
       </div>
       <div style={{ display: `flex`, flexDirection: `column`, gap: 4 }}>
