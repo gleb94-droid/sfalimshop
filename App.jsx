@@ -680,6 +680,7 @@ const FloatingProductCardComponent = ({
               src={imageUrl}
               alt={name || `מוצר`}
               loading="lazy"
+              decoding="async"
               onLoad={onImageLoad} />
           </div>
           <div className="fpc-shine" />
@@ -716,16 +717,118 @@ const FloatingProductCardComponent = ({
 
 const FloatingProductCard = React.memo(FloatingProductCardComponent);
 
+// BloomCardLite — minimal mobile/reduced-motion variant of FloatingProductCard.
+// Same overall layout (image, name, description, price, CTA) but as a plain
+// <div> with no rAF tilt loop, no pointer listeners, no holographic shine, no
+// mount reveal. Used on screens < 768px to stop the home page flickering when
+// the carousel has 12 cards mounted at once.
+const BloomCardLite = React.memo(function BloomCardLite({
+  imageUrl, name, description, price, status, buttonText, onClick,
+}) {
+  return (
+    <div
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === `Enter` || e.key === ` `) { e.preventDefault(); onClick && onClick(); } }}
+      style={{
+        background: COLORS.bgCard,
+        border: `1px solid ${COLORS.border}`,
+        borderRadius: 18,
+        padding: 14,
+        cursor: `pointer`,
+        display: `flex`,
+        flexDirection: `column`,
+        gap: 12,
+        boxShadow: `0 8px 24px rgba(0,0,0,0.35)`,
+      }}>
+      <div style={{
+        position: `relative`,
+        width: `100%`,
+        aspectRatio: `1 / 1`,
+        background: COLORS.bg,
+        borderRadius: 12,
+        overflow: `hidden`,
+      }}>
+        <SmartImage
+          src={imageUrl}
+          alt={name || ``}
+          loading="lazy"
+          decoding="async"
+          style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }}
+        />
+      </div>
+      <div style={{ display: `flex`, flexDirection: `column`, gap: 4 }}>
+        <h3 style={{
+          margin: 0,
+          color: COLORS.white,
+          fontFamily: `'Playfair Display',serif`,
+          fontSize: 20,
+          letterSpacing: `0.02em`,
+          lineHeight: 1.15,
+        }}>{name}</h3>
+        {description && (
+          <p style={{
+            margin: 0,
+            color: COLORS.gray,
+            fontFamily: `'Varela Round',sans-serif`,
+            fontSize: 12,
+            lineHeight: 1.4,
+          }}>{description}</p>
+        )}
+      </div>
+      <div style={{
+        display: `flex`,
+        alignItems: `center`,
+        justifyContent: `space-between`,
+        gap: 10,
+        marginTop: 2,
+      }}>
+        <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
+          <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: 18 }}>{price}</div>
+          <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 10, letterSpacing: `0.05em`, textTransform: `uppercase` }}>{status}</div>
+        </div>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onClick && onClick(); }}
+          style={{
+            background: COLORS.accent,
+            color: COLORS.white,
+            border: `none`,
+            borderRadius: 999,
+            padding: `10px 18px`,
+            fontFamily: `'Varela Round',sans-serif`,
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: `pointer`,
+            whiteSpace: `nowrap`,
+          }}>{buttonText}</button>
+      </div>
+    </div>
+  );
+});
+
 // ============================================================================
 // HomeFloatingBloomCarousel — מציג את כל דמויות BLOOM כקרוסלת כרטיסים מרחפים.
 // טוען מ-Supabase, מתחלף אוטומטית כל 5 שניות (נעצר ב-hover), עם נקודות + swipe.
 // כפתור כל דמות מנווט ל-#pets/<slug> שלה (אותה לוגיקת slug כמו ב-PetsPage).
 // ============================================================================
 function HomeFloatingBloomCarousel({ lang, setPage }) {
+  // `designs` holds the picked 12 actually rendered. `totalCount` is the full
+  // count of active BLOOM characters (~70) — used only for the "see all" CTA
+  // label so the homepage still advertises the real collection size.
   const [designs, setDesigns] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [activeIdx, setActiveIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const [isPaused, setIsPaused] = useState(false);
+  // Mobile + reduced-motion users get the LIGHT card variant (no tilt, no
+  // holographic shine, no rAF mount reveal). Computed once on mount.
+  const [reduceFx, setReduceFx] = useState(() => {
+    if (typeof window === `undefined`) return false;
+    if (window.innerWidth < 768) return true;
+    try { return window.matchMedia(`(prefers-reduced-motion: reduce)`).matches; } catch { return false; }
+  });
 
   // Mount-driven reveal for the carousel card. The previous version waited
   // for the image to load — but when the browser had it cached, "load" fired
@@ -744,8 +847,12 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   // SAFETY: belt-and-braces 1000ms timer in case rAF never fires (background
   // tab, scheduler oddities). The card is also forced visible by the
   // @media (prefers-reduced-motion: reduce) CSS override.
-  const [cardRevealed, setCardRevealed] = useState(false);
+  // On reduceFx (mobile / reduced-motion) skip the rAF reveal entirely so the
+  // card is visible on the first paint — no opacity/translateY animation to
+  // schedule, no extra frames to compose.
+  const [cardRevealed, setCardRevealed] = useState(() => reduceFx);
   useEffect(() => {
+    if (reduceFx) { setCardRevealed(true); return; }
     let raf2 = 0;
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => setCardRevealed(true));
@@ -756,7 +863,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       if (raf2) cancelAnimationFrame(raf2);
       clearTimeout(safety);
     };
-  }, []);
+  }, [reduceFx]);
 
   // Refs mirror the latest state so the click handler can read activeIdx/designs
   // at click time — not at render time. Without this, each card captures its own
@@ -784,34 +891,61 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   }, []);
 
   useEffect(() => {
-    const handle = () => setIsMobile(window.innerWidth < 768);
+    const handle = () => {
+      const mob = window.innerWidth < 768;
+      setIsMobile(mob);
+      // Keep reduceFx in sync — if the user rotates a tablet across the 768px
+      // line mid-session we want the card variant to switch too.
+      let mq = false;
+      try { mq = window.matchMedia(`(prefers-reduced-motion: reduce)`).matches; } catch {}
+      setReduceFx(mob || mq);
+    };
     window.addEventListener("resize", handle);
     return () => window.removeEventListener("resize", handle);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
+    // Fisher-Yates in-place shuffle. Reused for the species pools and the
+    // final mixed 12 so dogs and cats are interleaved (not "all dogs then all
+    // cats") in the visible carousel.
+    const shuffle = (arr) => {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+      }
+      return a;
+    };
+    // Pick ~6 dogs + ~6 cats; if one species is short, fill from the other
+    // (plus any legacy species=NULL rows) so we always hit 12 if the pool is
+    // large enough. Final reshuffle so the order isn't "dogs first, cats
+    // after" — interleaving keeps the carousel feeling varied.
+    const pickBalanced = (all, target = 12, perSide = 6) => {
+      const dogs  = shuffle(all.filter(d => d.species === `dog`));
+      const cats  = shuffle(all.filter(d => d.species === `cat`));
+      const other = shuffle(all.filter(d => d.species !== `dog` && d.species !== `cat`));
+      const out = [...dogs.slice(0, perSide), ...cats.slice(0, perSide)];
+      if (out.length < target) {
+        const leftovers = [...dogs.slice(perSide), ...cats.slice(perSide), ...other];
+        out.push(...shuffle(leftovers).slice(0, target - out.length));
+      }
+      return shuffle(out);
+    };
     (async () => {
       try {
         const { data, error } = await supabase
           .from("pet_designs")
-          .select("id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,price_shirt_basic,mockup_url,mockup_shirt_url,mockup_mug_url,design_url")
+          .select("id,slug,species,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,price_shirt_basic,mockup_url,mockup_shirt_url,mockup_mug_url,design_url")
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
         if (error) throw error;
         if (cancelled || !data) return;
-        // Fisher-Yates shuffle so each fresh page load starts with a different
-        // character. Runs once (this effect has empty deps + setDesigns is only
-        // called here) so the order is stable for the rest of the session —
-        // it never reshuffles while the user is watching.
-        const shuffled = data.slice();
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          const tmp = shuffled[i];
-          shuffled[i] = shuffled[j];
-          shuffled[j] = tmp;
-        }
-        setDesigns(shuffled);
+        setTotalCount(data.length);
+        // Render only 12 cards (capped DOM + image count is the main flicker
+        // fix). Each fresh mount picks a different 12, so the home page rotates
+        // exposure across the whole collection over repeat visits.
+        setDesigns(pickBalanced(data, 12, 6));
       } catch (err) {
         console.error(`Failed to load BLOOM carousel:`, err);
       }
@@ -948,16 +1082,31 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
               }}>
               {/* mockup_shirt_url is the new product-on-shirt photo; it
                   rolls out gradually per character. Fall back to mockup_url
-                  (clean/hero image) until each row has its shirt mockup. */}
-              <FloatingProductCard
-                imageUrl={d.mockup_shirt_url || d.mockup_url}
-                name={displayName}
-                description={description}
-                price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
-                status={statusByLang[lang] || statusByLang.he}
-                buttonText={buttonByLang[lang] || buttonByLang.he}
-                onAddToCart={handleViewActiveCharacter}
-              />
+                  (clean/hero image) until each row has its shirt mockup.
+                  On mobile / reduced-motion we render a light <div> card
+                  instead of FloatingProductCard — no tilt rAF, no
+                  holographic shine, no pointer listeners, no mount reveal. */}
+              {reduceFx ? (
+                <BloomCardLite
+                  imageUrl={d.mockup_shirt_url || d.mockup_url}
+                  name={displayName}
+                  description={description}
+                  price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
+                  status={statusByLang[lang] || statusByLang.he}
+                  buttonText={buttonByLang[lang] || buttonByLang.he}
+                  onClick={handleViewActiveCharacter}
+                />
+              ) : (
+                <FloatingProductCard
+                  imageUrl={d.mockup_shirt_url || d.mockup_url}
+                  name={displayName}
+                  description={description}
+                  price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
+                  status={statusByLang[lang] || statusByLang.he}
+                  buttonText={buttonByLang[lang] || buttonByLang.he}
+                  onAddToCart={handleViewActiveCharacter}
+                />
+              )}
             </div>
           );
         })}
@@ -1054,6 +1203,30 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
           );
         })}
       </div>
+
+      {/* "See all 70" CTA — total count reflects the full active pool, not the
+          12 we render. Picks up bloom.seeAll(n) from LANGS so the wording is
+          trilingual and consistent with the rest of the site. */}
+      {totalCount > designs.length && typeof setPage === `function` && (
+        <button
+          type="button"
+          onClick={() => setPage(`pets`)}
+          style={{
+            marginTop: 22,
+            background: `transparent`,
+            border: `1px solid ${COLORS.accent}`,
+            color: COLORS.accent,
+            borderRadius: 999,
+            padding: `10px 22px`,
+            fontFamily: `'Varela Round',sans-serif`,
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: `0.05em`,
+            cursor: `pointer`,
+          }}>
+          {(LANGS[lang]?.bloom?.seeAll || LANGS.he.bloom.seeAll)(totalCount)}
+        </button>
+      )}
       </div>
     </section>
   );
@@ -1215,7 +1388,7 @@ const LANGS = {
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
     products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
-    bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור" },
+    bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} →` },
   },
   en: {
     dir: "ltr", label: "EN",
@@ -1256,7 +1429,7 @@ const LANGS = {
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
     products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
-    bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close" },
+    bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close", seeAll: (n) => `See all ${n} →` },
   },
   ru: {
     dir: "ltr", label: "RU",
@@ -1297,7 +1470,7 @@ const LANGS = {
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
     products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
-    bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть" },
+    bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть", seeAll: (n) => `Смотреть все ${n} →` },
   },
 };
 
