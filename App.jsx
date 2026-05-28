@@ -1255,6 +1255,9 @@ const SHIPPING_LOCKER = 20;
 const SHIPPING_HOME = 35;
 const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
 const ADMIN_EMAIL = "gleb2009@gmail.com";
+// Single source of truth for social links — referenced anywhere the Instagram
+// profile is linked (Nav, mobile menu, BLOOM page CTA, Footer).
+const SOCIAL = { instagram: `https://www.instagram.com/sfalimshop/` };
 
 // ============ BLOOM shirt colors — 5 basic options for the Pet Couture collection ============
 const BLOOM_SHIRT_COLORS = [
@@ -2214,9 +2217,9 @@ function AuthPage({ lang, onAuth }) {
                 onChange={e => setPassword(e.target.value)}
                 required
                 minLength={8}
-                style={{ ...inputStyle, padding: t.dir === "rtl" ? "12px 14px 12px 80px" : "12px 80px 12px 14px" }}
+                style={{ ...inputStyle, paddingBlock: 12, paddingInlineStart: 14, paddingInlineEnd: 80 }}
               />
-              <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", [t.dir === "rtl" ? "left" : "right"]: 8, top: 14, ...smallBtnStyle, color: COLORS.gray }}>
+              <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 14, ...smallBtnStyle, color: COLORS.gray }}>
                 {showPassword ? t.auth.hidePw : t.auth.showPw}
               </button>
             </div>
@@ -2342,8 +2345,8 @@ function ResetPasswordPage({ lang, setPage }) {
             <div style={{ marginBottom: 16 }}>
               <label style={labelStyle}>{t.auth.newPw}</label>
               <div style={{ position: "relative" }}>
-                <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, padding: t.dir === "rtl" ? "12px 14px 12px 80px" : "12px 80px 12px 14px" }} />
-                <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", [t.dir === "rtl" ? "left" : "right"]: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 12, paddingInlineStart: 14, paddingInlineEnd: 80 }} />
+                <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
                   {showPassword ? t.auth.hidePw : t.auth.showPw}
                 </button>
               </div>
@@ -2442,8 +2445,8 @@ function AccountSettings({ lang }) {
               <div style={{ marginBottom: 12 }}>
                 <label style={labelStyle}>{t.auth.newPw}</label>
                 <div style={{ position: "relative" }}>
-                  <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, padding: t.dir === "rtl" ? "10px 12px 10px 70px" : "10px 70px 10px 12px" }} />
-                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", [t.dir === "rtl" ? "left" : "right"]: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                  <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 10, paddingInlineStart: 12, paddingInlineEnd: 70 }} />
+                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
                     {showPassword ? t.auth.hidePw : t.auth.showPw}
                   </button>
                 </div>
@@ -3081,7 +3084,7 @@ function AdminPage({ lang }) {
                         <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
                           <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColors[order.status] || COLORS.accent, boxShadow: `0 0 8px ${statusColors[order.status] || COLORS.accent}`, flexShrink: 0 }} />
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginLeft: 8, marginRight: 8, background: "rgba(255,107,53,0.15)", padding: "2px 10px", borderRadius: 10, letterSpacing: "0.05em" }}>{group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
+                            <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginInline: 8, background: "rgba(255,107,53,0.15)", padding: "2px 10px", borderRadius: 10, letterSpacing: "0.05em" }}>{group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13 }}>{isMulti ? group.map(o => `${localizeProduct(o.product, lang)} ×${o.quantity}`).join(" · ") : `${localizeProduct(order.product, lang)} · ${localizeVariant(order.variant, lang)} · ×${order.quantity}`}</div>
                           </div>
                         </div>
@@ -3180,7 +3183,7 @@ function AdminPage({ lang }) {
                                       a.href = url; a.download = `${d.label}-${it.id}.png`;
                                       document.body.appendChild(a); a.click();
                                       document.body.removeChild(a); window.URL.revokeObjectURL(url);
-                                    }} style={{ background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 8px", fontSize: 10, fontWeight: 600, cursor: "pointer", marginLeft: 4, fontFamily: "'Varela Round',sans-serif" }}>⬇️ {d.label}</button>
+                                    }} style={{ background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 8px", fontSize: 10, fontWeight: 600, cursor: "pointer", marginInlineStart: 4, fontFamily: "'Varela Round',sans-serif" }}>⬇️ {d.label}</button>
                                   ))}
                                   {/* Per-item status */}
                                   <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${COLORS.border}` }}>
@@ -3900,6 +3903,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [showPaymentSoonModal]);
+
+  // Escape closes the leave-warning modal as the safe choice (keep ordering),
+  // for parity with the CartDrawer/payment modals.
+  useEffect(() => {
+    if (!leaveWarning) return;
+    const onKey = (e) => { if (e.key === "Escape") setLeaveWarning(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [leaveWarning]);
 
   // Non-passive touch listeners — re-attach when step 2 renders (mockupRef becomes available)
   useEffect(() => {
@@ -4971,9 +4983,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <div style={{ position: "relative" }}>
                 <label style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
                 <input type="text" value={form.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }} onBlur={() => setTimeout(() => setShowAddrSugg(false), 200)} placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" />
-                {addrLoading && <div style={{ position: "absolute", left: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</div>}
+                {addrLoading && <div style={{ position: "absolute", insetInlineStart: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</div>}
                 {showAddrSugg && addrSuggestions.length > 0 && (
-                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
+                  <div style={{ position: "absolute", top: "100%", insetInlineStart: 0, insetInlineEnd: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
                     {addrSuggestions.map((s, i) => (
                       <div key={i} onMouseDown={(e) => { e.preventDefault(); selectAddress(s); }} style={{ padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                         <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.display_name.split(",").slice(0, 2).join(",")}</div>
@@ -5019,7 +5031,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                           color: COLORS.white,
                           borderRadius: 10,
                           padding: `12px 14px`,
-                          textAlign: lang === `he` ? `right` : `left`,
+                          textAlign: `start`,
                           cursor: `pointer`,
                           fontFamily: `'Varela Round',sans-serif`,
                           transition: `border-color 0.2s, background 0.2s`,
@@ -5581,9 +5593,18 @@ function ParticlesBackground() {
   // >= 768) and desktop (hover/fine pointer) keep the full effect with
   // sprite-cached orbs + 30fps cap. Phones alone bailed because the
   // optimised loop still triggered the reload loop there.
-  const isPhone = typeof window !== "undefined" &&
+  // Kept in state + a resize listener so rotating a phone (or resizing across
+  // the 768 threshold) re-evaluates the gate instead of being frozen at mount.
+  const computeIsPhone = () => typeof window !== "undefined" &&
     (window.matchMedia("(hover: none)").matches || window.matchMedia("(pointer: coarse)").matches) &&
     window.innerWidth < 768;
+  const [isPhone, setIsPhone] = useState(computeIsPhone);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setIsPhone(computeIsPhone());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -6039,7 +6060,7 @@ function ProductBadges({ product, lang }) {
   const showNew = !!product?.is_new;
   if (!showBest && !showNew) return null;
   return (
-    <div style={{ position: "absolute", top: 10, [isRTL ? "right" : "left"]: 10, display: "flex", flexDirection: "column", gap: 6, zIndex: 3, pointerEvents: "none" }}>
+    <div style={{ position: "absolute", top: 10, insetInlineStart: 10, display: "flex", flexDirection: "column", gap: 6, zIndex: 3, pointerEvents: "none" }}>
       {showBest && (
         <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accent, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
@@ -6153,14 +6174,14 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
       {cartCount > 0 && (
-        <span key={bumpKey} className="cart-badge-bump" style={{ position: "absolute", top: -7, right: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+        <span key={bumpKey} className="cart-badge-bump" style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
       )}
     </button>
   );
 
   // Instagram icon link — square button, matches the cart button's style.
   const instagramButton = (
-    <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
+    <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
       style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0, transition: "all 0.2s" }}
       onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
       onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
@@ -6255,7 +6276,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
           : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accent, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
         }
-        <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
+        <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
           onClick={() => setMobileMenu(false)}
           style={{ background: "transparent", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%", boxSizing: "border-box", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
@@ -6330,7 +6351,7 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
     ru: { title: 'Доступность', textSize: 'Размер текста', contrast: 'Высокий контраст', motion: 'Без анимации', reset: 'Сбросить', close: 'Закрыть' },
   }[lang] || { title: 'Accessibility', textSize: 'Text Size', contrast: 'High Contrast', motion: 'Reduce Motion', reset: 'Reset', close: 'Close' };
 
-  const btnBase = { width: '100%', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textAlign: 'left', transition: 'all 0.2s', marginBottom: 8 };
+  const btnBase = { width: '100%', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textAlign: 'start', transition: 'all 0.2s', marginBottom: 8 };
 
   return (
     <>
@@ -6363,7 +6384,7 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
         <div style={{
           position: 'fixed', bottom: 88, insetInlineStart: 24, zIndex: 9997,
           background: '#1a1a1a', border: '1px solid #2a2a2a',
-          borderRadius: 16, padding: 20, width: 260,
+          borderRadius: 16, padding: 20, width: 260, maxWidth: "calc(100vw - 48px)",
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
           animation: 'fadeUp 0.2s ease',
         }}>
@@ -6711,7 +6732,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
       {/* Panel */}
       <div style={{
         position: "fixed", top: 0, bottom: 0,
-        [isRTL ? "left" : "right"]: 0,
+        insetInlineEnd: 0,
         zIndex: 1101,
         width: isMobile ? "100%" : 400, maxWidth: "100%",
         background: COLORS.bg,
@@ -7582,9 +7603,18 @@ function PawPrintsBackground() {
   // Phone = touch device with a NARROW screen. Mirrors the gate in
   // ParticlesBackground so the BLOOM page doesn't run two heavy canvases
   // on phones; tablets (touch, width >= 768) and desktop keep the paws.
-  const isPhone = typeof window !== "undefined" &&
+  // Kept in state + a resize listener so rotating a phone (or resizing across
+  // the 768 threshold) re-evaluates the gate instead of being frozen at mount.
+  const computeIsPhone = () => typeof window !== "undefined" &&
     (window.matchMedia("(hover: none)").matches || window.matchMedia("(pointer: coarse)").matches) &&
     window.innerWidth < 768;
+  const [isPhone, setIsPhone] = useState(computeIsPhone);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setIsPhone(computeIsPhone());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -8346,7 +8376,7 @@ function PetBadges({ design, lang }) {
     <div style={{
       position: "absolute",
       top: 10,
-      [isRTL ? "right" : "left"]: 10,
+      insetInlineStart: 10,
       display: "flex",
       flexDirection: "column",
       gap: 6,
@@ -8701,7 +8731,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
         <button onClick={onClose} style={{
           position: "absolute",
           top: 16,
-          [isRTL ? "left" : "right"]: 16,
+          insetInlineEnd: 16,
           width: 40, height: 40,
           background: "rgba(0,0,0,0.5)",
           backdropFilter: "blur(10px)",
@@ -8729,7 +8759,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
         <button onClick={handleShare} type="button" style={{
           position: "absolute",
           top: 16,
-          [isRTL ? "left" : "right"]: 64,
+          insetInlineEnd: 64,
           height: 40,
           padding: "0 14px",
           background: "rgba(0,0,0,0.5)",
@@ -8867,7 +8897,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
               </>
             )}
 
-            <div aria-hidden="true" style={{ position: "absolute", bottom: 12, [isRTL ? "left" : "right"]: 12, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 20, padding: "6px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em", backdropFilter: "blur(6px)", pointerEvents: "none" }}>
+            <div aria-hidden="true" style={{ position: "absolute", bottom: 12, insetInlineEnd: 12, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 20, padding: "6px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em", backdropFilter: "blur(6px)", pointerEvents: "none" }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -9047,7 +9077,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
             style={{
               position: "absolute",
               top: 20,
-              [isRTL ? "left" : "right"]: 20,
+              insetInlineEnd: 20,
               width: 44, height: 44,
               background: "rgba(255,255,255,0.1)",
               border: `1px solid rgba(255,255,255,0.25)`,
@@ -9124,7 +9154,7 @@ function MaintenancePage({ lang, setLang, setPage }) {
         <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 48, color: "#fff", marginBottom: 16, letterSpacing: "-0.5px" }}>{m.title}</h1>
         <p style={{ color: "#999", fontSize: 18, marginBottom: 8, fontFamily: "'Varela Round',sans-serif" }}>{m.sub}</p>
         <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 36 }}>{m.back}</p>
-        <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 14 }}>
+        <a href={SOCIAL.instagram} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 14 }}>
           Instagram @sfalimshop
         </a>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 36, opacity: 0.85 }}>
@@ -9278,7 +9308,7 @@ function Footer({ lang, setPage }) {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {POLICY_SECTIONS.map(s => (
-              <button key={s.id} onClick={() => goPolicy(s.id)} className="footer-link" style={{ textAlign: isRTL ? "right" : "left" }}>
+              <button key={s.id} onClick={() => goPolicy(s.id)} className="footer-link" style={{ textAlign: "start" }}>
                 {s.title[lang]}
               </button>
             ))}
@@ -9288,7 +9318,7 @@ function Footer({ lang, setPage }) {
           <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
             {lang === "he" ? "עקבו אחרינו" : lang === "ru" ? "Соцсети" : "Follow Us"}
           </div>
-          <a href="https://www.instagram.com/sfalimshop/" target="_blank" rel="noopener" className="footer-contact-link" style={{ display: "inline-block", color: "#888", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.3px" }}>
+          <a href={SOCIAL.instagram} target="_blank" rel="noopener" className="footer-contact-link" style={{ display: "inline-block", color: "#888", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.3px" }}>
             Instagram <span style={{ color: "#555" }}>· @sfalimshop</span>
           </a>
         </div>
