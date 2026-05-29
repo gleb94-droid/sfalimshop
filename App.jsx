@@ -1,5 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { createClient } from '@supabase/supabase-js'
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Mug Studio is code-split: the studio component (≈25KB) and its dynamic
 // `import('three')` (≈190KB gz) ship in their own chunks and load ONLY when a
@@ -7373,6 +7375,8 @@ export default function App() {
 
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh" }}>
+      <Analytics />
+      <SpeedInsights />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Varela+Round&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
