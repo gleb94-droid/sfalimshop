@@ -8984,6 +8984,8 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
               {t.availableOn}
             </div>
 
+            {/* Shirt color/type/size — shown only when the shirt product is selected */}
+            {previewProduct === `shirt` && (<>
             {/* Shirt color picker — choice is saved for ordering */}
             <div style={{ marginBottom: 20 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -9059,14 +9061,28 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                 ))}
               </div>
             </div>
+            </>)}
 
             {/* Product buttons. Single stickers used to be a paid option here
                 — now they're a free gift only, and customers who want stickers
                 buy a bundled pack from the PetsPage packs section instead. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
-              <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => { setPreviewProduct(`shirt`); handleOrder(`shirt`); }} disabled={!design.design_url} />
-              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => { setPreviewProduct(`mug`); handleOrder(`mug`); }} disabled={!design.design_url} />
+              <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
+              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} />
             </div>
+            {/* Add to cart — appears only after a product is selected; adds the
+                currently-previewed product (color-aware for shirts). */}
+            {previewProduct && (
+              <button
+                onClick={() => handleOrder(previewProduct)}
+                disabled={!design.design_url}
+                onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentHover; }}
+                onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
+                style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}
+              >
+                🛒 {lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{previewProduct === `mug` ? design.price_mug : shirtPrice}
+              </button>
+            )}
             {/* Made-to-order caption. Reassures the customer that delivery
                 isn't same-day and sets expectations on production lead time. */}
             {(t.madeToOrder || t.dispatchTime) && (
@@ -9134,8 +9150,9 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
 }
 
 // ============ Product option button inside modal ============
-function ProductOption({ label, price, onClick, disabled }) {
+function ProductOption({ label, price, onClick, disabled, selected }) {
   const [hovered, setHovered] = useState(false);
+  const active = !disabled && (selected || hovered);
   return (
     <button
       onClick={onClick}
@@ -9143,10 +9160,10 @@ function ProductOption({ label, price, onClick, disabled }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: disabled ? "transparent" : (hovered ? "rgba(255,107,53,0.1)" : COLORS.bg),
-        border: `1px solid ${disabled ? COLORS.border : (hovered ? COLORS.accent : COLORS.border)}`,
+        background: disabled ? "transparent" : (selected ? "rgba(255,107,53,0.14)" : (hovered ? "rgba(255,107,53,0.1)" : COLORS.bg)),
+        border: `2px solid ${active ? COLORS.accent : COLORS.border}`,
         borderRadius: 10,
-        padding: "16px 20px",
+        padding: "15px 19px",
         cursor: disabled ? "not-allowed" : "pointer",
         display: "flex",
         alignItems: "center",
@@ -9156,8 +9173,8 @@ function ProductOption({ label, price, onClick, disabled }) {
         width: "100%",
         textAlign: "inherit",
       }}>
-      <span style={{ color: hovered && !disabled ? COLORS.accent : COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
-      <span style={{ color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18, fontWeight: 700 }}>₪{price}</span>
+      <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
+      <span style={{ color: selected ? COLORS.accent : COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18, fontWeight: 700 }}>₪{price}</span>
     </button>
   );
 }
