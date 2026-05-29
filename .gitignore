@@ -25,6 +25,7 @@ mug-*.jpeg
 _printtmp/
 _stickers_for_dima/
 _bloom_shirts_renamed/
+_bloom_shirts_batch2/
 
 # build/test artifacts and backups
 *.zip

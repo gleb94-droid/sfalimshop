@@ -168,12 +168,13 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 - ⏳ Tranzila registered, awaiting supplier number
 - ✅ 70 BLOOM active in DB (47 dogs + 23 cats)
 - ✅ 70 BLOOM portraits + 70 mug mockups in Supabase storage
-- ✅ 70 / 70 BLOOM shirt mockups live (Mokey AI, white+black per slug, all uploaded + DB URLs set).
+- ✅ 70 / 70 BLOOM shirt mockups live (Mokey AI, white+black per slug, uploaded + DB URLs set, 140 files).
   - 4 slugs use 2000×1600 landscape mockups (08_great_dane, 14_doberman, 61_bengal, 70_devon_rex); the other 66 are 1600×2000 portrait. Optional future polish: regenerate those 4 as portrait.
 - ✅ Sticker print workflow ready (Roland PerfCutContour CMYK FOGRA39), awaiting Dima
 - ✅ Security baseline: H1 + M1 + M6 + M7 done; C1/C2/H2/H3 deferred to Tranzila integration
 - ✅ Quiz fully refreshed: Q0 species filter, dark theme, back button, WhatsApp share fix, OG image fix
 - ✅ BLOOM mug mockup wired into PetModal (preview swap + product-specific cart thumbnail)
+- ✅ PetsPage browse: sticky dog/cat/all emoji filter tabs (🐾/🐶/🐱, pinned at top:72 under the navbar) + breed search
 
 ---
 
