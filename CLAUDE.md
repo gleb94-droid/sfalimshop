@@ -65,7 +65,7 @@ sfalimshop/
 
 | Table | Rows | Notes |
 |---|---|---|
-| `pet_designs` | 82 (70 active + 12 obsolete drafts) | 33 columns. Core catalog. |
+| `pet_designs` | 82 (70 active + 12 obsolete drafts) | 39 columns. Core catalog. |
 | `orders` | varies | RLS enabled |
 | `order_status_history` | audit log | RLS enabled |
 | `payment_events` | webhook audit log | RLS enabled |
@@ -88,6 +88,9 @@ sfalimshop/
 - `is_active`, `is_bestseller`, `is_new`, `sort_order`
 - `species` (`dog` / `cat` / `NULL` — NULL for the 12 obsolete drafts)
 - `breed_he` / `breed_en` / `breed_ru`, `breed_aliases`
+- `breed_origin_he` / `breed_origin_en` / `breed_origin_ru` (text) — breed origin/background, ~1 sentence. **Populated for all 70 active (all 3 langs).**
+- `breed_facts_he` / `breed_facts_en` / `breed_facts_ru` (text) — fun facts, **newline-separated** (3 per breed), rendered as a bulleted list. **Populated for all 70 active (all 3 langs).**
+  - Breed content written by the `content-writer` agent (accurate, well-established facts only — never invented).
 
 ### Storage buckets (all public)
 
@@ -127,7 +130,7 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 | `PRODUCTS` array | 1757 | mug/shirt/sticker with prices + printArea |
 | `MOCKUP_URLS` const | 1855 | Generic product templates |
 | `MugMockup` component | 1998 | Wraps `ProductMockupBase` for mug |
-| `pet_designs` SELECT | 945 | Fetches catalog columns |
+| `pet_designs` SELECT | 945 | Fetches catalog columns (incl. the 6 `breed_origin_*` / `breed_facts_*` columns) |
 | `handleViewActiveCharacter` | ~1000 | BLOOM card → `/pets/` |
 | `FloatingProductCard` | 1101 | Home carousel card |
 | `BloomCardLite` | 1091 | Carousel variant |
@@ -174,7 +177,17 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 - ✅ Security baseline: H1 + M1 + M6 + M7 done; C1/C2/H2/H3 deferred to Tranzila integration
 - ✅ Quiz fully refreshed: Q0 species filter, dark theme, back button, WhatsApp share fix, OG image fix
 - ✅ BLOOM mug mockup wired into PetModal (preview swap + product-specific cart thumbnail)
-- ✅ PetsPage browse: sticky dog/cat/all emoji filter tabs (🐾/🐶/🐱, pinned at top:72 under the navbar) + breed search
+- ✅ PetsPage browse: sticky dog/cat/all emoji filter tabs (🐾/🐶/🐱, `position:sticky` top:72 under the navbar) + breed search
+- ✅ BLOOM breed content LIVE: PetModal shows a "🐾 על הגזע / About the breed / О породе" card (origin paragraph + bulleted facts), language-aware + RTL/LTR, renders only when `breed_origin_<lang>` exists. 70/70 active breeds populated in all 3 langs (content-writer output). SELECT at ~line 945 includes the 6 breed columns.
+- ✅ PetModal UX: product preview is **decoupled** from add-to-cart — clicking shirt/mug only previews; a separate "🛒 Add to cart · ₪X" button does the purchase (color-aware for shirts).
+- ✅ Home page product grid: 4-up row on desktop (was 3+1 orphan); 2×2 tablet; 1-col mobile (`gridCols` breakpoints 900/600).
+
+---
+
+## 🗺️ Roadmap / next
+
+- ⏳ Tranzila payment integration → flip `MAINTENANCE_MODE` off (see Tranzila section below).
+- 📰 Planned: a dog/cat **blog / news / articles section** (new page + routing). The `content-writer` agent is ready to produce the content.
 
 ---
 
@@ -218,3 +231,4 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 Pre-existing: `explorer`, `code-finder`, `supabase-helper`, `rtl-auditor`, `ramkol`
 Added 2026-05-27: `tranzila-specialist`, `i18n-translator`, `whatsapp-responder`, `seo-auditor`, `a11y-auditor`, `legal-content-checker`, `security-auditor`
 Added 2026-05-28: `mockup-qa`, `pre-deploy-orchestrator`, `order-helper`, `bloom-curator`, `canva-pipeline`, `sticker-print-helper`
+Added 2026-05-29: `content-writer` — owns brand voice; writes he/en/ru; accurate, well-established facts only (never invents). Used for BLOOM breed content and future blog/article content.
