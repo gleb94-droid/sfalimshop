@@ -6952,6 +6952,16 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [pendingBloomItem, setPendingBloomItem] = useState(null);
+
+  // Always open at the very top on load/refresh. The browser otherwise
+  // restores the previous scroll position on reload; we disable that and
+  // force the top once on initial mount. In-app navigation is unaffected.
+  useEffect(() => {
+    if (typeof window === `undefined`) return;
+    if (`scrollRestoration` in window.history) window.history.scrollRestoration = `manual`;
+    window.scrollTo(0, 0);
+  }, []);
+
   // The order cart lives here (not inside OrderPage) so it survives navigation
   // between the BLOOM collection and the order page while shopping. It's also
   // persisted to localStorage (hydrated lazily on mount, written on every
