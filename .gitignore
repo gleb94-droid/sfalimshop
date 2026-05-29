@@ -24,6 +24,7 @@ mug-*.jpeg
 # sticker print scratch
 _printtmp/
 _stickers_for_dima/
+_bloom_shirts_renamed/
 
 # build/test artifacts and backups
 *.zip

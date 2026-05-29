@@ -942,7 +942,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       try {
         const { data, error } = await supabase
           .from("pet_designs")
-          .select("id,slug,species,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,price_shirt_basic,mockup_url,mockup_shirt_url,mockup_mug_url,design_url")
+          .select("id,slug,species,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,price_shirt_basic,mockup_url,mockup_shirt_url,mockup_shirt_white_url,mockup_shirt_black_url,mockup_mug_url,design_url")
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
         if (error) throw error;
@@ -1256,12 +1256,8 @@ const SOCIAL = { instagram: `https://www.instagram.com/sfalimshop/` };
 
 // ============ BLOOM shirt colors — 5 basic options for the Pet Couture collection ============
 const BLOOM_SHIRT_COLORS = [
-  { id: "white", hex: "#ffffff", he: "לבן",  en: "White", ru: "Белый" },
-  { id: "black", hex: "#1a1a1a", he: "שחור", en: "Black", ru: "Чёрный" },
-  { id: "gray",  hex: "#9ca3af", he: "אפור", en: "Gray",  ru: "Серый" },
-  { id: "navy",  hex: "#1e3a5f", he: "נייבי", en: "Navy",  ru: "Тёмно-синий" },
-  { id: "sand",  hex: "#d4c5a9", he: "חול",  en: "Sand",  ru: "Песочный" },
-  { id: "pink",  hex: "#f9a8d4", he: "ורוד", en: "Pink",  ru: "Розовый" },
+  { id: `white`, hex: `#ffffff`, he: `לבן`,  en: `White`, ru: `Белый` },
+  { id: `black`, hex: `#1a1a1a`, he: `שחור`, en: `Black`, ru: `Чёрный` },
 ];
 
 // Resolve a saved hex colour to a readable name (falls back to the hex itself).
@@ -8580,6 +8576,8 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
   // previewProduct (set when the user clicks a product) overrides the default.
   const imgSrc =
     (previewProduct === `mug` && design.mockup_mug_url) ||
+    (previewProduct === `shirt` && selectedColor?.id === `black` && design.mockup_shirt_black_url) ||
+    (previewProduct === `shirt` && selectedColor?.id === `white` && design.mockup_shirt_white_url) ||
     (previewProduct === `shirt` && design.mockup_shirt_url) ||
     design.mockup_shirt_url || design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || "#1a1a1a";
@@ -8669,7 +8667,10 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
     // saved on the order so the order preview matches what they saw.
     const mockupUrl =
       kind === `mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
-      kind === `shirt` ? (design.mockup_shirt_url || design.mockup_url || design.design_url) :
+      kind === `shirt` ? (
+        (selectedColor?.id === `black` ? design.mockup_shirt_black_url : design.mockup_shirt_white_url) ||
+        design.mockup_shirt_url || design.mockup_url || design.design_url
+      ) :
       (design.mockup_url || design.design_url);
     if (kind === "shirt") {
       onOrderBloom({
@@ -8997,7 +8998,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                 {BLOOM_SHIRT_COLORS.map((c) => (
                   <div
                     key={c.id}
-                    onClick={() => setSelectedColor(c)}
+                    onClick={() => { setSelectedColor(c); setPreviewProduct(`shirt`); }}
                     title={c[lang] || c.en}
                     style={{
                       width: 30, height: 30, borderRadius: "50%", background: c.hex, cursor: "pointer",

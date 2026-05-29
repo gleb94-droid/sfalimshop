@@ -80,7 +80,8 @@ sfalimshop/
 - `tagline_he` / `tagline_en` / `tagline_ru`
 - `mockup_url` — BLOOM portrait (populated for all 82 rows)
 - `mockup_mug_url` — sofa-style mug photo (populated for 70 active rows)
-- `mockup_shirt_url` — shirt mockup (**NULL for all 70** — not added yet, code falls back gracefully)
+- `mockup_shirt_url` — legacy single shirt mockup (**NULL for all 70** — superseded by the per-color columns below)
+- `mockup_shirt_white_url` / `mockup_shirt_black_url` — per-color shirt mockups; columns exist but **NULL for all 70 (not uploaded yet)**. PetModal is color-aware (white/black) and falls back to the portrait until these are populated.
 - `design_url` — raw transparent design
 - `mockup_bg` — fallback background color
 - `price_shirt`, `price_shirt_basic`, `price_shirt_oversized`, `price_mug`, `price_sticker`, `price_sticker_pack`
@@ -167,7 +168,7 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 - ⏳ Tranzila registered, awaiting supplier number
 - ✅ 70 BLOOM active in DB (47 dogs + 23 cats)
 - ✅ 70 BLOOM portraits + 70 mug mockups in Supabase storage
-- ❌ 0 shirt mockups (TBD — code is ready, just needs the files)
+- ⏳ 39 / 70 BLOOM shirt mockups renamed locally (78 files = white + black) and PetModal wired color-aware; **NOT yet uploaded — `mockup_shirt_white_url`/`black_url` still NULL in DB**, so shirts fall back to the portrait until upload
 - ✅ Sticker print workflow ready (Roland PerfCutContour CMYK FOGRA39), awaiting Dima
 - ✅ Security baseline: H1 + M1 + M6 + M7 done; C1/C2/H2/H3 deferred to Tranzila integration
 - ✅ Quiz fully refreshed: Q0 species filter, dark theme, back button, WhatsApp share fix, OG image fix
