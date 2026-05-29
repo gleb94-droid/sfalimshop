@@ -6170,7 +6170,7 @@ function Hero({ setPage, lang }) {
 }
 
 // Nav
-function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick }) {
+function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick, preview = false }) {
   const t = LANGS[lang];
   const [mobileMenu, setMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
@@ -6219,6 +6219,34 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
       </svg>
     </a>
   );
+
+  // Pre-launch public preview: a slim nav with only what works for a visitor
+  // who can't buy yet — logo (→ coming-soon landing), an "Explore BLOOM" link
+  // (→ pets), and the language switcher. No cart/login/order/track links that
+  // would just bounce to the maintenance screen. Staff/admin/post-launch fall
+  // through to the full nav below, 100% unchanged.
+  if (preview) {
+    return (
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
+        {/* Logo → coming-soon landing */}
+        <div style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => setPage("home")}>
+          <img src="/logo.jpg" alt="Sfalim Shop" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} />
+        </div>
+        {/* Explore BLOOM + language switcher */}
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12, flexShrink: 0 }}>
+          <button onClick={() => setPage("pets")} style={{ background: page === "pets" ? COLORS.accentDim : "transparent", border: `1px solid ${page === "pets" ? COLORS.accent : COLORS.border}`, color: page === "pets" ? COLORS.accent : COLORS.white, padding: isMobile ? "8px 14px" : "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 13 : 14, letterSpacing: "0.5px", whiteSpace: "nowrap", transition: "all 0.2s" }}
+            onMouseOver={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; } }}
+            onMouseOut={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; } }}
+          >{t.nav.pets}</button>
+          <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
+            {Object.keys(LANGS).map(l => (
+              <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "5px 10px" : "5px 12px", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+            ))}
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <>
@@ -7566,7 +7594,7 @@ export default function App() {
         return (
           <>
             <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
-            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} />
+            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
