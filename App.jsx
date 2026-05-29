@@ -7270,11 +7270,24 @@ export default function App() {
       setPageState(newPage);
       if (newPage === 'blog') setBlogSlug(e.state?.blogSlug ?? parseBlogSlugFromHash());
     };
+    // hashchange fires for plain <a href="#..."> navigation (e.g. an in-article
+    // blog link to "/#/pets?slug=..."). The app's own setPage/pushState helpers
+    // don't fire it, so this only handles anchor-driven hash changes — it syncs
+    // the page (and blog slug) from the URL. Idempotent with popstate.
+    const handleHashChange = () => {
+      const newPage = getPageFromHash();
+      setPageState(newPage);
+      if (newPage === 'blog') setBlogSlug(parseBlogSlugFromHash());
+    };
     window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handleHashChange);
     // Set initial history state
     const current = getPageFromHash();
     window.history.replaceState({ page: current }, '', window.location.href);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   // ============ SCROLL REVEAL — observe all .reveal elements on every page change ============
@@ -8128,16 +8141,27 @@ function PetsPage({ lang, setPage, goToBlog, preview = false, onOrderBloom, onAd
   useEffect(() => {
     if (!designs.length) return;
     const applyHash = () => {
-      const hash = (window.location.hash || "").replace("#", "");
-      const parts = hash.split("/");
+      // Tolerate a leading slash ("#/pets..." as well as "#pets...") so deep
+      // links from the blog / other tabs resolve the same as in-app navigation.
+      const hash = (window.location.hash || "").replace("#", "").replace(/^\//, "");
+      const path = hash.split("?")[0];
+      const parts = path.split("/");
       if (parts[0] !== "pets") return;
-      const slug = parts[1];
+      // The breed slug can arrive two ways:
+      //   • query param  →  #/pets?slug=01_golden_retriever   (blog deep links)
+      //   • path segment →  #pets/01_golden_retriever         (in-app card click)
+      // GOTCHA: with a hash router the "?slug=" lives INSIDE location.hash, never
+      // in location.search — so it must be parsed out of the hash string here.
+      let slug = "";
+      const qIdx = hash.indexOf("?");
+      if (qIdx !== -1) slug = new URLSearchParams(hash.slice(qIdx + 1)).get("slug") || "";
+      if (!slug) slug = parts[1] || "";
       if (!slug) { setSelected(null); return; }
       const match = designs.find(d => slugify(d) === slug);
       if (match) {
         setSelected(match);
       } else {
-        // Unknown id — fall back gracefully to the collection view and tidy the URL
+        // Unknown slug — fall back gracefully to the collection view and tidy the URL
         setSelected(null);
         window.history.replaceState({ page: "pets" }, "", "#pets");
       }
@@ -10136,10 +10160,11 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         {/* Body */}
         <div className="blog-body" style={{ color: `#d6d6d6`, fontFamily: `'Varela Round',sans-serif`, fontSize: isMobile ? 16 : 17, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
 
-        {/* Related product */}
+        {/* Related product — deep-links to this breed's modal on the pets page
+            (the slug query lives inside the hash; PetsPage parses it open). */}
         {pet && (
-          <div onClick={() => setPage(`pets`)} role="button" tabIndex={0}
-            onKeyDown={(e) => { if (e.key === `Enter`) setPage(`pets`); }}
+          <div onClick={() => { window.location.hash = `/pets?slug=${pet.slug}`; }} role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === `Enter`) window.location.hash = `/pets?slug=${pet.slug}`; }}
             style={{ marginTop: 40, display: `flex`, alignItems: `center`, gap: 18, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 18, cursor: `pointer`, transition: `border-color 0.2s` }}
             onMouseOver={(e) => { e.currentTarget.style.borderColor = COLORS.accent; }}
             onMouseOut={(e) => { e.currentTarget.style.borderColor = COLORS.border; }}>
