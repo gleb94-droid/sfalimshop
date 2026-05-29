@@ -1879,11 +1879,15 @@ const MOCKUP_URLS = {
 // large preview keeps the original full-res URL. Any non-Supabase or
 // already-transformed URL passes through untouched. Pass `width` at ~2× the
 // displayed CSS width so retina screens stay sharp.
+// resize=contain is REQUIRED: Supabase defaults to resize=cover, which with a
+// width-only request crops the source (it cropped the 1414×2000 BLOOM portraits
+// to narrow center strips). `contain` preserves the source aspect ratio — no
+// cropping — so the framed designs render in full.
 const transformImage = (url, { width, quality = 75 } = {}) => {
   if (typeof url !== `string` || !url.includes(`/storage/v1/object/public/`)) return url;
   const base = url.replace(`/storage/v1/object/public/`, `/storage/v1/render/image/public/`);
   const sep = base.includes(`?`) ? `&` : `?`;
-  return `${base}${sep}width=${width}&quality=${quality}`;
+  return `${base}${sep}width=${width}&quality=${quality}&resize=contain`;
 };
 
 // SmartImage — drop-in replacement for <img> on product images served from
