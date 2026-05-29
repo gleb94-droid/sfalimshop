@@ -5666,7 +5666,10 @@ function ParticlesBackground() {
       r: i < 8 ? Math.random() * 3 + 2 : i < 25 ? Math.random() * 1.5 + 0.8 : Math.random() * 0.8 + 0.2,
       dx: (Math.random() - 0.5) * 0.3,
       dy: (Math.random() - 0.5) * 0.3,
-      alpha: i < 8 ? Math.random() * 0.35 + 0.15 : Math.random() * 0.2 + 0.05,
+      // Subtle visibility bump: faint specks (was *0.2+0.05 → 0.05–0.25) and
+      // the larger dots (was *0.35+0.15) nudged up ~0.05 so they read as
+      // gently present, still soft. Count/size/motion unchanged — opacity only.
+      alpha: i < 8 ? Math.random() * 0.38 + 0.2 : Math.random() * 0.22 + 0.1,
       color: i < 12 ? '#FF6B35' : i < 22 ? '#ff8c5a' : '#ffffff',
       pulse: Math.random() * Math.PI * 2,
     }));
@@ -7739,7 +7742,9 @@ function PawPrintsBackground() {
       drift: (Math.random() - 0.5) * 0.2,
       rot: Math.random() * Math.PI * 2,
       rotSpeed: (Math.random() - 0.5) * 0.004,
-      alpha: Math.random() * 0.06 + 0.03,
+      // Subtle visibility bump (was *0.06+0.03 → 0.03–0.09): a touch more
+      // present, still soft. Same count/size/positions/timing — opacity only.
+      alpha: Math.random() * 0.08 + 0.05,
       color: Math.random() > 0.5 ? "#FF6B35" : "#ff8c5a",
     }));
 
@@ -7883,8 +7888,13 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
   if (open) {
     return <WaitlistForm lang={lang} source={source} breedInterest={breedInterest} autoFocus />;
   }
+  // Hero variant: dead-center the (auto-width) button under the centered
+  // heading/subtitle, direction-agnostic so it's centered in he (RTL) and
+  // en/ru (LTR). Breed variant keeps reading-side alignment for its CTA line
+  // (its button is full-width, so centering is moot there).
+  const isHero = variant !== `breed`;
   return (
-    <div style={{ textAlign: isRTL ? `right` : `left` }}>
+    <div style={isHero ? { display: `flex`, flexDirection: `column`, alignItems: `center`, textAlign: `center` } : { textAlign: isRTL ? `right` : `left` }}>
       {ctaText && (
         <div style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 18, lineHeight: 1.35, marginBottom: 14 }}>
           {ctaText}
