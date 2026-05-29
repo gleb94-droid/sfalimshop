@@ -3027,10 +3027,86 @@ function AdminPage({ lang }) {
 
   const statusColors = { received: COLORS.accent, design: "#a78bfa", printing: "#60a5fa", ready: "#facc15", shipped: "#fb923c", delivered: COLORS.success };
 
+  // Sticky admin section nav — one-click jump to each section. Sections are all
+  // rendered (no behavior change); we just smooth-scroll to them and highlight
+  // the one currently in view. Offset accounts for the fixed site nav (72) +
+  // this sticky bar (~58).
+  const ADMIN_NAV_OFFSET = 132;
+  const adminSections = [
+    { id: `admin-orders`, label: (t.admin && t.admin.orders) || (lang === `he` ? `הזמנות` : lang === `ru` ? `Заказы` : `Orders`) },
+    { id: `admin-pets`, label: `BLOOM` },
+    { id: `admin-packs`, label: lang === `he` ? `מדבקות` : lang === `ru` ? `Наклейки` : `Sticker packs` },
+    { id: `admin-blog`, label: t.navBlog || `Blog` },
+  ];
+  const [activeSection, setActiveSection] = useState(`admin-orders`);
+  const suppressSpy = useRef(false); // ignore scroll-spy while a click-scroll animates
+  const scrollToSection = (id) => {
+    setActiveSection(id); // clicked section is the active one immediately
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Suppress the scroll-spy for the whole programmatic animation so it can't
+    // briefly re-highlight a section we're scrolling past. Release on scrollend
+    // (no further scroll fires after, so the clicked section stays active), with
+    // a generous fallback for browsers without scrollend.
+    suppressSpy.current = true;
+    const release = () => { suppressSpy.current = false; window.removeEventListener(`scrollend`, release); };
+    window.addEventListener(`scrollend`, release, { once: true });
+    setTimeout(release, 2500);
+    const y = el.getBoundingClientRect().top + window.scrollY - ADMIN_NAV_OFFSET;
+    window.scrollTo({ top: Math.max(0, y), behavior: `smooth` });
+  };
+  useEffect(() => {
+    const onScroll = () => {
+      if (suppressSpy.current) return;
+      // Active = the last section whose top has scrolled to/above the bar
+      // (tolerant band so it tracks correctly once a smooth-scroll settles).
+      let current = adminSections[0].id;
+      for (const s of adminSections) {
+        const el = document.getElementById(s.id);
+        if (el && el.getBoundingClientRect().top <= ADMIN_NAV_OFFSET + 40) current = s.id;
+      }
+      setActiveSection(current);
+    };
+    onScroll();
+    window.addEventListener(`scroll`, onScroll, { passive: true });
+    return () => window.removeEventListener(`scroll`, onScroll);
+  }, []);
+
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
+        {/* Sticky section nav — one-click jump to any admin section. Stays just
+            below the fixed site nav (72px); horizontally scrollable on mobile. */}
+        <nav aria-label="Admin sections" style={{
+          position: "sticky", top: 72, zIndex: 90,
+          display: "flex", gap: 8, alignItems: "center",
+          background: "rgba(15,15,15,0.95)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+          border: `1px solid ${COLORS.border}`, borderRadius: 12,
+          padding: "10px 12px", marginBottom: 28,
+          overflowX: "auto", WebkitOverflowScrolling: "touch",
+        }}>
+          {adminSections.map(s => {
+            const active = activeSection === s.id;
+            return (
+              <button key={s.id} type="button" onClick={() => scrollToSection(s.id)}
+                aria-current={active ? "true" : undefined}
+                style={{
+                  flexShrink: 0,
+                  background: active ? COLORS.accent : "transparent",
+                  color: active ? "#fff" : COLORS.gray,
+                  border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+                  borderRadius: 999, padding: "8px 18px",
+                  fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 700,
+                  cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap",
+                }}
+                onMouseOver={e => { if (!active) { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = COLORS.accent; } }}
+                onMouseOut={e => { if (!active) { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.borderColor = COLORS.border; } }}>
+                {s.label}
+              </button>
+            );
+          })}
+        </nav>
+        <div id="admin-orders" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
           <div>
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36 }}>{t.admin.title}</h2>
             <p style={{ color: COLORS.gray, marginTop: 4 }}>{orders.length} {t.admin.total}</p>
@@ -3269,7 +3345,7 @@ function AdminPage({ lang }) {
         }
 
         {/* ===== BLOOM catalog manager — full CRUD for pet_designs ===== */}
-        <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+        <div id="admin-pets" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
             <div>
               <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>BLOOM</h2>
@@ -3377,7 +3453,7 @@ function AdminPage({ lang }) {
         </div>
 
         {/* ===== Sticker packs catalog manager — full CRUD for sticker_packs ===== */}
-        <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+        <div id="admin-packs" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
             <div>
               <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
@@ -3464,7 +3540,9 @@ function AdminPage({ lang }) {
         </div>
 
         {/* ===== Blog manager — full CRUD for blog_posts (Slice 2) ===== */}
-        <BlogAdmin uploadAdminImage={uploadAdminImage} lang={lang} />
+        <div id="admin-blog">
+          <BlogAdmin uploadAdminImage={uploadAdminImage} lang={lang} />
+        </div>
       </div>
     </div>
   );
