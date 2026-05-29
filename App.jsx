@@ -7387,7 +7387,10 @@ export default function App() {
       },
     };
     const langTitles = titles[lang] || titles.he;
-    document.title = langTitles[page] || langTitles.home;
+    // The blog pages (index + post) set their own SEO document.title per post
+    // and language — don't clobber it here (this is the parent effect and would
+    // otherwise overwrite the child's title on a language switch).
+    if (page !== "blog") document.title = langTitles[page] || langTitles.home;
     // Update html lang+dir to match current selection
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
@@ -10047,28 +10050,40 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     return () => { cancelled = true; };
   }, [slug]);
 
-  // SEO meta + OG + JSON-LD Article (template literals only).
+  // SEO meta + OG + JSON-LD Article — language-aware with Hebrew fallback so
+  // nothing renders blank. There are NO seo_*_ru columns, so RU falls back to
+  // title_ru/excerpt_ru (then _he). Template literals only.
   useEffect(() => {
     if (!post) return;
-    const titleHe = post.seo_title_he || post.title_he;
-    document.title = `${titleHe} — Sfalim Shop`;
-    setMeta(`description`, post.seo_description_he || post.excerpt_he);
-    setMeta(`og:title`, post.title_he, `property`);
-    setMeta(`og:description`, post.excerpt_he, `property`);
+    const seoTitle =
+      (lang === `en` ? (post.seo_title_en || post.title_en) :
+       lang === `ru` ? post.title_ru :
+       post.seo_title_he) || post.title_he || ``;
+    const seoDesc =
+      (lang === `en` ? (post.seo_description_en || post.excerpt_en) :
+       lang === `ru` ? post.excerpt_ru :
+       post.seo_description_he) || post.excerpt_he || ``;
+    const ogTitle = post[`title_${lang}`] || post.title_he || ``;
+    const ogDesc = post[`excerpt_${lang}`] || post.excerpt_he || ``;
+    document.title = `${seoTitle} — Sfalim Shop`;
+    setMeta(`description`, seoDesc);
+    setMeta(`og:title`, ogTitle, `property`);
+    setMeta(`og:description`, ogDesc, `property`);
     setMeta(`og:image`, post.cover_image_url, `property`);
     setMeta(`og:type`, `article`, `property`);
     setMeta(`og:url`, blogShareUrl(post.slug), `property`);
     const ld = {
       "@context": `https://schema.org`, "@type": `Article`,
-      "headline": post.title_he, "image": [post.cover_image_url],
+      "headline": ogTitle, "image": [post.cover_image_url],
+      "inLanguage": lang,
       "datePublished": post.published_at, "dateModified": post.updated_at || post.published_at,
       "author": { "@type": `Organization`, "name": `Sfalim Shop` },
       "publisher": { "@type": `Organization`, "name": `Sfalim Shop`, "logo": { "@type": `ImageObject`, "url": BLOG_LOGO_URL } },
-      "description": post.excerpt_he,
+      "description": ogDesc,
       "mainEntityOfPage": blogShareUrl(post.slug),
     };
     injectJsonLd(ld, `blog-article-ld`);
-  }, [post]);
+  }, [post, lang]);
 
   if (loading) {
     return (
