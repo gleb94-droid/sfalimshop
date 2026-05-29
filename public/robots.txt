@@ -20,3 +20,6 @@ Disallow: /
 
 # Sitemap
 Sitemap: https://www.sfalimshop.com/sitemap.xml
+# Dynamic sitemap (includes published blog posts) — Supabase Edge Function.
+# Deploy with: supabase functions deploy generate-sitemap --no-verify-jwt
+Sitemap: https://ubvgrxlxtelulwjtfudd.supabase.co/functions/v1/generate-sitemap

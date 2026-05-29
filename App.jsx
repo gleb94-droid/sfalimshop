@@ -1366,6 +1366,7 @@ const LANGS = {
   he: {
     dir: "rtl", label: "HE",
     nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
+    blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה →', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון →', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו →', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
@@ -1408,6 +1409,7 @@ const LANGS = {
   en: {
     dir: "ltr", label: "EN",
     nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
+    blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
@@ -1450,6 +1452,7 @@ const LANGS = {
   ru: {
     dir: "ltr", label: "RU",
     nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
+    blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
@@ -3459,6 +3462,9 @@ function AdminPage({ lang }) {
             </div>
           )}
         </div>
+
+        {/* ===== Blog manager — full CRUD for blog_posts (Slice 2) ===== */}
+        <BlogAdmin uploadAdminImage={uploadAdminImage} lang={lang} />
       </div>
     </div>
   );
@@ -6186,7 +6192,7 @@ function Hero({ setPage, lang }) {
 }
 
 // Nav
-function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick, preview = false }) {
+function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick, preview = false }) {
   const t = LANGS[lang];
   const [mobileMenu, setMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
@@ -6289,6 +6295,10 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
           onMouseOut={e => { if(page !== p) { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav[p]}</button>
         ))}
+        <button onClick={() => goToBlog && goToBlog()} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+          onMouseOver={e => { if(page !== "blog") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
+          onMouseOut={e => { if(page !== "blog") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
+        >{t.navBlog}</button>
         <a href="/quiz" style={{ background: "transparent", border: "1px solid transparent", color: COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textDecoration: "none", transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
           onMouseOut={e => { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}
@@ -6344,6 +6354,7 @@ function Nav({ page, setPage, lang, setLang, user, isAdmin, onLogout, cartCount,
         {["home", "order", "pets", "about"].map(p => (
           <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
+        <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
         {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
         {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
@@ -6935,7 +6946,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
+ const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'blog', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -6949,14 +6960,22 @@ export default function App() {
   const getPageFromURL = () => {
     if (typeof window === 'undefined') return 'home';
     if (PATH_TO_POLICY_SECTION[window.location.pathname]) return 'policies';
-    const hash = window.location.hash.replace('#', '');
-    const root = hash.split('/')[0];
+    // Tolerate an optional leading slash after the hash (#/blog as well as
+    // #blog) so the canonical #/blog/<slug> share/OG/sitemap URLs resolve too.
+    // Existing routes (#pets, #order, #policies/...) have no leading slash and
+    // are unaffected.
+    const hash = window.location.hash.replace('#', '').replace(/^\//, '');
+    const root = hash.split('/')[0].split('?')[0];
     return VALID_PAGES.includes(root) ? root : 'home';
   };
 
   const getPageFromHash = getPageFromURL;
 
   const [page, setPageState] = useState(getPageFromURL);
+  // Blog sub-route slug (null = blog index). Kept in its own state because the
+  // app router is popstate/state-driven (not hashchange), so navigating between
+  // posts needs an explicit state change to re-render + re-fetch.
+  const [blogSlug, setBlogSlug] = useState(parseBlogSlugFromHash);
   const [lang, setLang] = useState("he");
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -7030,6 +7049,17 @@ export default function App() {
     const hash = root === 'home' ? '' : newPage;
     window.history.pushState({ page: root }, '', `#${hash}`);
     setPageState(root);
+  };
+
+  // Blog navigation. slug = a post slug (opens BlogPost) or null/undefined
+  // (opens BlogIndex). Uses the canonical #/blog and #/blog/<slug> form so the
+  // same URLs work when shared (OG/sitemap). Drives both page + blogSlug state.
+  const goToBlog = (slug) => {
+    const target = slug ? `blog/${slug}` : `blog`;
+    window.history.pushState({ page: 'blog', blogSlug: slug || null }, '', `#/${target}`);
+    setBlogSlug(slug || null);
+    setPageState('blog');
+    window.scrollTo(0, 0);
   };
 
   // Hand a ready-made BLOOM item to OrderPage's cart, then jump to the order page.
@@ -7238,6 +7268,7 @@ export default function App() {
     const handlePopState = (e) => {
       const newPage = e.state?.page || getPageFromHash();
       setPageState(newPage);
+      if (newPage === 'blog') setBlogSlug(e.state?.blogSlug ?? parseBlogSlugFromHash());
     };
     window.addEventListener('popstate', handlePopState);
     // Set initial history state
@@ -7620,10 +7651,13 @@ export default function App() {
         return (
           <>
             <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
-            <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
+            <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
+            {page === "blog" && (blogSlug
+              ? <BlogPost slug={blogSlug} lang={lang} goToBlog={goToBlog} setPage={setPage} onShareToast={showToast} />
+              : <BlogIndex lang={lang} goToBlog={goToBlog} />)}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
@@ -7928,9 +7962,10 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
   );
 }
 
-function PetsPage({ lang, setPage, preview = false, onOrderBloom, onAddStickerPack, onShareToast }) {
+function PetsPage({ lang, setPage, goToBlog, preview = false, onOrderBloom, onAddStickerPack, onShareToast }) {
   const isRTL = lang === "he";
   const w = WL[lang] || WL.he; // BLOOM Family waitlist copy (pre-launch preview)
+  const [blogPosts, setBlogPosts] = useState([]); // latest 3 published — drives the "from our blog" stripe
   const quizT = LANGS[lang].quiz; // quiz banner copy lives in LANGS (single source)
   const [designs, setDesigns] = useState([]);
   const [packs, setPacks] = useState([]);
@@ -7983,6 +8018,22 @@ function PetsPage({ lang, setPage, preview = false, onOrderBloom, onAddStickerPa
         setLoading(false);
       }
     })();
+  }, []);
+
+  // Latest published blog posts for the "from our blog" stripe (Slice 3). Only
+  // shown when there are 3+; a fetch failure or <3 simply hides it.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("slug,title_he,title_en,title_ru,excerpt_he,excerpt_en,excerpt_ru,cover_image_url,cover_image_alt_he,category,published_at")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(3);
+      if (!cancelled && !error && data) setBlogPosts(data);
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // ============ SCHEMA.ORG — Product structured data for BLOOM (SEO / Rich Results) ============
@@ -8354,6 +8405,19 @@ function PetsPage({ lang, setPage, preview = false, onOrderBloom, onAddStickerPa
         </a>
       </section>
 
+      {/* ===== FROM OUR BLOG stripe (Slice 3) — only when 3+ published posts ===== */}
+      {blogPosts.length >= 3 && (
+        <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "16px 16px 0" : "24px 40px 0" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.4rem" : "1.9rem", color: COLORS.white, margin: 0 }}>{(LANGS[lang] || LANGS.he).blogHeroTitle}</h2>
+            <button onClick={() => goToBlog && goToBlog()} style={{ background: "transparent", border: "none", color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{(LANGS[lang] || LANGS.he).blogFromOurBlog}</button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 16 : 20 }}>
+            {blogPosts.map((p) => <BlogCard key={p.slug} post={p} lang={lang} goToBlog={goToBlog} compact />)}
+          </div>
+        </section>
+      )}
+
       {/* ===== COLLECTION GRID ===== */}
       <section style={{ position: "relative", zIndex: 1, padding: isMobile ? "20px 16px 80px" : "40px 40px 120px", maxWidth: 1400, margin: "0 auto" }}>
         <div className="reveal" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
@@ -8601,6 +8665,7 @@ function PetsPage({ lang, setPage, preview = false, onOrderBloom, onAddStickerPa
           tagline={getTagline(selected)}
           t={t}
           preview={preview}
+          goToBlog={goToBlog}
           onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
@@ -8812,13 +8877,29 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, preview = false, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
+function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("basic");
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
+  // Slice 3: if a published blog post links to this breed, surface a "read more
+  // about the breed" link at the bottom of the modal.
+  const [breedPost, setBreedPost] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    setBreedPost(null);
+    if (!design || !design.slug) return;
+    (async () => {
+      const { data } = await supabase
+        .from(`blog_posts`).select(`slug,title_he,title_en,title_ru`)
+        .eq(`breed_slug_link`, design.slug).eq(`status`, `published`)
+        .order(`published_at`, { ascending: false }).limit(1).maybeSingle();
+      if (!cancelled && data) setBreedPost(data);
+    })();
+    return () => { cancelled = true; };
+  }, [design && design.slug]);
   // Lead with the shirt product mockup since shirts are the headline BLOOM
   // product; falls back to the clean hero image, then the raw design.
   // previewProduct (set when the user clicks a product) overrides the default.
@@ -9375,6 +9456,18 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, onC
                 )}
               </div>
             )}
+
+            {/* Slice 3: link to the breed's blog post when one is published. */}
+            {breedPost && goToBlog && (
+              <button
+                type="button"
+                onClick={() => goToBlog(breedPost.slug)}
+                style={{ marginTop: 4, marginBottom: 8, background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 18px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, transition: `background 0.2s, color 0.2s` }}
+                onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = `#fff`; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = `transparent`; e.currentTarget.style.color = COLORS.accent; }}>
+                {(LANGS[lang] || LANGS.he).blogReadMoreBreed}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -9664,5 +9757,642 @@ function Footer({ lang, setPage }) {
         © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
       </div>
     </footer>
+  );
+}
+
+// ============================================================================
+// BLOG — index, post, admin + SEO helpers (Slices 1–3)
+// ----------------------------------------------------------------------------
+// Frontend only. Reads the existing public.blog_posts table (RLS: public reads
+// status='published'; admin full access). Cover images live in the public
+// blog-images bucket. No view-count RPC is called (intentional). Routing uses
+// the canonical #/blog and #/blog/<slug> hashes handled by App's goToBlog.
+// All strings via template literals — never `+` concatenation.
+// ============================================================================
+
+const BLOG_CATEGORY_IDS = ['breeds', 'gifts', 'culture', 'stories'];
+const BLOG_LOGO_URL = `https://sfalimshop.com/logo.jpg`; // existing asset (Nav uses /logo.jpg)
+
+function blogCategoryLabel(lang, cat) {
+  const t = LANGS[lang] || LANGS.he;
+  const map = { breeds: t.blogCategoryBreeds, gifts: t.blogCategoryGifts, culture: t.blogCategoryCulture, stories: t.blogCategoryStories };
+  return map[cat] || cat || ``;
+}
+
+function formatBlogDate(iso, lang) {
+  if (!iso) return ``;
+  try {
+    const loc = lang === `he` ? `he-IL` : lang === `ru` ? `ru-RU` : `en-US`;
+    return new Date(iso).toLocaleDateString(loc, { year: `numeric`, month: `long`, day: `numeric` });
+  } catch { return ``; }
+}
+
+// Read the blog slug from the current hash (#/blog/<slug>). Hoisted so App's
+// useState initializer + popstate handler can call it.
+function parseBlogSlugFromHash() {
+  if (typeof window === `undefined`) return null;
+  const h = window.location.hash.replace(`#`, ``).replace(/^\//, ``);
+  const path = h.split(`?`)[0];
+  const parts = path.split(`/`);
+  if (parts[0] !== `blog`) return null;
+  return parts[1] ? decodeURIComponent(parts[1]) : null;
+}
+
+function blogShareUrl(slug) { return `https://sfalimshop.com/#/blog/${slug}`; }
+
+// Create or update a <meta> tag in <head> (idempotent — never duplicates on
+// re-navigation). attr is 'name' (default) or 'property' for OG tags.
+function setMeta(name, content, attr) {
+  if (typeof document === `undefined` || content == null) return;
+  const a = attr || `name`;
+  let el = document.head.querySelector(`meta[${a}="${name}"]`);
+  if (!el) { el = document.createElement(`meta`); el.setAttribute(a, name); document.head.appendChild(el); }
+  el.setAttribute(`content`, String(content));
+}
+
+// Create or update a JSON-LD <script> by id (idempotent).
+function injectJsonLd(obj, id) {
+  if (typeof document === `undefined`) return;
+  let el = document.getElementById(id);
+  if (!el) { el = document.createElement(`script`); el.type = `application/ld+json`; el.id = id; document.head.appendChild(el); }
+  el.textContent = JSON.stringify(obj);
+}
+
+// Defensive HTML sanitizer for admin-authored post bodies. Removes dangerous
+// tags, on* handlers and javascript: URLs. Content is trusted (admin-only) so
+// this is belt-and-suspenders; falls back to a crude script-strip if no parser.
+function sanitizeBlogHtml(html) {
+  if (!html || typeof html !== `string`) return ``;
+  if (typeof window === `undefined` || !window.DOMParser) {
+    return html.replace(/<\/?(script|style|iframe|object|embed|link|meta|base|form)[^>]*>/gi, ``);
+  }
+  const doc = new DOMParser().parseFromString(`<div>${html}</div>`, `text/html`);
+  const root = doc.body.firstChild;
+  const BAD = [`SCRIPT`, `STYLE`, `IFRAME`, `OBJECT`, `EMBED`, `LINK`, `META`, `BASE`, `FORM`];
+  root.querySelectorAll(`*`).forEach((el) => {
+    if (BAD.includes(el.tagName)) { el.remove(); return; }
+    Array.from(el.attributes).forEach((attr) => {
+      const n = attr.name.toLowerCase();
+      const v = (attr.value || ``).trim().toLowerCase();
+      if (n.startsWith(`on`)) el.removeAttribute(attr.name);
+      else if ((n === `href` || n === `src` || n === `xlink:href`) && v.indexOf(`javascript:`) === 0) el.removeAttribute(attr.name);
+      else if (n === `style` && /expression|javascript:/.test(v)) el.removeAttribute(attr.name);
+    });
+  });
+  return root.innerHTML;
+}
+
+// ============ BLOG CARD — reused by index grid + "from our blog" stripe ============
+function BlogCard({ post, lang, goToBlog, compact = false }) {
+  const isRTL = lang === `he`;
+  const title = post[`title_${lang}`] || post.title_he || ``;
+  const excerpt = post[`excerpt_${lang}`] || post.excerpt_he || ``;
+  const [hover, setHover] = useState(false);
+  const open = () => goToBlog && goToBlog(post.slug);
+  return (
+    <article
+      onClick={open}
+      onKeyDown={(e) => { if (e.key === `Enter` || e.key === ` `) { e.preventDefault(); open(); } }}
+      role="button" tabIndex={0}
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      style={{
+        background: COLORS.bgCard, border: `1px solid ${hover ? COLORS.accent : COLORS.border}`,
+        borderRadius: 14, overflow: `hidden`, cursor: `pointer`, display: `flex`, flexDirection: `column`,
+        direction: isRTL ? `rtl` : `ltr`, textAlign: isRTL ? `right` : `left`,
+        transition: `border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.3s`,
+        transform: hover ? `translateY(-4px)` : `translateY(0)`,
+        boxShadow: hover ? `0 16px 40px rgba(0,0,0,0.35)` : `none`,
+      }}>
+      <div style={{ width: `100%`, aspectRatio: `16 / 9`, background: `#0d0d0d`, overflow: `hidden`, flexShrink: 0 }}>
+        {post.cover_image_url && (
+          <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title}
+            style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block`, transition: `transform 0.5s cubic-bezier(.2,.6,.2,1)`, transform: hover ? `scale(1.05)` : `scale(1)` }} />
+        )}
+      </div>
+      <div style={{ padding: compact ? `16px 18px` : `20px 22px`, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
+        <span style={{ alignSelf: isRTL ? `flex-end` : `flex-start`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 10, letterSpacing: `1.5px`, textTransform: `uppercase` }}>{blogCategoryLabel(lang, post.category)}</span>
+        <h3 style={{ margin: 0, color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: compact ? 19 : 22, lineHeight: 1.25 }}>{title}</h3>
+        <p style={{ margin: 0, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.55, display: `-webkit-box`, WebkitLineClamp: 2, WebkitBoxOrient: `vertical`, overflow: `hidden` }}>{excerpt}</p>
+        <div style={{ marginTop: `auto`, paddingTop: 10, display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10 }}>
+          <span style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 12 }}>{formatBlogDate(post.published_at, lang)}</span>
+          <span style={{ color: hover ? COLORS.accent : COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 700, transition: `color 0.2s` }}>{(LANGS[lang] || LANGS.he).blogReadMore}</span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+// ============ BLOG INDEX — #/blog ============
+const BLOG_PAGE_SIZE = 12;
+function BlogIndex({ lang, goToBlog }) {
+  const t = LANGS[lang] || LANGS.he;
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` && window.innerWidth < 768);
+  const [posts, setPosts] = useState([]);
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState(`all`);
+  const readPageNum = () => {
+    const m = (typeof window !== `undefined` ? window.location.hash : ``).match(/[?&]page=(\d+)/);
+    return m ? Math.max(1, parseInt(m[1], 10)) : 1;
+  };
+  const [pageNum, setPageNum] = useState(readPageNum);
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+
+  // Page-level SEO for the index.
+  useEffect(() => {
+    document.title = `${t.blogHeroTitle} — Sfalim Shop`;
+    setMeta(`description`, t.blogHeroSubtitle);
+    setMeta(`og:title`, t.blogHeroTitle, `property`);
+    setMeta(`og:description`, t.blogHeroSubtitle, `property`);
+    setMeta(`og:type`, `website`, `property`);
+    setMeta(`og:url`, `https://sfalimshop.com/#/blog`, `property`);
+  }, [lang]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    (async () => {
+      const offset = (pageNum - 1) * BLOG_PAGE_SIZE;
+      let q = supabase
+        .from(`blog_posts`)
+        .select(`slug,title_he,title_en,title_ru,excerpt_he,excerpt_en,excerpt_ru,cover_image_url,cover_image_alt_he,category,published_at`, { count: `exact` })
+        .eq(`status`, `published`)
+        .order(`published_at`, { ascending: false })
+        .range(offset, offset + BLOG_PAGE_SIZE - 1);
+      if (category !== `all`) q = q.eq(`category`, category);
+      const { data, count: c, error } = await q;
+      if (cancelled) return;
+      if (error) { console.error(`Failed to load blog posts:`, error); setPosts([]); setCount(0); }
+      else { setPosts(data || []); setCount(c || 0); }
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [category, pageNum]);
+
+  const totalPages = Math.max(1, Math.ceil(count / BLOG_PAGE_SIZE));
+  const gotoPageNum = (n) => {
+    setPageNum(n);
+    window.history.pushState({ page: `blog` }, ``, n > 1 ? `#/blog?page=${n}` : `#/blog`);
+    window.scrollTo(0, 0);
+  };
+  const changeCategory = (c) => {
+    setCategory(c); setPageNum(1);
+    window.history.pushState({ page: `blog` }, ``, `#/blog`);
+  };
+
+  const cats = [{ id: `all`, label: t.blogCategoryAll }, ...BLOG_CATEGORY_IDS.map((id) => ({ id, label: blogCategoryLabel(lang, id) }))];
+
+  return (
+    <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
+      {/* Hero */}
+      <section style={{ position: `relative`, zIndex: 1, padding: isMobile ? `56px 20px 28px` : `90px 40px 40px`, textAlign: `center`, maxWidth: 900, margin: `0 auto` }}>
+        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.6rem` : `4rem`, color: COLORS.white, margin: `0 0 16px`, letterSpacing: `-0.02em` }}>{t.blogHeroTitle}</h1>
+        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: isMobile ? 15 : 18, lineHeight: 1.5, margin: 0 }}>{t.blogHeroSubtitle}</p>
+      </section>
+
+      {/* Category filter */}
+      <section style={{ position: `relative`, zIndex: 1, maxWidth: 1200, margin: `0 auto`, padding: isMobile ? `0 16px` : `0 40px` }}>
+        <div role="tablist" aria-label={t.blogHeroTitle} style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `center`, marginBottom: 32 }}>
+          {cats.map((c) => {
+            const active = category === c.id;
+            return (
+              <button key={c.id} type="button" role="tab" aria-selected={active} onClick={() => changeCategory(c.id)}
+                style={{ background: active ? COLORS.accent : `transparent`, color: active ? `#fff` : COLORS.gray, border: `${active ? 2 : 1}px solid ${active ? COLORS.accent : COLORS.border}`, borderRadius: 999, padding: `9px 20px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, transition: `all 0.2s` }}>{c.label}</button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Grid */}
+      <section style={{ position: `relative`, zIndex: 1, maxWidth: 1200, margin: `0 auto`, padding: isMobile ? `0 16px 80px` : `0 40px 120px` }}>
+        {loading ? (
+          <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif` }}>
+            <div style={{ display: `inline-block`, width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `blogSpin 0.8s linear infinite` }} />
+          </div>
+        ) : posts.length === 0 ? (
+          <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 20 }}>{t.blogEmpty}</div>
+        ) : (
+          <>
+            <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(auto-fill, minmax(300px, 1fr))`, gap: isMobile ? 16 : 28 }}>
+              {posts.map((p) => <BlogCard key={p.slug} post={p} lang={lang} goToBlog={goToBlog} />)}
+            </div>
+            {totalPages > 1 && (
+              <div style={{ display: `flex`, gap: 8, justifyContent: `center`, alignItems: `center`, marginTop: 48, direction: `ltr` }}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                  <button key={n} type="button" onClick={() => gotoPageNum(n)}
+                    aria-current={n === pageNum ? `page` : undefined}
+                    style={{ minWidth: 40, height: 40, background: n === pageNum ? COLORS.accent : `transparent`, color: n === pageNum ? `#fff` : COLORS.gray, border: `1px solid ${n === pageNum ? COLORS.accent : COLORS.border}`, borderRadius: 8, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700 }}>{n}</button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </section>
+      <style>{`@keyframes blogSpin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+// ============ BLOG POST — #/blog/<slug> ============
+function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
+  const t = LANGS[lang] || LANGS.he;
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` && window.innerWidth < 768);
+  const [post, setPost] = useState(null);
+  const [pet, setPet] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true); setNotFound(false); setPet(null); setRelated([]);
+    window.scrollTo(0, 0);
+    (async () => {
+      const { data, error } = await supabase
+        .from(`blog_posts`).select(`*`)
+        .eq(`slug`, slug).eq(`status`, `published`).single();
+      if (cancelled) return;
+      if (error || !data) { setNotFound(true); setPost(null); setLoading(false); return; }
+      setPost(data);
+      setLoading(false);
+      // No view-count RPC call (intentional).
+      if (data.breed_slug_link) {
+        const { data: petRow } = await supabase
+          .from(`pet_designs`)
+          .select(`slug,name_he,name_en,name_ru,mockup_url,mockup_mug_url,price_mug`)
+          .eq(`slug`, data.breed_slug_link).maybeSingle();
+        if (!cancelled && petRow) setPet(petRow);
+      }
+      const { data: rel } = await supabase
+        .from(`blog_posts`)
+        .select(`slug,title_he,title_en,title_ru,excerpt_he,excerpt_en,excerpt_ru,cover_image_url,cover_image_alt_he,category,published_at`)
+        .eq(`status`, `published`).eq(`category`, data.category).neq(`slug`, slug)
+        .order(`published_at`, { ascending: false }).limit(3);
+      if (!cancelled && rel) setRelated(rel);
+    })();
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  // SEO meta + OG + JSON-LD Article (template literals only).
+  useEffect(() => {
+    if (!post) return;
+    const titleHe = post.seo_title_he || post.title_he;
+    document.title = `${titleHe} — Sfalim Shop`;
+    setMeta(`description`, post.seo_description_he || post.excerpt_he);
+    setMeta(`og:title`, post.title_he, `property`);
+    setMeta(`og:description`, post.excerpt_he, `property`);
+    setMeta(`og:image`, post.cover_image_url, `property`);
+    setMeta(`og:type`, `article`, `property`);
+    setMeta(`og:url`, blogShareUrl(post.slug), `property`);
+    const ld = {
+      "@context": `https://schema.org`, "@type": `Article`,
+      "headline": post.title_he, "image": [post.cover_image_url],
+      "datePublished": post.published_at, "dateModified": post.updated_at || post.published_at,
+      "author": { "@type": `Organization`, "name": `Sfalim Shop` },
+      "publisher": { "@type": `Organization`, "name": `Sfalim Shop`, "logo": { "@type": `ImageObject`, "url": BLOG_LOGO_URL } },
+      "description": post.excerpt_he,
+      "mainEntityOfPage": blogShareUrl(post.slug),
+    };
+    injectJsonLd(ld, `blog-article-ld`);
+  }, [post]);
+
+  if (loading) {
+    return (
+      <div style={{ background: COLORS.bg, minHeight: `100vh`, paddingTop: 72, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+        <div style={{ width: 36, height: 36, border: `3px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `blogSpin 0.8s linear infinite` }} />
+        <style>{`@keyframes blogSpin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+  if (notFound || !post) {
+    return (
+      <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
+        <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{t.blogNotFound}</div>
+        <button onClick={() => goToBlog()} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
+      </div>
+    );
+  }
+
+  const title = post[`title_${lang}`] || post.title_he || ``;
+  const bodyHtml = sanitizeBlogHtml(post[`content_${lang}`] || post.content_he || ``);
+  const shareUrl = blogShareUrl(post.slug);
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(shareUrl); setCopied(true); if (onShareToast) onShareToast(t.blogShareCopied); setTimeout(() => setCopied(false), 2000); } catch {}
+  };
+  const petName = pet ? (pet[`name_${lang}`] || pet.name_he || pet.name_en) : ``;
+
+  return (
+    <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
+      <article style={{ maxWidth: 820, margin: `0 auto`, padding: isMobile ? `24px 18px 80px` : `40px 24px 120px` }}>
+        {/* Breadcrumb */}
+        <nav aria-label="breadcrumb" style={{ display: `flex`, flexWrap: `wrap`, gap: 8, alignItems: `center`, color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, marginBottom: 24 }}>
+          <button onClick={() => setPage(`home`)} style={{ background: `none`, border: `none`, color: COLORS.grayLight, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{t.blogBreadcrumbHome}</button>
+          <span>/</span>
+          <button onClick={() => goToBlog()} style={{ background: `none`, border: `none`, color: COLORS.accent, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{t.navBlog}</button>
+          <span>/</span>
+          <span style={{ color: COLORS.gray, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap`, maxWidth: 200 }}>{title}</span>
+        </nav>
+
+        <span style={{ display: `inline-block`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `2px`, textTransform: `uppercase`, marginBottom: 12 }}>{blogCategoryLabel(lang, post.category)}</span>
+        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.2rem` : `3rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 12px`, letterSpacing: `-0.01em` }}>{title}</h1>
+        <div style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, marginBottom: 28 }}>{t.blogPublishedOn}{formatBlogDate(post.published_at, lang)}</div>
+
+        {/* Cover */}
+        {post.cover_image_url && (
+          <div style={{ width: `100%`, maxHeight: 480, overflow: `hidden`, borderRadius: 16, marginBottom: 32, background: `#0d0d0d` }}>
+            <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title} style={{ width: `100%`, maxHeight: 480, objectFit: `cover`, display: `block` }} />
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="blog-body" style={{ color: `#d6d6d6`, fontFamily: `'Varela Round',sans-serif`, fontSize: isMobile ? 16 : 17, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+
+        {/* Related product */}
+        {pet && (
+          <div onClick={() => setPage(`pets`)} role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === `Enter`) setPage(`pets`); }}
+            style={{ marginTop: 40, display: `flex`, alignItems: `center`, gap: 18, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 18, cursor: `pointer`, transition: `border-color 0.2s` }}
+            onMouseOver={(e) => { e.currentTarget.style.borderColor = COLORS.accent; }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = COLORS.border; }}>
+            <div style={{ width: 88, height: 88, borderRadius: 12, overflow: `hidden`, flexShrink: 0, background: `#0d0d0d` }}>
+              <SmartImage src={pet.mockup_mug_url || pet.mockup_url} alt={petName} style={{ width: `100%`, height: `100%`, objectFit: `cover` }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 20 }}>{petName}</div>
+              <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 6 }}>{t.blogRelatedProduct}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Quiz CTA */}
+        <a href="/quiz" style={{ display: `block`, marginTop: 32, textDecoration: `none` }}>
+          <div style={{ background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 16, padding: isMobile ? `20px 22px` : `22px 28px`, textAlign: `center`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: isMobile ? 15 : 17 }}>{t.blogQuizCta}</div>
+        </a>
+
+        {/* Share */}
+        <div style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 14 }}>{t.blogShareTitle}</div>
+          <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
+            <a href={`https://wa.me/?text=${encodeURIComponent(`${title} ${shareUrl}`)}`} target="_blank" rel="noopener noreferrer"
+              style={{ background: `#25D366`, color: `#fff`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, textDecoration: `none` }}>{t.blogShareWhatsapp}</a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer"
+              style={{ background: `#1877F2`, color: `#fff`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, textDecoration: `none` }}>{t.blogShareFacebook}</a>
+            <button type="button" onClick={copyLink}
+              style={{ background: copied ? COLORS.success : `transparent`, color: copied ? `#000` : COLORS.white, border: `1px solid ${copied ? COLORS.success : COLORS.border}`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, transition: `all 0.2s` }}>{copied ? t.blogShareCopied : t.blogShareCopy}</button>
+          </div>
+        </div>
+
+        {/* Related posts */}
+        {related.length > 0 && (
+          <div style={{ marginTop: 56 }}>
+            <h2 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? `1.5rem` : `2rem`, color: COLORS.white, margin: `0 0 24px` }}>{t.blogRelatedPosts}</h2>
+            <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(3, 1fr)`, gap: isMobile ? 16 : 20 }}>
+              {related.map((r) => <BlogCard key={r.slug} post={r} lang={lang} goToBlog={goToBlog} compact />)}
+            </div>
+          </div>
+        )}
+
+        <div style={{ marginTop: 48 }}>
+          <button onClick={() => goToBlog()} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
+        </div>
+      </article>
+
+      {/* Scoped typography for the post body */}
+      <style>{`
+        @keyframes blogSpin { to { transform: rotate(360deg); } }
+        .blog-body h2 { font-family: 'Playfair Display', serif; font-style: italic; color: #fff; font-size: 1.7rem; margin: 32px 0 14px; line-height: 1.3; }
+        .blog-body h3 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.35rem; margin: 26px 0 12px; }
+        .blog-body p { margin: 0 0 18px; }
+        .blog-body a { color: #FF6B35; }
+        .blog-body ul, .blog-body ol { margin: 0 0 18px; padding-inline-start: 24px; }
+        .blog-body li { margin-bottom: 8px; }
+        .blog-body img { max-width: 100%; height: auto; border-radius: 12px; margin: 18px 0; }
+        .blog-body blockquote { border-inline-start: 3px solid #FF6B35; margin: 18px 0; padding-inline-start: 16px; color: #aaa; font-style: italic; }
+        .blog-body strong { color: #fff; }
+      `}</style>
+    </div>
+  );
+}
+
+// ============ BLOG ADMIN — list + create/edit + cover upload ============
+const BLANK_BLOG_POST = {
+  slug: ``, title_he: ``, title_en: ``, title_ru: ``,
+  excerpt_he: ``, excerpt_en: ``, excerpt_ru: ``,
+  content_he: ``, content_en: ``, content_ru: ``,
+  cover_image_url: ``, cover_image_alt_he: ``, breed_slug_link: ``,
+  category: `breeds`, seo_title_he: ``, seo_description_he: ``,
+  status: `draft`,
+};
+const slugifyBlog = (s) => (s || ``).toLowerCase().trim().replace(/[^a-z0-9]+/g, `-`).replace(/^-+|-+$/g, ``);
+
+function BlogAdmin({ uploadAdminImage, lang }) {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false); // false | true (form open)
+  const [form, setForm] = useState(BLANK_BLOG_POST);
+  const [editingId, setEditingId] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [breeds, setBreeds] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const fileRef = useRef(null);
+
+  const fetchPosts = async () => {
+    const { data } = await supabase.from(`blog_posts`).select(`*`).order(`created_at`, { ascending: false });
+    setPosts(data || []);
+    setLoading(false);
+  };
+  useEffect(() => {
+    fetchPosts();
+    supabase.from(`pet_designs`).select(`slug,name_he`).order(`sort_order`, { ascending: true }).then(({ data }) => setBreeds(data || []));
+  }, []);
+
+  const startNew = () => { setForm(BLANK_BLOG_POST); setEditingId(null); setEditing(true); setShowPreview(false); };
+  const startEdit = (p) => {
+    setForm({ ...BLANK_BLOG_POST, ...p, breed_slug_link: p.breed_slug_link || ``, slug: p.slug || `` });
+    setEditingId(p.id); setEditing(true); setShowPreview(false);
+  };
+  const cancel = () => { setEditing(false); setEditingId(null); setForm(BLANK_BLOG_POST); };
+
+  const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleCover = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadAdminImage(`blog-images`, file, `cover`);
+      if (url) upd(`cover_image_url`, url);
+    } catch (err) { console.error(`Cover upload failed:`, err); window.alert(`Upload failed`); }
+    finally { setUploading(false); if (fileRef.current) fileRef.current.value = ``; }
+  };
+
+  const buildRow = (publish) => {
+    const slug = (form.slug && form.slug.trim()) || slugifyBlog(form.title_en) || slugifyBlog(form.title_he);
+    const row = {
+      slug,
+      title_he: form.title_he || null, title_en: form.title_en || null, title_ru: form.title_ru || null,
+      excerpt_he: form.excerpt_he || null, excerpt_en: form.excerpt_en || null, excerpt_ru: form.excerpt_ru || null,
+      content_he: form.content_he || null, content_en: form.content_en || null, content_ru: form.content_ru || null,
+      cover_image_url: form.cover_image_url || null, cover_image_alt_he: form.cover_image_alt_he || null,
+      breed_slug_link: form.breed_slug_link || null, category: form.category || `breeds`,
+      seo_title_he: form.seo_title_he || null, seo_description_he: form.seo_description_he || null,
+    };
+    if (publish) { row.status = `published`; if (!form.published_at) row.published_at = new Date().toISOString(); }
+    else if (!editingId) { row.status = `draft`; }
+    return row;
+  };
+
+  const save = async (publish) => {
+    if (!form.title_he && !form.title_en) { window.alert(`Title required`); return; }
+    setBusy(true);
+    try {
+      const row = buildRow(publish);
+      if (!row.slug) { window.alert(`Slug required (add an English title or set slug manually)`); setBusy(false); return; }
+      let error;
+      if (editingId) ({ error } = await supabase.from(`blog_posts`).update(row).eq(`id`, editingId));
+      else ({ error } = await supabase.from(`blog_posts`).insert(row));
+      if (error) { console.error(`Save blog post failed:`, error); window.alert(`Save failed: ${error.message}`); setBusy(false); return; }
+      await fetchPosts();
+      cancel();
+    } finally { setBusy(false); }
+  };
+
+  const togglePublish = async (p) => {
+    const next = p.status === `published` ? `draft` : `published`;
+    const patch = { status: next };
+    if (next === `published` && !p.published_at) patch.published_at = new Date().toISOString();
+    const { error } = await supabase.from(`blog_posts`).update(patch).eq(`id`, p.id);
+    if (error) { console.error(error); window.alert(`Failed`); return; }
+    fetchPosts();
+  };
+  const remove = async (p) => {
+    if (!window.confirm(`Delete this post permanently?`)) return;
+    const { error } = await supabase.from(`blog_posts`).delete().eq(`id`, p.id);
+    if (error) { console.error(error); window.alert(`Delete failed`); return; }
+    fetchPosts();
+  };
+
+  const inp = { width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 12px`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, outline: `none`, boxSizing: `border-box`, marginTop: 4 };
+  const lbl = { color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, display: `block`, marginTop: 12 };
+  const field = (label, key, opts = {}) => (
+    <label style={lbl}>{label}
+      {opts.area
+        ? <textarea value={form[key] || ``} onChange={(e) => upd(key, e.target.value)} rows={opts.rows || 4} style={{ ...inp, fontFamily: opts.mono ? `'IBM Plex Mono',monospace` : inp.fontFamily, resize: `vertical` }} />
+        : <input value={form[key] || ``} onChange={(e) => upd(key, e.target.value)} style={inp} placeholder={opts.ph || ``} dir={opts.dir || `auto`} />}
+    </label>
+  );
+
+  return (
+    <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+      <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
+        <div>
+          <h2 style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontSize: 28, margin: 0 }}>{lang === `he` ? `בלוג` : `Blog`}</h2>
+          <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>{loading ? (lang === `he` ? `טוען...` : `Loading...`) : `${posts.length} ${lang === `he` ? `פוסטים` : `posts`}`}</p>
+        </div>
+        {!editing && (
+          <button onClick={startNew} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `+ פוסט חדש` : `+ New post`}</button>
+        )}
+      </div>
+
+      {editing && (
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 12, padding: 18, marginBottom: 24 }}>
+          <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(220px, 1fr))`, gap: 12 }}>
+            {field(`slug (a-z 0-9 -)`, `slug`, { ph: `auto from English title`, dir: `ltr` })}
+            <label style={lbl}>{lang === `he` ? `קטגוריה` : `Category`}
+              <select value={form.category} onChange={(e) => upd(`category`, e.target.value)} style={inp}>
+                {BLOG_CATEGORY_IDS.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+            <label style={lbl}>{lang === `he` ? `קישור לגזע (BLOOM)` : `Linked breed (BLOOM)`}
+              <select value={form.breed_slug_link || ``} onChange={(e) => upd(`breed_slug_link`, e.target.value)} style={inp}>
+                <option value="">—</option>
+                {breeds.map((b) => <option key={b.slug} value={b.slug}>{b.slug} · {b.name_he}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(220px, 1fr))`, gap: 12 }}>
+            {field(`title_he`, `title_he`)}
+            {field(`title_en`, `title_en`, { dir: `ltr` })}
+            {field(`title_ru`, `title_ru`)}
+          </div>
+          <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(220px, 1fr))`, gap: 12 }}>
+            {field(`excerpt_he`, `excerpt_he`, { area: true, rows: 2 })}
+            {field(`excerpt_en`, `excerpt_en`, { area: true, rows: 2 })}
+            {field(`excerpt_ru`, `excerpt_ru`, { area: true, rows: 2 })}
+          </div>
+
+          {/* Cover */}
+          <div style={{ display: `flex`, alignItems: `center`, gap: 14, marginTop: 14, flexWrap: `wrap` }}>
+            <div style={{ width: 120, height: 68, borderRadius: 8, overflow: `hidden`, background: `#0d0d0d`, border: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
+              {form.cover_image_url ? <img src={form.cover_image_url} alt="" style={{ width: `100%`, height: `100%`, objectFit: `cover` }} /> : null}
+            </div>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleCover} style={{ display: `none` }} />
+              <button type="button" onClick={() => fileRef.current && fileRef.current.click()} disabled={uploading} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `8px 14px`, fontSize: 12, fontWeight: 700, cursor: uploading ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{uploading ? `…` : (lang === `he` ? `העלה כריכה` : `Upload cover`)}</button>
+              {field(`cover_image_url`, `cover_image_url`, { dir: `ltr` })}
+            </div>
+          </div>
+          {field(`cover_image_alt_he`, `cover_image_alt_he`)}
+
+          {field(`content_he (HTML)`, `content_he`, { area: true, rows: 12, mono: true })}
+          {field(`content_en (HTML)`, `content_en`, { area: true, rows: 8, mono: true })}
+          {field(`content_ru (HTML)`, `content_ru`, { area: true, rows: 8, mono: true })}
+
+          {field(`seo_title_he`, `seo_title_he`)}
+          {field(`seo_description_he`, `seo_description_he`, { area: true, rows: 2 })}
+
+          {showPreview && (
+            <div style={{ marginTop: 16, border: `1px dashed ${COLORS.border}`, borderRadius: 10, padding: 16, background: COLORS.bg }}>
+              <div style={{ color: COLORS.accent, fontSize: 11, fontFamily: `'IBM Plex Mono',monospace`, marginBottom: 10 }}>PREVIEW (content_he)</div>
+              <div className="blog-body" style={{ color: `#d6d6d6`, fontFamily: `'Varela Round',sans-serif`, fontSize: 16, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(form.content_he) }} />
+            </div>
+          )}
+
+          <div style={{ display: `flex`, gap: 10, marginTop: 18, flexWrap: `wrap` }}>
+            <button onClick={() => save(false)} disabled={busy} style={{ background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `שמור טיוטה` : `Save draft`)}</button>
+            <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
+            <button onClick={() => setShowPreview((s) => !s)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `תצוגה מקדימה` : `Preview`}</button>
+            <button onClick={cancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `ביטול` : `Cancel`}</button>
+            <style>{`.blog-body h2{font-family:'Playfair Display',serif;font-style:italic;color:#fff;font-size:1.5rem;margin:20px 0 10px} .blog-body p{margin:0 0 14px} .blog-body a{color:#FF6B35} .blog-body img{max-width:100%;height:auto;border-radius:10px}`}</style>
+          </div>
+        </div>
+      )}
+
+      {!loading && !editing && (
+        <div style={{ display: `flex`, flexDirection: `column`, gap: 8 }}>
+          {posts.length === 0 && <div style={{ color: COLORS.gray, fontSize: 14, padding: 16 }}>{lang === `he` ? `אין פוסטים עדיין` : `No posts yet`}</div>}
+          {posts.map((p) => (
+            <div key={p.id} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `10px 14px`, display: `flex`, alignItems: `center`, gap: 12, flexWrap: `wrap` }}>
+              <span style={{ background: p.status === `published` ? `rgba(74,222,128,0.15)` : `rgba(255,255,255,0.06)`, color: p.status === `published` ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `4px 10px`, fontSize: 11, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, flexShrink: 0 }}>{p.status}</span>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: `'Playfair Display',serif` }}>{p.title_he || p.title_en || p.slug}</div>
+                <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{[p.category, p.published_at ? formatBlogDate(p.published_at, lang) : `—`, `${p.views_count || 0} ${lang === `he` ? `צפיות` : `views`}`].filter(Boolean).join(` · `)}</div>
+              </div>
+              <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
+                <button onClick={() => startEdit(p)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lang === `he` ? `ערוך` : `Edit`}</button>
+                <button onClick={() => togglePublish(p)} style={{ background: `transparent`, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{p.status === `published` ? (lang === `he` ? `הסתר` : `Unpublish`) : (lang === `he` ? `פרסם` : `Publish`)}</button>
+                <button onClick={() => remove(p)} style={{ background: `transparent`, color: `#ef4444`, border: `1px solid #ef4444`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lang === `he` ? `מחק` : `Delete`}</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
