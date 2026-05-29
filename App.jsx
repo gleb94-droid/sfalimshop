@@ -970,7 +970,13 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     return () => clearInterval(id);
   }, [isPaused, designs.length]);
 
-  if (!designs.length) return null;
+  // NOTE: we intentionally do NOT early-return when designs is empty. Doing so
+  // collapsed the whole showcase to 0px until Supabase responded, then it
+  // popped to full height and shoved the hero below it down — the dominant
+  // source of the home page's poor CLS (~0.63 desktop). Instead the <section>
+  // reserves its loaded height via minHeight (see below) so the empty→loaded
+  // fill happens inside already-reserved space and nothing below shifts. The
+  // card + dots are inserted (not moved) on load, so they don't shift either.
 
   const statusByLang = {
     he: `מוצר כוכב · BLOOM`,
@@ -1012,6 +1018,12 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         width: `100%`,
         background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.18) 0%, transparent 60%), ${COLORS.bg}`,
         padding: isMobile ? `96px 16px 32px` : `120px 24px 48px`,
+        // Reserve the loaded showcase height (measured: 856px desktop / 731px
+        // mobile, incl. padding) so the async card never collapses→expands and
+        // shoves the hero below it down. This is the loaded height ceiling —
+        // the card is svh/width-capped, so content never exceeds it; on shorter
+        // viewports minHeight simply holds the space. Prevents ~0.63 home CLS.
+        minHeight: isMobile ? 731 : 856,
         display: `flex`,
         flexDirection: `column`,
         alignItems: `center`,
@@ -7378,7 +7390,6 @@ export default function App() {
       <Analytics />
       <SpeedInsights />
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Varela+Round&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0f0f0f; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
