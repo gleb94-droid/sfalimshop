@@ -1103,7 +1103,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                   holographic shine, no pointer listeners, no mount reveal. */}
               {reduceFx ? (
                 <BloomCardLite
-                  imageUrl={d.mockup_shirt_url || d.mockup_url}
+                  imageUrl={transformImage(d.mockup_shirt_url || d.mockup_url, { width: 1080 })}
                   name={displayName}
                   description={description}
                   price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
@@ -1113,7 +1113,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 />
               ) : (
                 <FloatingProductCard
-                  imageUrl={d.mockup_shirt_url || d.mockup_url}
+                  imageUrl={transformImage(d.mockup_shirt_url || d.mockup_url, { width: 1080 })}
                   name={displayName}
                   description={description}
                   price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
@@ -1869,6 +1869,21 @@ const MOCKUP_URLS = {
   mug:        "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/mug.png",
   sticker:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
   sticker_sq: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/square%20sticker.png",
+};
+
+// transformImage — rewrites a Supabase Storage *public object* URL to the
+// on-the-fly image-transform endpoint (Pro feature), serving a resized,
+// re-compressed image for thumbnail/card/grid contexts. Browsers send
+// Accept: image/webp so Supabase returns webp regardless of source format,
+// cutting payloads ~50–85%. Use ONLY for small display sizes; the PetModal
+// large preview keeps the original full-res URL. Any non-Supabase or
+// already-transformed URL passes through untouched. Pass `width` at ~2× the
+// displayed CSS width so retina screens stay sharp.
+const transformImage = (url, { width, quality = 75 } = {}) => {
+  if (typeof url !== `string` || !url.includes(`/storage/v1/object/public/`)) return url;
+  const base = url.replace(`/storage/v1/object/public/`, `/storage/v1/render/image/public/`);
+  const sep = base.includes(`?`) ? `&` : `?`;
+  return `${base}${sep}width=${width}&quality=${quality}`;
 };
 
 // SmartImage — drop-in replacement for <img> on product images served from
@@ -6141,7 +6156,7 @@ function Hero({ setPage, lang }) {
             onTouchCancel={e => { e.currentTarget.style.transform = "translateY(0)"; }}>
             <ProductBadges product={p} lang={lang} />
             <div style={{ width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <SmartImage src={MOCKUP_URLS[p.id]} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 320 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
             <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
             <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
@@ -8479,7 +8494,9 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
   // Prefer the new product-mockup (breed on a shirt) — it shows the user the
   // actual product they'd be buying. Falls back to the clean hero image, then
   // the raw design transparent PNG if neither shipped for this row yet.
-  const imgSrc = design.mockup_shirt_url || design.mockup_url || design.design_url;
+  // Grid thumbnail: serve a resized transform (~2× the ~300px card for retina).
+  // The full-res original is used in PetModal's large preview (untouched).
+  const imgSrc = transformImage(design.mockup_shirt_url || design.mockup_url || design.design_url, { width: 600 });
   const fallbackBg = design.mockup_bg || "#1a1a1a";
 
   // Editorial corner-cut on hover (desktop only — no hover on touch)
