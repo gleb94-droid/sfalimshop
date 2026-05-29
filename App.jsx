@@ -8145,12 +8145,12 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
             three options — counts beside them so the user knows what to
             expect before clicking. */}
         {!loading && designs.length > 0 && (
-          <div className="reveal" style={{ display: "flex", flexDirection: isMobile ? `column` : `row`, alignItems: isMobile ? `stretch` : `center`, gap: 12, marginBottom: 32, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? `column` : `row`, alignItems: isMobile ? `stretch` : `center`, gap: 12, marginBottom: 32, flexWrap: "wrap", position: `sticky`, top: 72, zIndex: 40, background: `rgba(15,15,15,0.92)`, backdropFilter: `blur(12px)`, WebkitBackdropFilter: `blur(12px)`, paddingTop: 16, paddingBottom: 16, borderBottom: `1px solid ${COLORS.border}` }}>
             <div role="tablist" aria-label={t.collectionEyebrow} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {[
-                { id: `all`, label: t.tabAll, count: designs.length },
-                { id: `dog`, label: t.tabDogs, count: designs.filter(d => d.species === `dog`).length },
-                { id: `cat`, label: t.tabCats, count: designs.filter(d => d.species === `cat`).length },
+                { id: `all`, emoji: `🐾`, label: t.tabAll, count: designs.length },
+                { id: `dog`, emoji: `🐶`, label: t.tabDogs, count: designs.filter(d => d.species === `dog`).length },
+                { id: `cat`, emoji: `🐱`, label: t.tabCats, count: designs.filter(d => d.species === `cat`).length },
               ].map(tab => {
                 const active = speciesFilter === tab.id;
                 return (
@@ -8163,16 +8163,22 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
                     style={{
                       background: active ? COLORS.accent : `transparent`,
                       color: active ? `#fff` : COLORS.gray,
-                      border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+                      border: `${active ? 2 : 1}px solid ${active ? COLORS.accent : COLORS.border}`,
                       borderRadius: 999,
-                      padding: `8px 16px`,
-                      fontSize: 13,
-                      fontWeight: 600,
+                      padding: `12px 22px`,
+                      fontSize: 15,
+                      fontWeight: 700,
                       fontFamily: `'Varela Round',sans-serif`,
                       cursor: `pointer`,
-                      transition: `background 0.2s, color 0.2s, border-color 0.2s`,
+                      transition: `background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s`,
+                      transform: active ? `scale(1.05)` : `scale(1)`,
+                      display: `inline-flex`,
+                      alignItems: `center`,
+                      gap: 6,
                     }}>
-                    {tab.label} <span style={{ opacity: 0.7, marginInlineStart: 4 }}>{tab.count}</span>
+                    <span style={{ fontSize: 18 }} aria-hidden="true">{tab.emoji}</span>
+                    <span>{tab.label}</span>
+                    <span style={{ opacity: 0.7, marginInlineStart: 2 }}>{tab.count}</span>
                   </button>
                 );
               })}
