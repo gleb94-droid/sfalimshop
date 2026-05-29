@@ -7552,11 +7552,15 @@ export default function App() {
       {!reduceMotion && <CursorGlow />}
       {(() => {
         const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
-        // Maintenance gate. Only 'policies' is exposed during maintenance
-        // (legal pages need to stay reachable for Google verification + SEO).
-        // The previous mug-studio exception is removed — that route is now
-        // controlled by MUG_STUDIO_ENABLED above and respects MAINTENANCE_MODE.
-        if (MAINTENANCE_MODE && !isAdmin && !isStaffOverride && page !== 'policies') {
+        // Public pre-launch preview: while in maintenance, the public (no
+        // ?staff=1, not admin) may still browse the BLOOM "Find Your Breed"
+        // experience on /pets — the grid, dog/cat filter and breed stories —
+        // but cannot purchase. There, every buy CTA becomes "Join the BLOOM
+        // Family" (waitlist). Staff/admin get the full site unchanged.
+        const publicPreview = MAINTENANCE_MODE && !isAdmin && !isStaffOverride;
+        // Maintenance gate. 'policies' (legal/SEO) and 'pets' (public preview)
+        // stay reachable; everything else shows the maintenance screen.
+        if (publicPreview && page !== 'policies' && page !== 'pets') {
           return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} />;
         }
         return (
@@ -7565,7 +7569,7 @@ export default function App() {
             <Nav page={page} setPage={setPage} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} />
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
             {page === "track" && <TrackPage lang={lang} user={user} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
@@ -7744,8 +7748,128 @@ function PawPrintsBackground() {
 }
 
 // ============ PETS PAGE — BLOOM Collection / Pet Couture ============
-function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast }) {
+// ============ BLOOM FAMILY WAITLIST (pre-launch) ============
+// While MAINTENANCE_MODE is true the public can browse the BLOOM collection +
+// breed stories but cannot buy — every purchase CTA becomes "Join the BLOOM
+// Family", which captures the visitor's email and which breed they were
+// interested in (public.waitlist). Checkout/cart/account stay gated.
+const WL = {
+  he: { heroTitle:`70 כלבים וחתולים. אחד מהם שלכם.`, heroSub:`מצאו את הגזע שלכם והצטרפו למשפחת BLOOM — גישה מוקדמת לפני כולם.`, joinBtn:`הצטרפו למשפחת BLOOM`, breedCta:(n)=>`רוצים את ${n} על חולצה או ספל? הצטרפו למשפחת BLOOM`, ph:`האימייל שלך`, submit:`אני בפנים`, submitting:`רגע...`, consent:`בהרשמה אני מאשר/ת לקבל עדכוני השקה מספלים שופ. ניתן להסיר בכל עת.`, success:`אתם במשפחת BLOOM. נעדכן אתכם כשהדלתות ייפתחו — עם גישה מוקדמת.`, already:`אתם כבר במשפחת BLOOM. נתראה כשהדלתות ייפתחו.`, error:`משהו השתבש. נסו שוב בעוד רגע.`, invalid:`כתובת אימייל לא תקינה.` },
+  en: { heroTitle:`70 dogs & cats. One of them is yours.`, heroSub:`Find your breed and join the BLOOM Family — early access before everyone else.`, joinBtn:`Join the BLOOM Family`, breedCta:(n)=>`Want ${n} on a tee or mug? Join the BLOOM Family`, ph:`Your email`, submit:`I'm in`, submitting:`One sec...`, consent:`By joining I agree to receive launch updates from Sfalim Shop. Unsubscribe anytime.`, success:`You're in the BLOOM Family. We'll let you know when the doors open — with early access.`, already:`You're already in the BLOOM Family. See you when the doors open.`, error:`Something went wrong. Please try again.`, invalid:`Please enter a valid email.` },
+  ru: { heroTitle:`70 собак и кошек. Одна из них — ваша.`, heroSub:`Найдите свою породу и вступите в семью BLOOM — ранний доступ раньше всех.`, joinBtn:`В семью BLOOM`, breedCta:(n)=>`Хотите ${n} на футболке или кружке? Вступайте в семью BLOOM`, ph:`Ваш email`, submit:`Я с вами`, submitting:`Секунду...`, consent:`Регистрируясь, я соглашаюсь получать новости о запуске от Sfalim Shop. Отписаться можно в любой момент.`, success:`Вы в семье BLOOM. Сообщим, когда откроются двери — с ранним доступом.`, already:`Вы уже в семье BLOOM. До встречи, когда откроются двери.`, error:`Что-то пошло не так. Попробуйте ещё раз.`, invalid:`Введите корректный email.` },
+};
+
+// Email-capture form. Self-contained: validates client-side, inserts into the
+// waitlist (RLS allows anon INSERT with consent=true), and swaps itself for a
+// success/already message. Reused by the hero (general signup) and each breed
+// (breed_interest = slug). NOTE: no .select() chain — RLS only allows INSERT.
+function WaitlistForm({ lang, source, breedInterest = null, autoFocus = false }) {
+  const w = WL[lang] || WL.he;
+  const isRTL = lang === `he`;
+  const [email, setEmail] = useState(``);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(null); // invalid | error | success | already
+  const inputId = `wl-email-${source}-${breedInterest || `general`}`;
+  const done = status === `success` || status === `already`;
+
+  const submit = async (ev) => {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    const addr = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)) { setStatus(`invalid`); return; }
+    setBusy(true); setStatus(null);
+    try {
+      const { error } = await supabase.from(`waitlist`).insert({ email: addr, lang, source, consent: true, breed_interest: breedInterest });
+      if (!error) setStatus(`success`);
+      else if (error.code === `23505`) setStatus(`already`); // duplicate => already in
+      else setStatus(`error`);
+    } catch (err) {
+      console.error(`Waitlist insert failed:`, err);
+      setStatus(`error`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (done) {
+    return (
+      <div role="status" aria-live="polite" style={{ background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.4)`, borderRadius: 12, padding: `18px 20px`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 15, lineHeight: 1.5, textAlign: isRTL ? `right` : `left` }}>
+        {status === `already` ? w.already : w.success}
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} noValidate style={{ width: `100%` }}>
+      <label htmlFor={inputId} style={{ display: `block`, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, marginBottom: 8, textAlign: isRTL ? `right` : `left` }}>
+        {w.ph}
+      </label>
+      <div style={{ display: `flex`, flexDirection: isRTL ? `row-reverse` : `row`, gap: 10, flexWrap: `wrap` }}>
+        <input
+          id={inputId}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoFocus={autoFocus}
+          value={email}
+          onChange={(ev) => setEmail(ev.target.value)}
+          placeholder={w.ph}
+          disabled={busy}
+          dir="ltr"
+          style={{ flex: `1 1 200px`, minWidth: 0, background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `14px 16px`, fontSize: 15, fontFamily: `'Varela Round',sans-serif`, outline: `none`, textAlign: `left` }}
+          onFocus={(ev) => { ev.target.style.borderColor = COLORS.accent; }}
+          onBlur={(ev) => { ev.target.style.borderColor = COLORS.border; }}
+        />
+        <button type="submit" disabled={busy} style={{ flexShrink: 0, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: busy ? `wait` : `pointer`, opacity: busy ? 0.7 : 1, transition: `background 0.2s` }}
+          onMouseOver={(ev) => { if (!busy) ev.currentTarget.style.background = COLORS.accentHover; }}
+          onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accent; }}>
+          {busy ? w.submitting : w.submit}
+        </button>
+      </div>
+      <div aria-live="polite" style={{ minHeight: 18, marginTop: 8, textAlign: isRTL ? `right` : `left` }}>
+        {(status === `invalid` || status === `error`) && (
+          <span style={{ color: `#ff7a6b`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>
+            {status === `invalid` ? w.invalid : w.error}
+          </span>
+        )}
+      </div>
+      <div style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 11, lineHeight: 1.5, marginTop: 4, textAlign: isRTL ? `right` : `left` }}>
+        {w.consent}
+      </div>
+    </form>
+  );
+}
+
+// "Join the BLOOM Family" CTA. Shows the join button (and, for a breed, the
+// breed-specific line); clicking it reveals the inline WaitlistForm with the
+// right source/breed_interest. variant: `hero` (general) | `breed` (in modal).
+function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, variant = `hero` }) {
+  const w = WL[lang] || WL.he;
+  const isRTL = lang === `he`;
+  const [open, setOpen] = useState(false);
+  const ctaText = variant === `breed` && breedName ? w.breedCta(breedName) : null;
+
+  if (open) {
+    return <WaitlistForm lang={lang} source={source} breedInterest={breedInterest} autoFocus />;
+  }
+  return (
+    <div style={{ textAlign: isRTL ? `right` : `left` }}>
+      {ctaText && (
+        <div style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 18, lineHeight: 1.35, marginBottom: 14 }}>
+          {ctaText}
+        </div>
+      )}
+      <button type="button" onClick={() => setOpen(true)} style={{ width: variant === `breed` ? `100%` : `auto`, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 32px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 28px rgba(255,107,53,0.35)`, transition: `background 0.2s, transform 0.2s` }}
+        onMouseOver={(ev) => { ev.currentTarget.style.background = COLORS.accentHover; ev.currentTarget.style.transform = `translateY(-2px)`; }}
+        onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accent; ev.currentTarget.style.transform = `translateY(0)`; }}>
+        {w.joinBtn}
+      </button>
+    </div>
+  );
+}
+
+function PetsPage({ lang, setPage, preview = false, onOrderBloom, onAddStickerPack, onShareToast }) {
   const isRTL = lang === "he";
+  const w = WL[lang] || WL.he; // BLOOM Family waitlist copy (pre-launch preview)
   const quizT = LANGS[lang].quiz; // quiz banner copy lives in LANGS (single source)
   const [designs, setDesigns] = useState([]);
   const [packs, setPacks] = useState([]);
@@ -8141,6 +8265,19 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
         </p>
       </section>
 
+      {/* ===== JOIN THE BLOOM FAMILY (pre-launch public preview only) ===== */}
+      {preview && (
+        <section style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", padding: isMobile ? "0 20px 24px" : "0 40px 32px" }}>
+          <div style={{ background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 18, padding: isMobile ? "28px 22px" : "40px 44px", textAlign: "center" }}>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: isMobile ? "1.6rem" : "2.2rem", color: COLORS.white, margin: "0 0 12px", lineHeight: 1.2 }}>{w.heroTitle}</h2>
+            <p style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: isMobile ? 14 : 16, lineHeight: 1.5, maxWidth: 560, margin: "0 auto 24px" }}>{w.heroSub}</p>
+            <div style={{ maxWidth: 460, margin: "0 auto" }}>
+              <JoinBloomCTA lang={lang} source="bloom" variant="hero" />
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ===== BLOOM QUIZ BANNER (links to the static /quiz page) ===== */}
       <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "0 16px 8px" : "0 40px" }}>
         <a href="/quiz" style={{ textDecoration: "none", display: "block" }}>
@@ -8271,7 +8408,7 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
             loads. Each pack adds a single sticker_pack line to the cart at
             its bundled price. Single-character stickers are NOT sold here
             (free gift only). */}
-        {!loading && packs.length > 0 && typeof onAddStickerPack === `function` && (
+        {!preview && !loading && packs.length > 0 && typeof onAddStickerPack === `function` && (
           <div className="reveal" style={{ marginBottom: 40 }}>
             <div style={{ color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `2px`, marginBottom: 8 }}>
               {t.packsEyebrow}
@@ -8348,6 +8485,7 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
                   animal={getAnimal(d)}
                   tagline={getTagline(d)}
                   priceFrom={t.priceFrom}
+                  preview={preview}
                   onClick={() => openPet(d)}
                   isMobile={isMobile}
                 />
@@ -8358,13 +8496,20 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
       </section>
 
       {/* ===== CTA SECTION ===== */}
+      {/* Pre-launch: the order CTA is replaced by a closing "Join the BLOOM
+          Family" band so the public never hits a buy action. */}
       <section className="reveal" style={{ position: "relative", zIndex: 1, padding: isMobile ? "60px 20px" : "80px 40px", textAlign: "center", borderTop: `1px solid ${COLORS.border}`, maxWidth: 900, margin: "0 auto" }}>
         <h3 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.8rem" : "2.4rem", color: COLORS.white, margin: "0 0 12px 0" }}>
           {t.ctaTitle}
         </h3>
         <p style={{ color: COLORS.gray, fontSize: isMobile ? 14 : 16, fontFamily: "'Varela Round',sans-serif", marginBottom: 30 }}>
-          {t.ctaSub}
+          {preview ? w.heroSub : t.ctaSub}
         </p>
+        {preview ? (
+          <div style={{ maxWidth: 460, margin: "0 auto", textAlign: "center" }}>
+            <JoinBloomCTA lang={lang} source="bloom" variant="hero" />
+          </div>
+        ) : (
         <button onClick={() => setPage("order")} style={{
           background: COLORS.accent,
           border: "none",
@@ -8382,6 +8527,7 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
         onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 36px rgba(255,107,53,0.5)"; }}
         onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,107,53,0.35)"; }}
         >{t.ctaBtn}</button>
+        )}
       </section>
 
       {/* ===== DETAIL MODAL ===== */}
@@ -8393,6 +8539,7 @@ function PetsPage({ lang, setPage, onOrderBloom, onAddStickerPack, onShareToast 
           animal={getAnimal(selected)}
           tagline={getTagline(selected)}
           t={t}
+          preview={preview}
           onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
@@ -8489,7 +8636,7 @@ function PetBadges({ design, lang }) {
 }
 
 // ============ PET CARD — gallery tile ============
-function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClick, isMobile }) {
+function PetCard({ design, lang, index, name, animal, tagline, priceFrom, preview = false, onClick, isMobile }) {
   const [hovered, setHovered] = useState(false);
   // Prefer the new product-mockup (breed on a shirt) — it shows the user the
   // actual product they'd be buying. Falls back to the clean hero image, then
@@ -8593,7 +8740,9 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
           paddingTop: 14,
           borderTop: `1px solid ${COLORS.border}`,
         }}>
-          <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{priceFrom}{Number(design.price_mug) || Number(design.price_sticker) || 59}</span>
+          {/* Pre-launch: no price shown — the breed detail offers "Join the
+              BLOOM Family" instead of a purchase. */}
+          <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{preview ? `` : `${priceFrom}${Number(design.price_mug) || Number(design.price_sticker) || 59}`}</span>
           <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>{lang === "he" ? "←" : "→"}</span>
         </div>
       </div>
@@ -8602,7 +8751,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, onClic
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
+function PetModal({ design, lang, name, animal, tagline, t, preview = false, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("basic");
@@ -9018,6 +9167,17 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.accent }} />
             </div>
 
+            {/* Pre-launch: the entire purchase block (product picker + add-to-
+                cart) is replaced by a breed-specific "Join the BLOOM Family"
+                CTA that records breed_interest = this slug. The breed story
+                below still renders. */}
+            {preview && (
+              <div style={{ marginBottom: 24 }}>
+                <JoinBloomCTA lang={lang} source="breed" breedInterest={design.slug} breedName={name} variant="breed" />
+              </div>
+            )}
+
+            {!preview && (<>
             <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>
               {t.availableOn}
             </div>
@@ -9132,6 +9292,7 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                 </div>
               </div>
             )}
+            </>)}
             {/* About the breed — origin + fun facts (content-writer agent). Only
                 renders when the breed has content; legacy rows stay clean. */}
             {design[`breed_origin_${lang}`] && (
@@ -9240,9 +9401,9 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
 
 function MaintenancePage({ lang, setLang, setPage }) {
   const messages = {
-    he: { title: "האתר בתחזוקה", sub: "אנחנו עובדים על שדרוגים מרגשים", back: "נחזור בקרוב!", staff: "כניסת צוות" },
-    en: { title: "Under Maintenance", sub: "We are working on exciting upgrades", back: "Back soon!", staff: "Staff login" },
-    ru: { title: "Сайт на обслуживании", sub: "Мы работаем над улучшениями", back: "Скоро вернёмся!", staff: "Вход для персонала" },
+    he: { title: "האתר בתחזוקה", sub: "החנות נפתחת בקרוב — אבל אוסף BLOOM כבר כאן. מצאו את הגזע שלכם.", back: "נחזור בקרוב!", staff: "כניסת צוות", explore: "גלו את אוסף BLOOM" },
+    en: { title: "Under Maintenance", sub: "The shop opens soon — but the BLOOM collection is already here. Find your breed.", back: "Back soon!", staff: "Staff login", explore: "Explore the BLOOM collection" },
+    ru: { title: "Сайт на обслуживании", sub: "Магазин скоро откроется — но коллекция BLOOM уже здесь. Найдите свою породу.", back: "Скоро вернёмся!", staff: "Вход для персонала", explore: "Открыть коллекцию BLOOM" },
   };
   const m = messages[lang] || messages.he;
   return (
@@ -9260,7 +9421,15 @@ function MaintenancePage({ lang, setLang, setPage }) {
         </div>
         <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 48, color: "#fff", marginBottom: 16, letterSpacing: "-0.5px" }}>{m.title}</h1>
         <p style={{ color: "#999", fontSize: 18, marginBottom: 8, fontFamily: "'Varela Round',sans-serif" }}>{m.sub}</p>
-        <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 36 }}>{m.back}</p>
+        <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 28 }}>{m.back}</p>
+        {/* Public entry into the pre-launch BLOOM "Find Your Breed" preview. */}
+        <div style={{ marginBottom: 24 }}>
+          <button onClick={() => setPage("pets")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", boxShadow: "0 8px 28px rgba(255,107,53,0.35)", transition: "background 0.2s, transform 0.2s" }}
+            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.transform = "translateY(0)"; }}>
+            {m.explore}
+          </button>
+        </div>
         <a href={SOCIAL.instagram} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 14 }}>
           Instagram @sfalimshop
         </a>
