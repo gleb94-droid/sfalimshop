@@ -6092,7 +6092,7 @@ function Hero({ setPage, lang }) {
     return () => window.removeEventListener("resize", handle);
   }, []);
   const isMobile = vw < 768;
-  const gridCols = vw >= 768 ? "repeat(3, 1fr)" : vw >= 480 ? "repeat(2, 1fr)" : "1fr";
+  const gridCols = vw >= 900 ? "repeat(4, 1fr)" : vw >= 600 ? "repeat(2, 1fr)" : "1fr";
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
@@ -6116,7 +6116,7 @@ function Hero({ setPage, lang }) {
         <TrustRow lang={lang} />
       </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 768 ? 820 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
+      <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 900 ? 900 : vw >= 600 ? 560 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
           <div key={p.id} onClick={() => setPage("order")} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
             style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
