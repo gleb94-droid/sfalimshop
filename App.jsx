@@ -942,7 +942,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       try {
         const { data, error } = await supabase
           .from("pet_designs")
-          .select("id,slug,species,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,price_shirt_basic,mockup_url,mockup_shirt_url,mockup_shirt_white_url,mockup_shirt_black_url,mockup_mug_url,design_url")
+          .select("id,slug,species,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,price_shirt,price_shirt_basic,mockup_url,mockup_shirt_url,mockup_shirt_white_url,mockup_shirt_black_url,mockup_mug_url,design_url,breed_origin_he,breed_origin_en,breed_origin_ru,breed_facts_he,breed_facts_en,breed_facts_ru")
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
         if (error) throw error;
@@ -9098,6 +9098,27 @@ function PetModal({ design, lang, name, animal, tagline, t, onClose, isMobile, o
                   {t.madeToOrder && <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, letterSpacing: `0.04em` }}>{t.madeToOrder}</span>}
                   {t.dispatchTime && <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Varela Round',sans-serif` }}>{t.dispatchTime}</span>}
                 </div>
+              </div>
+            )}
+            {/* About the breed — origin + fun facts (content-writer agent). Only
+                renders when the breed has content; legacy rows stay clean. */}
+            {design[`breed_origin_${lang}`] && (
+              <div style={{ marginBottom: 24, padding: `16px 18px`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 12, textAlign: isRTL ? `right` : `left` }}>
+                <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 8, display: `flex`, alignItems: `center`, gap: 6 }}>
+                  <span aria-hidden="true">🐾</span>
+                  <span>{lang === `he` ? `על הגזע` : lang === `ru` ? `О породе` : `About the breed`}</span>
+                </div>
+                <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{design[`breed_origin_${lang}`]}</p>
+                {design[`breed_facts_${lang}`] && (
+                  <ul style={{ margin: 0, marginTop: 12, padding: 0, listStyle: `none`, display: `flex`, flexDirection: `column`, gap: 7 }}>
+                    {String(design[`breed_facts_${lang}`]).split(/\n/).filter(Boolean).map((fact, i) => (
+                      <li key={i} style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13.5, lineHeight: 1.5, display: `flex`, alignItems: `flex-start`, gap: 8 }}>
+                        <span style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>•</span>
+                        <span>{fact}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
           </div>
