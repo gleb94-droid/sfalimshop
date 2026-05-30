@@ -47,7 +47,7 @@ sfalimshop/
 │   ├── create-payment/            # Tranzila (mostly written, gated off)
 │   └── tranzila-webhook/          # Tranzila (mostly written, gated off)
 ├── vercel.json                    # Routes + CSP + security headers
-├── PAYMENTS-LAUNCH-CHECKLIST.md   # Tranzila go-live checklist + known security hole
+├── PAYMENTS-LAUNCH-CHECKLIST.md   # Tranzila go-live checklist (both payment-integrity holes now FIXED)
 ├── .claude/agents/                # Subagent library (TRACKED in git as of 2026-05-28)
 └── CLAUDE.md                      # THIS FILE
 ```
@@ -185,7 +185,7 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 - 🔑 **`VITE_STAFF_PASSWORD` is set in Vercel (Production + Preview).** It's a **build-time** Vite var (inlined into the bundle), so **changing it requires a redeploy** to take effect. If unset, the staff gate stays closed (safe default).
 - ↩️ **Rollback candidate = prior production commit `4927eb4`** (`dpl_HguZgApkxm5QcvRJVxsun46oqnw7`) if a revert is ever needed.
 - 📣 **Instagram teaser launched** (business reel + personal story, early-access / waitlist push) to grow the pre-launch list.
-- ⛳ **STILL PENDING for the REAL public launch (in order):** (1) get the **Tranzila supplier number**; (2) **fix the cancel-button security hole** (customer can change payment status from the browser — see `PAYMENTS-LAUNCH-CHECKLIST.md`); (3) flip **`MAINTENANCE_MODE=false` + `PAYMENTS_ENABLED=true`**; (4) **arm `waitlist-launch-announce`** on launch day (dry-run → enable + `{"confirm":"SEND"}`).
+- ⛳ **STILL PENDING for the REAL public launch (in order):** (1) get the **Tranzila supplier number**; (2) ✅ ~~fix the cancel-button security hole~~ **DONE 2026-05-31** (both payment-integrity holes fixed + live on prod — see below); (3) flip **`MAINTENANCE_MODE=false` + `PAYMENTS_ENABLED=true`**; (4) **arm `waitlist-launch-announce`** on launch day (dry-run → enable + `{"confirm":"SEND"}`).
 - ℹ️ **Branch state at session end:** `main` is at the merge commit `174f312` (deployed to prod). `launch-prep` is at the same code tree **plus this CLAUDE.md doc commit on top** (so `launch-prep` is 1 commit ahead of `main` — docs only, no code diff). Both pushed to origin. **Next session: keep working on `launch-prep`; `main` is prod.**
 
 - ✅ MAINTENANCE_MODE = true (visitors see maintenance screen) + robots noindex until launch. The **only launch gate is the Tranzila supplier number.**
@@ -219,8 +219,8 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 ## 🗺️ Roadmap / next
 
 - ✅ **Tasks 7–10 DONE + LIVE ON PRODUCTION** 2026-05-30 (merged `launch-prep` → `main`, commit `174f312`; see the SESSION END block in Current status above): breed pages `5d5750c`, pet-name `bf62c1d`, launch email `e31aebd`, admin waitlist dashboard `0a948d4`, plus modal/breed nav, staff password gate, character rail.
-- 🚦 **REAL public-launch sequence (still pending):** (1) Tranzila supplier number → (2) fix the cancel-button security hole (`PAYMENTS-LAUNCH-CHECKLIST.md`) → (3) flip `MAINTENANCE_MODE=false` + `PAYMENTS_ENABLED=true` → (4) arm `waitlist-launch-announce` (dry-run → enable + `{"confirm":"SEND"}`).
-- ⏳ **Task 6 (blocked) — Tranzila payment:** waiting on the supplier number. Payment code is ~complete behind `PAYMENTS_ENABLED=false`. ⚠️ **Known security hole:** the "cancel" button lets a customer change payment status from the browser — MUST fix before enabling payments. Documented in `PAYMENTS-LAUNCH-CHECKLIST.md`. → then flip `MAINTENANCE_MODE` off.
+- 🚦 **REAL public-launch sequence (still pending):** (1) Tranzila supplier number → (2) ✅ ~~fix the cancel-button security hole~~ **DONE 2026-05-31** (both payment-integrity holes fixed + live on prod, `PAYMENTS-LAUNCH-CHECKLIST.md`) → (3) flip `MAINTENANCE_MODE=false` + `PAYMENTS_ENABLED=true` → (4) arm `waitlist-launch-announce` (dry-run → enable + `{"confirm":"SEND"}`).
+- ⏳ **Task 6 (blocked) — Tranzila payment:** waiting on the supplier number. Payment code is ~complete behind `PAYMENTS_ENABLED=false`. ✅ **Payment-integrity holes FIXED 2026-05-31** (live on prod Supabase, mirrored into repo): (a) a `BEFORE INSERT/UPDATE` trigger `trg_protect_order_payment_fields` on `orders` blocks any non-server/non-admin write to the payment columns (so a customer can no longer self-set `payment_status='paid'`); (b) `create-payment` now recomputes the charge server-side as `SUM(orders.total)` and ignores the client `amount`. Documented in `PAYMENTS-LAUNCH-CHECKLIST.md`. → then flip `MAINTENANCE_MODE` off.
 - 📰 **Blog — built but blocked in maintenance** (page + routing done, trilingual + SEO). Decision: stays non-public until there are ~3–5 posts. The `content-writer` agent produces the content.
 - 🔐 **TODO (small):** move `WAITLIST_WEBHOOK_SECRET` to a real Edge Function secret and rotate it (currently hard-coded in `waitlist-welcome/index.ts` and the DB trigger — low-stakes, but worth tidying).
 
@@ -250,8 +250,8 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 
 ## 💳 Tranzila integration (pending supplier number)
 
-- Code is **mostly written**, gated off behind `PAYMENTS_ENABLED=false`. Full go-live steps + the known security hole are in **`PAYMENTS-LAUNCH-CHECKLIST.md`**.
-- ⚠️ **Known security hole (must fix before enabling payments):** the "cancel" button lets a customer change their order's payment status from the browser. Fix server-side before `PAYMENTS_ENABLED=true`.
+- Code is **mostly written**, gated off behind `PAYMENTS_ENABLED=false`. Full go-live steps are in **`PAYMENTS-LAUNCH-CHECKLIST.md`**.
+- ✅ **Payment-integrity holes FIXED 2026-05-31 (live on prod Supabase, mirrored into repo):** (a) browser can no longer write payment fields on `orders` — a `BEFORE INSERT/UPDATE` trigger (`trg_protect_order_payment_fields` → `public.protect_order_payment_fields()`) pins payment columns to server/admin-only; migration `20260531120000_harden_orders_payment_fields.sql`. (b) `create-payment` recomputes the charge server-side from `SUM(orders.total)` and ignores the client-supplied amount.
 - Files in `supabase/functions/`:
   - `create-payment/` (mostly written, gated off)
   - `tranzila-webhook/` (mostly written, gated off)
@@ -259,7 +259,7 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
   - `TRANZILA_SUPPLIER` (pending from Tranzila — the single launch gate)
   - `TRANZILA_TK` (transaction key)
   - `SUPABASE_SERVICE_ROLE_KEY` (Supabase admin key)
-- Open security tasks: C1, C2 (payment integrity), H2 (webhook HMAC), H3 (rate limit / WAF rules)
+- Open security tasks: ✅ ~~C1, C2 (payment integrity)~~ **FIXED 2026-05-31** (orders payment-field trigger + server-side amount); still open: H2 (webhook HMAC), H3 (rate limit / WAF rules)
 
 ---
 

@@ -9,48 +9,61 @@ before real money flows. Compiled from a read-only audit on 2026-05-30.
 
 ---
 
-## 🔴 SECURITY GAP — must fix BEFORE enabling payments
+## ✅ SECURITY GAPS — BOTH FIXED (live on production Supabase, 2026-05-31)
 
-### Client can set its own `payment_status` (cancel button)
+Both payment-integrity holes from the 2026-05-30 audit are now closed. The
+fixes were applied directly to production Supabase via MCP and have since been
+mirrored into the repo for tracking (migration + edge-function source). No
+redeploy / `db push` needed — they are already live.
 
-**Where:** `App.jsx:5413–5417` (the "Cancel" button on checkout step 4).
+### ✅ (a) FIXED — Client can no longer write its own payment fields
 
-```js
-await supabase.from("orders").update({
-  status: "cancelled",
-  payment_status: "cancelled",
-  cancelled_at: new Date().toISOString(),
-}).in("id", pendingOrderIds);
-```
+**Was:** the checkout "Cancel" button (`App.jsx`) wrote `payment_status`
+directly to `orders`. The RLS policy "Users update own orders" let any
+logged-in customer set `payment_status = 'paid'` on their own unpaid order via
+the API, faking a successful payment. `payment_status` is the source of truth
+for "did they pay?" and must be server-writable only.
 
-**The problem:** the browser writes `payment_status` directly to the `orders`
-table. The RLS policy "Users update own orders" allows a logged-in user to
-update **their own** orders — including `payment_status`. So a technical user
-could call the same API and set `payment_status = 'paid'` on their own
-unpaid order, faking a successful payment.
+**Fix (live on prod):** a `BEFORE INSERT OR UPDATE` trigger on `public.orders`,
+`trg_protect_order_payment_fields`, calling
+`public.protect_order_payment_fields()`. For non-privileged callers (anyone who
+is **not** `service_role` / `postgres` / `supabase_admin` /
+`supabase_auth_admin` and **not** `is_admin()`):
 
-> Guests (rows where `user_id IS NULL`) cannot exploit this — the update policy
-> only permits owner-or-admin — but every logged-in customer can, on their own
-> orders.
+- **INSERT** → all payment fields are force-reset to safe defaults
+  (`payment_status = 'idle'`, `amount_paid/paid_at/tranzila_transaction_id/`
+  `payment_method/failed_reason/cancelled_at = null`).
+- **UPDATE** → all payment fields are pinned back to their `old` values
+  (`payment_status`, `amount_paid`, `paid_at`, `total`,
+  `tranzila_transaction_id`, `payment_method`, `currency`, `failed_reason`) —
+  so a customer write to any of them is silently reverted.
 
-**Why it matters:** `payment_status` is the source of truth for "did they pay?"
-It must be writable **only by the server** (the Tranzila webhook, via the
-service-role key), never by the customer's browser.
+Only the server (service-role: the Tranzila webhook) and admins can change
+payment fields. The customer's browser cancel write is now a no-op on the
+protected columns.
 
-**Recommended fix (needs Gleb's approval — touches RLS + App.jsx):**
+**Repo:** `supabase/migrations/20260531120000_harden_orders_payment_fields.sql`
+(idempotent — `create or replace function` + `drop trigger if exists` — safe to
+re-run even though already applied).
 
-1. **Move cancellation server-side.** Replace the client `update` with a call to
-   a small Edge Function (or extend `create-payment`) that cancels using the
-   service-role key. The browser should never write `payment_status` /
-   `paid_at` / `amount_paid` / `tranzila_transaction_id`.
-2. **Tighten the RLS update policy** so customers can update only "safe" columns
-   (e.g. notes) and **not** the payment columns. Options: a column-restricted
-   policy, a `BEFORE UPDATE` trigger that rejects customer writes to payment
-   columns, or simply remove customer UPDATE rights entirely and route all
-   state changes through the server.
+### ✅ (b) FIXED — `create-payment` ignores the client amount
 
-⚠️ Both of these are explicitly **off-limits until approved** (RLS change +
-App.jsx edit). Logged here so we don't forget.
+**Was:** `create-payment` trusted the `amount` sent by the browser, so a
+technical user could initiate a charge for ₪1 on a ₪100 order.
+
+**Fix (live on prod):** `create-payment` now **always recomputes the charge
+server-side** as `SUM(orders.total)` for the `order_group` (pulled with the
+service-role key). The client-supplied `amount` is **informational only** —
+never used for the charge; it is logged to `payment_events.raw_payload`
+alongside an `amount_source: "server_recomputed"` marker and a
+`client_amount_mismatch` flag for audit.
+
+**Repo:** `supabase/functions/create-payment/index.ts` (synced from the
+deployed version, `version 2`).
+
+> Note: the live `create-payment` also tightened CORS/contract details and
+> sets `payment_status = 'pending'` on intent creation (server-side, via
+> service role — allowed by the trigger above).
 
 ---
 
@@ -89,7 +102,8 @@ App.jsx edit). Logged here so we don't forget.
 
 ## 🚦 Go-live order of operations (when the supplier number arrives)
 
-1. Fix the security gap above (server-side cancel + RLS) — **approve first**.
+1. ✅ ~~Fix the security gap above (server-side cancel + RLS).~~ **DONE** — both
+   payment-integrity holes are fixed and live on prod (see the ✅ section above).
 2. Add the `#pay-success` / `#pay-fail` handler.
 3. Set Supabase secrets: `TRANZILA_SUPPLIER`, `TRANZILA_TK`, `SUPABASE_SERVICE_ROLE_KEY`.
 4. Deploy both Edge Functions.

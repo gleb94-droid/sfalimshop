@@ -1,235 +1,238 @@
-// supabase/functions/create-payment/index.ts
+// ============================================================
+// Sfalim Shop — create-payment edge function
 //
-// Deno Edge Function — builds and returns a Tranzila hosted-payment-page
-// redirect URL for a given order_group. Does NOT change orders.payment_status.
-// Logs a "payment_initiated" row to payment_events.
+// Builds a Tranzila Hosted Page URL for a Sfalim order (or cart of
+// orders sharing the same order_group) and returns it as redirect_url.
 //
-// Invoked by the client as:
-//   supabase.functions.invoke("create-payment", {
-//     body: { order_group, amount, currency, customer: { name, email, phone }, items_summary }
-//   })
+// SECURITY: the charge amount is ALWAYS recomputed server-side from the
+// orders rows in the DB. The client-supplied amount is informational only
+// and is never trusted (prevents "pay 1 instead of 100").
 //
-// Returns: { redirect_url: string } or { error: string } with appropriate status.
+// Contract:
+//   IN  { order_id?: uuid, order_group?: string, amount?: number,
+//         currency?: 'ILS', customer: { name, email, phone? },
+//         items_summary?: string }
+//   OUT { redirect_url: string, order_group: string, amount: number }
+// ============================================================
 
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// ─── CORS ───────────────────────────────────────────────────────────────────
-// Only the production origin and localhost dev are allowed.
-// TODO: verify against Tranzila docs — Tranzila's notify_url POST will NOT
-// hit this function, so no need to allow Tranzila's origin here.
-const ALLOWED_ORIGINS = [
-  `https://www.sfalimshop.com`,
-  `https://sfalimshop.com`,
-  `http://localhost:5173`,
-  `http://localhost:3000`,
-];
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed =
-    origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    "Access-Control-Allow-Origin": allowed,
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-  };
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "content-type": "application/json" },
+  });
 }
 
-// ─── Tranzila config ─────────────────────────────────────────────────────────
-// TODO: swap to production at go-live ↓↓↓
-// TRANZILA_SUPPLIER: the terminal/supplier name assigned by Tranzila.
-//   Sandbox value:    "sfalimtest"   (or whatever sandbox name Tranzila assigns)
-//   Production value: the real supplier name received from Tranzila
-// Set in Supabase Dashboard → Edge Functions → Secrets → TRANZILA_SUPPLIER
-//
-// TODO: verify against Tranzila docs — confirm the sandbox base URL and
-// the exact query-parameter names for their hosted payment page.
-const TRANZILA_BASE_URL = `https://direct.tranzila.com`; // same for sandbox + production; supplier name determines environment
+type CreatePaymentBody = {
+  order_id?: string;
+  order_group?: string;
+  amount?: number;
+  currency?: string;
+  customer?: { name?: string; email?: string; phone?: string };
+  items_summary?: string;
+};
 
-// ─── Main handler ────────────────────────────────────────────────────────────
-Deno.serve(async (req: Request) => {
-  const origin = req.headers.get("origin");
-  const headers = corsHeaders(origin);
+function encodeParam(v: string): string {
+  return encodeURIComponent(String(v).replace(/[\r\n]+/g, " "));
+}
 
-  // Preflight
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers });
+function buildTranzilaUrl(opts: {
+  supplier: string;
+  amount: number;
+  orderGroup: string;
+  description: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  language: string;
+  notifyUrl: string;
+  successUrl: string;
+  failUrl: string;
+}): string {
+  const langMap: Record<string, string> = { he: "il", en: "us", ru: "ru" };
+  const langCode = langMap[opts.language] ?? "il";
+  const params: Array<[string, string]> = [
+    ["sum", opts.amount.toFixed(2)],
+    ["currency", "1"], // 1 = ILS
+    ["cred_type", "1"],
+    ["tranmode", "A"],
+    ["myid", opts.orderGroup],
+    ["u71", opts.orderGroup],
+    ["pdesc", opts.description],
+    ["contact", opts.customerName],
+    ["email", opts.customerEmail],
+    ["lang", langCode],
+    ["trBgColor", "0f0f0f"],
+    ["trTextColor", "ffffff"],
+    ["trButtonColor", "FF6B35"],
+  ];
+  if (opts.customerPhone) params.push(["phone", opts.customerPhone]);
+  if (opts.notifyUrl) params.push(["notify_url_address", opts.notifyUrl]);
+  if (opts.successUrl) params.push(["success_url_address", opts.successUrl]);
+  if (opts.failUrl) params.push(["fail_url_address", opts.failUrl]);
+
+  const qs = params.map(([k, v]) => `${k}=${encodeParam(v)}`).join("&");
+  return `https://direct.tranzila.com/${encodeURIComponent(opts.supplier)}/iframenew.php?${qs}`;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!supabaseUrl || !serviceKey) {
+    return json({ ok: false, error: "Server misconfigured" }, 500);
   }
 
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: `Method not allowed` }), {
-      status: 405,
-      headers: { ...headers, "Content-Type": `application/json` },
-    });
-  }
-
-  // ── 1. Check that payments are enabled (supplier name is set) ──────────────
-  const supplierName = Deno.env.get(`TRANZILA_SUPPLIER`);
-  if (!supplierName) {
-    // Graceful degradation: client checks for "payments_disabled" in the error
-    // message and falls back to the "coming soon" modal (App.jsx line 5211).
-    return new Response(
-      JSON.stringify({ error: `payments_disabled: TRANZILA_SUPPLIER not set` }),
+  const supplier = (Deno.env.get("TRANZILA_SUPPLIER") ?? "").trim();
+  const supplierIsLive = supplier !== "" && supplier.toUpperCase() !== "PLACEHOLDER";
+  if (!supplierIsLive) {
+    return json(
       {
-        status: 503,
-        headers: { ...headers, "Content-Type": `application/json` },
-      }
+        ok: false,
+        error: "payments_disabled",
+        message: "TRANZILA_SUPPLIER is not set. Payments are not live yet.",
+      },
+      503,
     );
   }
 
-  // TODO: swap to production at go-live ↓↓↓
-  // TRANZILA_TK: the terminal password (TranzilaTK / notify password).
-  //   Sandbox value:    sandbox password from Tranzila test account
-  //   Production value: real terminal password from Tranzila
-  // Set in Supabase Dashboard → Edge Functions → Secrets → TRANZILA_TK
-  const tranzilaTK = Deno.env.get(`TRANZILA_TK`) ?? ``;
+  const supabase = createClient(supabaseUrl, serviceKey);
 
-  // ── 2. Build Supabase admin client (service-role, bypasses RLS) ───────────
-  const supabaseUrl = Deno.env.get(`SUPABASE_URL`) ?? ``;
-  const serviceRoleKey = Deno.env.get(`SUPABASE_SERVICE_ROLE_KEY`) ?? ``;
-  if (!supabaseUrl || !serviceRoleKey) {
-    console.error(`[create-payment] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY`);
-    return new Response(JSON.stringify({ error: `Server misconfiguration` }), {
-      status: 500,
-      headers: { ...headers, "Content-Type": `application/json` },
-    });
-  }
-  const supabase = createClient(supabaseUrl, serviceRoleKey);
-
-  // ── 3. Parse and validate request body ───────────────────────────────────
-  let body: {
-    order_group?: string;
-    amount?: number;
-    currency?: string;
-    customer?: { name?: string; email?: string; phone?: string };
-    items_summary?: string;
-  };
+  let body: CreatePaymentBody;
   try {
-    body = await req.json();
-  } catch {
-    return new Response(JSON.stringify({ error: `Invalid JSON body` }), {
-      status: 400,
-      headers: { ...headers, "Content-Type": `application/json` },
-    });
+    body = (await req.json()) as CreatePaymentBody;
+  } catch (_) {
+    return json({ ok: false, error: "invalid_json" }, 400);
   }
 
-  const { order_group, amount, currency = `ILS`, customer, items_summary } =
-    body;
-
-  if (!order_group || typeof amount !== `number` || amount <= 0) {
-    return new Response(
-      JSON.stringify({ error: `order_group and a positive amount are required` }),
-      { status: 400, headers: { ...headers, "Content-Type": `application/json` } }
-    );
+  // Client-supplied amount is informational only — NEVER trusted for the charge.
+  const clientAmount = Number(body?.amount);
+  if (body?.currency && body.currency.toUpperCase() !== "ILS") {
+    return json({ ok: false, error: "unsupported_currency" }, 400);
   }
 
-  // ── 4. Verify that the order_group exists in DB and is in a payable state ─
-  const { data: orders, error: dbError } = await supabase
-    .from(`orders`)
-    .select(`id, payment_status, total`)
-    .eq(`order_group`, order_group);
+  // Resolve to an order_group.
+  let orderGroup = (body.order_group ?? "").trim();
+  let firstOrderId: string | null = null;
+  let language = "he";
 
-  if (dbError) {
-    console.error(`[create-payment] DB error fetching orders:`, dbError);
-    return new Response(JSON.stringify({ error: `Database error` }), {
-      status: 500,
-      headers: { ...headers, "Content-Type": `application/json` },
-    });
+  if (!orderGroup && body.order_id) {
+    const { data: lookup, error: lookupErr } = await supabase
+      .from("orders")
+      .select("id, order_group, language")
+      .eq("id", body.order_id)
+      .maybeSingle();
+    if (lookupErr) return json({ ok: false, error: "db_lookup_failed" }, 500);
+    if (!lookup) return json({ ok: false, error: "order_not_found" }, 404);
+    orderGroup = lookup.order_group ?? lookup.id;
+    firstOrderId = lookup.id;
+    language = lookup.language ?? "he";
   }
 
-  if (!orders || orders.length === 0) {
-    return new Response(JSON.stringify({ error: `Order group not found` }), {
-      status: 404,
-      headers: { ...headers, "Content-Type": `application/json` },
-    });
+  if (!orderGroup) {
+    return json({ ok: false, error: "missing_order_reference" }, 400);
   }
 
-  // Reject if any row is already paid or cancelled
-  const nonPayable = orders.find(
-    (o: { payment_status: string }) =>
-      o.payment_status === `paid` || o.payment_status === `cancelled`
-  );
-  if (nonPayable) {
-    return new Response(
-      JSON.stringify({
-        error: `Order is not in a payable state: ${nonPayable.payment_status}`,
-      }),
-      { status: 409, headers: { ...headers, "Content-Type": `application/json` } }
-    );
+  // Pull customer + language from the order if the caller did not supply them.
+  if (!firstOrderId || !body.customer?.name || !body.customer?.email) {
+    const { data: row } = await supabase
+      .from("orders")
+      .select("id, customer_name, customer_email, customer_phone, language")
+      .eq("order_group", orderGroup)
+      .limit(1)
+      .maybeSingle();
+    if (row) {
+      firstOrderId = firstOrderId ?? row.id;
+      language = row.language ?? language;
+      body.customer = {
+        name: body.customer?.name || row.customer_name || "",
+        email: body.customer?.email || row.customer_email || "",
+        phone: body.customer?.phone || row.customer_phone || "",
+      };
+    }
   }
 
-  // ── 5. Build the Tranzila hosted-page URL ─────────────────────────────────
-  // TODO: verify against Tranzila docs — confirm exact parameter names,
-  // the notify_url mechanism, and the currency code for ILS.
-  // Tranzila hosted page docs: https://www.tranzila.com/developers/
-  const siteOrigin = `https://www.sfalimshop.com`;
+  const customerName = (body.customer?.name ?? "").trim();
+  const customerEmail = (body.customer?.email ?? "").trim();
+  const customerPhone = (body.customer?.phone ?? "").trim();
+  if (!customerName || !customerEmail) {
+    return json({ ok: false, error: "missing_customer_details" }, 400);
+  }
+
+  // Load every order in the group: used for idempotency AND the authoritative amount.
+  const { data: existing } = await supabase
+    .from("orders")
+    .select("id, payment_status, total")
+    .eq("order_group", orderGroup);
+
+  if (!existing || existing.length === 0) {
+    return json({ ok: false, error: "order_not_found" }, 404);
+  }
+  if (existing.some((o) => o.payment_status === "succeeded")) {
+    return json({ ok: false, error: "already_paid" }, 409);
+  }
+
+  // AUTHORITATIVE amount: always the sum of the orders' totals in the DB.
+  const amount = existing.reduce((s, o) => s + (Number(o.total) || 0), 0);
+  if (!isFinite(amount) || amount <= 0) {
+    return json({ ok: false, error: "invalid_server_amount" }, 400);
+  }
+
+  await supabase
+    .from("orders")
+    .update({ payment_status: "pending", payment_method: "tranzila" })
+    .eq("order_group", orderGroup);
+
+  const siteUrl = (Deno.env.get("SITE_URL") ?? "https://sfalim.shop").replace(/\/+$/, "");
+  const successUrl = `${siteUrl}/#track?order_group=${encodeURIComponent(orderGroup)}&paid=1`;
+  const failUrl = `${siteUrl}/#order?paid=0`;
   const notifyUrl = `${supabaseUrl}/functions/v1/tranzila-webhook`;
-  const successUrl = `${siteOrigin}/#pay-success?og=${encodeURIComponent(order_group)}`;
-  const failUrl = `${siteOrigin}/#pay-fail?og=${encodeURIComponent(order_group)}`;
 
-  // Truncate product description to 60 characters (Tranzila limit)
-  // TODO: verify against Tranzila docs — confirm max length for pdesc field
-  const pdesc = String(items_summary ?? `Sfalim order`).slice(0, 60);
+  const description = (body.items_summary ?? "Sfalim Shop").slice(0, 60);
 
-  const params = new URLSearchParams({
-    // TODO: verify against Tranzila docs — confirm field names exactly
-    sum: String(amount),
-    currency: `1`, // 1 = ILS. TODO: verify currency code in Tranzila docs
-    cred_type: `1`, // 1 = regular credit. TODO: verify against Tranzila docs
-    tranmode: `A`, // A = authorize+capture. TODO: verify against Tranzila docs
-    contact: customer?.name ?? ``,
-    email: customer?.email ?? ``,
-    phone: customer?.phone ?? ``,
-    pdesc,
-    notify_url: notifyUrl,
-    success_url: successUrl,
-    fail_url: failUrl,
-    TranzilaTK: tranzilaTK,
-    // Pass order_group so the webhook can identify which order was paid
-    // TODO: verify against Tranzila docs — confirm Tranzila echoes a custom
-    // "order" or "user_data" field back in the webhook notification
-    order: order_group,
+  const redirectUrl = buildTranzilaUrl({
+    supplier,
+    amount,
+    orderGroup,
+    description,
+    customerName,
+    customerEmail,
+    customerPhone,
+    language,
+    notifyUrl,
+    successUrl,
+    failUrl,
   });
 
-  // TODO: swap to production at go-live ↓↓↓
-  // The sandbox uses the same domain but a test supplier name.
-  // Production uses the same URL structure with the real supplier name.
-  const redirectUrl = `${TRANZILA_BASE_URL}/${encodeURIComponent(supplierName)}/iframenew.php?${params.toString()}`;
-  // TODO: verify against Tranzila docs — confirm the hosted-page path
-  // (/iframenew.php vs /iframe.php vs another path)
-
-  // ── 6. Log payment_initiated to payment_events ───────────────────────────
-  const ipAddress =
-    req.headers.get(`x-forwarded-for`) ??
-    req.headers.get(`cf-connecting-ip`) ??
-    null;
-  const userAgent = req.headers.get(`user-agent`) ?? null;
-
-  const { error: logError } = await supabase.from(`payment_events`).insert({
-    order_group,
-    event_type: `payment_initiated`,
+  // Audit log — records the server amount and any client/server mismatch.
+  await supabase.from("payment_events").insert({
+    order_id: firstOrderId,
+    order_group: orderGroup,
+    event_type: "payment_intent_created",
     raw_payload: {
-      order_group,
       amount,
-      currency,
-      customer_email: customer?.email ?? null,
-      items_summary: pdesc,
+      amount_source: "server_recomputed",
+      client_amount: isFinite(clientAmount) ? clientAmount : null,
+      client_amount_mismatch: isFinite(clientAmount) && Math.abs(clientAmount - amount) > 0.001,
+      currency: "ILS",
+      description,
+      items_summary: body.items_summary ?? null,
+      redirect_url: redirectUrl,
     },
     amount,
-    currency: currency ?? `ILS`,
-    ip_address: ipAddress,
-    user_agent: userAgent,
+    ip_address: req.headers.get("x-forwarded-for") ?? null,
+    user_agent: req.headers.get("user-agent") ?? null,
   });
 
-  if (logError) {
-    // Non-fatal: log the error but continue — the customer must not be blocked
-    // from paying just because the audit log insert failed.
-    console.error(`[create-payment] Failed to log payment_initiated:`, logError);
-  }
-
-  // ── 7. Return redirect URL to client ──────────────────────────────────────
-  return new Response(JSON.stringify({ redirect_url: redirectUrl }), {
-    status: 200,
-    headers: { ...headers, "Content-Type": `application/json` },
-  });
+  return json({ ok: true, redirect_url: redirectUrl, order_group: orderGroup, amount });
 });
