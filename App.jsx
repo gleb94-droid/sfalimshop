@@ -1263,6 +1263,10 @@ const SHIPPING_PRICE = 30;
 const SHIPPING_LOCKER = 20;
 const SHIPPING_HOME = 35;
 const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
+// Per-item surcharge added when a customer personalizes a BLOOM item with a pet
+// name. Folded into the cart line's unitPrice so it threads through the cart
+// total, the order total, and the stored orders.total. Empty name = no surcharge.
+const PET_NAME_SURCHARGE = 20;
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 // Single source of truth for social links — referenced anywhere the Instagram
 // profile is linked (Nav, mobile menu, BLOOM page CTA, Footer).
@@ -3945,6 +3949,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
+          {it.petName && <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, marginTop: 3 }}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
             {it.color && (
@@ -8490,6 +8495,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "הוסף לסל",
       madeToOrder: "נוצר בהזמנה",
       dispatchTime: "זמן ייצור 3-5 ימי עסקים",
+      petNameTitle: "התאמה אישית",
       petNameLabel: "שם החיה (לא חובה)",
       petNamePlaceholder: "למשל: רקסי",
       petNameHelper: "נדפיס את השם על המוצר בדיוק כפי שתכתבו",
@@ -8532,6 +8538,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "Add to cart",
       madeToOrder: "Made to order",
       dispatchTime: "Production 3-5 business days",
+      petNameTitle: "Personalization",
       petNameLabel: "Pet name (optional)",
       petNamePlaceholder: "e.g. Rex",
       petNameHelper: "We'll print the name on your product exactly as typed",
@@ -8574,6 +8581,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "В корзину",
       madeToOrder: "Сделано на заказ",
       dispatchTime: "Производство 3-5 рабочих дней",
+      petNameTitle: "Персонализация",
       petNameLabel: "Имя питомца (необязательно)",
       petNamePlaceholder: "напр. Рекс",
       petNameHelper: "Напечатаем имя на товаре ровно так, как вы введёте",
@@ -9239,6 +9247,10 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
     : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
 
+  // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
+  // Folded into the price passed to onOrderBloom so it threads into the cart line.
+  const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
+
   // Add this BLOOM character to the order cart with its design already fixed.
   // Shirt carries the chosen type, size and color; mug/sticker keep defaults.
   const handleOrder = (kind) => {
@@ -9256,7 +9268,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       onOrderBloom({
         productId: shirtProductId,
         variantId: shirtSize,
-        price: Number(shirtPrice) || 0,
+        price: (Number(shirtPrice) || 0) + petSurcharge,
         designUrl: design.design_url,
         mockupUrl,
         characterName: name,
@@ -9274,7 +9286,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     if (!choice) return;
     onOrderBloom({
       productId: choice.productId,
-      price: Number(choice.price) || 0,
+      price: (Number(choice.price) || 0) + petSurcharge,
       designUrl: design.design_url,
       mockupUrl,
       characterName: name,
@@ -9626,7 +9638,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
                 style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}
               >
-                🛒 {lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{previewProduct === `mug` ? design.price_mug : shirtPrice}
+                🛒 {lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
               </button>
             )}
             {/* Made-to-order caption. Reassures the customer that delivery
@@ -9748,7 +9760,16 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
 function PetNameInput({ lang, t, value, onChange }) {
   const isRTL = lang === `he`;
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div style={{ marginBottom: 20, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 12, padding: `15px 16px 17px` }}>
+      {/* Premium personalization block — visually distinct from the plain
+          product options. 🐾 heading + the +₪20 surcharge pill. */}
+      <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10, marginBottom: 12 }}>
+        <span style={{ display: `inline-flex`, alignItems: `center`, gap: 8 }}>
+          <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>🐾</span>
+          <span style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 700 }}>{t.petNameTitle}</span>
+        </span>
+        <span style={{ background: COLORS.accent, color: `#fff`, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
+      </div>
       <label style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
       <input
         type="text"
@@ -9901,9 +9922,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [petName, setPetName] = useState(``); // optional personalization (Task 8)
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте` },
   }[lang] || {};
 
   useEffect(() => {
@@ -9984,13 +10005,24 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     design.mockup_shirt_url || design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || `#1a1a1a`;
 
-  // Quick-preview thumbnails (portrait / shirt white / shirt black / mug).
+  // View-selector thumbnails — labeled + active-highlighted so the strip reads
+  // as an intentional gallery selector (not the hero repeated). Portrait first,
+  // then the product mockups. `active` marks the view currently in the hero.
+  const thumbLabel = {
+    portrait: lang === `he` ? `דיוקן` : lang === `ru` ? `Портрет` : `Portrait`,
+    white: lang === `he` ? `חולצה לבנה` : lang === `ru` ? `Бел. футболка` : `White tee`,
+    black: lang === `he` ? `חולצה שחורה` : lang === `ru` ? `Чёр. футболка` : `Black tee`,
+    mug: lang === `he` ? `ספל` : lang === `ru` ? `Кружка` : `Mug`,
+  };
   const thumbs = [
-    design.mockup_shirt_white_url && { key: `shirt-white`, src: design.mockup_shirt_white_url, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[0]); } },
-    design.mockup_shirt_black_url && { key: `shirt-black`, src: design.mockup_shirt_black_url, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[1]); } },
-    design.mockup_mug_url && { key: `mug`, src: design.mockup_mug_url, on: () => setPreviewProduct(`mug`) },
-    design.mockup_url && { key: `portrait`, src: design.mockup_url, on: () => setPreviewProduct(null) },
+    design.mockup_url && { key: `portrait`, src: design.mockup_url, label: thumbLabel.portrait, active: previewProduct === null, on: () => setPreviewProduct(null) },
+    design.mockup_shirt_white_url && { key: `shirt-white`, src: design.mockup_shirt_white_url, label: thumbLabel.white, active: previewProduct === `shirt` && selectedColor?.id === `white`, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[0]); } },
+    design.mockup_shirt_black_url && { key: `shirt-black`, src: design.mockup_shirt_black_url, label: thumbLabel.black, active: previewProduct === `shirt` && selectedColor?.id === `black`, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[1]); } },
+    design.mockup_mug_url && { key: `mug`, src: design.mockup_mug_url, label: thumbLabel.mug, active: previewProduct === `mug`, on: () => setPreviewProduct(`mug`) },
   ].filter(Boolean);
+
+  // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
+  const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
 
   // Add this BLOOM character to the shared cart. Identical payload shape to
   // PetModal.handleOrder — the cart logic itself lives in addBloomToCart.
@@ -10004,10 +10036,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       ) :
       (design.mockup_url || design.design_url);
     if (kind === `shirt`) {
-      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: Number(shirtPrice) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, petName: petName.trim() || null });
+      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, petName: petName.trim() || null });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: Number(design.price_mug) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, petName: petName.trim() || null });
+    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, petName: petName.trim() || null });
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -10044,15 +10076,22 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
 
           {/* Image + thumbnails */}
           <div>
-            <div style={{ position: `relative`, background: design.mockup_url ? `#1a1a1a` : fallbackBg, borderRadius: 16, overflow: `hidden`, border: `1px solid ${COLORS.border}`, minHeight: isMobile ? `auto` : 460, aspectRatio: isMobile ? `1` : `auto`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: design.mockup_url ? 0 : `10%` }}>
-              <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: isMobile ? `100%` : 560, objectFit: design.mockup_url ? `cover` : `contain`, width: design.mockup_url ? `100%` : `auto`, height: design.mockup_url ? `100%` : `auto` }} />
+            {/* Hero: the whole image sits inside a visible orange frame — object-fit
+                contain (never cropped), consistent 4/5 box, inner padding so the
+                image never touches the border. Letterbox uses the dark card bg. */}
+            <div style={{ position: `relative`, background: `#1a1a1a`, borderRadius: 18, overflow: `hidden`, border: `1.5px solid rgba(255,107,53,0.5)`, boxShadow: `0 0 0 1px rgba(255,107,53,0.08), 0 18px 50px rgba(0,0,0,0.45)`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 14, boxSizing: `border-box` }}>
+              <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: `100%`, width: `auto`, height: `auto`, objectFit: `contain`, borderRadius: 10, display: `block` }} />
               <PetBadges design={design} lang={lang} />
             </div>
             {thumbs.length > 1 && (
-              <div style={{ display: `flex`, gap: 10, marginTop: 12, flexWrap: `wrap` }}>
+              <div style={{ display: `flex`, gap: 12, marginTop: 14, flexWrap: `wrap` }}>
                 {thumbs.map((th) => (
-                  <button key={th.key} type="button" onClick={th.on} aria-label={th.key} style={{ width: 64, height: 64, borderRadius: 10, overflow: `hidden`, border: `1px solid ${COLORS.border}`, background: `#1a1a1a`, cursor: `pointer`, padding: 0 }}>
-                    <SmartImage src={th.src} alt={th.key} style={{ width: `100%`, height: `100%`, objectFit: `cover` }} />
+                  <button key={th.key} type="button" onClick={th.on} aria-label={th.label} aria-pressed={th.active}
+                    style={{ display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 6, background: `transparent`, border: `none`, cursor: `pointer`, padding: 0 }}>
+                    <span style={{ width: 66, height: 66, borderRadius: 12, overflow: `hidden`, background: `#1a1a1a`, border: `2px solid ${th.active ? COLORS.accent : COLORS.border}`, boxShadow: th.active ? `0 0 0 3px rgba(255,107,53,0.18)` : `none`, transition: `border-color 0.18s, box-shadow 0.18s`, display: `block` }}>
+                      <SmartImage src={th.src} alt={th.label} style={{ width: `100%`, height: `100%`, objectFit: th.key === `portrait` ? `contain` : `cover`, padding: th.key === `portrait` ? 4 : 0, boxSizing: `border-box`, display: `block` }} />
+                    </span>
+                    <span style={{ color: th.active ? COLORS.accent : COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 11, fontWeight: th.active ? 700 : 500, whiteSpace: `nowrap` }}>{th.label}</span>
                   </button>
                 ))}
               </div>
@@ -10114,7 +10153,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                     onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentHover; }}
                     onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
                     style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
-                    🛒 {tt.addToCart} · ₪{previewProduct === `mug` ? design.price_mug : shirtPrice}
+                    🛒 {tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
                   </button>
                 )}
                 <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginBottom: 24, padding: `10px 12px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8 }}>
