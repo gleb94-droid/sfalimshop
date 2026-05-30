@@ -177,6 +177,17 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 
 ## ✅ Current status (snapshot 2026-05-30)
 
+### 🚀 SESSION END 2026-05-30 — ALL THIS SESSION'S WORK IS LIVE ON PRODUCTION
+
+- ✅ **Merged `launch-prep` → `main` (merge commit `174f312`, `--no-ff`, history preserved) and deployed to production via Vercel.** Production deployment is **READY** (`dpl_4oryTToeXGG5pP7LTmsYBmLugH4u`, target=production, SHA `174f312…`). Domain `sfalimshop.com`.
+- ✅ **Now live on prod (this session's work):** breed pages (`#/breed/<slug>`); pet-name **paid add-on (+₪20)**; quick-look modal **view-nav** + unified breed/modal image nav via shared **`BloomImageCarousel`** (portrait→white tee→black tee→mug, "1/4" counter, zoom/swipe/keyboard, buy-panel sync); hero baked-in-frame handling via shared **`BloomHeroImage`** (no 2nd frame, contain+capped); home **"Our Stars" symmetric arrows**; **testimonials** table + `Reviews` component (hidden until rows exist); **admin waitlist dashboard**; **launch-announce email** (built, DISABLED by default, triple-gated); **staff PASSWORD gate** (reads `VITE_STAFF_PASSWORD`, sets `sf_staff` sessionStorage flag — a bare `?staff=1` only opens the password field, no longer bypasses); bottom **character rail `BloomCharacterRail`** (all 70, rAF auto-scroll, pause on hover/touch, hand-drag + native swipe, lazy-load, seamless loop — note `el.scrollLeft` is integer-quantized so the loop uses a float accumulator).
+- ⚠️ **This production deploy = infra / preview-on-prod ONLY. It is NOT the public launch.** `MAINTENANCE_MODE=true` and `PAYMENTS_ENABLED=false` **stay ON** — the public still sees the maintenance page + waitlist signup. Merging to main just ships the code to the prod environment behind the maintenance gate.
+- 🔑 **`VITE_STAFF_PASSWORD` is set in Vercel (Production + Preview).** It's a **build-time** Vite var (inlined into the bundle), so **changing it requires a redeploy** to take effect. If unset, the staff gate stays closed (safe default).
+- ↩️ **Rollback candidate = prior production commit `4927eb4`** (`dpl_HguZgApkxm5QcvRJVxsun46oqnw7`) if a revert is ever needed.
+- 📣 **Instagram teaser launched** (business reel + personal story, early-access / waitlist push) to grow the pre-launch list.
+- ⛳ **STILL PENDING for the REAL public launch (in order):** (1) get the **Tranzila supplier number**; (2) **fix the cancel-button security hole** (customer can change payment status from the browser — see `PAYMENTS-LAUNCH-CHECKLIST.md`); (3) flip **`MAINTENANCE_MODE=false` + `PAYMENTS_ENABLED=true`**; (4) **arm `waitlist-launch-announce`** on launch day (dry-run → enable + `{"confirm":"SEND"}`).
+- ℹ️ **Branch state at session end:** `main` is at the merge commit `174f312` (deployed to prod). `launch-prep` is at the same code tree **plus this CLAUDE.md doc commit on top** (so `launch-prep` is 1 commit ahead of `main` — docs only, no code diff). Both pushed to origin. **Next session: keep working on `launch-prep`; `main` is prod.**
+
 - ✅ MAINTENANCE_MODE = true (visitors see maintenance screen) + robots noindex until launch. The **only launch gate is the Tranzila supplier number.**
 - ⏳ Tranzila registered, awaiting supplier number
 - ✅ **`pet_designs` cleaned to exactly 70** (47 dogs + 23 cats, all active) — the 12 demo/legacy drafts were deleted 2026-05-30. `is_active` filters added in App.jsx (~10339, ~10140) so only active rows ever render.
@@ -207,8 +218,8 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 
 ## 🗺️ Roadmap / next
 
-- ✅ **Tasks 7–10 DONE** 2026-05-30 (see Current status above; on `launch-prep`): breed pages `5d5750c`, pet-name `bf62c1d`, launch email `e31aebd`, admin waitlist dashboard `0a948d4`.
-- 🚀 **Launch-day TODO:** arm `waitlist-launch-announce` deliberately (dry-run to confirm count → enable + `{"confirm":"SEND"}`); it's built + disabled.
+- ✅ **Tasks 7–10 DONE + LIVE ON PRODUCTION** 2026-05-30 (merged `launch-prep` → `main`, commit `174f312`; see the SESSION END block in Current status above): breed pages `5d5750c`, pet-name `bf62c1d`, launch email `e31aebd`, admin waitlist dashboard `0a948d4`, plus modal/breed nav, staff password gate, character rail.
+- 🚦 **REAL public-launch sequence (still pending):** (1) Tranzila supplier number → (2) fix the cancel-button security hole (`PAYMENTS-LAUNCH-CHECKLIST.md`) → (3) flip `MAINTENANCE_MODE=false` + `PAYMENTS_ENABLED=true` → (4) arm `waitlist-launch-announce` (dry-run → enable + `{"confirm":"SEND"}`).
 - ⏳ **Task 6 (blocked) — Tranzila payment:** waiting on the supplier number. Payment code is ~complete behind `PAYMENTS_ENABLED=false`. ⚠️ **Known security hole:** the "cancel" button lets a customer change payment status from the browser — MUST fix before enabling payments. Documented in `PAYMENTS-LAUNCH-CHECKLIST.md`. → then flip `MAINTENANCE_MODE` off.
 - 📰 **Blog — built but blocked in maintenance** (page + routing done, trilingual + SEO). Decision: stays non-public until there are ~3–5 posts. The `content-writer` agent produces the content.
 - 🔐 **TODO (small):** move `WAITLIST_WEBHOOK_SECRET` to a real Edge Function secret and rotate it (currently hard-coded in `waitlist-welcome/index.ts` and the DB trigger — low-stakes, but worth tidying).
