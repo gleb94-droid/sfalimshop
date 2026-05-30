@@ -3259,6 +3259,13 @@ function AdminPage({ lang }) {
                                 <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
                                   <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{localizeProduct(it.product, lang)} × {it.quantity}</div>
                                   <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{localizeVariant(it.variant, lang)} · ₪{it.total}</div>
+                                  {/* Pet-name personalization (Task 8) — printed in-house, so it
+                                      reads prominently here. Only shows when the customer supplied one. */}
+                                  {it.pet_name && (
+                                    <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,107,53,0.12)", border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: "4px 9px", marginBottom: 8, color: COLORS.accent, fontSize: 12, fontWeight: 700 }}>
+                                      <span aria-hidden="true">🐾</span>{lang === "he" ? "שם החיה" : lang === "ru" ? "Имя питомца" : "Pet name"}: {it.pet_name}
+                                    </div>
+                                  )}
                                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
                                     {(it.product_color || it.color) && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: it.product_color || it.color, border: "1px solid #555", flexShrink: 0 }} />{colorName(it.product_color || it.color, lang)}</div>}
                                     {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((it.design_size / 160) * 30)} cm</div>}
@@ -4189,6 +4196,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       qty: 1,
       uploadedImage: pendingBloomItem.designUrl,
       mockupUrl: pendingBloomItem.mockupUrl || null,
+      petName: pendingBloomItem.petName || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -4558,6 +4566,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
           product: itProduct.name, variant: itVariant.label, color: it.color,
           quantity: it.qty, total: itemTotal, notes: form.notes,
+          pet_name: it.petName || null,
           status: "pending_payment",
           payment_status: "idle",
           currency: "ILS",
@@ -7218,6 +7227,7 @@ export default function App() {
       qty: 1,
       uploadedImage: item.designUrl,
       mockupUrl: item.mockupUrl || null,
+      petName: item.petName || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -8379,6 +8389,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "הוסף לסל",
       madeToOrder: "נוצר בהזמנה",
       dispatchTime: "זמן ייצור 3-5 ימי עסקים",
+      petNameLabel: "שם החיה (לא חובה)",
+      petNamePlaceholder: "למשל: רקסי",
+      petNameHelper: "נדפיס את השם על המוצר בדיוק כפי שתכתבו",
     },
     en: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -8418,6 +8431,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "Add to cart",
       madeToOrder: "Made to order",
       dispatchTime: "Production 3-5 business days",
+      petNameLabel: "Pet name (optional)",
+      petNamePlaceholder: "e.g. Rex",
+      petNameHelper: "We'll print the name on your product exactly as typed",
     },
     ru: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -8457,6 +8473,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "В корзину",
       madeToOrder: "Сделано на заказ",
       dispatchTime: "Производство 3-5 рабочих дней",
+      petNameLabel: "Имя питомца (необязательно)",
+      petNamePlaceholder: "напр. Рекс",
+      petNameHelper: "Напечатаем имя на товаре ровно так, как вы введёте",
     },
   }[lang] || {};
 
@@ -9018,6 +9037,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
+  const [petName, setPetName] = useState(``); // optional personalization (Task 8)
   // Slice 3: if a published blog post links to this breed, surface a "read more
   // about the breed" link at the bottom of the modal.
   const [breedPost, setBreedPost] = useState(null);
@@ -9140,6 +9160,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         mockupUrl,
         characterName: name,
         shirtColor: selectedColor,
+        petName: petName.trim() || null,
       });
       return;
     }
@@ -9157,6 +9178,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       mockupUrl,
       characterName: name,
       shirtColor: null,
+      petName: petName.trim() || null,
     });
   };
 
@@ -9468,6 +9490,12 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               {t.availableOn}
             </div>
 
+            {/* Optional pet-name personalization (Task 8). The name is printed
+                on the product; it rides the cart line into the order and shows
+                in the admin order view. Empty → omitted. Shared shape with
+                BreedPage. */}
+            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} />
+
             {/* Shirt color/type/size — shown only when the shirt product is
                 selected. Shared with BreedPage via <BloomShirtOptions>. */}
             {previewProduct === `shirt` && (
@@ -9612,6 +9640,31 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
   );
 }
 
+// ============ PET NAME INPUT — optional personalization (Task 8) ============
+// Shared by PetModal and BreedPage. Optional, max 40 chars, strips angle
+// brackets (defence-in-depth; React already escapes on render). Empty value =
+// no personalization. Reads t.petNameLabel / t.petNamePlaceholder / t.petNameHelper.
+function PetNameInput({ lang, t, value, onChange }) {
+  const isRTL = lang === `he`;
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <label style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[<>]/g, ``).slice(0, 40))}
+        placeholder={t.petNamePlaceholder}
+        maxLength={40}
+        dir={isRTL ? `rtl` : `ltr`}
+        style={{ width: `100%`, boxSizing: `border-box`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px 14px`, color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: `none`, transition: `border-color 0.2s` }}
+        onFocus={(e) => { e.currentTarget.style.borderColor = COLORS.accent; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = COLORS.border; }}
+      />
+      {t.petNameHelper && <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif", marginTop: 6 }}>{t.petNameHelper}</div>}
+    </div>
+  );
+}
+
 // ============ BREED STORY CARD — origin + fun facts (shared) ============
 // Renders the "About the breed" card from the breed_origin_* / breed_facts_*
 // columns. Used by both PetModal and BreedPage so the story stays identical.
@@ -9744,11 +9797,12 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [shirtType, setShirtType] = useState(`basic`);
   const [shirtSize, setShirtSize] = useState(`m`);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
+  const [petName, setPetName] = useState(``); // optional personalization (Task 8)
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте` },
   }[lang] || {};
 
   useEffect(() => {
@@ -9760,7 +9814,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   useEffect(() => {
     let cancelled = false;
     setLoading(true); setNotFound(false); setDesign(null); setRelated([]);
-    setPreviewProduct(null); setSelectedColor(BLOOM_SHIRT_COLORS[0]); setShirtType(`basic`); setShirtSize(`m`);
+    setPreviewProduct(null); setSelectedColor(BLOOM_SHIRT_COLORS[0]); setShirtType(`basic`); setShirtSize(`m`); setPetName(``);
     window.scrollTo(0, 0);
     if (!slug) { setNotFound(true); setLoading(false); return; }
     (async () => {
@@ -9849,10 +9903,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       ) :
       (design.mockup_url || design.design_url);
     if (kind === `shirt`) {
-      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: Number(shirtPrice) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor });
+      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: Number(shirtPrice) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, petName: petName.trim() || null });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: Number(design.price_mug) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null });
+    onOrderBloom({ productId: `mug`, price: Number(design.price_mug) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, petName: petName.trim() || null });
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -9936,6 +9990,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
             ) : (
               <>
                 <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>{tt.available}</div>
+                {/* Optional pet-name personalization (Task 8) — same component
+                    and cart path as the modal. */}
+                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} />
                 {previewProduct === `shirt` && (
                   <BloomShirtOptions
                     lang={lang}
