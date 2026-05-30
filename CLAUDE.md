@@ -43,6 +43,7 @@ sfalimshop/
 │   ├── send-status-update/        # order status email
 │   ├── send-admin-order-alert/    # admin new-order alert
 │   ├── waitlist-welcome/          # LIVE — welcome email on new waitlist signup
+│   ├── waitlist-launch-announce/  # launch-day "we're live" blast — triple-gated, DISABLED by default
 │   ├── create-payment/            # Tranzila (mostly written, gated off)
 │   └── tranzila-webhook/          # Tranzila (mostly written, gated off)
 ├── vercel.json                    # Routes + CSP + security headers
@@ -196,12 +197,15 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 - ✅ Home page product grid: 4-up row on desktop (was 3+1 orphan); 2×2 tablet; 1-col mobile (`gridCols` breakpoints 900/600).
 - ✅ **Task 7 — Breed pages DONE** (2026-05-30, commit `5d5750c`). Each BLOOM breed has a rich routable page at `#/breed/<slug>` (e.g. `#/breed/01_golden_retriever`): hero + thumbnail strip, product picker, shirt color/type/size, add-to-cart, "על הגזע" breed story, related-breeds grid (same species), breadcrumb + back. Reuses the existing cart (`addBloomToCart`) + `ProductOption`; extracted shared `BreedStoryCard` + `BloomShirtOptions`. The quick-look modal stays the default and gained a "View full page" link. Behind MAINTENANCE_MODE like `/pets` (public preview → Join-the-BLOOM-Family CTA). Routing: `goToBreed`, `parseBreedSlugFromHash`, popstate/hashchange. No DB changes.
 - ✅ **Task 8 — Pet-name personalization DONE** (2026-05-30, commit `bf62c1d`). Optional per-item pet name on BLOOM shirt/mug orders via a shared `PetNameInput` (in both the modal and the breed page). Flows input → `addBloomToCart` cart line → order INSERT (`orders.pet_name` column, migration `20260530120000_add_pet_name_to_orders.sql`) → a prominent 🐾 badge in the admin order item card. Optional (empty → NULL, never blocks checkout), max 40 chars, strips `<>`. BLOOM-only scope. No RLS/grant changes. Verified end-to-end (real order row → admin badge shows the name).
+- ✅ **Task 9 — Launch announcement email BUILT (disabled until launch day)** (2026-05-30, commit `e31aebd`). New edge function `waitlist-launch-announce` (deployed, `verify_jwt=false`) sends a one-time "we're live 🎉" email (he/en/ru, BLOOM design, CTA → gallery) to every `waitlist` row where `launch_notified_at IS NULL`, stamping `launch_notified_at` per row on success (no double-sends; batched + idempotent, safe to re-run). ⛔ **MANUAL-TRIGGER / DISABLED by default** — a real send is **triple-gated**: `x-webhook-secret` + `LAUNCH_ANNOUNCE_ENABLED="true"` + body `{"confirm":"SEND"}`. A bare authed call = harmless dry-run (count only); `{test:true,to,lang}` sends ONE email without touching the list. Secret uses an in-code fallback (same TODO as waitlist-welcome). Verified (401 w/o secret, dry-run count, 1 test to gleb2009, no rows stamped, left disabled). **Launch day:** arm deliberately (dry-run → enable + confirm), like waitlist-welcome.
+- ✅ **Task 10 — Admin waitlist dashboard DONE** (2026-05-30, commit `0a948d4`). Read-only `Waitlist` section in `AdminPage` (5th sticky-nav chip): total signups, most-requested breeds (`breed_interest` grouped + counted, slug→name via `petDesigns`), recent signups (email, lang, friendly source label, date). Admin SELECT policy on `waitlist` (`USING is_admin()`) already existed → no RLS change/migration. Trilingual inline; reuses `COLORS` + `timeAgo`.
 
 ---
 
 ## 🗺️ Roadmap / next
 
-- ✅ **Task 7 (breed pages) + Task 8 (pet-name personalization) — DONE** 2026-05-30 (see Current status above; commits `5d5750c`, `bf62c1d` on `launch-prep`).
+- ✅ **Tasks 7–10 DONE** 2026-05-30 (see Current status above; on `launch-prep`): breed pages `5d5750c`, pet-name `bf62c1d`, launch email `e31aebd`, admin waitlist dashboard `0a948d4`.
+- 🚀 **Launch-day TODO:** arm `waitlist-launch-announce` deliberately (dry-run to confirm count → enable + `{"confirm":"SEND"}`); it's built + disabled.
 - ⏳ **Task 6 (blocked) — Tranzila payment:** waiting on the supplier number. Payment code is ~complete behind `PAYMENTS_ENABLED=false`. ⚠️ **Known security hole:** the "cancel" button lets a customer change payment status from the browser — MUST fix before enabling payments. Documented in `PAYMENTS-LAUNCH-CHECKLIST.md`. → then flip `MAINTENANCE_MODE` off.
 - 📰 **Blog — built but blocked in maintenance** (page + routing done, trilingual + SEO). Decision: stays non-public until there are ~3–5 posts. The `content-writer` agent produces the content.
 - 🔐 **TODO (small):** move `WAITLIST_WEBHOOK_SECRET` to a real Edge Function secret and rotate it (currently hard-coded in `waitlist-welcome/index.ts` and the DB trigger — low-stakes, but worth tidying).
