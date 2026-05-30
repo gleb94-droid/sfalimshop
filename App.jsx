@@ -2798,11 +2798,16 @@ function AdminPage({ lang }) {
   // an upload + insert is in flight (prevents double-save from impatient
   // double-clicks).
   const [catalogBusy, setCatalogBusy] = useState(false);
+  // Waitlist dashboard (read-only). The admin SELECT policy on public.waitlist
+  // (USING is_admin()) already exists, so this reads under the admin session.
+  const [waitlist, setWaitlist] = useState([]);
+  const [waitlistLoading, setWaitlistLoading] = useState(true);
 
   useEffect(() => {
     fetchOrders();
     fetchPetDesigns();
     fetchStickerPacks();
+    fetchWaitlist();
     const sub = supabase.channel("orders-changes").on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders).subscribe();
     return () => sub.unsubscribe();
   }, []);
@@ -2829,6 +2834,17 @@ function AdminPage({ lang }) {
       .order("sort_order", { ascending: true });
     setStickerPacks(data || []);
     setPacksLoading(false);
+  };
+
+  // Read-only waitlist fetch for the dashboard. Newest first; all stats are
+  // computed client-side (the list is small pre-launch). RLS: admin-only SELECT.
+  const fetchWaitlist = async () => {
+    const { data } = await supabase
+      .from("waitlist")
+      .select("email,lang,source,created_at,breed_interest")
+      .order("created_at", { ascending: false });
+    setWaitlist(data || []);
+    setWaitlistLoading(false);
   };
 
   // Optimistic toggle for is_bestseller / is_new. Reverts on DB error.
@@ -3047,6 +3063,7 @@ function AdminPage({ lang }) {
     { id: `admin-pets`, label: `BLOOM` },
     { id: `admin-packs`, label: lang === `he` ? `מדבקות` : lang === `ru` ? `Наклейки` : `Sticker packs` },
     { id: `admin-blog`, label: t.navBlog || `Blog` },
+    { id: `admin-waitlist`, label: lang === `he` ? `רשימת המתנה` : lang === `ru` ? `Лист ожидания` : `Waitlist` },
   ];
   const [activeSection, setActiveSection] = useState(`admin-orders`);
   const suppressSpy = useRef(false); // ignore scroll-spy while a click-scroll animates
@@ -3081,6 +3098,23 @@ function AdminPage({ lang }) {
     window.addEventListener(`scroll`, onScroll, { passive: true });
     return () => window.removeEventListener(`scroll`, onScroll);
   }, []);
+
+  // ── Waitlist dashboard derived data (read-only, computed client-side) ──
+  const wlRecent = waitlist.slice(0, 20);
+  const wlBreedCounts = {};
+  waitlist.forEach(r => { const b = (r.breed_interest || ``).trim(); if (b) wlBreedCounts[b] = (wlBreedCounts[b] || 0) + 1; });
+  const wlTopBreeds = Object.entries(wlBreedCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const wlBreedLabel = (slug) => { const d = petDesigns.find(p => p.slug === slug); return d ? (d[`name_${lang}`] || d.name_he || d[`breed_${lang}`] || slug) : slug; };
+  const wlSourceLabel = (s) => {
+    if (!s) return `—`;
+    const m = {
+      coming_soon: { he: `דף "בקרוב"`, en: `Coming-soon page`, ru: `Страница «Скоро»` },
+      breed: { he: `עניין בגזע`, en: `Breed interest`, ru: `Интерес к породе` },
+      hero: { he: `עמוד הבית`, en: `Homepage`, ru: `Главная` },
+    };
+    return (m[s] && (m[s][lang] || m[s].en)) || s;
+  };
+  const wlDate = (d) => { try { return new Date(d).toLocaleDateString(lang === `he` ? `he-IL` : lang === `ru` ? `ru-RU` : `en-US`, { day: `2-digit`, month: `2-digit`, year: `numeric` }); } catch { return ``; } };
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
@@ -3559,6 +3593,73 @@ function AdminPage({ lang }) {
         {/* ===== Blog manager — full CRUD for blog_posts (Slice 2) ===== */}
         <div id="admin-blog">
           <BlogAdmin uploadAdminImage={uploadAdminImage} lang={lang} />
+        </div>
+
+        {/* ===== Waitlist dashboard (read-only) — Task 10 ===== */}
+        <div id="admin-waitlist" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ marginBottom: 20 }}>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+              {lang === `he` ? `רשימת המתנה` : lang === `ru` ? `Лист ожидания` : `Waitlist`}
+            </h2>
+            <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
+              {waitlistLoading
+                ? (lang === `he` ? `טוען...` : lang === `ru` ? `Загрузка...` : `Loading...`)
+                : `${waitlist.length} ${lang === `he` ? `נרשמו` : lang === `ru` ? `записей` : `signups`}`}
+            </p>
+          </div>
+
+          {!waitlistLoading && waitlist.length === 0 && (
+            <div style={{ textAlign: `center`, padding: `32px 0`, color: COLORS.gray, fontSize: 14 }}>
+              {lang === `he` ? `עדיין אין נרשמים` : lang === `ru` ? `Пока нет записей` : `No signups yet`}
+            </div>
+          )}
+
+          {!waitlistLoading && waitlist.length > 0 && (
+            <>
+              {/* Most-requested breeds */}
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: `uppercase`, letterSpacing: `0.12em`, marginBottom: 12 }}>
+                  {lang === `he` ? `הגזעים המבוקשים ביותר` : lang === `ru` ? `Самые востребованные породы` : `Most-requested breeds`}
+                </div>
+                {wlTopBreeds.length === 0 ? (
+                  <div style={{ color: COLORS.gray, fontSize: 13 }}>
+                    {lang === `he` ? `אין עדיין עניין בגזע מסוים` : lang === `ru` ? `Пока нет интереса к породам` : `No breed interest yet`}
+                  </div>
+                ) : (
+                  <div style={{ display: `flex`, flexWrap: `wrap`, gap: 8 }}>
+                    {wlTopBreeds.map(([slug, count]) => (
+                      <div key={slug} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `7px 14px` }}>
+                        <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{wlBreedLabel(slug)}</span>
+                        <span style={{ background: COLORS.accent, color: `#fff`, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: `1px 8px` }}>{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Recent signups */}
+              <div>
+                <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, textTransform: `uppercase`, letterSpacing: `0.12em`, marginBottom: 12 }}>
+                  {lang === `he` ? `הרשמות אחרונות` : lang === `ru` ? `Недавние записи` : `Recent signups`}
+                </div>
+                <div style={{ display: `flex`, flexDirection: `column`, gap: 8 }}>
+                  {wlRecent.map((r, i) => (
+                    <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `10px 14px`, display: `flex`, alignItems: `center`, gap: 12, flexWrap: `wrap` }}>
+                      <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, flex: 1, minWidth: 180, wordBreak: `break-all` }}>{r.email}</span>
+                      <span style={{ color: COLORS.gray, fontSize: 11, textTransform: `uppercase`, letterSpacing: `0.06em` }}>{(r.lang || `he`).toUpperCase()}</span>
+                      <span style={{ color: COLORS.gray, fontSize: 11 }}>{wlSourceLabel(r.source)}</span>
+                      <span style={{ color: COLORS.gray, fontSize: 11 }}>{wlDate(r.created_at)} · {timeAgo(r.created_at, lang)}</span>
+                    </div>
+                  ))}
+                </div>
+                {waitlist.length > wlRecent.length && (
+                  <div style={{ color: COLORS.grayLight, fontSize: 11, marginTop: 10, textAlign: `center` }}>
+                    {lang === `he` ? `מציג ${wlRecent.length} מתוך ${waitlist.length}` : lang === `ru` ? `Показаны ${wlRecent.length} из ${waitlist.length}` : `Showing ${wlRecent.length} of ${waitlist.length}`}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
