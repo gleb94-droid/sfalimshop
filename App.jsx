@@ -9519,6 +9519,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                   bottom: 12,
                   left: "50%",
                   transform: "translateX(-50%)",
+                  direction: "ltr",
                   background: "rgba(0,0,0,0.55)",
                   color: "#fff",
                   borderRadius: 20,
@@ -9948,17 +9949,45 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [shirtSize, setShirtSize] = useState(`m`);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
   const [petName, setPetName] = useState(``); // optional personalization (Task 8)
+  const [zoomed, setZoomed] = useState(false); // full-screen enlarge (matches the modal)
+  const touchStartX = useRef(null);
+  // Latest view-nav + zoom handlers, read by the keyboard effect (set up once on
+  // mount, before the loading early-return; updated each render below).
+  const navRef = useRef({ goView: () => {}, zoomed: false, close: () => {} });
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте` },
   }[lang] || {};
 
   useEffect(() => {
     const h = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener(`resize`, h);
     return () => window.removeEventListener(`resize`, h);
+  }, []);
+
+  // Lock body scroll while the enlarge overlay is open (matches the modal).
+  useEffect(() => {
+    if (!zoomed) return;
+    document.body.style.overflow = `hidden`;
+    return () => { document.body.style.overflow = ``; };
+  }, [zoomed]);
+
+  // Keyboard: Esc closes the enlarge overlay; ←/→ step through the views
+  // (ignored while typing in a field). Reads the latest handlers via navRef so
+  // this single mount-time listener stays current. Mirrors the modal.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === `Escape` && navRef.current.zoomed) { navRef.current.close(); return; }
+      const el = typeof document !== `undefined` ? document.activeElement : null;
+      if (el && (el.tagName === `INPUT` || el.tagName === `TEXTAREA`)) return;
+      if (navRef.current.zoomed) return;
+      if (e.key === `ArrowRight`) { e.preventDefault(); navRef.current.goView(1); }
+      else if (e.key === `ArrowLeft`) { e.preventDefault(); navRef.current.goView(-1); }
+    };
+    window.addEventListener(`keydown`, onKey);
+    return () => window.removeEventListener(`keydown`, onKey);
   }, []);
 
   useEffect(() => {
@@ -10033,21 +10062,33 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     design.mockup_shirt_url || design.mockup_url || design.design_url;
   const fallbackBg = design.mockup_bg || `#1a1a1a`;
 
-  // View-selector thumbnails — labeled + active-highlighted so the strip reads
-  // as an intentional gallery selector (not the hero repeated). Portrait first,
-  // then the product mockups. `active` marks the view currently in the hero.
-  const thumbLabel = {
-    portrait: lang === `he` ? `דיוקן` : lang === `ru` ? `Портрет` : `Portrait`,
-    white: lang === `he` ? `חולצה לבנה` : lang === `ru` ? `Бел. футболка` : `White tee`,
-    black: lang === `he` ? `חולצה שחורה` : lang === `ru` ? `Чёр. футболка` : `Black tee`,
-    mug: lang === `he` ? `ספל` : lang === `ru` ? `Кружка` : `Mug`,
-  };
-  const thumbs = [
-    design.mockup_url && { key: `portrait`, src: design.mockup_url, label: thumbLabel.portrait, active: previewProduct === null, on: () => setPreviewProduct(null) },
-    design.mockup_shirt_white_url && { key: `shirt-white`, src: design.mockup_shirt_white_url, label: thumbLabel.white, active: previewProduct === `shirt` && selectedColor?.id === `white`, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[0]); } },
-    design.mockup_shirt_black_url && { key: `shirt-black`, src: design.mockup_shirt_black_url, label: thumbLabel.black, active: previewProduct === `shirt` && selectedColor?.id === `black`, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[1]); } },
-    design.mockup_mug_url && { key: `mug`, src: design.mockup_mug_url, label: thumbLabel.mug, active: previewProduct === `mug`, on: () => setPreviewProduct(`mug`) },
+  // Ordered image views for the in-place gallery nav (portrait + product
+  // mockups). The arrows / counter / enlarge replicate the modal's controls;
+  // each view's apply() sets the same preview state the buy panel reads, so the
+  // hero image and the selected product stay in sync. (Replaces the old
+  // thumbnail strip.)
+  const views = [
+    design.mockup_url && { key: `portrait`, src: design.mockup_url, apply: () => setPreviewProduct(null) },
+    design.mockup_shirt_white_url && { key: `shirt-white`, src: design.mockup_shirt_white_url, apply: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[0]); } },
+    design.mockup_shirt_black_url && { key: `shirt-black`, src: design.mockup_shirt_black_url, apply: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[1]); } },
+    design.mockup_mug_url && { key: `mug`, src: design.mockup_mug_url, apply: () => setPreviewProduct(`mug`) },
   ].filter(Boolean);
+  const currentViewKey =
+    previewProduct === `mug` ? `mug` :
+    previewProduct === `shirt` ? (selectedColor?.id === `black` ? `shirt-black` : `shirt-white`) :
+    `portrait`;
+  const viewIdx = Math.max(0, views.findIndex(v => v.key === currentViewKey));
+  const goView = (dir) => { if (views.length < 2) return; const n = views.length; views[(viewIdx + dir + n) % n].apply(); };
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null || views.length < 2 || zoomed) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 50) goView(1);
+    else if (diff < -50) goView(-1);
+    touchStartX.current = null;
+  };
+  // Keep the keyboard listener's handlers current (it was set up on mount).
+  navRef.current = { goView, zoomed, close: () => setZoomed(false) };
 
   // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
   const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
@@ -10102,30 +10143,63 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
         {/* Hero: image + info */}
         <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `1fr 1fr`, gap: isMobile ? 24 : 40, alignItems: `start` }}>
 
-          {/* Image + thumbnails */}
+          {/* Image + in-place gallery nav — SAME controls as the quick-look
+              modal (side arrows, counter, enlarge, swipe, ←/→, Esc). The
+              container hugs the image so the chevrons flank it; the portrait's
+              own baked-in orange frame is shown whole via <BloomHeroImage>. */}
           <div>
-            {/* Hero: the BLOOM portrait already has its own orange frame baked
-                into the artwork (transparent bg) — DON'T add a second frame. Show
-                the whole image (object-fit contain), capped small enough to leave
-                breathing room, with padding around it so the artwork's frame never
-                touches the container edges and is fully visible on all four sides.
-                No overflow:hidden ancestor clips it. Product mockups show cleanly. */}
-            <div style={{ display: `flex`, justifyContent: `center`, alignItems: `flex-start`, padding: isMobile ? `10px 12px` : `12px 18px` }}>
-              <BloomHeroImage src={imgSrc} alt={name} design={design} lang={lang} isMobile={isMobile} />
-            </div>
-            {thumbs.length > 1 && (
-              <div style={{ display: `flex`, gap: 12, marginTop: 14, flexWrap: `wrap` }}>
-                {thumbs.map((th) => (
-                  <button key={th.key} type="button" onClick={th.on} aria-label={th.label} aria-pressed={th.active}
-                    style={{ display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 6, background: `transparent`, border: `none`, cursor: `pointer`, padding: 0 }}>
-                    <span style={{ width: 66, height: 66, borderRadius: 12, overflow: `hidden`, background: `#1a1a1a`, border: `2px solid ${th.active ? COLORS.accent : COLORS.border}`, boxShadow: th.active ? `0 0 0 3px rgba(255,107,53,0.18)` : `none`, transition: `border-color 0.18s, box-shadow 0.18s`, display: `block` }}>
-                      <SmartImage src={th.src} alt={th.label} style={{ width: `100%`, height: `100%`, objectFit: th.key === `portrait` ? `contain` : `cover`, padding: th.key === `portrait` ? 4 : 0, boxSizing: `border-box`, display: `block` }} />
-                    </span>
-                    <span style={{ color: th.active ? COLORS.accent : COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 11, fontWeight: th.active ? 700 : 500, whiteSpace: `nowrap` }}>{th.label}</span>
-                  </button>
-                ))}
+            <div style={{ display: `flex`, justifyContent: `center` }}>
+              <div
+                onClick={() => { if (views.length) setZoomed(true); }}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                title={lang === `he` ? `לחץ להגדלה` : lang === `ru` ? `Нажмите, чтобы увеличить` : `Click to zoom`}
+                style={{ position: `relative`, cursor: `zoom-in`, touchAction: `pan-y`, padding: isMobile ? `10px 12px` : `12px 18px` }}>
+                <BloomHeroImage src={imgSrc} alt={name} design={design} lang={lang} isMobile={isMobile} />
+
+                {/* Prev/next chevrons — only with 2+ views. stopPropagation so a
+                    chevron tap doesn't also open the enlarge overlay. */}
+                {views.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); goView(-1); }}
+                      aria-label={lang === `he` ? `תמונה קודמת` : lang === `ru` ? `Предыдущее изображение` : `Previous image`}
+                      className="bloom-nav-btn"
+                      style={{ position: `absolute`, top: `50%`, insetInlineStart: isMobile ? 6 : 8, transform: `translateY(-50%)`, width: isMobile ? 48 : 42, height: isMobile ? 48 : 42, border: `none`, borderRadius: `50%`, background: `rgba(0,0,0,0.55)`, color: COLORS.accent, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, zIndex: 4, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, touchAction: `manipulation`, transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s` }}>
+                      <svg width={isMobile ? 26 : 22} height={isMobile ? 26 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points={lang === `he` ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); goView(1); }}
+                      aria-label={lang === `he` ? `תמונה הבאה` : lang === `ru` ? `Следующее изображение` : `Next image`}
+                      className="bloom-nav-btn"
+                      style={{ position: `absolute`, top: `50%`, insetInlineEnd: isMobile ? 6 : 8, transform: `translateY(-50%)`, width: isMobile ? 48 : 42, height: isMobile ? 48 : 42, border: `none`, borderRadius: `50%`, background: `rgba(0,0,0,0.55)`, color: COLORS.accent, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, zIndex: 4, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, touchAction: `manipulation`, transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s` }}>
+                      <svg width={isMobile ? 26 : 22} height={isMobile ? 26 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points={lang === `he` ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
+                      </svg>
+                    </button>
+                    <div aria-live="polite" style={{ position: `absolute`, bottom: 10, left: `50%`, transform: `translateX(-50%)`, direction: `ltr`, background: `rgba(0,0,0,0.55)`, color: `#fff`, borderRadius: 20, padding: `5px 14px`, fontSize: 11, fontFamily: "'IBM Plex Mono','Courier New',monospace", letterSpacing: `0.12em`, backdropFilter: `blur(6px)`, pointerEvents: `none` }}>
+                      {viewIdx + 1} / {views.length}
+                    </div>
+                  </>
+                )}
+
+                {/* Enlarge button — same look as the modal's zoom indicator. */}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setZoomed(true); }}
+                  aria-label={tt.zoom}
+                  style={{ position: `absolute`, bottom: 10, insetInlineEnd: 10, background: `rgba(0,0,0,0.55)`, color: `#fff`, border: `none`, borderRadius: 20, padding: `6px 11px`, display: `flex`, alignItems: `center`, gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: `0.05em`, backdropFilter: `blur(6px)`, cursor: `pointer`, zIndex: 4 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
+                  </svg>
+                  <span>{tt.zoom}</span>
+                </button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Info */}
@@ -10230,6 +10304,23 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
           <button onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{isRTL ? `${tt.back} ←` : `← ${tt.back}`}</button>
         </div>
       </div>
+
+      {/* Enlarge overlay — replicates the modal's zoom view (current image,
+          contain, dark backdrop, × close, click-out / Esc to close). */}
+      {zoomed && (
+        <div
+          onClick={() => setZoomed(false)}
+          role="dialog"
+          aria-label={lang === `he` ? `תמונה מוגדלת` : lang === `ru` ? `Увеличенное изображение` : `Zoomed image`}
+          style={{ position: `fixed`, inset: 0, zIndex: 1100, background: `rgba(0,0,0,0.95)`, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 16, cursor: `zoom-out`, animation: `breedZoomFadeIn 0.2s ease-out` }}>
+          <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: `100%`, objectFit: `contain`, boxShadow: `0 30px 80px rgba(0,0,0,0.6)` }} />
+          <button
+            onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
+            aria-label={lang === `he` ? `סגירה` : lang === `ru` ? `Закрыть` : `Close`}
+            style={{ position: `absolute`, top: 20, insetInlineEnd: 20, width: 44, height: 44, background: `rgba(255,255,255,0.1)`, border: `1px solid rgba(255,255,255,0.25)`, borderRadius: `50%`, color: `#fff`, cursor: `pointer`, fontSize: 22, display: `flex`, alignItems: `center`, justifyContent: `center`, backdropFilter: `blur(10px)` }}>×</button>
+          <style>{`@keyframes breedZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
+        </div>
+      )}
     </div>
   );
 }
