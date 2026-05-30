@@ -1274,6 +1274,16 @@ const BLOOM_SHIRT_COLORS = [
   { id: `black`, hex: `#1a1a1a`, he: `שחור`, en: `Black`, ru: `Чёрный` },
 ];
 
+// Shared BLOOM shirt option sets — used by both PetModal and BreedPage so the
+// shirt type/size picker stays identical in the quick-look modal and the full
+// breed page. productId maps the shirt type to its OrderPage product; sizes
+// match the PRODUCTS variant ids.
+const BLOOM_SHIRT_TYPES = [
+  { id: `basic`,     productId: `tshirt`,    label: { he: `בייסיק`,   en: `Basic`,     ru: `Базовая` } },
+  { id: `oversized`, productId: `oversized`, label: { he: `אוברסייז`, en: `Oversized`, ru: `Оверсайз` } },
+];
+const BLOOM_SHIRT_SIZES = [`s`, `m`, `l`, `xl`, `xxl`];
+
 // Resolve a saved hex colour to a readable name (falls back to the hex itself).
 const colorName = (hex, lang) => {
   if (!hex) return "";
@@ -7024,7 +7034,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'blog', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
+ const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -7054,6 +7064,10 @@ export default function App() {
   // app router is popstate/state-driven (not hashchange), so navigating between
   // posts needs an explicit state change to re-render + re-fetch.
   const [blogSlug, setBlogSlug] = useState(parseBlogSlugFromHash);
+  // Breed sub-route slug (#/breed/<slug>). Own state for the same reason as
+  // blogSlug — the router is popstate/state-driven, so navigating between
+  // breeds needs an explicit state change to re-render + re-fetch.
+  const [breedSlug, setBreedSlug] = useState(parseBreedSlugFromHash);
   const [lang, setLang] = useState("he");
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -7137,6 +7151,17 @@ export default function App() {
     window.history.pushState({ page: 'blog', blogSlug: slug || null }, '', `#/${target}`);
     setBlogSlug(slug || null);
     setPageState('blog');
+    window.scrollTo(0, 0);
+  };
+
+  // Breed-page navigation. slug = a pet_designs.slug → opens BreedPage at the
+  // canonical #/breed/<slug> form (so the URL is shareable). Drives both page +
+  // breedSlug state, like goToBlog.
+  const goToBreed = (slug) => {
+    if (!slug) return;
+    window.history.pushState({ page: 'breed', breedSlug: slug }, '', `#/breed/${slug}`);
+    setBreedSlug(slug);
+    setPageState('breed');
     window.scrollTo(0, 0);
   };
 
@@ -7347,6 +7372,7 @@ export default function App() {
       const newPage = e.state?.page || getPageFromHash();
       setPageState(newPage);
       if (newPage === 'blog') setBlogSlug(e.state?.blogSlug ?? parseBlogSlugFromHash());
+      if (newPage === 'breed') setBreedSlug(e.state?.breedSlug ?? parseBreedSlugFromHash());
     };
     // hashchange fires for plain <a href="#..."> navigation (e.g. an in-article
     // blog link to "/#/pets?slug=..."). The app's own setPage/pushState helpers
@@ -7356,6 +7382,7 @@ export default function App() {
       const newPage = getPageFromHash();
       setPageState(newPage);
       if (newPage === 'blog') setBlogSlug(parseBlogSlugFromHash());
+      if (newPage === 'breed') setBreedSlug(parseBreedSlugFromHash());
     };
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('hashchange', handleHashChange);
@@ -7739,7 +7766,7 @@ export default function App() {
         const publicPreview = MAINTENANCE_MODE && !isAdmin && !isStaffOverride;
         // Maintenance gate. 'policies' (legal/SEO) and 'pets' (public preview)
         // stay reachable; everything else shows the maintenance screen.
-        if (publicPreview && page !== 'policies' && page !== 'pets') {
+        if (publicPreview && page !== 'policies' && page !== 'pets' && page !== 'breed') {
           return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} />;
         }
         return (
@@ -7748,7 +7775,8 @@ export default function App() {
             <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
+            {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
             {page === "blog" && (blogSlug
               ? <BlogPost slug={blogSlug} lang={lang} goToBlog={goToBlog} setPage={setPage} onShareToast={showToast} />
               : <BlogIndex lang={lang} goToBlog={goToBlog} />)}
@@ -8056,7 +8084,7 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
   );
 }
 
-function PetsPage({ lang, setPage, goToBlog, preview = false, onOrderBloom, onAddStickerPack, onShareToast }) {
+function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrderBloom, onAddStickerPack, onShareToast }) {
   const isRTL = lang === "he";
   const w = WL[lang] || WL.he; // BLOOM Family waitlist copy (pre-launch preview)
   const [blogPosts, setBlogPosts] = useState([]); // latest 3 published — drives the "from our blog" stripe
@@ -8771,6 +8799,7 @@ function PetsPage({ lang, setPage, goToBlog, preview = false, onOrderBloom, onAd
           t={t}
           preview={preview}
           goToBlog={goToBlog}
+          goToBreed={goToBreed}
           onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
@@ -8982,7 +9011,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
+function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("basic");
@@ -9077,12 +9106,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     }
   };
 
-  // Shirt type → OrderPage product. Sizes match the PRODUCTS variant ids.
-  const SHIRT_TYPES = [
-    { id: "basic",     productId: "tshirt",    label: { he: "בייסיק",   en: "Basic",     ru: "Базовая" } },
-    { id: "oversized", productId: "oversized", label: { he: "אוברסייז", en: "Oversized", ru: "Оверсайз" } },
-  ];
-  const SHIRT_SIZES = ["s", "m", "l", "xl", "xxl"];
+  // Shirt type/size option sets are shared at module scope (BLOOM_SHIRT_TYPES /
+  // BLOOM_SHIRT_SIZES) so PetModal and BreedPage render an identical picker.
 
   // BLOOM shirt prices come from the design's own price columns, not the
   // custom-upload PRODUCTS variants — basic and oversized are flat per row,
@@ -9414,6 +9439,20 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.accent }} />
             </div>
 
+            {/* Quick-look → full breed page (Task 7). The modal stays the fast
+                browse view; this opens the rich standalone page for the breed. */}
+            {goToBreed && design.slug && (
+              <button
+                type="button"
+                onClick={() => goToBreed(design.slug)}
+                style={{ alignSelf: isRTL ? `flex-end` : `flex-start`, background: `transparent`, border: `none`, color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 700, cursor: `pointer`, padding: 0, marginBottom: 20, display: `inline-flex`, alignItems: `center`, gap: 6 }}
+                onMouseOver={e => { e.currentTarget.style.textDecoration = `underline`; }}
+                onMouseOut={e => { e.currentTarget.style.textDecoration = `none`; }}>
+                <span aria-hidden="true">📄</span>
+                <span>{lang === `he` ? `לעמוד הגזע המלא ←` : lang === `ru` ? `Открыть страницу породы →` : `View full breed page →`}</span>
+              </button>
+            )}
+
             {/* Pre-launch: the entire purchase block (product picker + add-to-
                 cart) is replaced by a breed-specific "Join the BLOOM Family"
                 CTA that records breed_interest = this slug. The breed story
@@ -9429,84 +9468,17 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               {t.availableOn}
             </div>
 
-            {/* Shirt color/type/size — shown only when the shirt product is selected */}
-            {previewProduct === `shirt` && (<>
-            {/* Shirt color picker — choice is saved for ordering */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <span style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase" }}>
-                  {lang === "he" ? "צבע חולצה" : lang === "ru" ? "Цвет футболки" : "Shirt color"}
-                </span>
-                <span style={{ color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 600 }}>
-                  {selectedColor[lang] || selectedColor.en}
-                </span>
-              </div>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {BLOOM_SHIRT_COLORS.map((c) => (
-                  <div
-                    key={c.id}
-                    onClick={() => { setSelectedColor(c); setPreviewProduct(`shirt`); }}
-                    title={c[lang] || c.en}
-                    style={{
-                      width: 30, height: 30, borderRadius: "50%", background: c.hex, cursor: "pointer",
-                      border: `3px solid ${selectedColor.id === c.id ? COLORS.accent : "transparent"}`,
-                      boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
-                      transition: "transform 0.15s, border-color 0.15s",
-                      transform: selectedColor.id === c.id ? "scale(1.18)" : "scale(1)",
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Shirt type — Basic / Oversized (applies to the shirt option) */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>
-                {lang === "he" ? "סוג חולצה" : lang === "ru" ? "Тип футболки" : "Shirt type"}
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                {SHIRT_TYPES.map((st) => (
-                  <button
-                    key={st.id}
-                    onClick={() => setShirtType(st.id)}
-                    style={{
-                      flex: 1,
-                      background: shirtType === st.id ? COLORS.accent : COLORS.bg,
-                      border: `1px solid ${shirtType === st.id ? COLORS.accent : COLORS.border}`,
-                      color: shirtType === st.id ? "#fff" : COLORS.white,
-                      borderRadius: 8, padding: "10px 12px", cursor: "pointer",
-                      fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
-                      transition: "background 0.2s, border-color 0.2s",
-                    }}
-                  >{st.label[lang] || st.label.en}</button>
-                ))}
-              </div>
-            </div>
-
-            {/* Shirt size — S / M / L / XL / XXL (applies to the shirt option) */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>
-                {lang === "he" ? "מידה" : lang === "ru" ? "Размер" : "Size"}
-              </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {SHIRT_SIZES.map((sz) => (
-                  <button
-                    key={sz}
-                    onClick={() => setShirtSize(sz)}
-                    style={{
-                      minWidth: 46,
-                      background: shirtSize === sz ? COLORS.accent : COLORS.bg,
-                      border: `1px solid ${shirtSize === sz ? COLORS.accent : COLORS.border}`,
-                      color: shirtSize === sz ? "#fff" : COLORS.white,
-                      borderRadius: 8, padding: "8px 12px", cursor: "pointer",
-                      fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
-                      transition: "background 0.2s, border-color 0.2s",
-                    }}
-                  >{sz.toUpperCase()}</button>
-                ))}
-              </div>
-            </div>
-            </>)}
+            {/* Shirt color/type/size — shown only when the shirt product is
+                selected. Shared with BreedPage via <BloomShirtOptions>. */}
+            {previewProduct === `shirt` && (
+              <BloomShirtOptions
+                lang={lang}
+                selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                shirtType={shirtType} setShirtType={setShirtType}
+                shirtSize={shirtSize} setShirtSize={setShirtSize}
+                onColorPreview={() => setPreviewProduct(`shirt`)}
+              />
+            )}
 
             {/* Product buttons. Single stickers used to be a paid option here
                 — now they're a free gift only, and customers who want stickers
@@ -9540,27 +9512,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               </div>
             )}
             </>)}
-            {/* About the breed — origin + fun facts (content-writer agent). Only
-                renders when the breed has content; legacy rows stay clean. */}
-            {design[`breed_origin_${lang}`] && (
-              <div style={{ marginBottom: 24, padding: `16px 18px`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 12, textAlign: isRTL ? `right` : `left` }}>
-                <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 8, display: `flex`, alignItems: `center`, gap: 6 }}>
-                  <span aria-hidden="true">🐾</span>
-                  <span>{lang === `he` ? `על הגזע` : lang === `ru` ? `О породе` : `About the breed`}</span>
-                </div>
-                <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{design[`breed_origin_${lang}`]}</p>
-                {design[`breed_facts_${lang}`] && (
-                  <ul style={{ margin: 0, marginTop: 12, padding: 0, listStyle: `none`, display: `flex`, flexDirection: `column`, gap: 7 }}>
-                    {String(design[`breed_facts_${lang}`]).split(/\n/).filter(Boolean).map((fact, i) => (
-                      <li key={i} style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13.5, lineHeight: 1.5, display: `flex`, alignItems: `flex-start`, gap: 8 }}>
-                        <span style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>•</span>
-                        <span>{fact}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
+            {/* About the breed — origin + fun facts (content-writer agent).
+                Shared with BreedPage; renders null when the breed has no content. */}
+            <BreedStoryCard design={design} lang={lang} />
 
             {/* Slice 3: link to the breed's blog post when one is published. */}
             {breedPost && goToBlog && (
@@ -9655,6 +9609,401 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
       <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
       <span style={{ color: selected ? COLORS.accent : COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18, fontWeight: 700 }}>₪{price}</span>
     </button>
+  );
+}
+
+// ============ BREED STORY CARD — origin + fun facts (shared) ============
+// Renders the "About the breed" card from the breed_origin_* / breed_facts_*
+// columns. Used by both PetModal and BreedPage so the story stays identical.
+// Returns null when the breed has no content (legacy rows stay clean).
+function BreedStoryCard({ design, lang }) {
+  if (!design || !design[`breed_origin_${lang}`]) return null;
+  const isRTL = lang === `he`;
+  return (
+    <div style={{ marginBottom: 24, padding: `16px 18px`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 12, textAlign: isRTL ? `right` : `left` }}>
+      <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 8, display: `flex`, alignItems: `center`, gap: 6 }}>
+        <span aria-hidden="true">🐾</span>
+        <span>{lang === `he` ? `על הגזע` : lang === `ru` ? `О породе` : `About the breed`}</span>
+      </div>
+      <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{design[`breed_origin_${lang}`]}</p>
+      {design[`breed_facts_${lang}`] && (
+        <ul style={{ margin: 0, marginTop: 12, padding: 0, listStyle: `none`, display: `flex`, flexDirection: `column`, gap: 7 }}>
+          {String(design[`breed_facts_${lang}`]).split(/\n/).filter(Boolean).map((fact, i) => (
+            <li key={i} style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13.5, lineHeight: 1.5, display: `flex`, alignItems: `flex-start`, gap: 8 }}>
+              <span style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>•</span>
+              <span>{fact}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ============ BLOOM SHIRT OPTIONS — color / type / size (shared) ============
+// Pure presentational picker. Holds no state of its own — the parent (PetModal
+// or BreedPage) owns the selection so its preview image can react. onColorPreview
+// lets the parent flip its preview to the shirt when a color is tapped.
+function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, setShirtType, shirtSize, setShirtSize, onColorPreview }) {
+  return (
+    <>
+      {/* Shirt color picker — choice is saved for ordering */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          <span style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase" }}>
+            {lang === "he" ? "צבע חולצה" : lang === "ru" ? "Цвет футболки" : "Shirt color"}
+          </span>
+          <span style={{ color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 600 }}>
+            {selectedColor[lang] || selectedColor.en}
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {BLOOM_SHIRT_COLORS.map((c) => (
+            <div
+              key={c.id}
+              onClick={() => { setSelectedColor(c); if (onColorPreview) onColorPreview(); }}
+              title={c[lang] || c.en}
+              style={{
+                width: 30, height: 30, borderRadius: "50%", background: c.hex, cursor: "pointer",
+                border: `3px solid ${selectedColor.id === c.id ? COLORS.accent : "transparent"}`,
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
+                transition: "transform 0.15s, border-color 0.15s",
+                transform: selectedColor.id === c.id ? "scale(1.18)" : "scale(1)",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Shirt type — Basic / Oversized */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>
+          {lang === "he" ? "סוג חולצה" : lang === "ru" ? "Тип футболки" : "Shirt type"}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {BLOOM_SHIRT_TYPES.map((st) => (
+            <button
+              key={st.id}
+              onClick={() => setShirtType(st.id)}
+              style={{
+                flex: 1,
+                background: shirtType === st.id ? COLORS.accent : COLORS.bg,
+                border: `1px solid ${shirtType === st.id ? COLORS.accent : COLORS.border}`,
+                color: shirtType === st.id ? "#fff" : COLORS.white,
+                borderRadius: 8, padding: "10px 12px", cursor: "pointer",
+                fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
+                transition: "background 0.2s, border-color 0.2s",
+              }}
+            >{st.label[lang] || st.label.en}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Shirt size — S / M / L / XL / XXL */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>
+          {lang === "he" ? "מידה" : lang === "ru" ? "Размер" : "Size"}
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {BLOOM_SHIRT_SIZES.map((sz) => (
+            <button
+              key={sz}
+              onClick={() => setShirtSize(sz)}
+              style={{
+                minWidth: 46,
+                background: shirtSize === sz ? COLORS.accent : COLORS.bg,
+                border: `1px solid ${shirtSize === sz ? COLORS.accent : COLORS.border}`,
+                color: shirtSize === sz ? "#fff" : COLORS.white,
+                borderRadius: 8, padding: "8px 12px", cursor: "pointer",
+                fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
+                transition: "background 0.2s, border-color 0.2s",
+              }}
+            >{sz.toUpperCase()}</button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ============ BREED PAGE — full per-character page (#/breed/<slug>) ============
+// Task 7. A rich, routable page for one BLOOM breed. Reuses the shared cart
+// (onOrderBloom = addBloomToCart), the ProductOption picker, BloomShirtOptions
+// and BreedStoryCard — no cart-logic duplication. Lives behind MAINTENANCE_MODE
+// exactly like /pets: in the public pre-launch preview the purchase block
+// becomes the "Join the BLOOM Family" CTA.
+function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, onOrderBloom, onShareToast }) {
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` && window.innerWidth < 768);
+  const [design, setDesign] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  // Buy state — mirrors PetModal so the hero image reacts to the selection.
+  const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
+  const [shirtType, setShirtType] = useState(`basic`);
+  const [shirtSize, setShirtSize] = useState(`m`);
+  const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
+
+  const tt = {
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp` },
+  }[lang] || {};
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true); setNotFound(false); setDesign(null); setRelated([]);
+    setPreviewProduct(null); setSelectedColor(BLOOM_SHIRT_COLORS[0]); setShirtType(`basic`); setShirtSize(`m`);
+    window.scrollTo(0, 0);
+    if (!slug) { setNotFound(true); setLoading(false); return; }
+    (async () => {
+      const { data, error } = await supabase
+        .from(`pet_designs`).select(`*`)
+        .eq(`slug`, slug).eq(`is_active`, true).maybeSingle();
+      if (cancelled) return;
+      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      setDesign(data); setLoading(false);
+      if (data.species) {
+        const { data: rel } = await supabase
+          .from(`pet_designs`)
+          .select(`slug,name_he,name_en,name_ru,mockup_url,mockup_shirt_url,mockup_mug_url,species`)
+          .eq(`is_active`, true).eq(`species`, data.species).neq(`slug`, slug)
+          .order(`sort_order`, { ascending: true }).limit(6);
+        if (!cancelled && rel) setRelated(rel);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  // Per-breed document.title for deep-linked tabs/bookmarks. We don't touch OG
+  // meta client-side: social crawlers read those before the SPA renders, so it
+  // needs SSR/prerender to actually affect share previews (deferred — behind
+  // maintenance/noindex anyway).
+  useEffect(() => {
+    if (typeof document === `undefined` || !design) return;
+    const nm = design[`name_${lang}`] || design.name_en || design.name_he || ``;
+    const prev = document.title;
+    if (nm) document.title = `${nm} · BLOOM · Sfalim Shop`;
+    return () => { document.title = prev; };
+  }, [design, lang]);
+
+  if (loading) {
+    return (
+      <div style={{ background: COLORS.bg, minHeight: `100vh`, paddingTop: 72, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+        <div style={{ width: 36, height: 36, border: `3px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `breedSpin 0.8s linear infinite` }} />
+        <style>{`@keyframes breedSpin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+  if (notFound || !design) {
+    return (
+      <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
+        <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{tt.notFound}</div>
+        <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
+      </div>
+    );
+  }
+
+  const name = design[`name_${lang}`] || design.name_en || design.name_he || ``;
+  const animal = design[`animal_${lang}`] || design.animal_en || ``;
+  const tagline = design[`tagline_${lang}`] || design.tagline_en || ``;
+
+  const shirtProductId = shirtType === `oversized` ? `oversized` : `tshirt`;
+  const shirtPrice = shirtType === `oversized`
+    ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
+    : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
+
+  // Hero image reacts to the product selection, same precedence as PetModal.
+  const imgSrc =
+    (previewProduct === `mug` && design.mockup_mug_url) ||
+    (previewProduct === `shirt` && selectedColor?.id === `black` && design.mockup_shirt_black_url) ||
+    (previewProduct === `shirt` && selectedColor?.id === `white` && design.mockup_shirt_white_url) ||
+    (previewProduct === `shirt` && design.mockup_shirt_url) ||
+    design.mockup_shirt_url || design.mockup_url || design.design_url;
+  const fallbackBg = design.mockup_bg || `#1a1a1a`;
+
+  // Quick-preview thumbnails (portrait / shirt white / shirt black / mug).
+  const thumbs = [
+    design.mockup_shirt_white_url && { key: `shirt-white`, src: design.mockup_shirt_white_url, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[0]); } },
+    design.mockup_shirt_black_url && { key: `shirt-black`, src: design.mockup_shirt_black_url, on: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[1]); } },
+    design.mockup_mug_url && { key: `mug`, src: design.mockup_mug_url, on: () => setPreviewProduct(`mug`) },
+    design.mockup_url && { key: `portrait`, src: design.mockup_url, on: () => setPreviewProduct(null) },
+  ].filter(Boolean);
+
+  // Add this BLOOM character to the shared cart. Identical payload shape to
+  // PetModal.handleOrder — the cart logic itself lives in addBloomToCart.
+  const handleOrder = (kind) => {
+    if (!design.design_url) return;
+    const mockupUrl =
+      kind === `mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `shirt` ? (
+        (selectedColor?.id === `black` ? design.mockup_shirt_black_url : design.mockup_shirt_white_url) ||
+        design.mockup_shirt_url || design.mockup_url || design.design_url
+      ) :
+      (design.mockup_url || design.design_url);
+    if (kind === `shirt`) {
+      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: Number(shirtPrice) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor });
+      return;
+    }
+    onOrderBloom({ productId: `mug`, price: Number(design.price_mug) || 0, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null });
+  };
+
+  const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
+  const handleShare = async () => {
+    const heName = design.name_he || design.name_en || name;
+    const shareText = `תראו את "${heName}" 🐾 מבית BLOOM של ספלים שופ`;
+    if (typeof navigator !== `undefined` && typeof navigator.share === `function`) {
+      try { await navigator.share({ title: `BLOOM · ${heName}`, text: shareText, url: shareUrl }); return; }
+      catch (err) { if (err && err.name === `AbortError`) return; }
+    }
+    try { if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(shareUrl); } catch {}
+    if (typeof onShareToast === `function`) {
+      onShareToast(tt.copied, { label: tt.whatsapp, handler: () => window.open(`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`, `_blank`, `noopener,noreferrer`) });
+    }
+  };
+
+  const relatedHeading = design.species === `dog` ? tt.relatedDogs : design.species === `cat` ? tt.relatedCats : tt.related;
+
+  return (
+    <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
+      <div style={{ maxWidth: 1100, margin: `0 auto`, padding: isMobile ? `20px 16px 80px` : `36px 24px 110px`, position: `relative`, zIndex: 1 }}>
+
+        {/* Breadcrumb */}
+        <nav aria-label="breadcrumb" style={{ display: `flex`, flexWrap: `wrap`, gap: 8, alignItems: `center`, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, marginBottom: 24 }}>
+          <button onClick={() => setPage(`home`)} style={{ background: `none`, border: `none`, color: COLORS.gray, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{tt.home}</button>
+          <span aria-hidden="true">/</span>
+          <button onClick={() => setPage(`pets`)} style={{ background: `none`, border: `none`, color: COLORS.accent, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{tt.collection}</button>
+          <span aria-hidden="true">/</span>
+          <span style={{ color: COLORS.white, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap`, maxWidth: 220 }}>{name}</span>
+        </nav>
+
+        {/* Hero: image + info */}
+        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `1fr 1fr`, gap: isMobile ? 24 : 40, alignItems: `start` }}>
+
+          {/* Image + thumbnails */}
+          <div>
+            <div style={{ position: `relative`, background: design.mockup_url ? `#1a1a1a` : fallbackBg, borderRadius: 16, overflow: `hidden`, border: `1px solid ${COLORS.border}`, minHeight: isMobile ? `auto` : 460, aspectRatio: isMobile ? `1` : `auto`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: design.mockup_url ? 0 : `10%` }}>
+              <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: isMobile ? `100%` : 560, objectFit: design.mockup_url ? `cover` : `contain`, width: design.mockup_url ? `100%` : `auto`, height: design.mockup_url ? `100%` : `auto` }} />
+              <PetBadges design={design} lang={lang} />
+            </div>
+            {thumbs.length > 1 && (
+              <div style={{ display: `flex`, gap: 10, marginTop: 12, flexWrap: `wrap` }}>
+                {thumbs.map((th) => (
+                  <button key={th.key} type="button" onClick={th.on} aria-label={th.key} style={{ width: 64, height: 64, borderRadius: 10, overflow: `hidden`, border: `1px solid ${COLORS.border}`, background: `#1a1a1a`, cursor: `pointer`, padding: 0 }}>
+                    <SmartImage src={th.src} alt={th.key} style={{ width: `100%`, height: `100%`, objectFit: `cover` }} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div style={{ display: `flex`, flexDirection: `column` }}>
+            <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 12, marginBottom: 12 }}>
+              <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase" }}>
+                {`BLOOM ${LANGS[lang].bloom.collection}`}
+              </div>
+              <button type="button" onClick={handleShare} aria-label={tt.share} title={tt.share}
+                style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: `transparent`, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 20, padding: `6px 14px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 600, cursor: `pointer` }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
+                <span aria-hidden="true">↗</span><span>{tt.share}</span>
+              </button>
+            </div>
+
+            <h1 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 900, fontSize: isMobile ? "2.6rem" : "3.6rem", color: COLORS.white, margin: "0 0 4px 0", lineHeight: 1, letterSpacing: "-0.02em" }}>{name}</h1>
+
+            {animal && <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", marginBottom: 12 }}>{animal}</div>}
+            {tagline && <div style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 400, fontSize: isMobile ? 18 : 22, marginBottom: 24 }}>— {tagline}</div>}
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+              <div style={{ width: 30, height: 1, background: COLORS.accent }} />
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.accent }} />
+            </div>
+
+            {/* Buy / preview-mode CTA */}
+            {preview ? (
+              <div style={{ marginBottom: 24 }}>
+                <JoinBloomCTA lang={lang} source="breed" breedInterest={design.slug} breedName={name} variant="breed" />
+              </div>
+            ) : (
+              <>
+                <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>{tt.available}</div>
+                {previewProduct === `shirt` && (
+                  <BloomShirtOptions
+                    lang={lang}
+                    selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+                    shirtType={shirtType} setShirtType={setShirtType}
+                    shirtSize={shirtSize} setShirtSize={setShirtSize}
+                    onColorPreview={() => setPreviewProduct(`shirt`)}
+                  />
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
+                  <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
+                  <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} />
+                </div>
+                {previewProduct && (
+                  <button
+                    onClick={() => handleOrder(previewProduct)}
+                    disabled={!design.design_url}
+                    onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentHover; }}
+                    onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
+                    style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
+                    🛒 {tt.addToCart} · ₪{previewProduct === `mug` ? design.price_mug : shirtPrice}
+                  </button>
+                )}
+                <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginBottom: 24, padding: `10px 12px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: `50%`, background: COLORS.accent, flexShrink: 0 }} />
+                  <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
+                    <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, letterSpacing: `0.04em` }}>{tt.made}</span>
+                    <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Varela Round',sans-serif` }}>{tt.dispatch}</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* About the breed (shared with PetModal) */}
+            <BreedStoryCard design={design} lang={lang} />
+          </div>
+        </div>
+
+        {/* Related breeds */}
+        {related.length > 0 && (
+          <div style={{ marginTop: isMobile ? 48 : 64 }}>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: "0 0 24px" }}>{relatedHeading}</h2>
+            <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(6, 1fr)`, gap: isMobile ? 12 : 16 }}>
+              {related.map((r) => {
+                const rName = r[`name_${lang}`] || r.name_en || r.name_he || ``;
+                const rImg = r.mockup_shirt_url || r.mockup_url || r.mockup_mug_url;
+                return (
+                  <button key={r.slug} type="button" onClick={() => goToBreed(r.slug)}
+                    style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 12, overflow: `hidden`, cursor: `pointer`, padding: 0, textAlign: `center`, transition: `border-color 0.2s, transform 0.2s` }}
+                    onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-3px)`; }}
+                    onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
+                    <div style={{ width: `100%`, aspectRatio: `1`, background: `#1a1a1a` }}>
+                      <SmartImage src={rImg} alt={rName} style={{ width: `100%`, height: `100%`, objectFit: `cover` }} />
+                    </div>
+                    <div style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 6px`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap` }}>{rName}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Back to collection */}
+        <div style={{ marginTop: 48 }}>
+          <button onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{isRTL ? `${tt.back} ←` : `← ${tt.back}`}</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -9900,6 +10249,22 @@ function parseBlogSlugFromHash() {
   const path = h.split(`?`)[0];
   const parts = path.split(`/`);
   if (parts[0] !== `blog`) return null;
+  return parts[1] ? decodeURIComponent(parts[1]) : null;
+}
+
+// Breed sub-route slug from the hash. Canonical form is #/breed/<slug>; a
+// ?slug= form is also tolerated for symmetry with the /pets deep links.
+function parseBreedSlugFromHash() {
+  if (typeof window === `undefined`) return null;
+  const h = window.location.hash.replace(`#`, ``).replace(/^\//, ``);
+  const path = h.split(`?`)[0];
+  const parts = path.split(`/`);
+  if (parts[0] !== `breed`) return null;
+  const qIdx = h.indexOf(`?`);
+  if (qIdx !== -1) {
+    const s = new URLSearchParams(h.slice(qIdx + 1)).get(`slug`);
+    if (s) return s;
+  }
   return parts[1] ? decodeURIComponent(parts[1]) : null;
 }
 
