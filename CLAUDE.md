@@ -38,10 +38,16 @@ sfalimshop/
 ├── api/                           # Vercel serverless functions
 │   ├── og.js                      # OG meta image generation
 │   └── p/[handle].js              # /p/<slug> share URL handler
-├── supabase/functions/            # Edge Functions (Tranzila stubs in here)
-│   ├── create-payment/            # stub
-│   └── tranzila-webhook/          # stub
+├── supabase/functions/            # Edge Functions
+│   ├── send-order-confirmation/   # order email (Resend)
+│   ├── send-status-update/        # order status email
+│   ├── send-admin-order-alert/    # admin new-order alert
+│   ├── waitlist-welcome/          # LIVE — welcome email on new waitlist signup
+│   ├── waitlist-launch-announce/  # launch-day "we're live" blast — triple-gated, DISABLED by default
+│   ├── create-payment/            # Tranzila (mostly written, gated off)
+│   └── tranzila-webhook/          # Tranzila (mostly written, gated off)
 ├── vercel.json                    # Routes + CSP + security headers
+├── PAYMENTS-LAUNCH-CHECKLIST.md   # Tranzila go-live checklist + known security hole
 ├── .claude/agents/                # Subagent library (TRACKED in git as of 2026-05-28)
 └── CLAUDE.md                      # THIS FILE
 ```
@@ -51,11 +57,14 @@ sfalimshop/
 ## ⚠️ Critical conventions (NEVER violate)
 
 1. **Template literals only** — `` `text ${var}` ``. Never `"text " + var`. (esbuild 0.18 limit.)
-2. **Hebrew RTL primary**, English/Russian secondary.
-3. **Single-file React app** — all UI/logic lives in `App.jsx` at the repo root.
-4. **BLOOM slug numbering**: `01-47` = dogs, `48-70` = cats.
+2. **Hebrew RTL primary**, English/Russian secondary. Every user-facing string is trilingual (he/en/ru).
+3. **Single-file React app** — all UI/logic lives in `App.jsx` at the repo root. Only one agent edits `App.jsx` at a time.
+4. **BLOOM slug numbering**: `01-47` = dogs, `48-70` = cats. **Do NOT touch the 70 BLOOM designs.**
 5. **Windows ImageMagick**: use `magick identify` / `magick convert`. **Bare `convert` is a Windows disk tool** — it will NOT call ImageMagick.
 6. **Pixel Agents (VS Code ext.)** is unreliable for actual work — use the regular Claude Code terminal.
+7. **Work on branch `launch-prep`. NEVER commit to `main`** — `main` auto-deploys to Vercel (production). No merge to main, no deploy, without explicit approval.
+8. **Don't touch payment/Tranzila code** until the supplier number arrives. **Never weaken RLS** (`is_admin()`). **Secrets live in env / Supabase secrets only.**
+9. **Gleb does not code** — report in plain Hebrew, and **stop for approval before every commit / delete / deploy.**
 
 ---
 
@@ -65,12 +74,13 @@ sfalimshop/
 
 | Table | Rows | Notes |
 |---|---|---|
-| `pet_designs` | 82 (70 active + 12 obsolete drafts) | 39 columns. Core catalog. |
+| `pet_designs` | **70 (all active: 47 dogs + 23 cats)** | 39 columns. Core catalog. The 12 obsolete demo/legacy drafts were **DELETED 2026-05-30** — there are now 0 inactive rows. |
 | `orders` | varies | RLS enabled |
 | `order_status_history` | audit log | RLS enabled |
 | `payment_events` | webhook audit log | RLS enabled |
 | `admins` | 1 (`gleb2009@gmail.com`) | Self-select RLS only |
 | `sticker_packs` | 2 | BLOOM sticker bundles |
+| `waitlist` | grows (pre-launch signups) | RLS enabled. `email`, `lang`, `source`, `consent`, `launch_notified_at`. **INSERT fires the `waitlist-welcome` email** via a DB webhook (pg_net trigger → edge function). See Edge Functions below. |
 
 ### `pet_designs` key columns
 
@@ -78,7 +88,7 @@ sfalimshop/
 - `name_he` / `name_en` / `name_ru`
 - `animal_he` / `animal_en` / `animal_ru`
 - `tagline_he` / `tagline_en` / `tagline_ru`
-- `mockup_url` — BLOOM portrait (populated for all 82 rows)
+- `mockup_url` — BLOOM portrait (populated for all 70 rows)
 - `mockup_mug_url` — sofa-style mug photo (populated for 70 active rows)
 - `mockup_shirt_url` — legacy single shirt mockup (**NULL for all 70** — superseded by the per-color columns below)
 - `mockup_shirt_white_url` / `mockup_shirt_black_url` — per-color shirt mockups; **populated for all 70**. PetModal is color-aware (white/black) and falls back to the portrait only if a URL is ever missing.
@@ -86,7 +96,7 @@ sfalimshop/
 - `mockup_bg` — fallback background color
 - `price_shirt`, `price_shirt_basic`, `price_shirt_oversized`, `price_mug`, `price_sticker`, `price_sticker_pack`
 - `is_active`, `is_bestseller`, `is_new`, `sort_order`
-- `species` (`dog` / `cat` / `NULL` — NULL for the 12 obsolete drafts)
+- `species` (`dog` / `cat`) — always set now (the only NULL-species rows were the 12 legacy drafts, deleted 2026-05-30)
 - `breed_he` / `breed_en` / `breed_ru`, `breed_aliases`
 - `breed_origin_he` / `breed_origin_en` / `breed_origin_ru` (text) — breed origin/background, ~1 sentence. **Populated for all 70 active (all 3 langs).**
 - `breed_facts_he` / `breed_facts_en` / `breed_facts_ru` (text) — fun facts, **newline-separated** (3 per breed), rendered as a bulleted list. **Populated for all 70 active (all 3 langs).**
@@ -99,18 +109,18 @@ sfalimshop/
   - `bloom/<slug>-mug.webp` — sofa lifestyle mug photo (70 files, ~355 KB avg)
   - `mug.png`, `t shirt basic.png`, `oversize.png`, `dri fit t shirt.png`, `round sticker.png`, `square sticker.png` — generic product templates
 - **`pet-designs/`**
-  - `bloom/<slug>.webp` — raw transparent design (82 files)
+  - `bloom/<slug>.webp` — raw transparent design (70 active designs; the 12 legacy rows were removed from the DB 2026-05-30 — any leftover legacy storage files are orphans, cleanup separate)
 - **`designs/`**
   - User-uploaded custom designs for orders
 
 ### Useful queries
 
 ```sql
--- Active characters with mockup URLs
+-- Active characters with mockup URLs (all 70 are active)
 SELECT slug, name_he, mockup_url, mockup_mug_url 
 FROM pet_designs WHERE is_active=true ORDER BY slug;
 
--- Obsolete drafts (12)
+-- Inactive rows — now returns 0 (the 12 legacy drafts were deleted 2026-05-30)
 SELECT slug, name_he, species 
 FROM pet_designs WHERE is_active=false ORDER BY slug;
 
@@ -165,10 +175,14 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 
 ---
 
-## ✅ Current status (snapshot 2026-05-28)
+## ✅ Current status (snapshot 2026-05-30)
 
-- ✅ MAINTENANCE_MODE = true (visitors see maintenance screen)
+- ✅ MAINTENANCE_MODE = true (visitors see maintenance screen) + robots noindex until launch. The **only launch gate is the Tranzila supplier number.**
 - ⏳ Tranzila registered, awaiting supplier number
+- ✅ **`pet_designs` cleaned to exactly 70** (47 dogs + 23 cats, all active) — the 12 demo/legacy drafts were deleted 2026-05-30. `is_active` filters added in App.jsx (~10339, ~10140) so only active rows ever render.
+- ✅ **`waitlist-welcome` email is LIVE** (2026-05-30). New waitlist signups get an automatic BLOOM-branded welcome email (he/en/ru), styled like the order-confirmation mail (black `#0f0f0f` + orange `#FF6B35` + Playfair/Heebo). Wiring: DB webhook (pg_net trigger `waitlist_welcome_on_insert`) on INSERT into `public.waitlist` → POSTs to the edge function. **Armed by default**; kill-switch = set secret `WAITLIST_WELCOME_ENABLED="false"`. **Secret-protected:** the function requires an `x-webhook-secret` header — direct calls without it return 401 and send nothing. Already wired to **Resend** (`RESEND_API_KEY` set, `hello@sfalimshop.com` verified). ⚠️ The webhook secret is currently hard-coded in `waitlist-welcome/index.ts` and in the trigger — TODO: move to a real Edge Function secret + rotate (see Roadmap).
+- ✅ **In-house printing — Gleb prints himself, there is NO external print provider.** Pet-name personalization is therefore fully feasible; the pet name MUST show clearly in the admin order view (see Roadmap task 8).
+- ✅ **Quiz already exists and already links to products** (`public/quiz/index.html` → product flow). Do NOT rebuild it.
 - ✅ 70 BLOOM active in DB (47 dogs + 23 cats)
 - ✅ 70 BLOOM portraits + 70 mug mockups in Supabase storage
 - ✅ 70 / 70 BLOOM shirt mockups live (Mokey AI, white+black per slug, uploaded + DB URLs set, 140 files).
@@ -181,13 +195,23 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 - ✅ BLOOM breed content LIVE: PetModal shows a "🐾 על הגזע / About the breed / О породе" card (origin paragraph + bulleted facts), language-aware + RTL/LTR, renders only when `breed_origin_<lang>` exists. 70/70 active breeds populated in all 3 langs (content-writer output). SELECT at ~line 945 includes the 6 breed columns.
 - ✅ PetModal UX: product preview is **decoupled** from add-to-cart — clicking shirt/mug only previews; a separate "🛒 Add to cart · ₪X" button does the purchase (color-aware for shirts).
 - ✅ Home page product grid: 4-up row on desktop (was 3+1 orphan); 2×2 tablet; 1-col mobile (`gridCols` breakpoints 900/600).
+- ✅ **Task 7 — Breed pages DONE** (2026-05-30, commit `5d5750c`). Each BLOOM breed has a rich routable page at `#/breed/<slug>` (e.g. `#/breed/01_golden_retriever`): hero + thumbnail strip, product picker, shirt color/type/size, add-to-cart, "על הגזע" breed story, related-breeds grid (same species), breadcrumb + back. Reuses the existing cart (`addBloomToCart`) + `ProductOption`; extracted shared `BreedStoryCard` + `BloomShirtOptions`. The quick-look modal stays the default and gained a "View full page" link. Behind MAINTENANCE_MODE like `/pets` (public preview → Join-the-BLOOM-Family CTA). Routing: `goToBreed`, `parseBreedSlugFromHash`, popstate/hashchange. No DB changes.
+- ✅ **Task 8 — Pet-name personalization DONE** (2026-05-30, commit `bf62c1d`). Optional per-item pet name on BLOOM shirt/mug orders via a shared `PetNameInput` (in both the modal and the breed page). Flows input → `addBloomToCart` cart line → order INSERT (`orders.pet_name` column, migration `20260530120000_add_pet_name_to_orders.sql`) → a prominent 🐾 badge in the admin order item card. Optional (empty → NULL, never blocks checkout), max 40 chars, strips `<>`. BLOOM-only scope. No RLS/grant changes. Verified end-to-end (real order row → admin badge shows the name).
+  - 💰 **Now a PAID add-on** (2026-05-30, commit `adbe5ab`): a pet name adds **+₪20 per item** (`PET_NAME_SURCHARGE` const). Folded into the cart line `unitPrice`, so it threads through the cart subtotal, order total, and stored `orders.total` (verified: ₪99 shirt → ₪119; empty name = no surcharge). The personalization field is a premium tinted block (🐾 heading + `+₪20` pill).
+- ✅ **Breed-page polish DONE** (2026-05-30, commit `adbe5ab`): hero image, labeled active-highlighted **view selector** thumbnails (portrait / white tee / black tee / mug, trilingual), premium pet-name personalization block. Plus a 2nd pass (commit pending): product-option prices now large + brand-orange; the cart drawer line shows `🐾 <name> (+₪20)`. App.jsx only.
+  - ⚠️ **Breed-page hero — the BLOOM portrait artwork (`mockups/bloom/<slug>-clean.webp`) already has its own orange frame baked in (transparent bg). Do NOT add a second frame/border — just `object-fit: contain` capped to the viewport (e.g. `maxHeight: min(74vh, 600px)`) so the whole image + its frame fits with no clipping.**
+- ✅ **Task 9 — Launch announcement email BUILT (disabled until launch day)** (2026-05-30, commit `e31aebd`). New edge function `waitlist-launch-announce` (deployed, `verify_jwt=false`) sends a one-time "we're live 🎉" email (he/en/ru, BLOOM design, CTA → gallery) to every `waitlist` row where `launch_notified_at IS NULL`, stamping `launch_notified_at` per row on success (no double-sends; batched + idempotent, safe to re-run). ⛔ **MANUAL-TRIGGER / DISABLED by default** — a real send is **triple-gated**: `x-webhook-secret` + `LAUNCH_ANNOUNCE_ENABLED="true"` + body `{"confirm":"SEND"}`. A bare authed call = harmless dry-run (count only); `{test:true,to,lang}` sends ONE email without touching the list. Secret uses an in-code fallback (same TODO as waitlist-welcome). Verified (401 w/o secret, dry-run count, 1 test to gleb2009, no rows stamped, left disabled). **Launch day:** arm deliberately (dry-run → enable + confirm), like waitlist-welcome.
+- ✅ **Task 10 — Admin waitlist dashboard DONE** (2026-05-30, commit `0a948d4`). Read-only `Waitlist` section in `AdminPage` (5th sticky-nav chip): total signups, most-requested breeds (`breed_interest` grouped + counted, slug→name via `petDesigns`), recent signups (email, lang, friendly source label, date). Admin SELECT policy on `waitlist` (`USING is_admin()`) already existed → no RLS change/migration. Trilingual inline; reuses `COLORS` + `timeAgo`.
 
 ---
 
 ## 🗺️ Roadmap / next
 
-- ⏳ Tranzila payment integration → flip `MAINTENANCE_MODE` off (see Tranzila section below).
-- 📰 Planned: a dog/cat **blog / news / articles section** (new page + routing). The `content-writer` agent is ready to produce the content.
+- ✅ **Tasks 7–10 DONE** 2026-05-30 (see Current status above; on `launch-prep`): breed pages `5d5750c`, pet-name `bf62c1d`, launch email `e31aebd`, admin waitlist dashboard `0a948d4`.
+- 🚀 **Launch-day TODO:** arm `waitlist-launch-announce` deliberately (dry-run to confirm count → enable + `{"confirm":"SEND"}`); it's built + disabled.
+- ⏳ **Task 6 (blocked) — Tranzila payment:** waiting on the supplier number. Payment code is ~complete behind `PAYMENTS_ENABLED=false`. ⚠️ **Known security hole:** the "cancel" button lets a customer change payment status from the browser — MUST fix before enabling payments. Documented in `PAYMENTS-LAUNCH-CHECKLIST.md`. → then flip `MAINTENANCE_MODE` off.
+- 📰 **Blog — built but blocked in maintenance** (page + routing done, trilingual + SEO). Decision: stays non-public until there are ~3–5 posts. The `content-writer` agent produces the content.
+- 🔐 **TODO (small):** move `WAITLIST_WEBHOOK_SECRET` to a real Edge Function secret and rotate it (currently hard-coded in `waitlist-welcome/index.ts` and the DB trigger — low-stakes, but worth tidying).
 
 ---
 
@@ -213,13 +237,15 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 
 ---
 
-## 💳 Tranzila integration (pending)
+## 💳 Tranzila integration (pending supplier number)
 
+- Code is **mostly written**, gated off behind `PAYMENTS_ENABLED=false`. Full go-live steps + the known security hole are in **`PAYMENTS-LAUNCH-CHECKLIST.md`**.
+- ⚠️ **Known security hole (must fix before enabling payments):** the "cancel" button lets a customer change their order's payment status from the browser. Fix server-side before `PAYMENTS_ENABLED=true`.
 - Files in `supabase/functions/`:
-  - `create-payment/` (stub)
-  - `tranzila-webhook/` (stub)
+  - `create-payment/` (mostly written, gated off)
+  - `tranzila-webhook/` (mostly written, gated off)
 - Env vars needed in Vercel:
-  - `TRANZILA_SUPPLIER` (pending from Tranzila)
+  - `TRANZILA_SUPPLIER` (pending from Tranzila — the single launch gate)
   - `TRANZILA_TK` (transaction key)
   - `SUPABASE_SERVICE_ROLE_KEY` (Supabase admin key)
 - Open security tasks: C1, C2 (payment integrity), H2 (webhook HMAC), H3 (rate limit / WAF rules)

@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Pacifico&amp;display=swap');
+      .bloom-script { font-family: 'Pacifico', cursive; }
+      .body-bold { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; }
+      .body-reg { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; }
+    </style>
+
+    <!-- Background: rich brown, with warm gradient sweep from top-right -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4A3228"/>
+      <stop offset="60%" stop-color="#3A2E28"/>
+      <stop offset="100%" stop-color="#2A1E18"/>
+    </linearGradient>
+
+    <!-- Upper orange glow behind Bloom. logo area -->
+    <radialGradient id="topGlow" cx="50%" cy="22%" r="40%">
+      <stop offset="0%" stop-color="#E8743B" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#E8743B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Lower-third clean zone: slightly lighter to give contrast for the sticker -->
+    <linearGradient id="lowerClean" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3A2E28" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#3A2E28" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- Vignette edges -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#1A100A" stop-opacity="0.50"/>
+    </radialGradient>
+
+    <!-- Dot texture -->
+    <pattern id="dots" x="0" y="0" width="58" height="58" patternUnits="userSpaceOnUse">
+      <circle cx="29" cy="29" r="2" fill="#E8743B" opacity="0.10"/>
+    </pattern>
+
+    <!-- Dotted-line mask for lower-third boundary  -->
+    <filter id="softEdge">
+      <feGaussianBlur stdDeviation="0.8"/>
+    </filter>
+  </defs>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- BASE LAYERS                     -->
+  <!-- ═══════════════════════════════ -->
+
+  <rect width="1080" height="1920" fill="url(#bgGrad)"/>
+  <!-- Dot texture — full canvas but very subtle -->
+  <rect width="1080" height="1920" fill="url(#dots)"/>
+  <!-- Orange glow — upper branded zone only -->
+  <rect width="1080" height="1920" fill="url(#topGlow)"/>
+  <!-- Vignette -->
+  <rect width="1080" height="1920" fill="url(#vignette)"/>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- LOWER THIRD CLEAN ZONE          -->
+  <!-- Lines at y=1310 down to 1920    -->
+  <!-- Visually: plain dark brand bg   -->
+  <!-- ═══════════════════════════════ -->
+
+  <!-- Dashed divider line marking the safe zone for the sticker -->
+  <line x1="60" y1="1315" x2="1020" y2="1315"
+        stroke="#E8743B" stroke-width="2" stroke-dasharray="14,10" opacity="0.45"/>
+
+  <!-- Tiny label above the line indicating it's a sticker zone (very light, won't show in final export at scale) -->
+  <text x="540" y="1305" text-anchor="middle" class="body-reg"
+        font-size="18" fill="#E8743B" opacity="0.28" letter-spacing="2">— STICKER ZONE BELOW — </text>
+
+  <!-- Lower third stays clean — just the brown background. No other elements. -->
+  <!-- A light bottom tagline anchors the brand quietly -->
+  <text x="540" y="1870" text-anchor="middle" class="body-reg"
+        font-size="26" fill="#F5E6D8" letter-spacing="3" opacity="0.30">DESIGNED FOR YOUR STYLE</text>
+  <text x="540" y="1900" text-anchor="middle" class="body-reg"
+        font-size="20" fill="#F5E6D8" opacity="0.20">sfalimshop.com</text>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- BRANDED UPPER TWO-THIRDS        -->
+  <!-- Content zone: y = 0 → 1310      -->
+  <!-- ═══════════════════════════════ -->
+
+  <!-- Top thin orange rule -->
+  <rect x="100" y="96" width="880" height="3" rx="2" fill="#E8743B" opacity="0.65"/>
+
+  <!-- SFALIMSHOP pill — top center -->
+  <rect x="365" y="120" width="350" height="60" rx="30" fill="#2A1E18"/>
+  <rect x="365" y="120" width="350" height="60" rx="30" fill="none" stroke="#E8743B" stroke-width="2.5"/>
+  <text x="540" y="159" text-anchor="middle" class="body-bold"
+        font-size="23" fill="#E8743B" letter-spacing="5">SFALIMSHOP</text>
+
+  <!-- ─── BLOOM. LOGO ─── -->
+  <!-- Large, dominant, centered — the hero of the top zone -->
+  <text x="540" y="390" text-anchor="middle" class="bloom-script"
+        font-size="230" fill="#E8743B" letter-spacing="-2">Bloom.</text>
+
+  <!-- Subtitle under Bloom. -->
+  <text x="540" y="455" text-anchor="middle" class="body-reg"
+        font-size="34" fill="#F5E6D8" letter-spacing="6" opacity="0.70">PET PORTRAIT COLLECTION</text>
+
+  <!-- Orange separator line -->
+  <rect x="340" y="485" width="400" height="2.5" rx="1.5" fill="#E8743B" opacity="0.45"/>
+
+  <!-- ─── DECORATIVE PAWS — upper content zone ─── -->
+
+  <!-- Paw top-left -->
+  <g transform="translate(130, 200) rotate(-28)" opacity="0.17" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="22" ry="18"/>
+    <ellipse cx="-24" cy="-22" rx="10" ry="8"/>
+    <ellipse cx="-8" cy="-29" rx="10" ry="8"/>
+    <ellipse cx="10" cy="-29" rx="10" ry="8"/>
+    <ellipse cx="24" cy="-22" rx="10" ry="8"/>
+  </g>
+
+  <!-- Paw top-right -->
+  <g transform="translate(948, 220) rotate(22)" opacity="0.16" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="20" ry="16"/>
+    <ellipse cx="-22" cy="-19" rx="9" ry="7"/>
+    <ellipse cx="-7" cy="-26" rx="9" ry="7"/>
+    <ellipse cx="8" cy="-26" rx="9" ry="7"/>
+    <ellipse cx="22" cy="-19" rx="9" ry="7"/>
+  </g>
+
+  <!-- Paw left-mid -->
+  <g transform="translate(72, 720) rotate(-12)" opacity="0.14" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="26" ry="21"/>
+    <ellipse cx="-28" cy="-25" rx="12" ry="10"/>
+    <ellipse cx="-9" cy="-34" rx="12" ry="10"/>
+    <ellipse cx="11" cy="-34" rx="12" ry="10"/>
+    <ellipse cx="28" cy="-25" rx="12" ry="10"/>
+  </g>
+
+  <!-- Paw right-mid -->
+  <g transform="translate(1008, 760) rotate(10)" opacity="0.14" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="24" ry="19"/>
+    <ellipse cx="-26" cy="-23" rx="11" ry="9"/>
+    <ellipse cx="-8" cy="-31" rx="11" ry="9"/>
+    <ellipse cx="10" cy="-31" rx="11" ry="9"/>
+    <ellipse cx="26" cy="-23" rx="11" ry="9"/>
+  </g>
+
+  <!-- Paw left-lower -->
+  <g transform="translate(100, 1120) rotate(-20)" opacity="0.12" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="18" ry="14"/>
+    <ellipse cx="-20" cy="-17" rx="8" ry="6"/>
+    <ellipse cx="-6" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="7" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="20" cy="-17" rx="8" ry="6"/>
+  </g>
+
+  <!-- Paw right-lower -->
+  <g transform="translate(982, 1155) rotate(25)" opacity="0.11" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="18" ry="14"/>
+    <ellipse cx="-20" cy="-17" rx="8" ry="6"/>
+    <ellipse cx="-6" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="7" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="20" cy="-17" rx="8" ry="6"/>
+  </g>
+
+  <!-- ─── MAIN MESSAGE ─── -->
+
+  <!-- Pre-label -->
+  <text x="540" y="560" text-anchor="middle" class="body-bold"
+        font-size="30" fill="#E8743B" letter-spacing="5">EXCLUSIVE INVITATION</text>
+
+  <!-- Decorative dot row -->
+  <circle cx="400" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="430" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="460" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="490" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="520" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="550" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="580" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="610" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="640" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+  <circle cx="670" cy="600" r="4" fill="#E8743B" opacity="0.50"/>
+
+  <!-- Primary headline — "Join the" -->
+  <text x="540" y="710" text-anchor="middle" class="body-bold"
+        font-size="80" fill="#F5E6D8" letter-spacing="-1">Join the</text>
+
+  <!-- "BLOOM Family" in larger script-influenced bold -->
+  <text x="540" y="840" text-anchor="middle" class="bloom-script"
+        font-size="148" fill="#E8743B">BLOOM</text>
+  <text x="540" y="950" text-anchor="middle" class="body-bold"
+        font-size="80" fill="#F5E6D8">Family</text>
+
+  <!-- Emoji finger-point down (SVG text) -->
+  <text x="540" y="1050" text-anchor="middle"
+        font-size="88" dominant-baseline="middle">&#128071;</text>
+
+  <!-- Sub-copy: two lines -->
+  <text x="540" y="1120" text-anchor="middle" class="body-reg"
+        font-size="40" fill="#F5E6D8" opacity="0.80">Early access before everyone.</text>
+
+  <!-- Orange accent pill - "Be first" -->
+  <rect x="350" y="1150" width="380" height="58" rx="29" fill="#E8743B" opacity="0.18"/>
+  <rect x="350" y="1150" width="380" height="58" rx="29" fill="none" stroke="#E8743B" stroke-width="2"/>
+  <text x="540" y="1188" text-anchor="middle" class="body-bold"
+        font-size="28" fill="#E8743B" letter-spacing="2">Be first. Be BLOOM.</text>
+
+  <!-- @handle -->
+  <text x="540" y="1258" text-anchor="middle" class="body-reg"
+        font-size="34" fill="#F5E6D8" opacity="0.60">@sfalimshop</text>
+
+  <!-- ─── END of branded zone — sticker zone starts at y=1315 ─── -->
+
+</svg>

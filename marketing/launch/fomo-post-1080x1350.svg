@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Pacifico&amp;display=swap');
+      .bloom-script { font-family: 'Pacifico', cursive; }
+      .body-bold { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; }
+      .body-reg { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; }
+    </style>
+    <radialGradient id="warmGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#5A3E32"/>
+      <stop offset="100%" stop-color="#3A2E28"/>
+    </radialGradient>
+    <radialGradient id="orangeGlow" cx="50%" cy="55%" r="50%">
+      <stop offset="0%" stop-color="#E8743B" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#E8743B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#1E150F" stop-opacity="0.4"/>
+    </radialGradient>
+    <pattern id="dots" x="0" y="0" width="54" height="54" patternUnits="userSpaceOnUse">
+      <circle cx="27" cy="27" r="2" fill="#E8743B" opacity="0.11"/>
+    </pattern>
+  </defs>
+
+  <!-- Base -->
+  <rect width="1080" height="1350" fill="url(#warmGlow)"/>
+  <rect width="1080" height="1350" fill="url(#dots)"/>
+  <ellipse cx="540" cy="600" rx="540" ry="420" fill="url(#orangeGlow)"/>
+  <rect width="1080" height="1350" fill="url(#vignette)"/>
+
+  <!-- ═══ TOP BAR ═══ -->
+  <rect x="90" y="72" width="900" height="2.5" rx="1.5" fill="#E8743B" opacity="0.65"/>
+
+  <!-- "Bloom." top-left zone — slightly left of center to counterbalance the pill on the right -->
+  <text x="190" y="220" text-anchor="middle" class="bloom-script"
+        font-size="140" fill="#E8743B">Bloom.</text>
+
+  <!-- Collection label under Bloom. -->
+  <text x="190" y="265" text-anchor="middle" class="body-reg"
+        font-size="24" fill="#F5E6D8" letter-spacing="4" opacity="0.65">PET PORTRAITS</text>
+
+  <!-- SFALIMSHOP pill — top-right, dark pill + orange text -->
+  <rect x="720" y="128" width="290" height="60" rx="30" fill="#2A1E18"/>
+  <rect x="720" y="128" width="290" height="60" rx="30" fill="none" stroke="#E8743B" stroke-width="2"/>
+  <text x="865" y="166" text-anchor="middle" class="body-bold"
+        font-size="22" fill="#E8743B" letter-spacing="4">SFALIMSHOP</text>
+
+  <!-- Divider line — full width -->
+  <rect x="90" y="295" width="900" height="1.5" rx="1" fill="#E8743B" opacity="0.3"/>
+
+  <!-- ═══ DECORATIVE PAWS ═══ -->
+
+  <!-- Paw left mid -->
+  <g transform="translate(80, 560) rotate(-20)" opacity="0.16" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="20" ry="16"/>
+    <ellipse cx="-22" cy="-19" rx="9" ry="7"/>
+    <ellipse cx="-7" cy="-26" rx="9" ry="7"/>
+    <ellipse cx="8" cy="-26" rx="9" ry="7"/>
+    <ellipse cx="22" cy="-19" rx="9" ry="7"/>
+  </g>
+
+  <!-- Paw right mid -->
+  <g transform="translate(995, 520) rotate(15)" opacity="0.14" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="18" ry="14"/>
+    <ellipse cx="-20" cy="-17" rx="8" ry="6"/>
+    <ellipse cx="-6" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="7" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="20" cy="-17" rx="8" ry="6"/>
+  </g>
+
+  <!-- Paw top-right corner small -->
+  <g transform="translate(1010, 240) rotate(30)" opacity="0.10" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="14" ry="11"/>
+    <ellipse cx="-15" cy="-13" rx="6" ry="5"/>
+    <ellipse cx="-5" cy="-18" rx="6" ry="5"/>
+    <ellipse cx="5" cy="-18" rx="6" ry="5"/>
+    <ellipse cx="15" cy="-13" rx="6" ry="5"/>
+  </g>
+
+  <!-- ═══ MAIN CONTENT — centered block ═══ -->
+
+  <!-- EARLY ACCESS pill -->
+  <rect x="370" y="330" width="340" height="58" rx="29" fill="#E8743B"/>
+  <text x="540" y="368" text-anchor="middle" class="body-bold"
+        font-size="24" fill="#3A2E28" letter-spacing="4">EARLY ACCESS</text>
+
+  <!-- Dot separator -->
+  <circle cx="440" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+  <circle cx="470" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+  <circle cx="500" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+  <circle cx="530" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+  <circle cx="560" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+  <circle cx="590" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+  <circle cx="620" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+  <circle cx="650" cy="415" r="4.5" fill="#E8743B" opacity="0.55"/>
+
+  <!-- CLOSING SOON headline — two lines, tight spacing -->
+  <text x="540" y="545" text-anchor="middle" class="body-bold"
+        font-size="136" fill="#F5E6D8" letter-spacing="-4">CLOSING</text>
+  <text x="540" y="688" text-anchor="middle" class="body-bold"
+        font-size="136" fill="#E8743B" letter-spacing="-4">SOON.</text>
+
+  <!-- Thin accent rule under headline -->
+  <rect x="210" y="712" width="660" height="2" rx="1" fill="#E8743B" opacity="0.4"/>
+
+  <!-- Sub-message -->
+  <text x="540" y="768" text-anchor="middle" class="body-reg"
+        font-size="38" fill="#F5E6D8" opacity="0.78">Don't miss your spot.</text>
+
+  <!-- Body copy — two lines -->
+  <text x="540" y="828" text-anchor="middle" class="body-reg"
+        font-size="32" fill="#F5E6D8" opacity="0.62">Waitlist open to a small group</text>
+  <text x="540" y="868" text-anchor="middle" class="body-reg"
+        font-size="32" fill="#F5E6D8" opacity="0.62">before the official launch.</text>
+
+  <!-- CTA highlight -->
+  <text x="540" y="940" text-anchor="middle" class="body-bold"
+        font-size="36" fill="#E8743B">Join now. Link in bio &#8593;</text>
+
+  <!-- ═══ BOTTOM ZONE ═══ -->
+
+  <!-- Paw bottom left -->
+  <g transform="translate(110, 1130) rotate(-25)" opacity="0.13" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="18" ry="14"/>
+    <ellipse cx="-20" cy="-17" rx="8" ry="6"/>
+    <ellipse cx="-6" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="7" cy="-23" rx="8" ry="6"/>
+    <ellipse cx="20" cy="-17" rx="8" ry="6"/>
+  </g>
+
+  <!-- Paw bottom right -->
+  <g transform="translate(970, 1100) rotate(22)" opacity="0.13" fill="#E8743B">
+    <ellipse cx="0" cy="0" rx="20" ry="16"/>
+    <ellipse cx="-22" cy="-19" rx="9" ry="7"/>
+    <ellipse cx="-7" cy="-26" rx="9" ry="7"/>
+    <ellipse cx="8" cy="-26" rx="9" ry="7"/>
+    <ellipse cx="22" cy="-19" rx="9" ry="7"/>
+  </g>
+
+  <!-- Bottom rule -->
+  <rect x="90" y="990" width="900" height="2" rx="1" fill="#E8743B" opacity="0.4"/>
+
+  <!-- Instagram handle -->
+  <text x="540" y="1048" text-anchor="middle" class="body-reg"
+        font-size="32" fill="#F5E6D8" opacity="0.65">@sfalimshop</text>
+
+  <!-- Tagline -->
+  <text x="540" y="1098" text-anchor="middle" class="body-reg"
+        font-size="26" fill="#F5E6D8" letter-spacing="3" opacity="0.40">DESIGNED FOR YOUR STYLE</text>
+
+  <!-- Bottom rule -->
+  <rect x="90" y="1120" width="900" height="2" rx="1" fill="#E8743B" opacity="0.40"/>
+
+  <!-- Site URL small -->
+  <text x="540" y="1162" text-anchor="middle" class="body-reg"
+        font-size="22" fill="#F5E6D8" opacity="0.28">sfalimshop.com</text>
+
+</svg>
