@@ -8421,13 +8421,10 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
     window.history.replaceState({ page: "pets" }, "", "#pets");
   };
 
-  // Derived browse list. The grid and the modal's prev/next walk this list,
-  // so when the user has filtered to "Cats" the arrows step through cats only.
-  // If `selected` is set but falls outside the filtered list (e.g. came in
-  // via deep link with a filter on), we still let it through to the modal —
-  // the user opened it intentionally. The arrows then walk filteredForNav,
-  // which falls back to all designs when the selected character isn't in the
-  // filtered view so navigation never dead-ends.
+  // Derived browse list for the GRID. Browsing breeds happens in the grid only —
+  // the modal no longer walks this list (it shows one breed and flips that breed's
+  // views via the shared <BloomImageCarousel>). To see another breed the user
+  // closes the modal and taps another card.
   const filtered = React.useMemo(() => {
     let list = designs;
     if (speciesFilter !== `all`) list = list.filter(d => d.species === speciesFilter);
@@ -8444,31 +8441,6 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
     }
     return list;
   }, [designs, speciesFilter, breedQuery]);
-
-  const filteredForNav = filtered.length > 0 && (!selected || filtered.some(d => d.id === selected.id))
-    ? filtered
-    : designs;
-
-  // Step left/right through the (filtered) BLOOM list while the modal is open.
-  // dir = +1 → next, -1 → previous; index wraps with modulo so it loops forever.
-  // We use replaceState (not pushState) so the back button still returns to /pets
-  // rather than walking through every design the user previewed.
-  const goPet = (dir) => {
-    const list = filteredForNav;
-    if (!selected || !list.length) return;
-    const idx = list.findIndex(d => d.id === selected.id);
-    if (idx < 0) return;
-    const len = list.length;
-    const nextIdx = ((idx + dir) % len + len) % len;
-    const d = list[nextIdx];
-    setSelected(d);
-    const slug = slugify(d);
-    if (slug) window.history.replaceState({ page: "pets" }, "", `#pets/${slug}`);
-  };
-
-  // Position of the currently-open design within the (filtered) list — passed
-  // to the modal for the "3 / 12" counter so it matches the arrow navigation.
-  const selectedIdx = selected ? filteredForNav.findIndex(d => d.id === selected.id) : -1;
 
   // Translations
   const t = {
@@ -8946,10 +8918,6 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
-          onPrev={() => goPet(-1)}
-          onNext={() => goPet(1)}
-          currentIndex={selectedIdx + 1}
-          total={filteredForNav.length}
           shareSlug={slugify(selected)}
           onShareToast={onShareToast}
         />
@@ -9154,7 +9122,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, onClose, isMobile, onOrderBloom, onPrev, onNext, currentIndex, total, shareSlug, onShareToast }) {
+function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, onClose, isMobile, onOrderBloom, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("basic");
@@ -9178,30 +9146,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     })();
     return () => { cancelled = true; };
   }, [design && design.slug]);
-  // Lead with the shirt product mockup since shirts are the headline BLOOM
-  // product; falls back to the clean hero image, then the raw design.
-  // previewProduct (set when the user clicks a product) overrides the default.
-  const imgSrc =
-    (previewProduct === `mug` && design.mockup_mug_url) ||
-    (previewProduct === `shirt` && selectedColor?.id === `black` && design.mockup_shirt_black_url) ||
-    (previewProduct === `shirt` && selectedColor?.id === `white` && design.mockup_shirt_white_url) ||
-    (previewProduct === `shirt` && design.mockup_shirt_url) ||
-    design.mockup_shirt_url || design.mockup_url || design.design_url;
-  const fallbackBg = design.mockup_bg || "#1a1a1a";
-  // Show navigation arrows only when there are at least 2 designs to flip between.
-  const canNavigate = typeof onPrev === "function" && typeof onNext === "function" && total > 1;
-
-  // Touch swipe: 50px threshold. Left-swipe goes to the next design, right
-  // goes back — same convention as Instagram regardless of RTL.
-  const touchStartX = useRef(null);
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
-  const handleTouchEnd = (e) => {
-    if (touchStartX.current === null || !canNavigate || zoomed) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (diff > 50) onNext();
-    else if (diff < -50) onPrev();
-    touchStartX.current = null;
-  };
+  // The image + view nav (arrows / counter / enlarge / swipe) live in the shared
+  // <BloomImageCarousel> below — it computes imgSrc from previewProduct/selectedColor.
 
   // Share: build a Hebrew share line (Israel = WhatsApp-heavy) pointing at the
   // clean /p/<slug> URL — the serverless function at api/p/[handle].js serves
@@ -9316,24 +9262,17 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  // Keyboard nav inside the modal:
-  //   Esc → close zoom first, then close the modal
-  //   ← / → → step through BLOOM designs (LTR-friendly; RTL users still get
-  //   "right arrow = next" because most carousels worldwide work that way)
+  // Keyboard: Esc closes the zoom overlay first, then the modal. View nav (←/→)
+  // lives in the shared <BloomImageCarousel>; the modal no longer browses breeds.
   useEffect(() => {
     const handler = (e) => {
-      if (e.key === "Escape") {
-        if (zoomed) { setZoomed(false); return; }
-        onClose();
-        return;
-      }
-      if (!canNavigate || zoomed) return;
-      if (e.key === "ArrowRight") { e.preventDefault(); onNext(); }
-      else if (e.key === "ArrowLeft") { e.preventDefault(); onPrev(); }
+      if (e.key !== "Escape") return;
+      if (zoomed) { setZoomed(false); return; }
+      onClose();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose, zoomed, canNavigate, onPrev, onNext]);
+  }, [onClose, zoomed]);
 
   return (
     <div
@@ -9428,126 +9367,16 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         </button>
 
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0, alignItems: "start" }}>
-          {/* Image */}
-          <div
-            onClick={(e) => { e.stopPropagation(); setZoomed(true); }}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            title={lang === "he" ? "לחץ להגדלה" : lang === "ru" ? "Нажмите, чтобы увеличить" : "Click to zoom"}
-            style={{
-              position: "relative",
-              background: design.mockup_url ? "#1a1a1a" : fallbackBg,
-              minHeight: isMobile ? 300 : 440,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: isMobile ? "18px 14px" : "26px 22px",
-              cursor: "zoom-in",
-              touchAction: "pan-y",
-            }}>
-            {/* Shared hero treatment — same as the breed page (no 2nd frame;
-                contain + capped + padded). */}
-            <BloomHeroImage src={imgSrc} alt={name} design={design} lang={lang} isMobile={isMobile} />
-
-            {/* Prev/next chevrons — visible only when there are 2+ designs.
-                Larger tap targets on mobile so a finger can hit them comfortably.
-                stopPropagation so clicking the arrows does NOT open the zoom overlay. */}
-            {canNavigate && (
-              <>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); onPrev(); }}
-                  aria-label={lang === "he" ? "עיצוב קודם" : lang === "ru" ? "Предыдущий дизайн" : "Previous design"}
-                  className="bloom-nav-btn"
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    insetInlineStart: isMobile ? 8 : 12,
-                    transform: "translateY(-50%)",
-                    width: isMobile ? 52 : 44,
-                    height: isMobile ? 52 : 44,
-                    border: "none",
-                    borderRadius: "50%",
-                    background: "rgba(0,0,0,0.55)",
-                    color: COLORS.accent,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 4,
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    touchAction: "manipulation",
-                    transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
-                  }}>
-                  <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points={lang === "he" ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); onNext(); }}
-                  aria-label={lang === "he" ? "עיצוב הבא" : lang === "ru" ? "Следующий дизайн" : "Next design"}
-                  className="bloom-nav-btn"
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    insetInlineEnd: isMobile ? 8 : 12,
-                    transform: "translateY(-50%)",
-                    width: isMobile ? 52 : 44,
-                    height: isMobile ? 52 : 44,
-                    border: "none",
-                    borderRadius: "50%",
-                    background: "rgba(0,0,0,0.55)",
-                    color: COLORS.accent,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 4,
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    touchAction: "manipulation",
-                    transition: "transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s",
-                  }}>
-                  <svg width={isMobile ? 28 : 22} height={isMobile ? 28 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points={lang === "he" ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
-                  </svg>
-                </button>
-
-                {/* "3 / 12" position counter — sits at the bottom-center of the image,
-                    matches the look of the zoom indicator. */}
-                <div aria-live="polite" style={{
-                  position: "absolute",
-                  bottom: 12,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  direction: "ltr",
-                  background: "rgba(0,0,0,0.55)",
-                  color: "#fff",
-                  borderRadius: 20,
-                  padding: "5px 14px",
-                  fontSize: 11,
-                  fontFamily: "'IBM Plex Mono','Courier New',monospace",
-                  letterSpacing: "0.12em",
-                  backdropFilter: "blur(6px)",
-                  pointerEvents: "none",
-                }}>
-                  {currentIndex} / {total}
-                </div>
-              </>
-            )}
-
-            <div aria-hidden="true" style={{ position: "absolute", bottom: 12, insetInlineEnd: 12, background: "rgba(0,0,0,0.55)", color: "#fff", borderRadius: 20, padding: "6px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em", backdropFilter: "blur(6px)", pointerEvents: "none" }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                <line x1="11" y1="8" x2="11" y2="14" />
-                <line x1="8" y1="11" x2="14" y2="11" />
-              </svg>
-              <span>{lang === "he" ? "הגדל" : lang === "ru" ? "Увеличить" : "Zoom"}</span>
-            </div>
-          </div>
+          {/* Image — shared in-place view carousel (panel = the modal's dark
+              image panel). Flips THIS breed's views (portrait/white/black/mug);
+              it no longer browses breeds. Same component the breed page uses. */}
+          <BloomImageCarousel
+            design={design} lang={lang} isMobile={isMobile}
+            previewProduct={previewProduct} setPreviewProduct={setPreviewProduct}
+            selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+            zoomed={zoomed} setZoomed={setZoomed}
+            panel
+          />
 
           {/* Info */}
           <div style={{ padding: isMobile ? "28px 24px" : "40px 36px", display: "flex", flexDirection: "column" }}>
@@ -9688,52 +9517,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         </div>
       </div>
 
-      {zoomed && (
-        <div
-          onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
-          role="dialog"
-          aria-label={lang === "he" ? "תמונה מוגדלת" : lang === "ru" ? "Увеличенное изображение" : "Zoomed image"}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1100,
-            background: "rgba(0,0,0,0.95)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            cursor: "zoom-out",
-            animation: "petZoomFadeIn 0.2s ease-out",
-          }}>
-          <SmartImage src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", boxShadow: "0 30px 80px rgba(0,0,0,0.6)" }} />
-          <button
-            onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
-            aria-label={t.modalClose}
-            style={{
-              position: "absolute",
-              top: 20,
-              insetInlineEnd: 20,
-              width: 44, height: 44,
-              background: "rgba(255,255,255,0.1)",
-              border: `1px solid rgba(255,255,255,0.25)`,
-              borderRadius: "50%",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 22,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(10px)",
-            }}>×</button>
-        </div>
-      )}
-
       <style>{`
         @keyframes petModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes petModalSlideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes petZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
     </div>
   );
@@ -9782,6 +9568,127 @@ function BloomHeroImage({ src, alt, design, lang, isMobile }) {
       <SmartImage src={src} alt={alt} style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `min(50vh, 380px)` : `min(55vh, 460px)`, objectFit: `contain` }} />
       {design && <PetBadges design={design} lang={lang} />}
     </span>
+  );
+}
+
+// ============ BLOOM IMAGE CAROUSEL — shared by the modal + breed page ========
+// In-place image gallery for ONE breed: flips between THAT breed's views
+// (portrait → white tee → black tee → mug, wrapping) with side arrows, a "1/N"
+// counter, enlarge/zoom overlay, swipe and ←/→ keys. Each view's apply() sets the
+// SAME previewProduct/selectedColor the buy panel reads, so the hero image and the
+// selected product stay in sync. It does NOT browse breeds — to see another breed
+// the user closes the modal and clicks another card.
+//   `zoomed`/`setZoomed` are owned by the parent so the parent controls Esc (the
+//   modal closes the modal on Esc when NOT zoomed); this component only opens the
+//   overlay + handles ←/→. `panel` gives the modal its dark image panel; the breed
+//   page floats the image on the page bg. ONE component so the two never drift.
+function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreviewProduct, selectedColor, setSelectedColor, zoomed, setZoomed, panel = false }) {
+  const name = design[`name_${lang}`] || design.name_en || design.name_he || ``;
+  const fallbackBg = design.mockup_bg || `#1a1a1a`;
+  const zoomLabel = lang === `he` ? `הגדל` : lang === `ru` ? `Увеличить` : `Zoom`;
+  const imgSrc =
+    (previewProduct === `mug` && design.mockup_mug_url) ||
+    (previewProduct === `shirt` && selectedColor?.id === `black` && design.mockup_shirt_black_url) ||
+    (previewProduct === `shirt` && selectedColor?.id === `white` && design.mockup_shirt_white_url) ||
+    (previewProduct === `shirt` && design.mockup_shirt_url) ||
+    design.mockup_shirt_url || design.mockup_url || design.design_url;
+
+  // Ordered views; each apply() drives the same preview state the buy panel reads.
+  const views = [
+    design.mockup_url && { key: `portrait`, src: design.mockup_url, apply: () => setPreviewProduct(null) },
+    design.mockup_shirt_white_url && { key: `shirt-white`, src: design.mockup_shirt_white_url, apply: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[0]); } },
+    design.mockup_shirt_black_url && { key: `shirt-black`, src: design.mockup_shirt_black_url, apply: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[1]); } },
+    design.mockup_mug_url && { key: `mug`, src: design.mockup_mug_url, apply: () => setPreviewProduct(`mug`) },
+  ].filter(Boolean);
+  const currentViewKey =
+    previewProduct === `mug` ? `mug` :
+    previewProduct === `shirt` ? (selectedColor?.id === `black` ? `shirt-black` : `shirt-white`) :
+    `portrait`;
+  const viewIdx = Math.max(0, views.findIndex(v => v.key === currentViewKey));
+  const goView = (dir) => { if (views.length < 2) return; const n = views.length; views[(viewIdx + dir + n) % n].apply(); };
+
+  const touchStartX = useRef(null);
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null || views.length < 2 || zoomed) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 50) goView(1);
+    else if (diff < -50) goView(-1);
+    touchStartX.current = null;
+  };
+
+  // ←/→ step through views (ignored while typing or zoomed). Esc is the parent's
+  // job (so the modal can close the modal on Esc when not zoomed).
+  useEffect(() => {
+    const onKey = (e) => {
+      if (zoomed) return;
+      const el = typeof document !== `undefined` ? document.activeElement : null;
+      if (el && (el.tagName === `INPUT` || el.tagName === `TEXTAREA`)) return;
+      if (e.key === `ArrowRight`) { e.preventDefault(); goView(1); }
+      else if (e.key === `ArrowLeft`) { e.preventDefault(); goView(-1); }
+    };
+    window.addEventListener(`keydown`, onKey);
+    return () => window.removeEventListener(`keydown`, onKey);
+  }, [zoomed, viewIdx, views.length]);
+
+  const arrowStyle = (side) => ({ position: `absolute`, top: `50%`, [side]: isMobile ? 6 : 8, transform: `translateY(-50%)`, width: isMobile ? 48 : 42, height: isMobile ? 48 : 42, border: `none`, borderRadius: `50%`, background: `rgba(0,0,0,0.55)`, color: COLORS.accent, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, zIndex: 4, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, touchAction: `manipulation`, transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s` });
+
+  return (
+    <>
+      <div style={{ display: `flex`, justifyContent: `center`, ...(panel ? { background: design.mockup_url ? `#1a1a1a` : fallbackBg, minHeight: isMobile ? 300 : 440, alignItems: `center` } : {}) }}>
+        <div
+          onClick={() => { if (views.length) setZoomed(true); }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          title={lang === `he` ? `לחץ להגדלה` : lang === `ru` ? `Нажмите, чтобы увеличить` : `Click to zoom`}
+          style={{ position: `relative`, cursor: `zoom-in`, touchAction: `pan-y`, padding: isMobile ? `10px 12px` : `12px 18px` }}>
+          <BloomHeroImage src={imgSrc} alt={name} design={design} lang={lang} isMobile={isMobile} />
+
+          {views.length > 1 && (
+            <>
+              <button type="button" onClick={(e) => { e.stopPropagation(); goView(-1); }}
+                aria-label={lang === `he` ? `תמונה קודמת` : lang === `ru` ? `Предыдущее изображение` : `Previous image`}
+                className="bloom-nav-btn" style={arrowStyle(`insetInlineStart`)}>
+                <svg width={isMobile ? 26 : 22} height={isMobile ? 26 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points={lang === `he` ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
+                </svg>
+              </button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); goView(1); }}
+                aria-label={lang === `he` ? `תמונה הבאה` : lang === `ru` ? `Следующее изображение` : `Next image`}
+                className="bloom-nav-btn" style={arrowStyle(`insetInlineEnd`)}>
+                <svg width={isMobile ? 26 : 22} height={isMobile ? 26 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points={lang === `he` ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
+                </svg>
+              </button>
+              <div aria-live="polite" style={{ position: `absolute`, bottom: 10, left: `50%`, transform: `translateX(-50%)`, direction: `ltr`, background: `rgba(0,0,0,0.55)`, color: `#fff`, borderRadius: 20, padding: `5px 14px`, fontSize: 11, fontFamily: "'IBM Plex Mono','Courier New',monospace", letterSpacing: `0.12em`, backdropFilter: `blur(6px)`, pointerEvents: `none` }}>
+                {viewIdx + 1} / {views.length}
+              </div>
+            </>
+          )}
+
+          {/* Enlarge button */}
+          <button type="button" onClick={(e) => { e.stopPropagation(); setZoomed(true); }} aria-label={zoomLabel}
+            style={{ position: `absolute`, bottom: 10, insetInlineEnd: 10, background: `rgba(0,0,0,0.55)`, color: `#fff`, border: `none`, borderRadius: 20, padding: `6px 11px`, display: `flex`, alignItems: `center`, gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: `0.05em`, backdropFilter: `blur(6px)`, cursor: `pointer`, zIndex: 4 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+            <span>{zoomLabel}</span>
+          </button>
+        </div>
+      </div>
+
+      {zoomed && (
+        <div onClick={() => setZoomed(false)} role="dialog"
+          aria-label={lang === `he` ? `תמונה מוגדלת` : lang === `ru` ? `Увеличенное изображение` : `Zoomed image`}
+          style={{ position: `fixed`, inset: 0, zIndex: 1100, background: `rgba(0,0,0,0.95)`, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 16, cursor: `zoom-out`, animation: `bloomZoomFadeIn 0.2s ease-out` }}>
+          <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: `100%`, objectFit: `contain`, boxShadow: `0 30px 80px rgba(0,0,0,0.6)` }} />
+          <button onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
+            aria-label={lang === `he` ? `סגירה` : lang === `ru` ? `Закрыть` : `Close`}
+            style={{ position: `absolute`, top: 20, insetInlineEnd: 20, width: 44, height: 44, background: `rgba(255,255,255,0.1)`, border: `1px solid rgba(255,255,255,0.25)`, borderRadius: `50%`, color: `#fff`, cursor: `pointer`, fontSize: 22, display: `flex`, alignItems: `center`, justifyContent: `center`, backdropFilter: `blur(10px)` }}>×</button>
+          <style>{`@keyframes bloomZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -9952,11 +9859,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [shirtSize, setShirtSize] = useState(`m`);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
   const [petName, setPetName] = useState(``); // optional personalization (Task 8)
-  const [zoomed, setZoomed] = useState(false); // full-screen enlarge (matches the modal)
-  const touchStartX = useRef(null);
-  // Latest view-nav + zoom handlers, read by the keyboard effect (set up once on
-  // mount, before the loading early-return; updated each render below).
-  const navRef = useRef({ goView: () => {}, zoomed: false, close: () => {} });
+  const [zoomed, setZoomed] = useState(false); // full-screen enlarge (shared <BloomImageCarousel>)
 
   const tt = {
     he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו` },
@@ -9977,21 +9880,12 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     return () => { document.body.style.overflow = ``; };
   }, [zoomed]);
 
-  // Keyboard: Esc closes the enlarge overlay; ←/→ step through the views
-  // (ignored while typing in a field). Reads the latest handlers via navRef so
-  // this single mount-time listener stays current. Mirrors the modal.
+  // Esc closes the enlarge overlay. (←/→ view nav lives in <BloomImageCarousel>.)
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === `Escape` && navRef.current.zoomed) { navRef.current.close(); return; }
-      const el = typeof document !== `undefined` ? document.activeElement : null;
-      if (el && (el.tagName === `INPUT` || el.tagName === `TEXTAREA`)) return;
-      if (navRef.current.zoomed) return;
-      if (e.key === `ArrowRight`) { e.preventDefault(); navRef.current.goView(1); }
-      else if (e.key === `ArrowLeft`) { e.preventDefault(); navRef.current.goView(-1); }
-    };
+    const onKey = (e) => { if (e.key === `Escape` && zoomed) setZoomed(false); };
     window.addEventListener(`keydown`, onKey);
     return () => window.removeEventListener(`keydown`, onKey);
-  }, []);
+  }, [zoomed]);
 
   useEffect(() => {
     let cancelled = false;
@@ -10056,43 +9950,6 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
     : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
 
-  // Hero image reacts to the product selection, same precedence as PetModal.
-  const imgSrc =
-    (previewProduct === `mug` && design.mockup_mug_url) ||
-    (previewProduct === `shirt` && selectedColor?.id === `black` && design.mockup_shirt_black_url) ||
-    (previewProduct === `shirt` && selectedColor?.id === `white` && design.mockup_shirt_white_url) ||
-    (previewProduct === `shirt` && design.mockup_shirt_url) ||
-    design.mockup_shirt_url || design.mockup_url || design.design_url;
-  const fallbackBg = design.mockup_bg || `#1a1a1a`;
-
-  // Ordered image views for the in-place gallery nav (portrait + product
-  // mockups). The arrows / counter / enlarge replicate the modal's controls;
-  // each view's apply() sets the same preview state the buy panel reads, so the
-  // hero image and the selected product stay in sync. (Replaces the old
-  // thumbnail strip.)
-  const views = [
-    design.mockup_url && { key: `portrait`, src: design.mockup_url, apply: () => setPreviewProduct(null) },
-    design.mockup_shirt_white_url && { key: `shirt-white`, src: design.mockup_shirt_white_url, apply: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[0]); } },
-    design.mockup_shirt_black_url && { key: `shirt-black`, src: design.mockup_shirt_black_url, apply: () => { setPreviewProduct(`shirt`); setSelectedColor(BLOOM_SHIRT_COLORS[1]); } },
-    design.mockup_mug_url && { key: `mug`, src: design.mockup_mug_url, apply: () => setPreviewProduct(`mug`) },
-  ].filter(Boolean);
-  const currentViewKey =
-    previewProduct === `mug` ? `mug` :
-    previewProduct === `shirt` ? (selectedColor?.id === `black` ? `shirt-black` : `shirt-white`) :
-    `portrait`;
-  const viewIdx = Math.max(0, views.findIndex(v => v.key === currentViewKey));
-  const goView = (dir) => { if (views.length < 2) return; const n = views.length; views[(viewIdx + dir + n) % n].apply(); };
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
-  const handleTouchEnd = (e) => {
-    if (touchStartX.current === null || views.length < 2 || zoomed) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (diff > 50) goView(1);
-    else if (diff < -50) goView(-1);
-    touchStartX.current = null;
-  };
-  // Keep the keyboard listener's handlers current (it was set up on mount).
-  navRef.current = { goView, zoomed, close: () => setZoomed(false) };
-
   // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
   const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
 
@@ -10146,63 +10003,16 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
         {/* Hero: image + info */}
         <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `1fr 1fr`, gap: isMobile ? 24 : 40, alignItems: `start` }}>
 
-          {/* Image + in-place gallery nav — SAME controls as the quick-look
-              modal (side arrows, counter, enlarge, swipe, ←/→, Esc). The
-              container hugs the image so the chevrons flank it; the portrait's
-              own baked-in orange frame is shown whole via <BloomHeroImage>. */}
+          {/* Image — shared in-place view carousel (side arrows / counter /
+              enlarge / swipe / ←/→). Floats the portrait on the page bg (no
+              panel). Same component the modal uses, so they never drift. */}
           <div>
-            <div style={{ display: `flex`, justifyContent: `center` }}>
-              <div
-                onClick={() => { if (views.length) setZoomed(true); }}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-                title={lang === `he` ? `לחץ להגדלה` : lang === `ru` ? `Нажмите, чтобы увеличить` : `Click to zoom`}
-                style={{ position: `relative`, cursor: `zoom-in`, touchAction: `pan-y`, padding: isMobile ? `10px 12px` : `12px 18px` }}>
-                <BloomHeroImage src={imgSrc} alt={name} design={design} lang={lang} isMobile={isMobile} />
-
-                {/* Prev/next chevrons — only with 2+ views. stopPropagation so a
-                    chevron tap doesn't also open the enlarge overlay. */}
-                {views.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); goView(-1); }}
-                      aria-label={lang === `he` ? `תמונה קודמת` : lang === `ru` ? `Предыдущее изображение` : `Previous image`}
-                      className="bloom-nav-btn"
-                      style={{ position: `absolute`, top: `50%`, insetInlineStart: isMobile ? 6 : 8, transform: `translateY(-50%)`, width: isMobile ? 48 : 42, height: isMobile ? 48 : 42, border: `none`, borderRadius: `50%`, background: `rgba(0,0,0,0.55)`, color: COLORS.accent, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, zIndex: 4, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, touchAction: `manipulation`, transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s` }}>
-                      <svg width={isMobile ? 26 : 22} height={isMobile ? 26 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points={lang === `he` ? `9 18 15 12 9 6` : `15 18 9 12 15 6`} />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); goView(1); }}
-                      aria-label={lang === `he` ? `תמונה הבאה` : lang === `ru` ? `Следующее изображение` : `Next image`}
-                      className="bloom-nav-btn"
-                      style={{ position: `absolute`, top: `50%`, insetInlineEnd: isMobile ? 6 : 8, transform: `translateY(-50%)`, width: isMobile ? 48 : 42, height: isMobile ? 48 : 42, border: `none`, borderRadius: `50%`, background: `rgba(0,0,0,0.55)`, color: COLORS.accent, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, zIndex: 4, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, touchAction: `manipulation`, transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s` }}>
-                      <svg width={isMobile ? 26 : 22} height={isMobile ? 26 : 22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points={lang === `he` ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
-                      </svg>
-                    </button>
-                    <div aria-live="polite" style={{ position: `absolute`, bottom: 10, left: `50%`, transform: `translateX(-50%)`, direction: `ltr`, background: `rgba(0,0,0,0.55)`, color: `#fff`, borderRadius: 20, padding: `5px 14px`, fontSize: 11, fontFamily: "'IBM Plex Mono','Courier New',monospace", letterSpacing: `0.12em`, backdropFilter: `blur(6px)`, pointerEvents: `none` }}>
-                      {viewIdx + 1} / {views.length}
-                    </div>
-                  </>
-                )}
-
-                {/* Enlarge button — same look as the modal's zoom indicator. */}
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setZoomed(true); }}
-                  aria-label={tt.zoom}
-                  style={{ position: `absolute`, bottom: 10, insetInlineEnd: 10, background: `rgba(0,0,0,0.55)`, color: `#fff`, border: `none`, borderRadius: 20, padding: `6px 11px`, display: `flex`, alignItems: `center`, gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: `0.05em`, backdropFilter: `blur(6px)`, cursor: `pointer`, zIndex: 4 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
-                  </svg>
-                  <span>{tt.zoom}</span>
-                </button>
-              </div>
-            </div>
+            <BloomImageCarousel
+              design={design} lang={lang} isMobile={isMobile}
+              previewProduct={previewProduct} setPreviewProduct={setPreviewProduct}
+              selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+              zoomed={zoomed} setZoomed={setZoomed}
+            />
           </div>
 
           {/* Info */}
@@ -10312,23 +10122,6 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
           <button onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{isRTL ? `${tt.back} ←` : `← ${tt.back}`}</button>
         </div>
       </div>
-
-      {/* Enlarge overlay — replicates the modal's zoom view (current image,
-          contain, dark backdrop, × close, click-out / Esc to close). */}
-      {zoomed && (
-        <div
-          onClick={() => setZoomed(false)}
-          role="dialog"
-          aria-label={lang === `he` ? `תמונה מוגדלת` : lang === `ru` ? `Увеличенное изображение` : `Zoomed image`}
-          style={{ position: `fixed`, inset: 0, zIndex: 1100, background: `rgba(0,0,0,0.95)`, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 16, cursor: `zoom-out`, animation: `breedZoomFadeIn 0.2s ease-out` }}>
-          <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: `100%`, objectFit: `contain`, boxShadow: `0 30px 80px rgba(0,0,0,0.6)` }} />
-          <button
-            onClick={(e) => { e.stopPropagation(); setZoomed(false); }}
-            aria-label={lang === `he` ? `סגירה` : lang === `ru` ? `Закрыть` : `Close`}
-            style={{ position: `absolute`, top: 20, insetInlineEnd: 20, width: 44, height: 44, background: `rgba(255,255,255,0.1)`, border: `1px solid rgba(255,255,255,0.25)`, borderRadius: `50%`, color: `#fff`, cursor: `pointer`, fontSize: 22, display: `flex`, alignItems: `center`, justifyContent: `center`, backdropFilter: `blur(10px)` }}>×</button>
-          <style>{`@keyframes breedZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
-        </div>
-      )}
     </div>
   );
 }
