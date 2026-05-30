@@ -1930,6 +1930,7 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const timerRef = useRef(null);
+  const imgRef = useRef(null);
   const MAX_RETRIES = 3;
   const RETRY_DELAY_MS = 500;
 
@@ -1939,6 +1940,15 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
     setFailed(false);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [src]);
+
+  // A cached image can already be `complete` before React attaches onLoad — in
+  // that case the load event never fires and the <img> would stay at opacity:0
+  // (invisible). This happens e.g. opening the BLOOM modal after the same
+  // portrait was shown in the /pets grid. Detect it and reveal the image.
+  useEffect(() => {
+    const el = imgRef.current;
+    if (el && el.complete && el.naturalWidth > 0) setLoaded(true);
+  });
 
   const isRemote = typeof src === "string" && /^https?:/i.test(src);
   const finalSrc = !src
@@ -1982,6 +1992,7 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
   return (
     <img
       {...rest}
+      ref={imgRef}
       src={finalSrc}
       alt={alt}
       style={imgStyle}
@@ -9413,7 +9424,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           <span>{t.shareBtn || `Share`}</span>
         </button>
 
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0, alignItems: "start" }}>
           {/* Image */}
           <div
             onClick={(e) => { e.stopPropagation(); setZoomed(true); }}
@@ -9423,17 +9434,17 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
             style={{
               position: "relative",
               background: design.mockup_url ? "#1a1a1a" : fallbackBg,
-              aspectRatio: isMobile ? "1" : "auto",
-              minHeight: isMobile ? "auto" : 500,
+              minHeight: isMobile ? 300 : 440,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: design.mockup_url ? 0 : "10%",
+              padding: isMobile ? "18px 14px" : "26px 22px",
               cursor: "zoom-in",
               touchAction: "pan-y",
             }}>
-            <SmartImage src={imgSrc} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: design.mockup_url ? "cover" : "contain", width: design.mockup_url ? "100%" : "auto", height: design.mockup_url ? "100%" : "auto" }} />
-            <PetBadges design={design} lang={lang} />
+            {/* Shared hero treatment — same as the breed page (no 2nd frame;
+                contain + capped + padded). */}
+            <BloomHeroImage src={imgSrc} alt={name} design={design} lang={lang} isMobile={isMobile} />
 
             {/* Prev/next chevrons — visible only when there are 2+ designs.
                 Larger tap targets on mobile so a finger can hit them comfortably.
@@ -9751,6 +9762,22 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
       <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
       <span style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 24, fontWeight: 800, letterSpacing: "0.01em" }}>₪{price}</span>
     </button>
+  );
+}
+
+// ============ BLOOM HERO IMAGE — shared by the modal + breed page ============
+// The BLOOM portrait artwork already has its own orange frame baked in (on a
+// transparent bg), so we add NO frame — just show the WHOLE image (object-fit
+// contain) capped to a fraction of the viewport, so the artwork's own frame is
+// always fully visible with breathing room and never clipped. Product mockups
+// (shirt/mug) have no baked frame and show cleanly too. Centred by the caller;
+// badges hug the image. ONE component so the modal + breed page never drift.
+function BloomHeroImage({ src, alt, design, lang, isMobile }) {
+  return (
+    <span style={{ position: `relative`, display: `inline-block`, lineHeight: 0, maxWidth: `100%` }}>
+      <SmartImage src={src} alt={alt} style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `min(50vh, 380px)` : `min(55vh, 460px)`, objectFit: `contain` }} />
+      {design && <PetBadges design={design} lang={lang} />}
+    </span>
   );
 }
 
@@ -10084,10 +10111,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 touches the container edges and is fully visible on all four sides.
                 No overflow:hidden ancestor clips it. Product mockups show cleanly. */}
             <div style={{ display: `flex`, justifyContent: `center`, alignItems: `flex-start`, padding: isMobile ? `10px 12px` : `12px 18px` }}>
-              <span style={{ position: `relative`, display: `inline-block`, lineHeight: 0, maxWidth: `100%` }}>
-                <SmartImage src={imgSrc} alt={name} style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `min(50vh, 380px)` : `min(55vh, 460px)`, objectFit: `contain` }} />
-                <PetBadges design={design} lang={lang} />
-              </span>
+              <BloomHeroImage src={imgSrc} alt={name} design={design} lang={lang} isMobile={isMobile} />
             </div>
             {thumbs.length > 1 && (
               <div style={{ display: `flex`, gap: 12, marginTop: 14, flexWrap: `wrap` }}>
