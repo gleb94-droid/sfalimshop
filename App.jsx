@@ -9852,6 +9852,127 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
 }
 
 // ============ BREED PAGE — full per-character page (#/breed/<slug>) ============
+// Bottom-of-breed-page rail: a gentle infinite marquee of the WHOLE active BLOOM
+// roster (all 70 — dogs + cats). Each portrait carries its own baked-in orange
+// frame on a transparent bg, so it FLOATS (no card box). The whole thing runs on
+// scrollLeft: a rAF loop drifts it sideways, hover (desktop) / touch (mobile)
+// pauses it, and it's draggable by hand (mouse) or swipeable (native touch).
+// Two back-to-back copies of the list make the wrap seamless. Images lazy-load
+// so 70 portraits stay light. Click a portrait → that breed's page.
+function BloomCharacterRail({ characters, lang, goToBreed, isMobile, heading }) {
+  const scrollerRef = useRef(null);
+  const pausedRef = useRef(false);
+  const dragRef = useRef({ active: false, startX: 0, startScroll: 0, moved: false });
+
+  // Render the list twice; once we drift past one full set we subtract its
+  // width, landing on the identical frame — so the loop never visibly jumps.
+  const loop = characters.concat(characters);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || characters.length === 0) return;
+    let raf = 0, last = 0;
+    // Float accumulator: el.scrollLeft is integer-quantized, so adding a sub-pixel
+    // amount per frame and reading it back would round away every frame (the rail
+    // would never move). We track the true position in `pos` and write it out.
+    let pos = el.scrollLeft;
+    const SPEED = isMobile ? 0.022 : 0.03; // px per ms — a slow, gentle drift
+    const tick = (ts) => {
+      if (pausedRef.current || dragRef.current.active) {
+        // Paused (hover/touch) or hand-dragging: let scrollLeft be the truth and
+        // resync, so auto-scroll resumes smoothly from wherever the user left it.
+        pos = el.scrollLeft;
+      } else if (last) {
+        pos += SPEED * (ts - last);
+        const half = el.scrollWidth / 2;
+        if (half > 0) { if (pos >= half) pos -= half; else if (pos < 0) pos += half; }
+        el.scrollLeft = pos;
+      }
+      last = ts;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [characters.length, isMobile]);
+
+  // Mouse drag (desktop). Touch keeps native scroll/momentum — don't hijack it.
+  const onPointerDown = (e) => {
+    if (e.pointerType !== `mouse`) return;
+    const el = scrollerRef.current;
+    dragRef.current = { active: true, startX: e.clientX, startScroll: el.scrollLeft, moved: false };
+  };
+  const onPointerMove = (e) => {
+    if (!dragRef.current.active) return;
+    const el = scrollerRef.current;
+    const dx = e.clientX - dragRef.current.startX;
+    if (Math.abs(dx) > 4) dragRef.current.moved = true;
+    const half = el.scrollWidth / 2;
+    let next = dragRef.current.startScroll - dx;
+    if (half > 0) {
+      // Keep the drag seamless in BOTH directions across the wrap boundary.
+      if (next < 0) { next += half; dragRef.current.startScroll += half; }
+      else if (next >= half) { next -= half; dragRef.current.startScroll -= half; }
+    }
+    el.scrollLeft = next;
+  };
+  const endDrag = () => { dragRef.current.active = false; };
+
+  if (!characters.length) return null;
+
+  return (
+    <div style={{ marginTop: isMobile ? 48 : 64 }}>
+      <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: "0 0 24px" }}>{heading}</h2>
+      <div
+        ref={scrollerRef}
+        onMouseEnter={() => { pausedRef.current = true; }}
+        onMouseLeave={() => { pausedRef.current = false; endDrag(); }}
+        onTouchStart={() => { pausedRef.current = true; }}
+        onTouchEnd={() => { pausedRef.current = false; }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        className="bloom-rail"
+        style={{
+          display: `flex`,
+          gap: isMobile ? 14 : 20,
+          overflowX: `auto`,
+          overflowY: `hidden`,
+          direction: `ltr`,          // normalize scrollLeft regardless of page RTL
+          scrollbarWidth: `none`,    // Firefox: hide the bar
+          touchAction: `pan-x`,      // swipe the rail without blocking vertical page scroll
+          WebkitOverflowScrolling: `touch`,
+          cursor: `grab`,
+          padding: `4px 2px 10px`,
+        }}>
+        {loop.map((c, i) => {
+          const nm = c[`name_${lang}`] || c.name_en || c.name_he || ``;
+          // Prefer the portrait — it carries the baked-in orange frame.
+          const img = c.mockup_url || c.mockup_shirt_url || c.mockup_mug_url;
+          return (
+            <button
+              key={`${c.slug}-${i}`}
+              type="button"
+              // Suppress the click that ends a drag (so dragging never navigates).
+              onClick={() => { if (!dragRef.current.moved) goToBreed(c.slug); }}
+              aria-label={nm}
+              style={{ flex: `0 0 auto`, width: isMobile ? 118 : 150, background: `transparent`, border: `none`, padding: 0, cursor: `pointer`, textAlign: `center`, transition: `transform 0.2s` }}
+              onMouseOver={e => { e.currentTarget.style.transform = `translateY(-5px)`; }}
+              onMouseOut={e => { e.currentTarget.style.transform = `translateY(0)`; }}>
+              {/* pointerEvents:none so drags glide over the images to the scroller. */}
+              <div style={{ width: `100%`, aspectRatio: `1414 / 2000`, pointerEvents: `none` }}>
+                <SmartImage src={img} alt={nm} loading="lazy" decoding="async" draggable={false} style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }} />
+              </div>
+              <div style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 4px 0`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap`, pointerEvents: `none` }}>{nm}</div>
+            </button>
+          );
+        })}
+      </div>
+      <style>{`.bloom-rail::-webkit-scrollbar { display: none; }`}</style>
+    </div>
+  );
+}
+
 // Task 7. A rich, routable page for one BLOOM breed. Reuses the shared cart
 // (onOrderBloom = addBloomToCart), the ProductOption picker, BloomShirtOptions
 // and BreedStoryCard — no cart-logic duplication. Lives behind MAINTENANCE_MODE
@@ -9873,9 +9994,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [zoomed, setZoomed] = useState(false); // full-screen enlarge (shared <BloomImageCarousel>)
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו`, railTitle: `כל אוסף BLOOM` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed`, railTitle: `The whole BLOOM family` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте`, railTitle: `Вся коллекция BLOOM` },
   }[lang] || {};
 
   useEffect(() => {
@@ -9911,14 +10032,13 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       if (cancelled) return;
       if (error || !data) { setNotFound(true); setLoading(false); return; }
       setDesign(data); setLoading(false);
-      if (data.species) {
-        const { data: rel } = await supabase
-          .from(`pet_designs`)
-          .select(`slug,name_he,name_en,name_ru,mockup_url,mockup_shirt_url,mockup_mug_url,species`)
-          .eq(`is_active`, true).eq(`species`, data.species).neq(`slug`, slug)
-          .order(`sort_order`, { ascending: true }).limit(6);
-        if (!cancelled && rel) setRelated(rel);
-      }
+      // Full active roster (all 70 — dogs + cats) for the bottom marquee rail.
+      const { data: rel } = await supabase
+        .from(`pet_designs`)
+        .select(`slug,name_he,name_en,name_ru,mockup_url,mockup_shirt_url,mockup_mug_url,species`)
+        .eq(`is_active`, true)
+        .order(`sort_order`, { ascending: true });
+      if (!cancelled && rel) setRelated(rel);
     })();
     return () => { cancelled = true; };
   }, [slug]);
@@ -9995,8 +10115,6 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       onShareToast(tt.copied, { label: tt.whatsapp, handler: () => window.open(`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`, `_blank`, `noopener,noreferrer`) });
     }
   };
-
-  const relatedHeading = design.species === `dog` ? tt.relatedDogs : design.species === `cat` ? tt.relatedCats : tt.related;
 
   return (
     <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
@@ -10099,34 +10217,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
           </div>
         </div>
 
-        {/* Related breeds */}
-        {related.length > 0 && (
-          <div style={{ marginTop: isMobile ? 48 : 64 }}>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: "0 0 24px" }}>{relatedHeading}</h2>
-            <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(6, 1fr)`, gap: isMobile ? 12 : 16 }}>
-              {related.map((r) => {
-                const rName = r[`name_${lang}`] || r.name_en || r.name_he || ``;
-                // Prefer the portrait (it carries the baked-in orange frame).
-                const rImg = r.mockup_url || r.mockup_shirt_url || r.mockup_mug_url;
-                return (
-                  // No dark card box — the BLOOM portrait has its own orange frame
-                  // on a transparent bg, so it FLOATS on the page. object-fit
-                  // contain at the image's native ratio shows the whole frame
-                  // (never cropped). Name + click-through unchanged.
-                  <button key={r.slug} type="button" onClick={() => goToBreed(r.slug)}
-                    style={{ background: `transparent`, border: `none`, cursor: `pointer`, padding: 0, textAlign: `center`, transition: `transform 0.2s` }}
-                    onMouseOver={e => { e.currentTarget.style.transform = `translateY(-4px)`; }}
-                    onMouseOut={e => { e.currentTarget.style.transform = `translateY(0)`; }}>
-                    <div style={{ width: `100%`, aspectRatio: `1414 / 2000` }}>
-                      <SmartImage src={rImg} alt={rName} style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }} />
-                    </div>
-                    <div style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 6px 0`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap` }}>{rName}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* The whole BLOOM roster — a gentle infinite marquee (replaces the old
+            static same-species grid). All 70 float past; hover/touch pauses;
+            draggable; click → that breed's page. */}
+        <BloomCharacterRail characters={related} lang={lang} goToBreed={goToBreed} isMobile={isMobile} heading={tt.railTitle} />
 
         {/* Back to collection */}
         <div style={{ marginTop: 48 }}>
