@@ -10078,14 +10078,14 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
           {/* Image + thumbnails */}
           <div>
             {/* Hero: the BLOOM portrait already has its own orange frame baked
-                into the artwork (on a transparent bg), so we just show the WHOLE
-                image (object-fit contain) capped to a fraction of the viewport —
-                its own frame is fully visible, never clipped, and the hero always
-                fits on screen. No competing frame (which double-framed the
-                portrait). Product mockups (shirt/mug) show cleanly too. */}
-            <div style={{ display: `flex`, justifyContent: `center` }}>
-              <span style={{ position: `relative`, display: `inline-block`, lineHeight: 0 }}>
-                <SmartImage src={imgSrc} alt={name} style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `62vh` : `min(74vh, 600px)`, objectFit: `contain` }} />
+                into the artwork (transparent bg) — DON'T add a second frame. Show
+                the whole image (object-fit contain), capped small enough to leave
+                breathing room, with padding around it so the artwork's frame never
+                touches the container edges and is fully visible on all four sides.
+                No overflow:hidden ancestor clips it. Product mockups show cleanly. */}
+            <div style={{ display: `flex`, justifyContent: `center`, alignItems: `flex-start`, padding: isMobile ? `10px 12px` : `12px 18px` }}>
+              <span style={{ position: `relative`, display: `inline-block`, lineHeight: 0, maxWidth: `100%` }}>
+                <SmartImage src={imgSrc} alt={name} style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `min(50vh, 380px)` : `min(55vh, 460px)`, objectFit: `contain` }} />
                 <PetBadges design={design} lang={lang} />
               </span>
             </div>
