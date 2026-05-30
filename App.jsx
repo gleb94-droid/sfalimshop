@@ -1308,7 +1308,9 @@ const ANALYTICS = {
 
 // 🚧 MAINTENANCE MODE — set to true to show "Under Maintenance" page to all visitors.
 // Admin (gleb2009@gmail.com) bypasses this when logged in.
-// Visit ?staff=1 to access login during maintenance.
+// Staff bypass is password-gated on the maintenance page (VITE_STAFF_PASSWORD →
+// sessionStorage flag). ?staff=1 only auto-opens that password field; it no
+// longer bypasses on its own.
 const MAINTENANCE_MODE = true;
 
 // 🔒 MUG STUDIO ACCESS — when false, the #mug-studio route is removed from
@@ -7201,6 +7203,12 @@ export default function App() {
   const [lang, setLang] = useState("he");
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  // 🔐 Staff maintenance bypass. A plain ?staff=1 no longer bypasses on its own —
+  // staff must enter VITE_STAFF_PASSWORD on the maintenance page, which sets a
+  // sessionStorage flag (sf_staff). This state mirrors that flag so a refresh
+  // within the same tab session keeps staff in. Session-scoped on purpose.
+  const [staffUnlocked, setStaffUnlocked] = useState(() =>
+    typeof window !== "undefined" && window.sessionStorage.getItem("sf_staff") === "1");
   const [pendingBloomItem, setPendingBloomItem] = useState(null);
 
   // Always open at the very top on load/refresh. The browser otherwise
@@ -7888,9 +7896,12 @@ export default function App() {
       {!reduceMotion && <ParticlesBackground />}
       {!reduceMotion && <CursorGlow />}
       {(() => {
-        const isStaffOverride = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
-        // Public pre-launch preview: while in maintenance, the public (no
-        // ?staff=1, not admin) may still browse the BLOOM "Find Your Breed"
+        // Staff bypass now requires the password gate (sessionStorage flag set
+        // by MaintenancePage after VITE_STAFF_PASSWORD matches). A bare ?staff=1
+        // no longer bypasses on its own — it only auto-opens the password field.
+        const isStaffOverride = staffUnlocked;
+        // Public pre-launch preview: while in maintenance, the public (not
+        // unlocked staff, not admin) may still browse the BLOOM "Find Your Breed"
         // experience on /pets — the grid, dog/cat filter and breed stories —
         // but cannot purchase. There, every buy CTA becomes "Join the BLOOM
         // Family" (waitlist). Staff/admin get the full site unchanged.
@@ -7898,7 +7909,7 @@ export default function App() {
         // Maintenance gate. 'policies' (legal/SEO) and 'pets' (public preview)
         // stay reachable; everything else shows the maintenance screen.
         if (publicPreview && page !== 'policies' && page !== 'pets' && page !== 'breed') {
-          return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} />;
+          return <MaintenancePage lang={lang} setLang={setLang} setPage={setPage} onUnlock={() => setStaffUnlocked(true)} />;
         }
         return (
           <>
@@ -10126,13 +10137,33 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   );
 }
 
-function MaintenancePage({ lang, setLang, setPage }) {
+function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
   const messages = {
-    he: { title: "האתר בתחזוקה", sub: "החנות נפתחת בקרוב — אבל אוסף BLOOM כבר כאן. מצאו את הגזע שלכם.", back: "נחזור בקרוב!", staff: "כניסת צוות", explore: "גלו את אוסף BLOOM" },
-    en: { title: "Under Maintenance", sub: "The shop opens soon — but the BLOOM collection is already here. Find your breed.", back: "Back soon!", staff: "Staff login", explore: "Explore the BLOOM collection" },
-    ru: { title: "Сайт на обслуживании", sub: "Магазин скоро откроется — но коллекция BLOOM уже здесь. Найдите свою породу.", back: "Скоро вернёмся!", staff: "Вход для персонала", explore: "Открыть коллекцию BLOOM" },
+    he: { title: "האתר בתחזוקה", sub: "החנות נפתחת בקרוב — אבל אוסף BLOOM כבר כאן. מצאו את הגזע שלכם.", back: "נחזור בקרוב!", staff: "כניסת צוות", explore: "גלו את אוסף BLOOM", pwPlaceholder: "סיסמת צוות", pwGo: "כניסה", pwErr: "סיסמה שגויה" },
+    en: { title: "Under Maintenance", sub: "The shop opens soon — but the BLOOM collection is already here. Find your breed.", back: "Back soon!", staff: "Staff login", explore: "Explore the BLOOM collection", pwPlaceholder: "Staff password", pwGo: "Enter", pwErr: "Wrong password" },
+    ru: { title: "Сайт на обслуживании", sub: "Магазин скоро откроется — но коллекция BLOOM уже здесь. Найдите свою породу.", back: "Скоро вернёмся!", staff: "Вход для персонала", explore: "Открыть коллекцию BLOOM", pwPlaceholder: "Пароль персонала", pwGo: "Войти", pwErr: "Неверный пароль" },
   };
   const m = messages[lang] || messages.he;
+
+  // 🔐 Staff password gate. A bare ?staff=1 only auto-opens this field; it does
+  // NOT bypass on its own. Correct password (VITE_STAFF_PASSWORD) → sessionStorage
+  // flag + onUnlock() so the App re-renders past the maintenance gate for this
+  // session. SOFT client-side gate by design (the Vite env value is in the
+  // bundle) — enough to keep casual visitors out, not real auth. If the env var
+  // is unset/empty the gate stays CLOSED (expected is falsy → never matches).
+  const staffParam = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("staff") === "1";
+  const [showStaff, setShowStaff] = useState(staffParam);
+  const [pwd, setPwd] = useState("");
+  const [pwErr, setPwErr] = useState(false);
+  const expectedPw = import.meta.env.VITE_STAFF_PASSWORD;
+  const submitStaff = () => {
+    if (expectedPw && pwd === expectedPw) {
+      window.sessionStorage.setItem("sf_staff", "1");
+      onUnlock && onUnlock();
+    } else {
+      setPwErr(true);
+    }
+  };
   return (
     <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: 24, zIndex: 10, direction: lang === "he" ? "rtl" : "ltr" }}>
       <div style={{ position: "absolute", top: 20, insetInlineEnd: 20, display: "flex", gap: 8 }}>
@@ -10192,8 +10223,26 @@ function MaintenancePage({ lang, setLang, setPage }) {
           {lang === "he" ? "צור קשר" : lang === "ru" ? "Контакты" : "Contact"}
         </a>
       </div>
-      <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#555", fontFamily: "'Varela Round',sans-serif" }}>
-        <a href="?staff=1" style={{ color: "#555", textDecoration: "none" }}>· {m.staff} ·</a>
+      <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#555", fontFamily: "'Varela Round',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+        {!showStaff ? (
+          <button onClick={() => setShowStaff(true)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", padding: 4 }}>· {m.staff} ·</button>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, direction: lang === "he" ? "rtl" : "ltr" }}>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="password"
+                value={pwd}
+                autoFocus
+                onChange={e => { setPwd(e.target.value); if (pwErr) setPwErr(false); }}
+                onKeyDown={e => { if (e.key === "Enter") submitStaff(); }}
+                placeholder={m.pwPlaceholder}
+                aria-label={m.pwPlaceholder}
+                style={{ background: "#181818", border: `1px solid ${pwErr ? "#a33" : "#333"}`, borderRadius: 8, color: "#ddd", padding: "8px 12px", fontSize: 13, fontFamily: "'Varela Round',sans-serif", width: 170, outline: "none" }} />
+              <button onClick={submitStaff} style={{ background: COLORS.accent, border: "none", borderRadius: 8, color: "#fff", padding: "8px 14px", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer" }}>{m.pwGo}</button>
+            </div>
+            {pwErr && <span style={{ color: "#e06a5a", fontSize: 11 }}>{m.pwErr}</span>}
+          </div>
+        )}
       </div>
     </div>
   );
