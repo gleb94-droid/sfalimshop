@@ -10139,7 +10139,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         const { data: petRow } = await supabase
           .from(`pet_designs`)
           .select(`slug,name_he,name_en,name_ru,mockup_url,mockup_mug_url,price_mug`)
-          .eq(`slug`, data.breed_slug_link).maybeSingle();
+          .eq(`slug`, data.breed_slug_link).eq(`is_active`, true).maybeSingle();
         if (!cancelled && petRow) setPet(petRow);
       }
       const { data: rel } = await supabase
@@ -10336,7 +10336,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
   };
   useEffect(() => {
     fetchPosts();
-    supabase.from(`pet_designs`).select(`slug,name_he`).order(`sort_order`, { ascending: true }).then(({ data }) => setBreeds(data || []));
+    supabase.from(`pet_designs`).select(`slug,name_he`).eq(`is_active`, true).order(`sort_order`, { ascending: true }).then(({ data }) => setBreeds(data || []));
   }, []);
 
   const startNew = () => { setForm(BLANK_BLOG_POST); setEditingId(null); setEditing(true); setShowPreview(false); };
