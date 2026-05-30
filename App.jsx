@@ -1062,16 +1062,19 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         alignItems: `center`,
         width: `100%`,
       }}>
-      {/* Card stack — positioning context for the prev/next arrows. Centered
-          on the row via margin auto; arrows below sit absolutely just outside
-          its left/right edges so spacing stays symmetric and consistent
-          regardless of viewport width. */}
+      {/* Card stack — positioning context for the prev/next arrows. Its width
+          must MATCH the rendered card so the arrows (placed just outside its
+          left/right edges) are symmetric. The desktop .fpc-card is sized by
+          aspect-ratio 0.718 × max-height 540 ≈ 388px, so a 360px stack let the
+          card overflow ~28px to the left (anchored right by dir=rtl) and the
+          left arrow overlapped it. 388 makes the card fit exactly → equal gaps.
+          Mobile uses BloomCardLite (width:100%), so it always fills the stack. */}
       <div
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         style={{
           position: `relative`,
-          width: isMobile ? 256 : 360,
+          width: isMobile ? 256 : 388,
           maxWidth: `100%`,
           margin: `0 auto`,
         }}>
@@ -10282,16 +10285,21 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
             <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(6, 1fr)`, gap: isMobile ? 12 : 16 }}>
               {related.map((r) => {
                 const rName = r[`name_${lang}`] || r.name_en || r.name_he || ``;
-                const rImg = r.mockup_shirt_url || r.mockup_url || r.mockup_mug_url;
+                // Prefer the portrait (it carries the baked-in orange frame).
+                const rImg = r.mockup_url || r.mockup_shirt_url || r.mockup_mug_url;
                 return (
+                  // No dark card box — the BLOOM portrait has its own orange frame
+                  // on a transparent bg, so it FLOATS on the page. object-fit
+                  // contain at the image's native ratio shows the whole frame
+                  // (never cropped). Name + click-through unchanged.
                   <button key={r.slug} type="button" onClick={() => goToBreed(r.slug)}
-                    style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 12, overflow: `hidden`, cursor: `pointer`, padding: 0, textAlign: `center`, transition: `border-color 0.2s, transform 0.2s` }}
-                    onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-3px)`; }}
-                    onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
-                    <div style={{ width: `100%`, aspectRatio: `1`, background: `#1a1a1a` }}>
-                      <SmartImage src={rImg} alt={rName} style={{ width: `100%`, height: `100%`, objectFit: `cover` }} />
+                    style={{ background: `transparent`, border: `none`, cursor: `pointer`, padding: 0, textAlign: `center`, transition: `transform 0.2s` }}
+                    onMouseOver={e => { e.currentTarget.style.transform = `translateY(-4px)`; }}
+                    onMouseOut={e => { e.currentTarget.style.transform = `translateY(0)`; }}>
+                    <div style={{ width: `100%`, aspectRatio: `1414 / 2000` }}>
+                      <SmartImage src={rImg} alt={rName} style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }} />
                     </div>
-                    <div style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 6px`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap` }}>{rName}</div>
+                    <div style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 6px 0`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap` }}>{rName}</div>
                   </button>
                 );
               })}
