@@ -7068,6 +7068,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
+                    {it.petName && <div style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, marginTop: 4 }}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
                       {it.color && (
@@ -9748,7 +9749,7 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
         textAlign: "inherit",
       }}>
       <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
-      <span style={{ color: selected ? COLORS.accent : COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18, fontWeight: 700 }}>₪{price}</span>
+      <span style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 24, fontWeight: 800, letterSpacing: "0.01em" }}>₪{price}</span>
     </button>
   );
 }
@@ -10076,12 +10077,17 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
 
           {/* Image + thumbnails */}
           <div>
-            {/* Hero: the whole image sits inside a visible orange frame — object-fit
-                contain (never cropped), consistent 4/5 box, inner padding so the
-                image never touches the border. Letterbox uses the dark card bg. */}
-            <div style={{ position: `relative`, background: `#1a1a1a`, borderRadius: 18, overflow: `hidden`, border: `1.5px solid rgba(255,107,53,0.5)`, boxShadow: `0 0 0 1px rgba(255,107,53,0.08), 0 18px 50px rgba(0,0,0,0.45)`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 14, boxSizing: `border-box` }}>
-              <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: `100%`, width: `auto`, height: `auto`, objectFit: `contain`, borderRadius: 10, display: `block` }} />
-              <PetBadges design={design} lang={lang} />
+            {/* Hero: the BLOOM portrait already has its own orange frame baked
+                into the artwork (on a transparent bg), so we just show the WHOLE
+                image (object-fit contain) capped to a fraction of the viewport —
+                its own frame is fully visible, never clipped, and the hero always
+                fits on screen. No competing frame (which double-framed the
+                portrait). Product mockups (shirt/mug) show cleanly too. */}
+            <div style={{ display: `flex`, justifyContent: `center` }}>
+              <span style={{ position: `relative`, display: `inline-block`, lineHeight: 0 }}>
+                <SmartImage src={imgSrc} alt={name} style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `62vh` : `min(74vh, 600px)`, objectFit: `contain` }} />
+                <PetBadges design={design} lang={lang} />
+              </span>
             </div>
             {thumbs.length > 1 && (
               <div style={{ display: `flex`, gap: 12, marginTop: 14, flexWrap: `wrap` }}>
