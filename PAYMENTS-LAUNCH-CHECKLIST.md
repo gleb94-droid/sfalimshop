@@ -1,11 +1,19 @@
 # 💳 Payments launch checklist (BLOCKED — do not enable without approval)
 
 Status: **BLOCKED.** `PAYMENTS_ENABLED = false`, `MAINTENANCE_MODE = true`.
-Waiting on: Tranzila **supplier number**. Do not touch payment code or flip flags
-until Gleb provides it and approves.
+Waiting on: **Tranzila supplier** (supplier docs **submitted 2026-05-31**, awaiting
+the supplier number). Do not flip flags until Gleb confirms.
 
-This file documents what's already built and the gaps that **must** be closed
-before real money flows. Compiled from a read-only audit on 2026-05-30.
+> **STATE AS OF 2026-05-31:** Both payment-integrity holes are **FIXED & live on
+> prod** (orders payment-field trigger + `create-payment` v4 server-side amount).
+> The **custom-design approval workflow** is **live** (`create-payment` v4 gate +
+> trigger + `notify-design-decision` v1 disabled). **`tranzila-webhook` v2** adds
+> **Layer-2 amount verification** (live); **Layer-1 signature verification is the
+> main remaining payment-security TODO** (sandbox). Production is `main` HEAD
+> `e3a31b4` behind the maintenance gate. See "🔔 Launch-arming" below and the
+> "STATE AS OF 2026-05-31" block in `CLAUDE.md`.
+
+Originally compiled from a read-only audit on 2026-05-30; kept current since.
 
 ---
 
@@ -177,10 +185,13 @@ Idempotent: an already-`succeeded` order short-circuits (logged as
 
 ## ✅ ALREADY BUILT (good)
 
-- `supabase/functions/create-payment/` — builds the Tranzila hosted-page URL,
-  validates the order, blocks already-paid/cancelled, logs a `payment_events`
-  row. Gated: returns 503 "payments_disabled" if `TRANZILA_SUPPLIER` is unset,
-  and the client falls back to a "coming soon" modal.
+- `supabase/functions/create-payment/` (v4) — builds the Tranzila hosted-page
+  URL, **recomputes the charge server-side from `SUM(orders.total)`** (ignores
+  the client amount), **blocks payment until the design is approved**
+  (`403 design_not_approved`), blocks already-paid, logs a `payment_events` row.
+  Gated: returns 503 "payments_disabled" if `TRANZILA_SUPPLIER` is unset, and the
+  client falls back to a "coming soon" modal. `SITE_URL` fallback =
+  `https://www.sfalimshop.com`.
 - `supabase/functions/tranzila-webhook/` (v2) — parses the callback, writes
   `payment_events`, enforces **Layer 2 amount verification** (see the Webhook
   payment integrity section above), and on a verified success flips `orders` to
@@ -203,6 +214,8 @@ Idempotent: an already-`succeeded` order short-circuits (logged as
 4. Deploy both Edge Functions.
 5. Sandbox end-to-end test → confirm the webhook actually flips `payment_status`.
 6. Verify all Tranzila field-name TODOs against the live docs.
+6b. **Implement Layer-1 webhook signature verification** (`TRANZILA_WEBHOOK_SECRET`)
+   using Tranzila's real mechanism — the main remaining payment-security TODO.
 7. Flip `PAYMENTS_ENABLED = true`.
 8. Flip `MAINTENANCE_MODE = false` **and** switch `index.html` robots tags to `index, follow`.
 9. Swap sandbox → production `TRANZILA_SUPPLIER` / `TRANZILA_TK`.
