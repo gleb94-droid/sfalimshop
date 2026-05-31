@@ -49,6 +49,88 @@ function useDialogFocus(active) {
 }
 
 // ============================================================================
+// FAVORITES — client-only "heart" store (localStorage, no auth/DB/Supabase).
+// One key holds an array of design slugs. All storage access is try/catch-guarded
+// (private-mode safe). toggleFavorite dispatches a window event so every
+// useFavorites() consumer (cards, modal, breed page, nav badge) updates instantly
+// and stays in sync; the native `storage` event syncs across tabs.
+// ============================================================================
+const FAVORITES_KEY = `sf_favorites`;
+const FAVORITES_EVENT = `sf-favorites-changed`;
+function readFavorites() {
+  try {
+    const raw = typeof localStorage !== `undefined` ? localStorage.getItem(FAVORITES_KEY) : null;
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(s => typeof s === `string`) : [];
+  } catch (_) { return []; }
+}
+function writeFavorites(arr) {
+  try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(arr)); } catch (_) {}
+}
+function getFavorites() { return readFavorites(); }
+function toggleFavorite(slug) {
+  if (!slug) return readFavorites();
+  const cur = readFavorites();
+  const next = cur.includes(slug) ? cur.filter(s => s !== slug) : cur.concat(slug);
+  writeFavorites(next);
+  try { if (typeof window !== `undefined`) window.dispatchEvent(new CustomEvent(FAVORITES_EVENT, { detail: next })); } catch (_) {}
+  return next;
+}
+// React hook: an in-memory mirror kept in sync via the window event (same tab)
+// and the native storage event (other tabs). Re-renders every consumer on change.
+function useFavorites() {
+  const [favs, setFavs] = useState(readFavorites);
+  useEffect(() => {
+    const sync = () => setFavs(readFavorites());
+    window.addEventListener(FAVORITES_EVENT, sync);
+    window.addEventListener(`storage`, sync);
+    return () => { window.removeEventListener(FAVORITES_EVENT, sync); window.removeEventListener(`storage`, sync); };
+  }, []);
+  return {
+    favorites: favs,
+    isFavorite: (slug) => favs.includes(slug),
+    toggle: (slug) => setFavs(toggleFavorite(slug)),
+  };
+}
+
+// Reusable heart button — self-contained trilingual aria-label that reflects
+// state, aria-pressed, keyboard-operable (real <button>), and stops propagation
+// so it never triggers a parent card's click/keydown. Filled = favorited,
+// outline = not. Lives inside #root, so high-contrast (filter) applies to it too.
+function FavHeart({ slug, name, lang, size = 38 }) {
+  const { isFavorite, toggle } = useFavorites();
+  const fav = isFavorite(slug);
+  const nm = name || ``;
+  const label = fav
+    ? (lang === `he` ? `הסר את ${nm} מהמועדפים` : lang === `ru` ? `Удалить ${nm} из избранного` : `Remove ${nm} from favorites`)
+    : (lang === `he` ? `הוסף את ${nm} למועדפים` : lang === `ru` ? `Добавить ${nm} в избранное` : `Add ${nm} to favorites`);
+  const icon = Math.round(size * 0.52);
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-pressed={fav}
+      title={label}
+      onClick={(e) => { e.stopPropagation(); toggle(slug); }}
+      onKeyDown={(e) => { if (e.key === `Enter` || e.key === ` `) e.stopPropagation(); }}
+      style={{
+        width: size, height: size, borderRadius: `50%`, padding: 0,
+        border: `1px solid ${fav ? COLORS.accent : `rgba(255,255,255,0.35)`}`,
+        background: `rgba(0,0,0,0.55)`, backdropFilter: `blur(10px)`, WebkitBackdropFilter: `blur(10px)`,
+        color: fav ? COLORS.accent : `#fff`, cursor: `pointer`,
+        display: `flex`, alignItems: `center`, justifyContent: `center`,
+        transition: `color 0.2s, border-color 0.2s, transform 0.15s`, touchAction: `manipulation`,
+      }}
+      onMouseOver={e => { e.currentTarget.style.transform = `scale(1.12)`; }}
+      onMouseOut={e => { e.currentTarget.style.transform = `scale(1)`; }}>
+      <svg width={icon} height={icon} viewBox="0 0 24 24" fill={fav ? `currentColor` : `none`} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    </button>
+  );
+}
+
+// ============================================================================
 // FloatingProductCard — כרטיס מוצר מרחף עם אפקט הטיה + זוהר הולוגרפי חם
 // ----------------------------------------------------------------------------
 // • קובץ אחד, ללא תלות חיצונית. ה-CSS מוטמע בתוך הרכיב (מוזרק פעם אחת ל-<head>).
@@ -6897,6 +6979,10 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     return () => window.removeEventListener('resize', handle);
   }, []);
 
+  // Favorites count for the nav badge — client-only store, live across components.
+  const { favorites } = useFavorites();
+  const favCount = favorites.length;
+
   // Cart icon with item-count badge — reused in the desktop and mobile nav.
   const cartButton = (
     <button onClick={onCartClick} aria-label={lang === "he" ? "סל קניות" : lang === "ru" ? "Корзина" : "Cart"}
@@ -6910,6 +6996,24 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
       </svg>
       {cartCount > 0 && (
         <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${lang === "he" ? "פריטים בסל" : lang === "ru" ? "товаров в корзине" : "items in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+      )}
+    </button>
+  );
+
+  // Favorites heart with a live count badge — navigates to the gallery's
+  // favorites view (#/pets?fav=1). Mirrors the cart button's styling; the icon
+  // stays an outline (the badge conveys the count).
+  const favButton = (
+    <button onClick={() => { try { window.location.hash = `/pets?fav=1`; } catch (_) {} }}
+      aria-label={lang === "he" ? "המועדפים שלי" : lang === "ru" ? "Избранное" : "Favorites"}
+      style={{ position: "relative", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.2s" }}
+      onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
+      onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      {favCount > 0 && (
+        <span role="status" aria-live="polite" aria-label={`${favCount} ${lang === "he" ? "מועדפים" : lang === "ru" ? "в избранном" : "favorites"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{favCount}</span>
       )}
     </button>
   );
@@ -7002,6 +7106,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
       {/* Lang + Hamburger - MOBILE RIGHT */}
       {isMobile && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {favButton}
         {cartButton}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
@@ -7013,6 +7118,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
       {/* Auth + Lang - RIGHT (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+        {favButton}
         {cartButton}
         {instagramButton}
         {user ? (
@@ -8731,6 +8837,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
   // Legacy rows (species IS NULL) only show under the All tab.
   const [speciesFilter, setSpeciesFilter] = useState(`all`);
   const [breedQuery, setBreedQuery] = useState(``);
+  const [favOnly, setFavOnly] = useState(false); // "show favorites only" gallery filter
+  const { favorites } = useFavorites();
   const pHero = useParallax(0.18);
   const pOrb1 = useParallax(0.4);
   const pOrb2 = useParallax(-0.3);
@@ -8893,6 +9001,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       let slug = "";
       const qIdx = hash.indexOf("?");
       if (qIdx !== -1) slug = new URLSearchParams(hash.slice(qIdx + 1)).get("slug") || "";
+      // "Show favorites only" deep link from the nav heart (#/pets?fav=1).
+      if (qIdx !== -1 && new URLSearchParams(hash.slice(qIdx + 1)).get("fav") === "1") setFavOnly(true);
       if (!slug) slug = parts[1] || "";
       if (!slug) { setSelected(null); return; }
       const match = designs.find(d => slugify(d) === slug);
@@ -8928,6 +9038,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
   // closes the modal and taps another card.
   const filtered = React.useMemo(() => {
     let list = designs;
+    if (favOnly) list = list.filter(d => favorites.includes(slugify(d)));
     if (speciesFilter !== `all`) list = list.filter(d => d.species === speciesFilter);
     const q = breedQuery.trim().toLowerCase();
     if (q) {
@@ -8941,7 +9052,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       });
     }
     return list;
-  }, [designs, speciesFilter, breedQuery]);
+  }, [designs, speciesFilter, breedQuery, favOnly, favorites]);
 
   // Translations
   const t = {
@@ -8978,6 +9089,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       searchPlaceholder: "חיפוש לפי גזע (לדוגמה: קורגי, פיטבול)",
       noResults: "לא נמצאו דמויות שתואמות לחיפוש שלך",
       clearFilters: "נקה סינון",
+      favTab: "מועדפים",
+      favEmpty: "עדיין אין מועדפים — הקישו על הלב על דמויות שאהבתם 🤍",
       packsEyebrow: "חבילות מדבקות",
       packsHeading: "10 מדבקות באריזה אחת",
       packAddToCart: "הוסף לסל",
@@ -9021,6 +9134,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       searchPlaceholder: "Search by breed (e.g. corgi, pitbull)",
       noResults: "No characters match your search",
       clearFilters: "Clear filters",
+      favTab: "Favorites",
+      favEmpty: "No favorites yet — tap the heart on designs you love 🤍",
       packsEyebrow: "Sticker packs",
       packsHeading: "10 stickers per pack",
       packAddToCart: "Add to cart",
@@ -9064,6 +9179,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       searchPlaceholder: "Поиск по породе (напр. корги, питбуль)",
       noResults: "По вашему запросу ничего не найдено",
       clearFilters: "Сбросить фильтры",
+      favTab: "Избранное",
+      favEmpty: "Пока нет избранного — нажмите на сердечко у понравившихся дизайнов 🤍",
       packsEyebrow: "Наборы наклеек",
       packsHeading: "10 наклеек в наборе",
       packAddToCart: "В корзину",
@@ -9223,6 +9340,26 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                   </button>
                 );
               })}
+              {/* Favorites-only toggle — sits with the species tabs */}
+              <button
+                type="button"
+                aria-pressed={favOnly}
+                onClick={() => setFavOnly(v => !v)}
+                title={t.favTab}
+                style={{
+                  background: favOnly ? COLORS.accent : `transparent`,
+                  color: favOnly ? `#fff` : COLORS.gray,
+                  border: `${favOnly ? 2 : 1}px solid ${favOnly ? COLORS.accent : COLORS.border}`,
+                  borderRadius: 999, padding: `12px 20px`, fontSize: 15, fontWeight: 700,
+                  fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`,
+                  display: `inline-flex`, alignItems: `center`, gap: 6,
+                  transition: `background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s`,
+                  transform: favOnly ? `scale(1.05)` : `scale(1)`,
+                }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill={favOnly ? `currentColor` : `none`} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span>{t.favTab}</span>
+                <span style={{ opacity: 0.7, marginInlineStart: 2 }}>{favorites.length}</span>
+              </button>
             </div>
             <div style={{ flex: 1, minWidth: isMobile ? `auto` : 240, position: `relative` }}>
               <input
@@ -9248,10 +9385,10 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                 onBlur={e => { e.target.style.borderColor = COLORS.border; }}
               />
             </div>
-            {(speciesFilter !== `all` || breedQuery) && (
+            {(speciesFilter !== `all` || breedQuery || favOnly) && (
               <button
                 type="button"
-                onClick={() => { setSpeciesFilter(`all`); setBreedQuery(``); }}
+                onClick={() => { setSpeciesFilter(`all`); setBreedQuery(``); setFavOnly(false); }}
                 style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `8px 14px`, fontSize: 12, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>
                 {t.clearFilters}
               </button>
@@ -9274,7 +9411,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
 
         {!loading && designs.length > 0 && filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18 }}>
-            {t.noResults}
+            {favOnly ? t.favEmpty : t.noResults}
           </div>
         )}
 
@@ -9579,6 +9716,10 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
           pointerEvents: "none",
         }} />
         <PetBadges design={design} lang={lang} />
+        {/* Favorite heart — top corner; stops propagation so it never opens the card */}
+        <div style={{ position: "absolute", top: 10, insetInlineEnd: 10, zIndex: 3 }}>
+          <FavHeart slug={design.slug} name={name} lang={lang} size={isMobile ? 36 : 40} />
+        </div>
       </div>
 
       {/* Text content */}
@@ -9877,6 +10018,11 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           <span aria-hidden="true" style={{ fontSize: 16, lineHeight: 1 }}>↗</span>
           <span>{t.shareBtn || `Share`}</span>
         </button>
+
+        {/* Favorite heart — top inline-start, opposite the close/share cluster */}
+        <div style={{ position: "absolute", top: 16, insetInlineStart: 16, zIndex: 10 }}>
+          <FavHeart slug={design.slug} name={name} lang={lang} size={40} />
+        </div>
 
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0, alignItems: "start" }}>
           {/* Image — shared in-place view carousel (panel = the modal's dark
@@ -10699,12 +10845,15 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
               <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase" }}>
                 {`BLOOM ${LANGS[lang].bloom.collection}`}
               </div>
-              <button type="button" onClick={handleShare} aria-label={tt.share} title={tt.share}
-                style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: `transparent`, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 20, padding: `6px 14px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 600, cursor: `pointer` }}
-                onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
-                onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
-                <span aria-hidden="true">↗</span><span>{tt.share}</span>
-              </button>
+              <div style={{ display: `flex`, alignItems: `center`, gap: 8 }}>
+                <FavHeart slug={design.slug} name={name} lang={lang} size={36} />
+                <button type="button" onClick={handleShare} aria-label={tt.share} title={tt.share}
+                  style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: `transparent`, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 20, padding: `6px 14px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 600, cursor: `pointer` }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
+                  <span aria-hidden="true">↗</span><span>{tt.share}</span>
+                </button>
+              </div>
             </div>
 
             <h1 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 900, fontSize: isMobile ? "2.6rem" : "3.6rem", color: COLORS.white, margin: "0 0 4px 0", lineHeight: 1, letterSpacing: "-0.02em" }}>{name}</h1>
