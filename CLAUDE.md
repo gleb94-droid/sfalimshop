@@ -17,6 +17,65 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ---
 
+## 📌 STATE AS OF 2026-05-31 (source of truth — read this first)
+
+> This block supersedes older snapshots below where they conflict. It records the
+> live production state, all security/workflow/SEO work shipped, edge-function
+> versions, and the remaining launch-arming steps.
+
+### 🚀 Production / deploy
+- **`main` HEAD = `e3a31b4`** (merge of `launch-prep`), **live on Vercel behind the maintenance gate.** Rollback candidate = **`174f312`** (prior production merge).
+- `MAINTENANCE_MODE = true` (`App.jsx:1314`), `PAYMENTS_ENABLED = false` (`App.jsx:1342`), **`index.html` noindex ON** (lines 49–51), **staff password gate** reads `VITE_STAFF_PASSWORD` (set in Vercel **Production + Preview**; build-time var → redeploy to change; unset = gate stays closed). Public sees the maintenance page + waitlist signup.
+
+### 🔒 Security — all LIVE on prod (repo mirrors them)
+1. **DB trigger `trg_protect_order_payment_fields` / fn `protect_order_payment_fields()`** (migrations `20260531120000_*` then `20260531130000_*`, the latter's body wins). Non-privileged (customer) callers **cannot** change `payment_status`, `amount_paid`, `paid_at`, `total`, `tranzila_transaction_id`, `payment_method`, `currency`, `failed_reason`; **cannot self-approve designs** (only `rejected→pending` allowed); on INSERT cannot pre-mark paid or approved. `service_role` / `postgres` / `supabase_admin` / `supabase_auth_admin` + `is_admin()` are exempt.
+2. **`create-payment` v4:** charge amount is **always recomputed server-side** from `SUM(orders.total)`; the client amount is ignored (audit-logged with a mismatch flag). **Blocks payment until the design is approved** (`403 design_not_approved`). `SITE_URL` fallback = `https://www.sfalimshop.com`.
+3. **`tranzila-webhook` v2:** **Layer-2 amount verification** — Tranzila's reported `sum` must equal the `order_group` total (±0.01), else the order is held as `payment_status='processing'`, a `payment_amount_mismatch` event is logged, the webhook returns `409`, and **no confirmation email is sent**. **Layer-1 signature verification (`TRANZILA_WEBHOOK_SECRET`) = TODO at the Tranzila sandbox.**
+
+### 🎨 Custom-design approval workflow (LIVE)
+- `orders` columns: `requires_design_approval` (bool), `design_approval_status` (`not_required`|`pending`|`approved`|`rejected`), `design_review_note`, `design_reviewed_at`.
+- **Applies ONLY to custom image-upload orders.** BLOOM gallery items + pet-name personalization **pay immediately** (unchanged).
+- **UI (`App.jsx`):** checkout for a custom upload creates the order(s) as `pending` with **no payment** → trilingual "submitted for approval" screen. `#track` shows: **pending** (review badge, no pay), **approved** (prominent **Pay now ₪X**), **rejected** (review note + **Edit & resubmit** [optional re-upload → `rejected→pending`] + **Cancel order**). Admin has a **"Pending design approval" queue** with **Approve** / **Request changes** (note prompt → `rejected` + note + `design_reviewed_at`).
+- **Email:** `notify-design-decision` v1 (`verify_jwt=false`), trilingual approved/rejected, secret-gated (`x-webhook-secret`), **DISABLED by default** (`DESIGN_NOTIFY_ENABLED`). Dry-run verified (200 `dryRun` + 401 on wrong secret).
+
+### 📝 Content
+- **Blog: 4 trilingual PUBLISHED posts** (content lives in the DB `blog_posts`, NOT the repo): `top-10-dog-breeds-israel-2026`, `israeli-cat-types-guide`, `gifts-for-pet-lovers-guide`, `custom-pet-photo-gift-guide`. Covers = BLOOM mockups. **Meets the ~3–5-post unlock threshold** (blog stays gated behind maintenance until launch).
+- **`testimonials` table exists but is EMPTY** → the `Reviews` section stays **hidden** until real post-launch reviews are added.
+
+### 🔎 SEO
+- Full per-page SEO (title / description / OG / Twitter card / **Product** (breed) & **Article** (blog) JSON-LD / canonical / hreflang he-en-ru-x-default) set dynamically on route change via the existing `setMeta` / `injectJsonLd` mechanism, for **breed pages + blog posts**. Generic site SEO is restored on all other routes.
+- **`generate-sitemap`** edge function covers **all 70 breed pages + published blog posts + core routes**. `noindex` stays until launch.
+- **`https://www.sfalimshop.com` unified everywhere** (canonical/hreflang/OG/sitemap/links; bare-host grep = 0).
+- **Known limitation:** hash-router SPA → non-JS crawlers don't see client-set tags on first hit. `/p/<handle>` via `api/og.js` is the SSR share path for BLOOM characters; full crawler SEO for breed/blog pages would need prerender/SSR (future, moot while `noindex` is on).
+
+### ⚙️ Edge function versions LIVE on prod
+| Function | Version / state |
+|---|---|
+| `create-payment` | **v4** — server-side amount + design-approval gate |
+| `tranzila-webhook` | **v2** — Layer-2 amount verify (Layer-1 signature TODO) |
+| `notify-design-decision` | **v1** — DISABLED by default (dry-run) |
+| `generate-sitemap` | extended with all 70 breeds + posts |
+| `waitlist-welcome` | ENABLED (welcome email on signup) |
+| `waitlist-launch-announce` | DISABLED (triple-gated launch blast) |
+| `send-order-confirmation` / `send-status-update` / `send-admin-order-alert` | live (transactional) |
+
+### 🔔 LAUNCH-ARMING CHECKLIST (waiting on Tranzila — supplier docs submitted 2026-05-31)
+1. Set `TRANZILA_SUPPLIER` + `SITE_URL` (`=https://www.sfalimshop.com`) in Supabase secrets (also `TRANZILA_TK`).
+2. **Sandbox:** run a full end-to-end test payment; **implement Layer-1 webhook signature verification** using Tranzila's real mechanism.
+3. Create the **DB webhook on `orders` UPDATE → `notify-design-decision`** with header `x-webhook-secret`; set a real `DESIGN_NOTIFY_WEBHOOK_SECRET` (rotate the in-code fallback); set `DESIGN_NOTIFY_ENABLED="true"`.
+4. Flip **`MAINTENANCE_MODE=false` + `PAYMENTS_ENABLED=true`**; **remove the `index.html` noindex** (revert robots/googlebot/bingbot to `index, follow`).
+5. **Arm + send `waitlist-launch-announce`** (triple-gate: secret + `ENABLED="true"` + `{"confirm":"SEND"}`; dry-run first).
+6. Add **real testimonials** as they arrive (un-hides the Reviews section).
+
+### 🧹 Open / low priority
+- Move `WAITLIST_WEBHOOK_SECRET` + `DESIGN_NOTIFY_WEBHOOK_SECRET` to real Edge Function secrets + rotate (currently in-code fallbacks).
+- Prerender/SSR for breed-page crawler SEO (future; moot under `noindex`).
+
+### 🌿 Branch state
+- **`main` = production (`e3a31b4`).** `launch-prep` is ahead by `2d3b7ab` (the `tranzila-webhook` v2 repo mirror) plus this docs commit; both are docs/repo-mirror only (no code diff vs prod behaviour). `launch-prep` will be reconciled into `main` at the next deploy/launch.
+
+---
+
 ## 🛠️ Tech stack
 
 - **React 18 + Vite 4.5** (esbuild 0.18 — **template literals only, no `+` string concat**)
@@ -45,7 +104,7 @@ sfalimshop/
 │   ├── waitlist-welcome/          # LIVE — welcome email on new waitlist signup
 │   ├── waitlist-launch-announce/  # launch-day "we're live" blast — triple-gated, DISABLED by default
 │   ├── create-payment/            # Tranzila + server-side amount + design-approval gate (gated off)
-│   ├── tranzila-webhook/          # Tranzila (mostly written, gated off)
+│   ├── tranzila-webhook/          # Tranzila webhook (v2) — Layer-2 amount verify LIVE; Layer-1 signature TODO
 │   └── notify-design-decision/    # custom-design approve/changes email — DISABLED by default (dry-run)
 ├── vercel.json                    # Routes + CSP + security headers
 ├── PAYMENTS-LAUNCH-CHECKLIST.md   # Tranzila go-live checklist (both payment-integrity holes now FIXED)
@@ -178,6 +237,11 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 
 ## ✅ Current status (snapshot 2026-05-30)
 
+> ⚠️ **Historical snapshot — see "STATE AS OF 2026-05-31" near the top for the
+> current source of truth.** Kept for history; where it conflicts (e.g. it cites
+> the old prod merge `174f312` / rollback `4927eb4`, or "the only launch gate is
+> the supplier number"), the 2026-05-31 block wins.
+
 ### 🚀 SESSION END 2026-05-30 — ALL THIS SESSION'S WORK IS LIVE ON PRODUCTION
 
 - ✅ **Merged `launch-prep` → `main` (merge commit `174f312`, `--no-ff`, history preserved) and deployed to production via Vercel.** Production deployment is **READY** (`dpl_4oryTToeXGG5pP7LTmsYBmLugH4u`, target=production, SHA `174f312…`). Domain `sfalimshop.com`.
@@ -254,15 +318,16 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 - Code is **mostly written**, gated off behind `PAYMENTS_ENABLED=false`. Full go-live steps are in **`PAYMENTS-LAUNCH-CHECKLIST.md`**.
 - ✅ **Payment-integrity holes FIXED 2026-05-31 (live on prod Supabase, mirrored into repo):** (a) browser can no longer write payment fields on `orders` — a `BEFORE INSERT/UPDATE` trigger (`trg_protect_order_payment_fields` → `public.protect_order_payment_fields()`) pins payment columns to server/admin-only; migration `20260531120000_harden_orders_payment_fields.sql`. (b) `create-payment` recomputes the charge server-side from `SUM(orders.total)` and ignores the client-supplied amount.
 - ✅ **Custom-design approval workflow LIVE 2026-05-31 (prod Supabase, mirrored into repo):** customer-uploaded custom designs must be shop-approved before payment. UI in `App.jsx` (checkout → `#track` → admin queue). Server: the 4 `orders` design-approval columns + the SAME `trg_protect_order_payment_fields` trigger (now also enforces `rejected→pending`-only for customers; only shop approves/rejects) — migration `20260531130000_add_design_approval_workflow.sql` (its trigger body supersedes the payment-only `…120000…` one). `create-payment` (v3) refuses payment with `403 design_not_approved` until approved. Email: `notify-design-decision/` (built, **DISABLED by default** / dry-run; arm via the `orders` UPDATE DB webhook + `DESIGN_NOTIFY_ENABLED="true"` — see `PAYMENTS-LAUNCH-CHECKLIST.md`).
+- ✅ **Webhook Layer-2 amount verification LIVE (prod, `tranzila-webhook` v2; repo mirrors it):** on a Tranzila success notice the reported `sum` must equal `SUM(orders.total)` for the `order_group` (±0.01); on mismatch the order is held as `payment_status='processing'` (NOT marked paid), logged as `payment_amount_mismatch`, and no confirmation email is sent. ⏳ **Layer-1 signature verification is still TODO** at the Tranzila sandbox (`TRANZILA_WEBHOOK_SECRET`; tracked with H2 below).
 - Files in `supabase/functions/`:
   - `create-payment/` (server-side amount + design-approval gate, gated off)
-  - `tranzila-webhook/` (mostly written, gated off)
+  - `tranzila-webhook/` (v2 — Layer-2 amount verify live; Layer-1 signature TODO)
   - `notify-design-decision/` (custom-design approve/changes email — DISABLED by default)
 - Env vars needed in Vercel:
   - `TRANZILA_SUPPLIER` (pending from Tranzila — the single launch gate)
   - `TRANZILA_TK` (transaction key)
   - `SUPABASE_SERVICE_ROLE_KEY` (Supabase admin key)
-- Open security tasks: ✅ ~~C1, C2 (payment integrity)~~ **FIXED 2026-05-31** (orders payment-field trigger + server-side amount); still open: H2 (webhook HMAC), H3 (rate limit / WAF rules)
+- Open security tasks: ✅ ~~C1, C2 (payment integrity)~~ **FIXED 2026-05-31** (orders payment-field trigger + server-side amount + webhook Layer-2 amount verify); still open: H2 (webhook signature/HMAC = Layer-1, TODO at sandbox), H3 (rate limit / WAF rules)
 
 ---
 

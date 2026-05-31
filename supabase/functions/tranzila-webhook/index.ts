@@ -1,183 +1,264 @@
-// supabase/functions/tranzila-webhook/index.ts
+// ============================================================
+// Sfalim Shop — Tranzila Payment Webhook
 //
-// Deno Edge Function — receives Tranzila's server-to-server payment notification.
-// This is the ONLY place that updates orders.payment_status to "paid" or "failed".
-// Client-side redirects (success_url / fail_url) are for UX only, never trusted.
+// Receives payment notifications from Tranzila after a customer
+// completes payment on the Tranzila Hosted Page.
 //
-// Tranzila posts to this URL (set as notify_url in create-payment):
-//   https://<project-ref>.supabase.co/functions/v1/tranzila-webhook
+// Endpoint: POST /functions/v1/tranzila-webhook
+// Auth: Public (Tranzila has no JWT) — DO NOT enable "Verify JWT"
 //
-// TODO: verify against Tranzila docs — confirm:
-//   1. The HTTP method Tranzila uses for the notification (POST assumed)
-//   2. The Content-Type (application/x-www-form-urlencoded assumed)
-//   3. The exact field names in the notification payload
-//   4. The authentication/verification mechanism (see step 2 below)
-//   5. The success Response code (000 assumed — verify against Tranzila docs)
-//   6. Whether Tranzila retries on non-200 responses and the retry schedule
+// INTEGRITY LAYERS:
+//   Layer 2 (ACTIVE): the paid amount reported by Tranzila must match the
+//     sum of the order_group's totals in the DB. On mismatch we do NOT mark
+//     the order paid — we hold it as 'processing' for manual review and send
+//     no confirmation. (Prevents "paid 1 instead of 100" / tampered notices.)
+//   Layer 1 (TODO at sandbox): verify Tranzila's signature/secret once the
+//     supplier account details are known (see TODO below).
+// ============================================================
 
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// ─── CORS ────────────────────────────────────────────────────────────────────
-// Tranzila's server-to-server POST does not send CORS headers / preflight.
-// We still handle OPTIONS for browser testing during development.
-function corsHeaders(): Record<string, string> {
-  return {
-    "Access-Control-Allow-Origin": `*`,
-    "Access-Control-Allow-Headers": `content-type`,
-    "Access-Control-Allow-Methods": `POST, OPTIONS`,
-  };
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+function jsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "content-type": "application/json" },
+  });
 }
 
-// ─── Main handler ────────────────────────────────────────────────────────────
-Deno.serve(async (req: Request) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders() });
+    return new Response(null, { headers: corsHeaders });
   }
-
   if (req.method !== "POST") {
-    return new Response(`Method not allowed`, { status: 405 });
+    return jsonResponse({ ok: false, error: "Method not allowed" }, 405);
   }
 
-  // ── 1. Build Supabase admin client (service-role, bypasses RLS) ───────────
-  const supabaseUrl = Deno.env.get(`SUPABASE_URL`) ?? ``;
-  const serviceRoleKey = Deno.env.get(`SUPABASE_SERVICE_ROLE_KEY`) ?? ``;
-  if (!supabaseUrl || !serviceRoleKey) {
-    console.error(`[tranzila-webhook] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY`);
-    // Return 500 so Tranzila retries — do not return 200 on misconfiguration
-    return new Response(`Server misconfiguration`, { status: 500 });
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return jsonResponse({ ok: false, error: "Server misconfigured" }, 500);
   }
-  const supabase = createClient(supabaseUrl, serviceRoleKey);
-
-  // ── 2. Parse the notification body ───────────────────────────────────────
-  // TODO: verify against Tranzila docs — Tranzila may send form-encoded or JSON.
-  // Assumption: application/x-www-form-urlencoded (standard for Israeli PSPs).
-  let params: URLSearchParams;
-  try {
-    const raw = await req.text();
-    params = new URLSearchParams(raw);
-  } catch (parseErr) {
-    console.error(`[tranzila-webhook] Failed to parse body:`, parseErr);
-    return new Response(`Bad request`, { status: 400 });
-  }
-
-  // Log the raw payload immediately (before any processing) so we have a record
-  // even if subsequent DB operations fail.
-  const rawPayload: Record<string, string> = {};
-  params.forEach((value, key) => { rawPayload[key] = value; });
-
-  console.log(`[tranzila-webhook] received:`, JSON.stringify(rawPayload));
-
-  // ── 3. Verify authenticity ───────────────────────────────────────────────
-  // TODO: verify against Tranzila docs — Tranzila does not use HMAC signatures
-  // in all integration types. Verification options (confirm which applies):
-  //   a) Check that TranzilaTK in the payload matches our stored secret.
-  //   b) Validate the notification against Tranzila's verification API endpoint.
-  //   c) IP allowlist (Tranzila publishes their notification server IP ranges).
-  // For now, check TranzilaTK as a minimum.
-
-  // TODO: swap to production at go-live ↓↓↓
-  // TRANZILA_TK: sandbox terminal password now, real password at go-live.
-  const expectedTK = Deno.env.get(`TRANZILA_TK`) ?? ``;
-  const receivedTK = params.get(`TranzilaTK`) ?? ``;
-
-  if (expectedTK && receivedTK !== expectedTK) {
-    console.warn(`[tranzila-webhook] TK mismatch — possible spoofed notification`);
-    // Return 200 to avoid Tranzila flagging our endpoint as broken,
-    // but do not process the payment.
-    // TODO: verify against Tranzila docs — whether returning 403 causes retry loops
-    return new Response(`OK`, { status: 200 });
-  }
-
-  // ── 4. Extract key fields ─────────────────────────────────────────────────
-  // TODO: verify against Tranzila docs — exact field names may differ
-  const responseCode = params.get(`Response`) ?? ``; // TODO: confirm field name
-  const confirmationCode = params.get(`ConfirmationCode`) ?? ``; // TODO: confirm field name
-  const rawSum = params.get(`sum`) ?? `0`; // TODO: confirm field name
-  const orderGroup = params.get(`order`) ?? ``; // the value we passed as `order=` in create-payment
-  const currency = params.get(`currency`) ?? `ILS`; // TODO: confirm field name and value format
-
-  // TODO: verify against Tranzila docs — confirm exact success code(s)
-  // Common Tranzila success code is "000" but verify this.
-  const TRANZILA_SUCCESS_CODE = `000`; // TODO: confirm against Tranzila docs
-
-  const isPaid = responseCode === TRANZILA_SUCCESS_CODE;
-  const amount = parseFloat(rawSum) || 0;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   const ipAddress =
-    req.headers.get(`x-forwarded-for`) ??
-    req.headers.get(`cf-connecting-ip`) ??
-    null;
-  const userAgent = req.headers.get(`user-agent`) ?? null;
+    req.headers.get("x-forwarded-for") ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  const userAgent = req.headers.get("user-agent") ?? "unknown";
 
-  // ── 5. Log the raw event FIRST, regardless of outcome ────────────────────
-  const { error: logError } = await supabase.from(`payment_events`).insert({
-    order_group: orderGroup || null,
-    event_type: isPaid ? `payment_paid` : `payment_failed`,
-    raw_payload: rawPayload,
-    amount,
-    currency,
+  let body: Record<string, string> = {};
+  try {
+    const contentType = req.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      body = await req.json();
+    } else {
+      const text = await req.text();
+      const params = new URLSearchParams(text);
+      body = Object.fromEntries(params.entries());
+    }
+  } catch (e) {
+    return jsonResponse({ ok: false, error: "Could not parse body" }, 400);
+  }
+
+  const orderGroupId =
+    body.myid ?? body.order_group ?? body.OrderID ?? body.client ?? "";
+  const transactionId =
+    body.Tempref ?? body.confirmation_code ?? body.transaction_id ?? "";
+  const responseCode = body.Response ?? body.response_code ?? "";
+  const amountStr = body.sum ?? body.amount ?? "0";
+  const amount = parseFloat(amountStr) || 0;
+
+  // Tranzila success codes: "000" = approved
+  const isSuccess = responseCode === "000" || responseCode === "0";
+
+  // Audit log of the raw webhook BEFORE doing anything else
+  await supabase.from("payment_events").insert({
+    order_group: orderGroupId || null,
+    event_type: "webhook_received",
+    raw_payload: body,
+    amount: amount || null,
     ip_address: ipAddress,
     user_agent: userAgent,
   });
 
-  if (logError) {
-    console.error(`[tranzila-webhook] Failed to log payment_event:`, logError);
-    // Non-fatal for the webhook response, but log it. Continue to update order.
+  // ============================================================
+  // TODO (Layer 1 — at Tranzila sandbox): verify the webhook signature here,
+  // using the secret/hash mechanism Tranzila provides for your supplier.
+  //   if (!verifyTranzilaSignature(body, Deno.env.get("TRANZILA_WEBHOOK_SECRET"))) {
+  //     return jsonResponse({ ok: false, error: "Invalid signature" }, 401);
+  //   }
+  // ============================================================
+
+  if (!orderGroupId) {
+    return jsonResponse({ ok: false, error: "Missing order_group" }, 400);
   }
 
-  // ── 6. Update orders ──────────────────────────────────────────────────────
-  if (!orderGroup) {
-    console.warn(`[tranzila-webhook] No order_group in notification — cannot update orders`);
-    // Still return 200 so Tranzila does not retry indefinitely
-    return new Response(`OK`, { status: 200 });
+  const { data: orders, error: fetchError } = await supabase
+    .from("orders")
+    .select("id, customer_email, customer_name, payment_status, total, language, product")
+    .eq("order_group", orderGroupId);
+
+  if (fetchError) {
+    await supabase.from("payment_events").insert({
+      order_group: orderGroupId,
+      event_type: "webhook_db_error",
+      raw_payload: { error: fetchError.message, body },
+      ip_address: ipAddress,
+    });
+    return jsonResponse({ ok: false, error: "DB error" }, 500);
   }
 
-  if (isPaid) {
-    // Payment confirmed — update all rows in the order group atomically
-    const { error: updateError } = await supabase
-      .from(`orders`)
+  if (!orders || orders.length === 0) {
+    await supabase.from("payment_events").insert({
+      order_group: orderGroupId,
+      event_type: "webhook_unknown_order",
+      raw_payload: body,
+      ip_address: ipAddress,
+    });
+    return jsonResponse({ ok: false, error: "Order not found" }, 404);
+  }
+
+  const firstOrder = orders[0];
+
+  // Idempotency: if already succeeded, don't process again
+  if (firstOrder.payment_status === "succeeded") {
+    await supabase.from("payment_events").insert({
+      order_id: firstOrder.id,
+      order_group: orderGroupId,
+      event_type: "webhook_duplicate_ignored",
+      raw_payload: body,
+    });
+    return jsonResponse({ ok: true, message: "Already processed" });
+  }
+
+  // ---- Layer 2 integrity: the paid amount must match the order total ----
+  const expectedTotal = orders.reduce(
+    (sum, o) => sum + (parseFloat(String(o.total)) || 0),
+    0,
+  );
+  const amountMismatch =
+    isSuccess && (!(expectedTotal > 0) || Math.abs(amount - expectedTotal) > 0.01);
+
+  if (amountMismatch) {
+    // Do NOT mark paid. Hold for manual review; send no confirmation.
+    await supabase
+      .from("orders")
       .update({
-        payment_status: `paid`,
-        paid_at: new Date().toISOString(),
-        amount_paid: amount,
-        tranzila_transaction_id: confirmationCode,
-        // Advance the fulfilment status so the admin dashboard shows the order
-        status: `received`,
+        payment_status: "processing",
+        payment_method: "tranzila",
+        tranzila_transaction_id: transactionId || null,
+        failed_reason: `Amount mismatch: expected ${expectedTotal.toFixed(2)}, received ${amount.toFixed(2)} — held for manual review.`,
       })
-      .eq(`order_group`, orderGroup)
-      .in(`payment_status`, [`idle`, `failed`]); // idempotent: skip if already paid
+      .eq("order_group", orderGroupId);
 
-    if (updateError) {
-      console.error(`[tranzila-webhook] Failed to update orders to paid:`, updateError);
-      // Return 500 so Tranzila retries — we want this to succeed
-      return new Response(`DB error`, { status: 500 });
-    }
+    await supabase.from("payment_events").insert({
+      order_id: firstOrder.id,
+      order_group: orderGroupId,
+      event_type: "payment_amount_mismatch",
+      raw_payload: {
+        expected_total: expectedTotal,
+        received_amount: amount,
+        response_code: responseCode,
+        body,
+      },
+      amount: amount || null,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+    });
 
-    console.log(`[tranzila-webhook] order_group=${orderGroup} marked as paid, confirmationCode=${confirmationCode}`);
+    return jsonResponse(
+      { ok: false, error: "amount_mismatch", expected: expectedTotal, received: amount },
+      409,
+    );
+  }
+  // ---- end Layer 2 ----
+
+  const nowIso = new Date().toISOString();
+  const newOrderStatus = isSuccess ? "paid" : "received";
+  const newPaymentStatus = isSuccess ? "succeeded" : "failed";
+
+  const updates: Record<string, unknown> = {
+    status: newOrderStatus,
+    payment_status: newPaymentStatus,
+    payment_method: "tranzila",
+    tranzila_transaction_id: transactionId || null,
+  };
+
+  if (isSuccess) {
+    updates.paid_at = nowIso;
+    updates.amount_paid = amount || null;
+    updates.failed_reason = null;
   } else {
-    // Payment failed or declined
-    const failedReason = `Tranzila Response code: ${responseCode}`;
-    // TODO: verify against Tranzila docs — map numeric response codes to
-    // human-readable Hebrew/English messages for customer-facing display
-
-    const { error: updateError } = await supabase
-      .from(`orders`)
-      .update({
-        payment_status: `failed`,
-        failed_reason: failedReason,
-      })
-      .eq(`order_group`, orderGroup)
-      .in(`payment_status`, [`idle`]); // do not overwrite "paid" with "failed"
-
-    if (updateError) {
-      console.error(`[tranzila-webhook] Failed to update orders to failed:`, updateError);
-      return new Response(`DB error`, { status: 500 });
-    }
-
-    console.log(`[tranzila-webhook] order_group=${orderGroup} marked as failed, responseCode=${responseCode}`);
+    updates.failed_reason = body.error_message ?? `Tranzila code ${responseCode}`;
   }
 
-  // ── 7. Respond 200 OK to Tranzila ────────────────────────────────────────
-  // Tranzila requires a 200 response to stop retrying.
-  return new Response(`OK`, { status: 200 });
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update(updates)
+    .eq("order_group", orderGroupId);
+
+  if (updateError) {
+    await supabase.from("payment_events").insert({
+      order_id: firstOrder.id,
+      order_group: orderGroupId,
+      event_type: "webhook_update_failed",
+      raw_payload: { error: updateError.message, body },
+      ip_address: ipAddress,
+    });
+    return jsonResponse({ ok: false, error: "Update failed" }, 500);
+  }
+
+  await supabase.from("payment_events").insert({
+    order_id: firstOrder.id,
+    order_group: orderGroupId,
+    event_type: isSuccess ? "payment_succeeded" : "payment_failed",
+    raw_payload: body,
+    amount: amount || null,
+    ip_address: ipAddress,
+    user_agent: userAgent,
+  });
+
+  if (isSuccess) {
+    try {
+      const totalAmount = orders.reduce(
+        (sum, o) => sum + (parseFloat(String(o.total)) || 0),
+        0,
+      );
+      const productList = orders.map((o) => o.product).join(", ");
+      await supabase.functions.invoke("send-order-confirmation", {
+        body: {
+          customerName: firstOrder.customer_name,
+          customerEmail: firstOrder.customer_email,
+          product: productList,
+          variant: `${orders.length} items`,
+          quantity: orders.length,
+          total: totalAmount,
+          orderId: firstOrder.id,
+          language: firstOrder.language || "he",
+        },
+      });
+    } catch (emailErr) {
+      console.error("Failed to send confirmation email:", emailErr);
+      await supabase.from("payment_events").insert({
+        order_id: firstOrder.id,
+        order_group: orderGroupId,
+        event_type: "email_send_failed",
+        raw_payload: { error: String(emailErr) },
+      });
+    }
+  }
+
+  return jsonResponse({
+    ok: true,
+    status: newOrderStatus,
+    payment_status: newPaymentStatus,
+    orders_updated: orders.length,
+  });
 });

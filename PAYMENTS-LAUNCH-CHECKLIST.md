@@ -1,11 +1,19 @@
 # 💳 Payments launch checklist (BLOCKED — do not enable without approval)
 
 Status: **BLOCKED.** `PAYMENTS_ENABLED = false`, `MAINTENANCE_MODE = true`.
-Waiting on: Tranzila **supplier number**. Do not touch payment code or flip flags
-until Gleb provides it and approves.
+Waiting on: **Tranzila supplier** (supplier docs **submitted 2026-05-31**, awaiting
+the supplier number). Do not flip flags until Gleb confirms.
 
-This file documents what's already built and the gaps that **must** be closed
-before real money flows. Compiled from a read-only audit on 2026-05-30.
+> **STATE AS OF 2026-05-31:** Both payment-integrity holes are **FIXED & live on
+> prod** (orders payment-field trigger + `create-payment` v4 server-side amount).
+> The **custom-design approval workflow** is **live** (`create-payment` v4 gate +
+> trigger + `notify-design-decision` v1 disabled). **`tranzila-webhook` v2** adds
+> **Layer-2 amount verification** (live); **Layer-1 signature verification is the
+> main remaining payment-security TODO** (sandbox). Production is `main` HEAD
+> `e3a31b4` behind the maintenance gate. See "🔔 Launch-arming" below and the
+> "STATE AS OF 2026-05-31" block in `CLAUDE.md`.
+
+Originally compiled from a read-only audit on 2026-05-30; kept current since.
 
 ---
 
@@ -133,6 +141,32 @@ When you want approval/changes emails to actually send:
 
 ---
 
+## 🛡️ Webhook payment integrity (`tranzila-webhook`)
+
+The `tranzila-webhook` function (live on prod, **v2**; repo mirrors it — no
+redeploy) is the ONLY place that flips `orders.payment_status` to paid/failed.
+Two integrity layers:
+
+- ✅ **Layer 2 — amount verification (DONE / LIVE):** on a success notice the
+  amount Tranzila reports (`sum`) must equal the sum of the `order_group`'s
+  `orders.total` in the DB (±0.01). On mismatch the order is **NOT** marked paid
+  — it's held as `payment_status='processing'` with a `failed_reason`, a
+  `payment_amount_mismatch` event is logged, the webhook returns `409`, and
+  **no confirmation email is sent**. Prevents "paid ₪1 on a ₪100 order" /
+  tampered notices. Complements `create-payment`'s server-side amount recompute.
+- ⏳ **Layer 1 — signature verification (TODO at Tranzila sandbox):** verify the
+  notice is genuinely from Tranzila using the secret/hash mechanism for the
+  supplier account. There's a marked `// TODO (Layer 1 …)` stub in the function
+  (`TRANZILA_WEBHOOK_SECRET`). Wire it up during sandbox testing once the
+  supplier details are known — until then the webhook trusts any POST that
+  passes Layer 2. (Tracked alongside the H2 webhook-HMAC security task.)
+
+Idempotent: an already-`succeeded` order short-circuits (logged as
+`webhook_duplicate_ignored`). Every raw notice is audit-logged to
+`payment_events` before processing.
+
+---
+
 ## 🟡 FUNCTIONAL GAPS — needed for a working payment flow
 
 1. **No `#pay-success` / `#pay-fail` landing handler.**
@@ -151,14 +185,19 @@ When you want approval/changes emails to actually send:
 
 ## ✅ ALREADY BUILT (good)
 
-- `supabase/functions/create-payment/` — builds the Tranzila hosted-page URL,
-  validates the order, blocks already-paid/cancelled, logs a `payment_events`
-  row. Gated: returns 503 "payments_disabled" if `TRANZILA_SUPPLIER` is unset,
-  and the client falls back to a "coming soon" modal.
-- `supabase/functions/tranzila-webhook/` — verifies `TranzilaTK`, parses the
-  callback, writes `payment_events`, and on success flips `orders` to
-  `payment_status='paid'` / `status='received'` with `paid_at`, `amount_paid`,
-  `tranzila_transaction_id`.
+- `supabase/functions/create-payment/` (v4) — builds the Tranzila hosted-page
+  URL, **recomputes the charge server-side from `SUM(orders.total)`** (ignores
+  the client amount), **blocks payment until the design is approved**
+  (`403 design_not_approved`), blocks already-paid, logs a `payment_events` row.
+  Gated: returns 503 "payments_disabled" if `TRANZILA_SUPPLIER` is unset, and the
+  client falls back to a "coming soon" modal. `SITE_URL` fallback =
+  `https://www.sfalimshop.com`.
+- `supabase/functions/tranzila-webhook/` (v2) — parses the callback, writes
+  `payment_events`, enforces **Layer 2 amount verification** (see the Webhook
+  payment integrity section above), and on a verified success flips `orders` to
+  `payment_status='succeeded'` / `status='paid'` with `paid_at`, `amount_paid`,
+  `tranzila_transaction_id`. **Layer 1 signature verification is still TODO**
+  (sandbox).
 - CSP in `vercel.json` already allows `frame-src` + `form-action` for
   `https://*.tranzila.com`.
 - `orders` / `payment_events` schema is ready (all payment columns exist).
@@ -175,6 +214,8 @@ When you want approval/changes emails to actually send:
 4. Deploy both Edge Functions.
 5. Sandbox end-to-end test → confirm the webhook actually flips `payment_status`.
 6. Verify all Tranzila field-name TODOs against the live docs.
+6b. **Implement Layer-1 webhook signature verification** (`TRANZILA_WEBHOOK_SECRET`)
+   using Tranzila's real mechanism — the main remaining payment-security TODO.
 7. Flip `PAYMENTS_ENABLED = true`.
 8. Flip `MAINTENANCE_MODE = false` **and** switch `index.html` robots tags to `index, follow`.
 9. Swap sandbox → production `TRANZILA_SUPPLIER` / `TRANZILA_TK`.
