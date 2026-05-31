@@ -200,7 +200,7 @@ serve(async (req) => {
     .update({ payment_status: "pending", payment_method: "tranzila" })
     .eq("order_group", orderGroup);
 
-  const siteUrl = (Deno.env.get("SITE_URL") ?? "https://sfalim.shop").replace(/\/+$/, "");
+  const siteUrl = (Deno.env.get("SITE_URL") ?? "https://www.sfalimshop.com").replace(/\/+$/, "");
   const successUrl = `${siteUrl}/#track?order_group=${encodeURIComponent(orderGroup)}&paid=1`;
   const failUrl = `${siteUrl}/#order?paid=0`;
   const notifyUrl = `${supabaseUrl}/functions/v1/tranzila-webhook`;

@@ -10824,7 +10824,7 @@ function Footer({ lang, setPage }) {
 // ============================================================================
 
 const BLOG_CATEGORY_IDS = ['breeds', 'gifts', 'culture', 'stories'];
-const BLOG_LOGO_URL = `https://sfalimshop.com/logo.jpg`; // existing asset (Nav uses /logo.jpg)
+const BLOG_LOGO_URL = `https://www.sfalimshop.com/logo.jpg`; // existing asset (Nav uses /logo.jpg)
 
 function blogCategoryLabel(lang, cat) {
   const t = LANGS[lang] || LANGS.he;
@@ -10867,7 +10867,7 @@ function parseBreedSlugFromHash() {
   return parts[1] ? decodeURIComponent(parts[1]) : null;
 }
 
-function blogShareUrl(slug) { return `https://sfalimshop.com/#/blog/${slug}`; }
+function blogShareUrl(slug) { return `https://www.sfalimshop.com/#/blog/${slug}`; }
 
 // Create or update a <meta> tag in <head> (idempotent — never duplicates on
 // re-navigation). attr is 'name' (default) or 'property' for OG tags.
