@@ -131,6 +131,53 @@ function FavHeart({ slug, name, lang, size = 38 }) {
 }
 
 // ============================================================================
+// WHATSAPP — floating chat button (client-only). The owner sets the number in
+// ONE place below; while it's the placeholder the button is HIDDEN so a broken
+// link never ships. Portaled to <body> (like the a11y FAB) so the high-contrast
+// filter on #root can never become its containing block.
+// ============================================================================
+// ⬇️ OWNER: replace with the shop's WhatsApp number — international format, no
+//    "+" and no spaces, e.g. 972501234567. Leave as-is to keep the button hidden.
+const WHATSAPP_NUMBER = `WHATSAPP_PLACEHOLDER`;
+function WhatsAppFab({ lang }) {
+  // Only render once a real number is set (6–15 digits) — never a broken link.
+  if (!/^\d{6,15}$/.test(WHATSAPP_NUMBER || ``)) return null;
+  if (typeof document === `undefined`) return null;
+  const greeting = lang === `he` ? `היי! יש לי שאלה על BLOOM 🐾` : lang === `ru` ? `Здравствуйте! У меня вопрос о BLOOM 🐾` : `Hi! I have a question about BLOOM 🐾`;
+  const label = lang === `he` ? `שוחחו איתנו בוואטסאפ` : lang === `ru` ? `Напишите нам в WhatsApp` : `Chat with us on WhatsApp`;
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(greeting)}`;
+  return createPortal(
+    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label} className="wa-fab"
+      style={{ position: `fixed`, bottom: 24, insetInlineEnd: 24, zIndex: 940, width: 52, height: 52, borderRadius: `50%`, background: `#25D366`, display: `flex`, alignItems: `center`, justifyContent: `center`, boxShadow: `0 4px 20px rgba(37,211,102,0.5)`, textDecoration: `none` }}
+      onMouseOver={e => { e.currentTarget.style.transform = `scale(1.1)`; e.currentTarget.style.boxShadow = `0 6px 30px rgba(37,211,102,0.7)`; }}
+      onMouseOut={e => { e.currentTarget.style.transform = `scale(1)`; e.currentTarget.style.boxShadow = `0 4px 20px rgba(37,211,102,0.5)`; }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.892c0 2.096.549 4.142 1.595 5.945L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.582 0 11.94-5.335 11.944-11.893a11.821 11.821 0 0 0-3.487-8.46z"/></svg>
+    </a>,
+    document.body
+  );
+}
+
+// Compact trust strip — "Ships anywhere in Israel" always; "Secure payment"
+// ONLY when payments are live (PAYMENTS_ENABLED), so it never claims secure
+// checkout while payments are off. Subtle, on-brand (faint orange tint).
+function TrustStrip({ lang }) {
+  const isRTL = lang === `he`;
+  const ships = lang === `he` ? `משלוח לכל הארץ` : lang === `ru` ? `Доставка по всему Израилю` : `Ships anywhere in Israel`;
+  const secure = lang === `he` ? `תשלום מאובטח` : lang === `ru` ? `Безопасная оплата` : `Secure payment`;
+  const item = (icon, text) => (
+    <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6, color: COLORS.gray, fontSize: 12, fontFamily: `'Varela Round',sans-serif` }}>
+      <span aria-hidden="true" style={{ fontSize: 14 }}>{icon}</span><span>{text}</span>
+    </span>
+  );
+  return (
+    <div style={{ display: `flex`, flexWrap: `wrap`, gap: `8px 18px`, justifyContent: `center`, alignItems: `center`, padding: `10px 14px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8, direction: isRTL ? `rtl` : `ltr` }}>
+      {item(`🚚`, ships)}
+      {PAYMENTS_ENABLED && item(`🔒`, secure)}
+    </div>
+  );
+}
+
+// ============================================================================
 // FloatingProductCard — כרטיס מוצר מרחף עם אפקט הטיה + זוהר הולוגרפי חם
 // ----------------------------------------------------------------------------
 // • קובץ אחד, ללא תלות חיצונית. ה-CSS מוטמע בתוך הרכיב (מוזרק פעם אחת ל-<head>).
@@ -7731,6 +7778,8 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{tr.total}</span>
               <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display',serif" }}>{`₪${total}`}</span>
             </div>
+            {/* Trust strip — supports the buying decision right by the checkout CTA */}
+            <div style={{ marginBottom: 15 }}><TrustStrip lang={lang} /></div>
             <button onClick={onCheckout} style={{
               width: "100%", background: COLORS.accent, color: "#fff", border: "none",
               borderRadius: 12, padding: isMobile ? "16px" : "15px", fontSize: 16, fontWeight: 700, cursor: "pointer",
@@ -8396,6 +8445,13 @@ export default function App() {
         @media (hover: none) { .magnetic-btn { transform: none !important; } }
         @media (prefers-reduced-motion: reduce) { .magnetic-btn { transform: none !important; transition: none !important; } }
 
+        /* ============ WhatsApp floating button ============ */
+        /* Subtle hover scale only (no continuous bounce); suppressed entirely
+           under reduced motion. The a11y "reduce motion" toggle also kills it. */
+        .wa-fab:focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 3px !important; }
+        @media (prefers-reduced-motion: no-preference) { .wa-fab { transition: transform 0.2s, box-shadow 0.2s; } }
+        @media (prefers-reduced-motion: reduce) { .wa-fab { transition: none !important; } }
+
         /* ============ SCROLL REVEAL — fade up on intersection ============ */
         .reveal {
           opacity: 0;
@@ -8510,6 +8566,7 @@ export default function App() {
         return (
           <>
             <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
+            <WhatsAppFab lang={lang} />
             <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
