@@ -3038,7 +3038,7 @@ function TrackPage({ lang, user }) {
 
       {/* Payments-coming-soon modal — reused while Tranzila is off (the
           create-payment 503 / PAYMENTS_ENABLED=false path lands here). */}
-      {paySoon && (
+      {paySoon && (typeof document !== `undefined` ? createPortal(
         <div onClick={(e) => { if (e.target === e.currentTarget) setPaySoon(false); }}
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)", direction: t.dir }}>
           <div ref={paySoonRef} role="dialog" aria-modal="true" aria-label={t.payment.soonTitle} onKeyDown={(e) => { if (e.key === "Escape") setPaySoon(false); }} style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
@@ -3052,7 +3052,7 @@ function TrackPage({ lang, user }) {
             <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
           </div>
         </div>
-      )}
+      , document.body) : null)}
     </div>
   );
 }
@@ -6037,7 +6037,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             </div>
 
             {/* Payment-coming-soon modal */}
-            {showPaymentSoonModal && (
+            {showPaymentSoonModal && (typeof document !== `undefined` ? createPortal(
               <div
                 onClick={(e) => { if (e.target === e.currentTarget) dismissPaymentSoonModal(); }}
                 style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)" }}
@@ -6067,7 +6067,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </button>
                 </div>
               </div>
-            )}
+            , document.body) : null)}
           </div>
         )}
 
@@ -7507,7 +7507,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
 
   if (!open) return null;
 
-  return (
+  const __drawer = (
     <>
       {/* Backdrop */}
       <div onClick={onClose} aria-hidden="true" style={{
@@ -7645,6 +7645,9 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
       </div>
     </>
   );
+  // Portal the drawer to <body> so a filtered #root (high-contrast) can't become
+  // its containing block and push the fixed drawer off-screen.
+  return typeof document !== `undefined` ? createPortal(__drawer, document.body) : __drawer;
 }
 
 export default function App() {
@@ -9779,7 +9782,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     return () => window.removeEventListener("keydown", handler);
   }, [onClose, zoomed]);
 
-  return (
+  const __overlay = (
     <div
       onClick={onClose}
       style={{
@@ -10032,6 +10035,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       `}</style>
     </div>
   );
+  // Portal the modal to <body> so a filtered #root (high-contrast) can't become
+  // its containing block and push the fixed overlay off-screen.
+  return typeof document !== `undefined` ? createPortal(__overlay, document.body) : __overlay;
 }
 
 // ============ Product option button inside modal ============
@@ -10189,7 +10195,7 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
         </div>
       </div>
 
-      {zoomed && (
+      {zoomed && (typeof document !== `undefined` ? createPortal(
         <div onClick={() => setZoomed(false)} role="dialog" aria-modal="true"
           ref={zoomDialogRef}
           onKeyDown={(e) => { if (e.key === `Escape`) setZoomed(false); }}
@@ -10201,7 +10207,7 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
             style={{ position: `absolute`, top: 20, insetInlineEnd: 20, width: 44, height: 44, background: `rgba(255,255,255,0.1)`, border: `1px solid rgba(255,255,255,0.25)`, borderRadius: `50%`, color: `#fff`, cursor: `pointer`, fontSize: 22, display: `flex`, alignItems: `center`, justifyContent: `center`, backdropFilter: `blur(10px)` }}>×</button>
           <style>{`@keyframes bloomZoomFadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
         </div>
-      )}
+      , document.body) : null)}
     </>
   );
 }
