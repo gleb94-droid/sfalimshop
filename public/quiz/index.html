@@ -67,9 +67,33 @@
   .toast.show{opacity:1;}
   .backlink{display:inline-block;margin-top:18px;color:var(--muted);font-size:13px;font-weight:600;text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:7px 16px;transition:all .15s;}
   .backlink:hover{border-color:var(--muted);color:var(--ink);background:rgba(255,255,255,.05);}
+  /* ===== Accessibility widget (self-contained, IS 5568) ===== */
+  /* All quiz content lives in #a11y-content so high-contrast (filter) + font
+     zoom apply ONLY here. The fixed a11y button/panel/toast sit OUTSIDE this
+     wrapper, so the filter never becomes their containing block — they stay
+     anchored to the viewport when high-contrast is toggled. */
+  #a11y-content{width:100%;max-width:560px;}
+  #a11y-content.hc{filter:contrast(1.4) brightness(1.1);}
+  .a11y-fab{position:fixed;bottom:24px;inset-inline-start:24px;z-index:9998;width:52px;height:52px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,107,53,.5);transition:transform .2s,box-shadow .2s;}
+  .a11y-fab:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(255,107,53,.7);}
+  .a11y-panel{position:fixed;bottom:88px;inset-inline-start:24px;z-index:9997;width:260px;max-width:calc(100vw - 48px);background:#1a1a1a;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.6);direction:rtl;}
+  .a11y-panel[hidden]{display:none;}
+  .a11y-panel h2{font-size:15px;font-weight:700;color:#fff;margin-bottom:16px;letter-spacing:.05em;}
+  .a11y-row{margin-bottom:14px;}
+  .a11y-row:last-of-type{margin-bottom:0;}
+  .a11y-label{color:#aaa;font-size:11px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em;text-align:start;}
+  .a11y-size{display:flex;gap:8px;align-items:center;}
+  .a11y-size button{width:36px;height:36px;border-radius:8px;background:#111;border:1px solid var(--line);color:#fff;font-size:18px;line-height:1;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+  .a11y-size .val{flex:1;text-align:center;color:var(--accent);font-weight:700;}
+  .a11y-toggle{width:100%;padding:10px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;text-align:start;background:#111;border:1px solid var(--line);color:#aaa;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .a11y-toggle[aria-pressed="true"]{background:rgba(255,107,53,.15);border-color:var(--accent);color:var(--accent);}
+  .a11y-reset{justify-content:center;background:transparent;color:#aaa;}
+  .a11y-link{display:block;margin-top:12px;color:#aaa;font-size:12px;text-decoration:underline;text-align:start;}
+  .a11y-link:hover{color:var(--ink);}
 </style>
 </head>
 <body>
+<div id="a11y-content">
 <div class="quiz">
   <section class="screen active" id="start">
     <div class="brand">BLOOM · ספלים שופ</div>
@@ -106,7 +130,32 @@
     <div style="text-align:center;"><a class="backlink" href="https://www.sfalimshop.com">← חזרה לחנות</a></div>
   </section>
 </div>
+</div><!-- /#a11y-content -->
 <div class="toast" id="toast"></div>
+<!-- ===== Accessibility widget (self-contained, vanilla — IS 5568) =====
+     Sits OUTSIDE #a11y-content so the high-contrast filter on that wrapper can
+     never become this button/panel's containing block (they stay viewport-fixed). -->
+<button class="a11y-fab" id="a11yFab" type="button" aria-label="תפריט נגישות" aria-haspopup="dialog" aria-expanded="false" aria-controls="a11yPanel">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path d="M12 6v6"/><path d="M8 9h8"/><path d="M9 22l3-10 3 10"/></svg>
+</button>
+<div class="a11y-panel" id="a11yPanel" role="dialog" aria-modal="true" aria-label="הגדרות נגישות" hidden>
+  <h2>נגישות</h2>
+  <div class="a11y-row">
+    <div class="a11y-label">גודל טקסט</div>
+    <div class="a11y-size">
+      <button type="button" id="a11ySizeDown" aria-label="הקטן טקסט">−</button>
+      <span class="val" id="a11ySizeVal">100%</span>
+      <button type="button" id="a11ySizeUp" aria-label="הגדל טקסט">+</button>
+    </div>
+  </div>
+  <div class="a11y-row">
+    <button type="button" class="a11y-toggle" id="a11yHc" aria-pressed="false"><span>ניגודיות גבוהה</span><span id="a11yHcMark" aria-hidden="true">○</span></button>
+  </div>
+  <div class="a11y-row">
+    <button type="button" class="a11y-toggle a11y-reset" id="a11yReset">איפוס</button>
+  </div>
+  <a class="a11y-link" href="https://www.sfalimshop.com/accessibility" target="_blank" rel="noopener">הצהרת נגישות מלאה ↗</a>
+</div>
 
 <script>
   // ===== CONFIG =====
@@ -307,6 +356,35 @@
   function fb(t){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(ta);toast();}
   function toast(){const el=$('toast');el.textContent='הקישור הועתק! שתף עם חברים 🐾';el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
   window.start=start;window.restart=restart;window.shareWA=shareWA;window.shareGen=shareGen;
+
+  // ===== Accessibility widget (self-contained, IS 5568) =====
+  (function(){
+    var content=$('a11y-content'), fab=$('a11yFab'), panel=$('a11yPanel');
+    var hcBtn=$('a11yHc'), hcMark=$('a11yHcMark'), sizeVal=$('a11ySizeVal');
+    if(!content||!fab||!panel) return;
+    var lastFocused=null, zoom=100, hc=false;
+    try{ var z=parseInt(localStorage.getItem('sfq_a11y_zoom'),10); if(z>=80&&z<=140)zoom=z; hc=localStorage.getItem('sfq_a11y_hc')==='1'; }catch(e){}
+    function applyZoom(){ content.style.zoom=(zoom/100); sizeVal.textContent=zoom+'%'; }
+    function applyHc(){ content.classList.toggle('hc',hc); hcBtn.setAttribute('aria-pressed',hc?'true':'false'); hcMark.textContent=hc?'✓':'○'; }
+    function save(){ try{ localStorage.setItem('sfq_a11y_zoom',String(zoom)); localStorage.setItem('sfq_a11y_hc',hc?'1':'0'); }catch(e){} }
+    applyZoom(); applyHc();
+    function focusables(){ return Array.prototype.slice.call(panel.querySelectorAll('a[href],button:not([disabled])')).filter(function(el){return el.offsetParent!==null;}); }
+    function onKey(e){
+      if(e.key==='Escape'){ e.stopPropagation(); close(); return; }
+      if(e.key!=='Tab') return;
+      var f=focusables(); if(!f.length){ e.preventDefault(); panel.focus(); return; }
+      var first=f[0], last=f[f.length-1];
+      if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+    }
+    function open(){ lastFocused=document.activeElement; panel.hidden=false; fab.setAttribute('aria-expanded','true'); var f=focusables(); (f[0]||panel).focus(); document.addEventListener('keydown',onKey,true); }
+    function close(){ panel.hidden=true; fab.setAttribute('aria-expanded','false'); document.removeEventListener('keydown',onKey,true); if(lastFocused&&lastFocused.focus){try{lastFocused.focus();}catch(e){}} }
+    fab.addEventListener('click',function(){ panel.hidden?open():close(); });
+    hcBtn.addEventListener('click',function(){ hc=!hc; applyHc(); save(); });
+    $('a11ySizeDown').addEventListener('click',function(){ zoom=Math.max(80,zoom-10); applyZoom(); save(); });
+    $('a11ySizeUp').addEventListener('click',function(){ zoom=Math.min(140,zoom+10); applyZoom(); save(); });
+    $('a11yReset').addEventListener('click',function(){ zoom=100; hc=false; applyZoom(); applyHc(); save(); });
+  })();
 </script>
 </body>
 </html>
