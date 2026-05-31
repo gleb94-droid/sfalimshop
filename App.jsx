@@ -2611,6 +2611,35 @@ function TrackPage({ lang, user }) {
   // A11y: focus-trap + restore for the "payments coming soon" modal.
   const paySoonRef = useDialogFocus(paySoon);
 
+  // Payment-return handler for create-payment's success redirect
+  // (#track?order_group=<id>&paid=1). UI-ONLY: the Tranzila webhook owns
+  // payment_status — we only READ it back and reflect succeeded/processing,
+  // never set it. Safe if visited directly (no order_group → friendly fallback).
+  const [payReturn] = useState(() => {
+    if (typeof window === `undefined`) return null;
+    const h = window.location.hash || ``;
+    const qi = h.indexOf(`?`);
+    if (qi === -1) return null;
+    const p = new URLSearchParams(h.slice(qi + 1));
+    if (p.get(`paid`) !== `1`) return null;
+    return { orderGroup: p.get(`order_group`) || null };
+  });
+  const [payReturnDismissed, setPayReturnDismissed] = useState(false);
+  const [payReturnStatus, setPayReturnStatus] = useState(`loading`); // loading | succeeded | processing | unknown
+  useEffect(() => {
+    if (!payReturn) return;
+    if (!payReturn.orderGroup) { setPayReturnStatus(`unknown`); return; }
+    let cancelled = false;
+    supabase.from(`orders`).select(`payment_status, status`).eq(`order_group`, payReturn.orderGroup)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data || data.length === 0) { setPayReturnStatus(`unknown`); return; }
+        const paid = data.some(o => o.payment_status === `succeeded` || o.payment_status === `paid` || o.status === `paid`);
+        setPayReturnStatus(paid ? `succeeded` : `processing`);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     // Match the customer's account orders AND any placed as a guest with the same email.
@@ -2742,6 +2771,46 @@ function TrackPage({ lang, user }) {
     }
     setActionBusy(null);
   };
+
+  // Payment-return screen takes priority over the normal track view (and the
+  // guest gate) so a customer coming back from Tranzila always sees confirmation.
+  if (payReturn && !payReturnDismissed) {
+    const ok = payReturnStatus === `succeeded`;
+    const proc = payReturnStatus === `processing` || payReturnStatus === `loading`;
+    const title = ok
+      ? (lang === `he` ? `התשלום התקבל — תודה!` : lang === `ru` ? `Оплата получена — спасибо!` : `Payment received — thank you!`)
+      : proc
+      ? (lang === `he` ? `מאמתים את התשלום…` : lang === `ru` ? `Подтверждаем оплату…` : `Confirming your payment…`)
+      : (lang === `he` ? `תודה! ההזמנה אצלנו` : lang === `ru` ? `Спасибо! Заказ получен` : `Thank you! Your order is in`);
+    const sub = ok
+      ? (lang === `he` ? `קיבלנו את התשלום וההזמנה נכנסה להפקה. נעדכן אותך במייל בכל שלב.` : lang === `ru` ? `Мы получили оплату, заказ передан в производство. Будем сообщать по email на каждом этапе.` : `We've received your payment and your order is in production. We'll email you at every step.`)
+      : proc
+      ? (lang === `he` ? `התשלום בעיבוד — נעדכן ברגע שהאישור יתקבל. אפשר לרענן בעוד רגע.` : lang === `ru` ? `Оплата обрабатывается — сообщим, как только подтвердится. Обновите через минуту.` : `Your payment is processing — we'll confirm shortly. Try refreshing in a moment.`)
+      : (lang === `he` ? `קיבלנו את הפנייה. אם בוצע תשלום, אישור יישלח במייל בהקדם.` : lang === `ru` ? `Мы вас зафиксировали. Если оплата прошла, подтверждение придёт на email.` : `We've got you. If a payment went through, a confirmation email will arrive shortly.`);
+    return (
+      <div style={{ minHeight: `100vh`, background: COLORS.bg, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 24, direction: t.dir, fontFamily: `'Varela Round',sans-serif` }}>
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${ok ? `#22c55e` : COLORS.accent}`, borderRadius: 16, padding: `40px 32px`, width: `100%`, maxWidth: 460, textAlign: `center` }}>
+          <div style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 80, height: 80, borderRadius: `50%`, background: ok ? `rgba(34,197,94,0.12)` : `rgba(255,107,53,0.12)`, border: `2px solid ${ok ? `#22c55e` : COLORS.accent}`, marginBottom: 20, fontSize: 40 }}>{ok ? `✓` : proc ? `⏳` : `📦`}</div>
+          <h2 style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontSize: 26, margin: `0 0 10px` }}>{title}</h2>
+          <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{sub}</p>
+          {payReturn.orderGroup && (
+            <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: `10px 16px`, marginBottom: 24 }}>
+              <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: `0.1em`, textTransform: `uppercase`, marginBottom: 3 }}>{lang === `he` ? `מספר הזמנה` : lang === `ru` ? `Номер заказа` : `Order number`}</div>
+              <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 15, letterSpacing: `0.05em` }}>{`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`}</div>
+            </div>
+          )}
+          <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#track`); } catch (_) {} setPayReturnDismissed(true); }}
+            style={{ width: `100%`, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, marginBottom: 10 }}>
+            {lang === `he` ? `למעקב ההזמנות שלי` : lang === `ru` ? `К моим заказам` : `View my orders`}
+          </button>
+          <button onClick={() => { window.location.hash = ``; }}
+            style={{ width: `100%`, background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px`, fontSize: 14, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+            {lang === `he` ? `חזרה לחנות` : lang === `ru` ? `Вернуться в магазин` : `Back to shop`}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir, fontFamily: "'Varela Round',sans-serif" }}>
@@ -2936,7 +3005,7 @@ function TrackPage({ lang, user }) {
                             </div>
                           </div>
                         )}
-                        <div style={{ marginTop: 20 }}>
+                        {!isCancelled && <div style={{ marginTop: 20 }}>
                           {ORDER_STAGES.map((s, i) => {
                             const done = i <= si;
                             const active = i === si;
@@ -2955,7 +3024,7 @@ function TrackPage({ lang, user }) {
                               </div>
                             );
                           })}
-                        </div>
+                        </div>}
                       </div>
                     )}
                   </div>
@@ -3033,8 +3102,11 @@ function AdminPage({ lang }) {
   // (USING is_admin()) already exists, so this reads under the admin session.
   const [waitlist, setWaitlist] = useState([]);
   const [waitlistLoading, setWaitlistLoading] = useState(true);
+  // Surface a banner if any admin fetch fails (instead of a silent blank/empty).
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
+    setFetchError(false);
     fetchOrders();
     fetchPetDesigns();
     fetchStickerPacks();
@@ -3044,27 +3116,48 @@ function AdminPage({ lang }) {
   }, []);
 
   const fetchOrders = async () => {
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    setOrders(data || []);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (e) {
+      console.error("Admin fetchOrders failed:", e);
+      setFetchError(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchPetDesigns = async () => {
-    const { data } = await supabase
-      .from("pet_designs")
-      .select("*")
-      .order("sort_order", { ascending: true });
-    setPetDesigns(data || []);
-    setPetsLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from("pet_designs")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      setPetDesigns(data || []);
+    } catch (e) {
+      console.error("Admin fetchPetDesigns failed:", e);
+      setFetchError(true);
+    } finally {
+      setPetsLoading(false);
+    }
   };
 
   const fetchStickerPacks = async () => {
-    const { data } = await supabase
-      .from("sticker_packs")
-      .select("*")
-      .order("sort_order", { ascending: true });
-    setStickerPacks(data || []);
-    setPacksLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from("sticker_packs")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      setStickerPacks(data || []);
+    } catch (e) {
+      console.error("Admin fetchStickerPacks failed:", e);
+      setFetchError(true);
+    } finally {
+      setPacksLoading(false);
+    }
   };
 
   // Read-only waitlist fetch for the dashboard. Newest first; all stats are
@@ -3368,6 +3461,15 @@ function AdminPage({ lang }) {
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 24px" }}>
+        {fetchError && (
+          <div role="alert" style={{ background: "rgba(248,113,113,0.12)", border: "1px solid #f87171", color: "#f87171", borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <span>{lang === "he" ? "⚠️ טעינת חלק מהנתונים נכשלה. בדקו את החיבור ונסו לרענן." : lang === "ru" ? "⚠️ Не удалось загрузить часть данных. Проверьте соединение и обновите." : "⚠️ Some data failed to load. Check your connection and reload."}</span>
+            <button onClick={() => { setFetchError(false); setLoading(true); setPetsLoading(true); setPacksLoading(true); fetchOrders(); fetchPetDesigns(); fetchStickerPacks(); }}
+              style={{ background: "#f87171", color: "#0f0f0f", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", whiteSpace: "nowrap" }}>
+              {lang === "he" ? "רענון" : lang === "ru" ? "Обновить" : "Reload"}
+            </button>
+          </div>
+        )}
         {/* Sticky section nav — one-click jump to any admin section. Stays just
             below the fixed site nav (72px); horizontally scrollable on mobile. */}
         <nav aria-label="Admin sections" style={{
@@ -4374,6 +4476,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const t = LANGS[lang];
   const products = getCustomProducts(t);
   const [step, setStep] = useState((pendingBloomItem || pendingCheckout) ? 3 : 1);
+  // Payment-failure return (#order?paid=0) from create-payment's fail redirect.
+  // UI-ONLY: surfaces a clear retry path. Safe if visited directly.
+  const [payFailed, setPayFailed] = useState(() => {
+    if (typeof window === `undefined`) return false;
+    const h = window.location.hash || ``;
+    const qi = h.indexOf(`?`);
+    if (qi === -1) return false;
+    return new URLSearchParams(h.slice(qi + 1)).get(`paid`) === `0`;
+  });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(0);
@@ -5132,6 +5243,25 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
+      {/* Payment-failure return (#order?paid=0) — full-screen retry state. */}
+      {payFailed && (
+        <div role="dialog" aria-modal="true" aria-label={lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}
+          style={{ position: "fixed", inset: 0, zIndex: 2000, background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
+          <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "40px 32px", maxWidth: 440, width: "100%", textAlign: "center" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 80, height: 80, borderRadius: "50%", background: "rgba(248,113,113,0.12)", border: "2px solid #f87171", marginBottom: 20, fontSize: 38, color: "#f87171", fontWeight: 700 }}>✕</div>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 26, margin: "0 0 10px" }}>{lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}</h2>
+            <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{lang === "he" ? "לא חויבת. אפשר לנסות שוב — ההזמנה שלך נשמרה." : lang === "ru" ? "С вас не списали. Можно попробовать снова — ваш заказ сохранён." : "You weren't charged. You can try again — your order is saved."}</p>
+            <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setStep(1); }}
+              style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", marginBottom: 10 }}>
+              {lang === "he" ? "לנסות שוב" : lang === "ru" ? "Попробовать снова" : "Try again"}
+            </button>
+            <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setPage("track"); }}
+              style={{ width: "100%", background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              {lang === "he" ? "מעקב ההזמנות שלי" : lang === "ru" ? "К моим заказам" : "Track my orders"}
+            </button>
+          </div>
+        </div>
+      )}
       <div style={{ maxWidth: step === 3 ? 1100 : 700, margin: "0 auto", padding: "24px 24px 60px", transition: "max-width 0.25s ease" }}>
         <div style={{ display: "flex", marginBottom: 40 }}>
           {t.steps.map((s, i) => (
