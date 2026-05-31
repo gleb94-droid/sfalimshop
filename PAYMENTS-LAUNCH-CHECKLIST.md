@@ -9,48 +9,127 @@ before real money flows. Compiled from a read-only audit on 2026-05-30.
 
 ---
 
-## 🔴 SECURITY GAP — must fix BEFORE enabling payments
+## ✅ SECURITY GAPS — BOTH FIXED (live on production Supabase, 2026-05-31)
 
-### Client can set its own `payment_status` (cancel button)
+Both payment-integrity holes from the 2026-05-30 audit are now closed. The
+fixes were applied directly to production Supabase via MCP and have since been
+mirrored into the repo for tracking (migration + edge-function source). No
+redeploy / `db push` needed — they are already live.
 
-**Where:** `App.jsx:5413–5417` (the "Cancel" button on checkout step 4).
+### ✅ (a) FIXED — Client can no longer write its own payment fields
 
-```js
-await supabase.from("orders").update({
-  status: "cancelled",
-  payment_status: "cancelled",
-  cancelled_at: new Date().toISOString(),
-}).in("id", pendingOrderIds);
-```
+**Was:** the checkout "Cancel" button (`App.jsx`) wrote `payment_status`
+directly to `orders`. The RLS policy "Users update own orders" let any
+logged-in customer set `payment_status = 'paid'` on their own unpaid order via
+the API, faking a successful payment. `payment_status` is the source of truth
+for "did they pay?" and must be server-writable only.
 
-**The problem:** the browser writes `payment_status` directly to the `orders`
-table. The RLS policy "Users update own orders" allows a logged-in user to
-update **their own** orders — including `payment_status`. So a technical user
-could call the same API and set `payment_status = 'paid'` on their own
-unpaid order, faking a successful payment.
+**Fix (live on prod):** a `BEFORE INSERT OR UPDATE` trigger on `public.orders`,
+`trg_protect_order_payment_fields`, calling
+`public.protect_order_payment_fields()`. For non-privileged callers (anyone who
+is **not** `service_role` / `postgres` / `supabase_admin` /
+`supabase_auth_admin` and **not** `is_admin()`):
 
-> Guests (rows where `user_id IS NULL`) cannot exploit this — the update policy
-> only permits owner-or-admin — but every logged-in customer can, on their own
-> orders.
+- **INSERT** → all payment fields are force-reset to safe defaults
+  (`payment_status = 'idle'`, `amount_paid/paid_at/tranzila_transaction_id/`
+  `payment_method/failed_reason/cancelled_at = null`).
+- **UPDATE** → all payment fields are pinned back to their `old` values
+  (`payment_status`, `amount_paid`, `paid_at`, `total`,
+  `tranzila_transaction_id`, `payment_method`, `currency`, `failed_reason`) —
+  so a customer write to any of them is silently reverted.
 
-**Why it matters:** `payment_status` is the source of truth for "did they pay?"
-It must be writable **only by the server** (the Tranzila webhook, via the
-service-role key), never by the customer's browser.
+Only the server (service-role: the Tranzila webhook) and admins can change
+payment fields. The customer's browser cancel write is now a no-op on the
+protected columns.
 
-**Recommended fix (needs Gleb's approval — touches RLS + App.jsx):**
+**Repo:** `supabase/migrations/20260531120000_harden_orders_payment_fields.sql`
+(idempotent — `create or replace function` + `drop trigger if exists` — safe to
+re-run even though already applied).
 
-1. **Move cancellation server-side.** Replace the client `update` with a call to
-   a small Edge Function (or extend `create-payment`) that cancels using the
-   service-role key. The browser should never write `payment_status` /
-   `paid_at` / `amount_paid` / `tranzila_transaction_id`.
-2. **Tighten the RLS update policy** so customers can update only "safe" columns
-   (e.g. notes) and **not** the payment columns. Options: a column-restricted
-   policy, a `BEFORE UPDATE` trigger that rejects customer writes to payment
-   columns, or simply remove customer UPDATE rights entirely and route all
-   state changes through the server.
+### ✅ (b) FIXED — `create-payment` ignores the client amount
 
-⚠️ Both of these are explicitly **off-limits until approved** (RLS change +
-App.jsx edit). Logged here so we don't forget.
+**Was:** `create-payment` trusted the `amount` sent by the browser, so a
+technical user could initiate a charge for ₪1 on a ₪100 order.
+
+**Fix (live on prod):** `create-payment` now **always recomputes the charge
+server-side** as `SUM(orders.total)` for the `order_group` (pulled with the
+service-role key). The client-supplied `amount` is **informational only** —
+never used for the charge; it is logged to `payment_events.raw_payload`
+alongside an `amount_source: "server_recomputed"` marker and a
+`client_amount_mismatch` flag for audit.
+
+**Repo:** `supabase/functions/create-payment/index.ts` (synced from the
+deployed version, now `version 3` — adds the design-approval gate below).
+
+> Note: the live `create-payment` also tightened CORS/contract details and
+> sets `payment_status = 'pending'` on intent creation (server-side, via
+> service role — allowed by the trigger above).
+
+---
+
+## 🎨 Custom-design approval workflow (LIVE on prod Supabase, 2026-05-31)
+
+Custom orders where the **customer uploads their own image** (the design-studio
+upload path — NOT BLOOM gallery items, NOT pet-name personalization) must be
+**approved by the shop before they can pay**. The UI is in `App.jsx`
+(checkout → track → admin); the server pieces are below. All live; the repo now
+mirrors them (no `db push` / redeploy needed).
+
+### DB columns + trigger
+- New `orders` columns: `requires_design_approval` (bool, default `false`),
+  `design_approval_status` (text, default `'not_required'`, CHECK in
+  `not_required | pending | approved | rejected`), `design_review_note` (text),
+  `design_reviewed_at` (timestamptz).
+- The **same** `protect_order_payment_fields()` trigger that freezes payment
+  fields ALSO governs design-approval transitions for non-privileged
+  (customer) callers:
+  - **INSERT** → if `requires_design_approval` is true, force
+    `design_approval_status='pending'`, else `'not_required'`; clear note +
+    reviewed_at. (So the client cannot self-insert an `'approved'` row.)
+  - **UPDATE** → the only customer-allowed transition is
+    `rejected → pending` (the "edit & resubmit" flow). Every other write to
+    `design_approval_status` is pinned back to `old`. `requires_design_approval`,
+    `design_review_note`, `design_reviewed_at` are also pinned. So **only the
+    shop (admin / service-role) can approve or reject.**
+- **Repo:** `supabase/migrations/20260531130000_add_design_approval_workflow.sql`
+  (idempotent: `add column if not exists` + guarded CHECK +
+  `create or replace function` + `drop trigger if exists`). This migration's
+  trigger body supersedes the payment-only one in
+  `20260531120000_harden_orders_payment_fields.sql` (later timestamp wins).
+
+### `create-payment` gate
+- Before charging, `create-payment` (v3) loads every row in the `order_group`
+  and **refuses payment** (`403 design_not_approved`) if any row has
+  `requires_design_approval = true` AND `design_approval_status <> 'approved'`.
+  This complements the client-side gating in the track page.
+
+### `notify-design-decision` email function — BUILT, **DISABLED by default**
+- **Repo:** `supabase/functions/notify-design-decision/index.ts`
+  (deployed, `verify_jwt=false`). Emails the customer (BLOOM-branded, he/en/ru)
+  when the shop **approves** or **requests changes** on a custom design.
+- Intended trigger: a **Supabase Database Webhook on UPDATE of
+  `public.orders`** → POSTs the row to this function with an
+  `x-webhook-secret` header.
+- Fires a real email ONLY when ALL are true: (1) `design_approval_status`
+  actually changed to `approved`/`rejected`; (2) `requires_design_approval =
+  true`; (3) secret `DESIGN_NOTIFY_ENABLED === "true"`; (4) `RESEND_API_KEY`
+  set. **Default = OFF / dry-run** (logs what it would send, sends nothing).
+  Missing/incorrect `x-webhook-secret` → `401`, nothing sent.
+- ⚠️ The webhook secret currently uses an **in-code fallback** in
+  `notify-design-decision/index.ts` — same TODO as `waitlist-welcome`: move to
+  the `DESIGN_NOTIFY_WEBHOOK_SECRET` Edge Function secret and rotate.
+
+#### 🔔 LAUNCH-ARMING step (to turn the approval emails on)
+When you want approval/changes emails to actually send:
+1. **Create the DB webhook:** Supabase Dashboard → Database → Webhooks → new
+   hook: table `orders`, event **UPDATE**, type **HTTP Request / POST**, URL =
+   the `notify-design-decision` function URL, add HTTP header
+   `x-webhook-secret = <the secret>` (the Edge Function secret
+   `DESIGN_NOTIFY_WEBHOOK_SECRET`, or the in-code fallback).
+2. **Arm sending:** set Edge Function secret `DESIGN_NOTIFY_ENABLED="true"`
+   (and confirm `RESEND_API_KEY` is set). Until then it stays in dry-run.
+3. Optionally do a dry-run first (leave `DESIGN_NOTIFY_ENABLED` unset) and watch
+   the function logs to confirm the webhook fires on approve/reject.
 
 ---
 
@@ -89,7 +168,8 @@ App.jsx edit). Logged here so we don't forget.
 
 ## 🚦 Go-live order of operations (when the supplier number arrives)
 
-1. Fix the security gap above (server-side cancel + RLS) — **approve first**.
+1. ✅ ~~Fix the security gap above (server-side cancel + RLS).~~ **DONE** — both
+   payment-integrity holes are fixed and live on prod (see the ✅ section above).
 2. Add the `#pay-success` / `#pay-fail` handler.
 3. Set Supabase secrets: `TRANZILA_SUPPLIER`, `TRANZILA_TK`, `SUPABASE_SERVICE_ROLE_KEY`.
 4. Deploy both Edge Functions.
@@ -98,3 +178,7 @@ App.jsx edit). Logged here so we don't forget.
 7. Flip `PAYMENTS_ENABLED = true`.
 8. Flip `MAINTENANCE_MODE = false` **and** switch `index.html` robots tags to `index, follow`.
 9. Swap sandbox → production `TRANZILA_SUPPLIER` / `TRANZILA_TK`.
+10. **Arm the custom-design approval emails** (independent of Tranzila — can be
+    done any time): create the `orders` UPDATE DB webhook with the
+    `x-webhook-secret` header + set `DESIGN_NOTIFY_ENABLED="true"`. See the
+    "Custom-design approval workflow" section above.
