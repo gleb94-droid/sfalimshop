@@ -4,9 +4,11 @@
 // Builds a Tranzila Hosted Page URL for a Sfalim order (or cart of
 // orders sharing the same order_group) and returns it as redirect_url.
 //
-// SECURITY: the charge amount is ALWAYS recomputed server-side from the
-// orders rows in the DB. The client-supplied amount is informational only
-// and is never trusted (prevents "pay 1 instead of 100").
+// SECURITY:
+//  - The charge amount is ALWAYS recomputed server-side from orders.total.
+//    The client-supplied amount is informational only (never trusted).
+//  - Payment is REFUSED if any order in the group still requires design
+//    approval and is not yet approved (design_not_approved).
 //
 // Contract:
 //   IN  { order_id?: uuid, order_group?: string, amount?: number,
@@ -61,7 +63,7 @@ function buildTranzilaUrl(opts: {
   const langCode = langMap[opts.language] ?? "il";
   const params: Array<[string, string]> = [
     ["sum", opts.amount.toFixed(2)],
-    ["currency", "1"], // 1 = ILS
+    ["currency", "1"],
     ["cred_type", "1"],
     ["tranmode", "A"],
     ["myid", opts.orderGroup],
@@ -97,11 +99,7 @@ serve(async (req) => {
   const supplierIsLive = supplier !== "" && supplier.toUpperCase() !== "PLACEHOLDER";
   if (!supplierIsLive) {
     return json(
-      {
-        ok: false,
-        error: "payments_disabled",
-        message: "TRANZILA_SUPPLIER is not set. Payments are not live yet.",
-      },
+      { ok: false, error: "payments_disabled", message: "TRANZILA_SUPPLIER is not set. Payments are not live yet." },
       503,
     );
   }
@@ -115,13 +113,11 @@ serve(async (req) => {
     return json({ ok: false, error: "invalid_json" }, 400);
   }
 
-  // Client-supplied amount is informational only — NEVER trusted for the charge.
-  const clientAmount = Number(body?.amount);
+  const clientAmount = Number(body?.amount); // informational only — never trusted
   if (body?.currency && body.currency.toUpperCase() !== "ILS") {
     return json({ ok: false, error: "unsupported_currency" }, 400);
   }
 
-  // Resolve to an order_group.
   let orderGroup = (body.order_group ?? "").trim();
   let firstOrderId: string | null = null;
   let language = "he";
@@ -143,7 +139,6 @@ serve(async (req) => {
     return json({ ok: false, error: "missing_order_reference" }, 400);
   }
 
-  // Pull customer + language from the order if the caller did not supply them.
   if (!firstOrderId || !body.customer?.name || !body.customer?.email) {
     const { data: row } = await supabase
       .from("orders")
@@ -169,10 +164,11 @@ serve(async (req) => {
     return json({ ok: false, error: "missing_customer_details" }, 400);
   }
 
-  // Load every order in the group: used for idempotency AND the authoritative amount.
+  // Load every order in the group: used for idempotency, the authoritative
+  // amount, AND the design-approval gate.
   const { data: existing } = await supabase
     .from("orders")
-    .select("id, payment_status, total")
+    .select("id, payment_status, total, requires_design_approval, design_approval_status")
     .eq("order_group", orderGroup);
 
   if (!existing || existing.length === 0) {
@@ -180,6 +176,17 @@ serve(async (req) => {
   }
   if (existing.some((o) => o.payment_status === "succeeded")) {
     return json({ ok: false, error: "already_paid" }, 409);
+  }
+
+  // GATE: every custom-design order in the group must be approved before payment.
+  const needsApproval = existing.some(
+    (o) => o.requires_design_approval === true && o.design_approval_status !== "approved",
+  );
+  if (needsApproval) {
+    return json(
+      { ok: false, error: "design_not_approved", message: "This design must be approved by the shop before payment." },
+      403,
+    );
   }
 
   // AUTHORITATIVE amount: always the sum of the orders' totals in the DB.
@@ -201,20 +208,11 @@ serve(async (req) => {
   const description = (body.items_summary ?? "Sfalim Shop").slice(0, 60);
 
   const redirectUrl = buildTranzilaUrl({
-    supplier,
-    amount,
-    orderGroup,
-    description,
-    customerName,
-    customerEmail,
-    customerPhone,
-    language,
-    notifyUrl,
-    successUrl,
-    failUrl,
+    supplier, amount, orderGroup, description,
+    customerName, customerEmail, customerPhone, language,
+    notifyUrl, successUrl, failUrl,
   });
 
-  // Audit log — records the server amount and any client/server mismatch.
   await supabase.from("payment_events").insert({
     order_id: firstOrderId,
     order_group: orderGroup,

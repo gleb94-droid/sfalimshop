@@ -44,8 +44,9 @@ sfalimshop/
 │   ├── send-admin-order-alert/    # admin new-order alert
 │   ├── waitlist-welcome/          # LIVE — welcome email on new waitlist signup
 │   ├── waitlist-launch-announce/  # launch-day "we're live" blast — triple-gated, DISABLED by default
-│   ├── create-payment/            # Tranzila (mostly written, gated off)
-│   └── tranzila-webhook/          # Tranzila (mostly written, gated off)
+│   ├── create-payment/            # Tranzila + server-side amount + design-approval gate (gated off)
+│   ├── tranzila-webhook/          # Tranzila (mostly written, gated off)
+│   └── notify-design-decision/    # custom-design approve/changes email — DISABLED by default (dry-run)
 ├── vercel.json                    # Routes + CSP + security headers
 ├── PAYMENTS-LAUNCH-CHECKLIST.md   # Tranzila go-live checklist (both payment-integrity holes now FIXED)
 ├── .claude/agents/                # Subagent library (TRACKED in git as of 2026-05-28)
@@ -75,7 +76,7 @@ sfalimshop/
 | Table | Rows | Notes |
 |---|---|---|
 | `pet_designs` | **70 (all active: 47 dogs + 23 cats)** | 39 columns. Core catalog. The 12 obsolete demo/legacy drafts were **DELETED 2026-05-30** — there are now 0 inactive rows. |
-| `orders` | varies | RLS enabled |
+| `orders` | varies | RLS enabled. Custom-design approval columns: `requires_design_approval` (bool), `design_approval_status` (`not_required`/`pending`/`approved`/`rejected`), `design_review_note`, `design_reviewed_at`. The `trg_protect_order_payment_fields` trigger freezes payment fields AND enforces approval transitions (customer may only go `rejected→pending`; only shop approves/rejects). |
 | `order_status_history` | audit log | RLS enabled |
 | `payment_events` | webhook audit log | RLS enabled |
 | `admins` | 1 (`gleb2009@gmail.com`) | Self-select RLS only |
@@ -252,9 +253,11 @@ WHERE bucket_id='mockups' AND name LIKE 'bloom/%';
 
 - Code is **mostly written**, gated off behind `PAYMENTS_ENABLED=false`. Full go-live steps are in **`PAYMENTS-LAUNCH-CHECKLIST.md`**.
 - ✅ **Payment-integrity holes FIXED 2026-05-31 (live on prod Supabase, mirrored into repo):** (a) browser can no longer write payment fields on `orders` — a `BEFORE INSERT/UPDATE` trigger (`trg_protect_order_payment_fields` → `public.protect_order_payment_fields()`) pins payment columns to server/admin-only; migration `20260531120000_harden_orders_payment_fields.sql`. (b) `create-payment` recomputes the charge server-side from `SUM(orders.total)` and ignores the client-supplied amount.
+- ✅ **Custom-design approval workflow LIVE 2026-05-31 (prod Supabase, mirrored into repo):** customer-uploaded custom designs must be shop-approved before payment. UI in `App.jsx` (checkout → `#track` → admin queue). Server: the 4 `orders` design-approval columns + the SAME `trg_protect_order_payment_fields` trigger (now also enforces `rejected→pending`-only for customers; only shop approves/rejects) — migration `20260531130000_add_design_approval_workflow.sql` (its trigger body supersedes the payment-only `…120000…` one). `create-payment` (v3) refuses payment with `403 design_not_approved` until approved. Email: `notify-design-decision/` (built, **DISABLED by default** / dry-run; arm via the `orders` UPDATE DB webhook + `DESIGN_NOTIFY_ENABLED="true"` — see `PAYMENTS-LAUNCH-CHECKLIST.md`).
 - Files in `supabase/functions/`:
-  - `create-payment/` (mostly written, gated off)
+  - `create-payment/` (server-side amount + design-approval gate, gated off)
   - `tranzila-webhook/` (mostly written, gated off)
+  - `notify-design-decision/` (custom-design approve/changes email — DISABLED by default)
 - Env vars needed in Vercel:
   - `TRANZILA_SUPPLIER` (pending from Tranzila — the single launch gate)
   - `TRANZILA_TK` (transaction key)

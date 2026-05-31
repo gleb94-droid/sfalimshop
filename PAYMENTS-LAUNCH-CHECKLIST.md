@@ -59,11 +59,77 @@ alongside an `amount_source: "server_recomputed"` marker and a
 `client_amount_mismatch` flag for audit.
 
 **Repo:** `supabase/functions/create-payment/index.ts` (synced from the
-deployed version, `version 2`).
+deployed version, now `version 3` — adds the design-approval gate below).
 
 > Note: the live `create-payment` also tightened CORS/contract details and
 > sets `payment_status = 'pending'` on intent creation (server-side, via
 > service role — allowed by the trigger above).
+
+---
+
+## 🎨 Custom-design approval workflow (LIVE on prod Supabase, 2026-05-31)
+
+Custom orders where the **customer uploads their own image** (the design-studio
+upload path — NOT BLOOM gallery items, NOT pet-name personalization) must be
+**approved by the shop before they can pay**. The UI is in `App.jsx`
+(checkout → track → admin); the server pieces are below. All live; the repo now
+mirrors them (no `db push` / redeploy needed).
+
+### DB columns + trigger
+- New `orders` columns: `requires_design_approval` (bool, default `false`),
+  `design_approval_status` (text, default `'not_required'`, CHECK in
+  `not_required | pending | approved | rejected`), `design_review_note` (text),
+  `design_reviewed_at` (timestamptz).
+- The **same** `protect_order_payment_fields()` trigger that freezes payment
+  fields ALSO governs design-approval transitions for non-privileged
+  (customer) callers:
+  - **INSERT** → if `requires_design_approval` is true, force
+    `design_approval_status='pending'`, else `'not_required'`; clear note +
+    reviewed_at. (So the client cannot self-insert an `'approved'` row.)
+  - **UPDATE** → the only customer-allowed transition is
+    `rejected → pending` (the "edit & resubmit" flow). Every other write to
+    `design_approval_status` is pinned back to `old`. `requires_design_approval`,
+    `design_review_note`, `design_reviewed_at` are also pinned. So **only the
+    shop (admin / service-role) can approve or reject.**
+- **Repo:** `supabase/migrations/20260531130000_add_design_approval_workflow.sql`
+  (idempotent: `add column if not exists` + guarded CHECK +
+  `create or replace function` + `drop trigger if exists`). This migration's
+  trigger body supersedes the payment-only one in
+  `20260531120000_harden_orders_payment_fields.sql` (later timestamp wins).
+
+### `create-payment` gate
+- Before charging, `create-payment` (v3) loads every row in the `order_group`
+  and **refuses payment** (`403 design_not_approved`) if any row has
+  `requires_design_approval = true` AND `design_approval_status <> 'approved'`.
+  This complements the client-side gating in the track page.
+
+### `notify-design-decision` email function — BUILT, **DISABLED by default**
+- **Repo:** `supabase/functions/notify-design-decision/index.ts`
+  (deployed, `verify_jwt=false`). Emails the customer (BLOOM-branded, he/en/ru)
+  when the shop **approves** or **requests changes** on a custom design.
+- Intended trigger: a **Supabase Database Webhook on UPDATE of
+  `public.orders`** → POSTs the row to this function with an
+  `x-webhook-secret` header.
+- Fires a real email ONLY when ALL are true: (1) `design_approval_status`
+  actually changed to `approved`/`rejected`; (2) `requires_design_approval =
+  true`; (3) secret `DESIGN_NOTIFY_ENABLED === "true"`; (4) `RESEND_API_KEY`
+  set. **Default = OFF / dry-run** (logs what it would send, sends nothing).
+  Missing/incorrect `x-webhook-secret` → `401`, nothing sent.
+- ⚠️ The webhook secret currently uses an **in-code fallback** in
+  `notify-design-decision/index.ts` — same TODO as `waitlist-welcome`: move to
+  the `DESIGN_NOTIFY_WEBHOOK_SECRET` Edge Function secret and rotate.
+
+#### 🔔 LAUNCH-ARMING step (to turn the approval emails on)
+When you want approval/changes emails to actually send:
+1. **Create the DB webhook:** Supabase Dashboard → Database → Webhooks → new
+   hook: table `orders`, event **UPDATE**, type **HTTP Request / POST**, URL =
+   the `notify-design-decision` function URL, add HTTP header
+   `x-webhook-secret = <the secret>` (the Edge Function secret
+   `DESIGN_NOTIFY_WEBHOOK_SECRET`, or the in-code fallback).
+2. **Arm sending:** set Edge Function secret `DESIGN_NOTIFY_ENABLED="true"`
+   (and confirm `RESEND_API_KEY` is set). Until then it stays in dry-run.
+3. Optionally do a dry-run first (leave `DESIGN_NOTIFY_ENABLED` unset) and watch
+   the function logs to confirm the webhook fires on approve/reject.
 
 ---
 
@@ -112,3 +178,7 @@ deployed version, `version 2`).
 7. Flip `PAYMENTS_ENABLED = true`.
 8. Flip `MAINTENANCE_MODE = false` **and** switch `index.html` robots tags to `index, follow`.
 9. Swap sandbox → production `TRANZILA_SUPPLIER` / `TRANZILA_TK`.
+10. **Arm the custom-design approval emails** (independent of Tranzila — can be
+    done any time): create the `orders` UPDATE DB webhook with the
+    `x-webhook-secret` header + set `DESIGN_NOTIFY_ENABLED="true"`. See the
+    "Custom-design approval workflow" section above.
