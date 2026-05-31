@@ -7937,10 +7937,15 @@ export default function App() {
       },
     };
     const langTitles = titles[lang] || titles.he;
-    // The blog pages (index + post) set their own SEO document.title per post
-    // and language — don't clobber it here (this is the parent effect and would
-    // otherwise overwrite the child's title on a language switch).
-    if (page !== "blog") document.title = langTitles[page] || langTitles.home;
+    // The blog pages (index + post) and breed pages set their own full SEO
+    // (title + description + OG + JSON-LD) in their components — don't clobber
+    // it here. For every OTHER route, restore the generic site SEO so a
+    // breed/post's tags never leak across navigation.
+    if (page !== "blog" && page !== "breed") {
+      const title = langTitles[page] || langTitles.home;
+      document.title = title;
+      setGenericSeo(lang, title);
+    }
     // Update html lang+dir to match current selection
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
@@ -10336,16 +10341,55 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     return () => { cancelled = true; };
   }, [slug]);
 
-  // Per-breed document.title for deep-linked tabs/bookmarks. We don't touch OG
-  // meta client-side: social crawlers read those before the SPA renders, so it
-  // needs SSR/prerender to actually affect share previews (deferred — behind
-  // maintenance/noindex anyway).
+  // Full per-breed SEO — title + description + Open Graph + Twitter card +
+  // Product JSON-LD + canonical/hreflang, set on navigation via the same
+  // setMeta/injectJsonLd mechanism the blog uses. The generic site SEO is
+  // restored by the parent route effect when leaving (page !== "breed"). The
+  // site-wide noindex (index.html) stays until MAINTENANCE_MODE is lifted, so
+  // none of this is indexed yet — it's built to be correct at launch.
   useEffect(() => {
     if (typeof document === `undefined` || !design) return;
-    const nm = design[`name_${lang}`] || design.name_en || design.name_he || ``;
-    const prev = document.title;
-    if (nm) document.title = `${nm} · BLOOM · Sfalim Shop`;
-    return () => { document.title = prev; };
+    const name = design[`name_${lang}`] || design.name_en || design.name_he || ``;
+    if (!name) return;
+    const origin = (design[`breed_origin_${lang}`] || design.breed_origin_en || design.breed_origin_he || ``).trim();
+    const tagline = (design[`tagline_${lang}`] || design.tagline_en || design.tagline_he || ``).trim();
+    const title =
+      lang === `en` ? `${name} · BLOOM Pet Portrait · Sfalim Shop` :
+      lang === `ru` ? `${name} · Портрет BLOOM · Sfalim Shop` :
+      `${name} · דיוקן BLOOM · ספלים שופ`;
+    const base =
+      lang === `en` ? `${name} in BLOOM style — a hand-illustrated pet portrait on premium shirts, mugs & stickers.` :
+      lang === `ru` ? `${name} в стиле BLOOM — рисованный портрет питомца на премиальных футболках, кружках и стикерах.` :
+      `${name} בסגנון BLOOM — דיוקן חיה מאויר על חולצות, ספלים ומדבקות איכותיים.`;
+    const desc = `${base}${origin ? ` ${origin}` : (tagline ? ` ${tagline}` : ``)}`.slice(0, 300);
+    const img = design.mockup_url || design.mockup_shirt_url || design.design_url || ``;
+    const url = `${SEO_ORIGIN}/#/breed/${design.slug}`;
+    document.title = title;
+    setMeta(`description`, desc);
+    setMeta(`og:title`, name, `property`);
+    setMeta(`og:description`, desc, `property`);
+    if (img) setMeta(`og:image`, img, `property`);
+    setMeta(`og:type`, `product`, `property`);
+    setMeta(`og:url`, url, `property`);
+    setMeta(`twitter:card`, `summary_large_image`);
+    setMeta(`twitter:title`, name);
+    setMeta(`twitter:description`, desc);
+    if (img) setMeta(`twitter:image`, img);
+    setCanonical(url);
+    setHreflang(url);
+    removeJsonLd(`blog-article-ld`); // never both at once
+    const ld = {
+      "@context": `https://schema.org`,
+      "@type": `Product`,
+      "name": name,
+      "image": img ? [img] : undefined,
+      "description": desc,
+      "inLanguage": lang,
+      "brand": { "@type": `Brand`, "name": `BLOOM / Sfalim Shop` },
+      "category": design.species === `cat` ? `Cat portrait apparel & gifts` : `Dog portrait apparel & gifts`,
+      "url": url,
+    };
+    injectJsonLd(ld, `breed-product-ld`);
   }, [design, lang]);
 
   if (loading) {
@@ -10843,6 +10887,70 @@ function injectJsonLd(obj, id) {
   el.textContent = JSON.stringify(obj);
 }
 
+// Remove a dynamic JSON-LD block by id (used when leaving breed/blog pages so a
+// stale Product/Article block never lingers on the next route).
+function removeJsonLd(id) {
+  if (typeof document === `undefined`) return;
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// Canonical domain for SEO URLs (matches index.html). The blog share helper
+// above predates this and uses the bare host; new SEO code standardises on www.
+const SEO_ORIGIN = `https://www.sfalimshop.com`;
+const SITE_OG_IMAGE = `${SEO_ORIGIN}/og-image.png`;
+
+// Upsert <link rel="canonical">.
+function setCanonical(url) {
+  if (typeof document === `undefined` || !url) return;
+  let el = document.head.querySelector(`link[rel="canonical"]`);
+  if (!el) { el = document.createElement(`link`); el.setAttribute(`rel`, `canonical`); document.head.appendChild(el); }
+  el.setAttribute(`href`, url);
+}
+
+// Upsert the he/en/ru/x-default hreflang alternates. This is a hash-router SPA
+// with one URL per page (language is in-app state, not the URL), so all four
+// alternates point at the same page URL — mirroring the static index.html
+// approach. Kept so the cluster is correct once prerender/SSR lands.
+function setHreflang(url) {
+  if (typeof document === `undefined` || !url) return;
+  for (const hl of [`he`, `en`, `ru`, `x-default`]) {
+    let el = document.head.querySelector(`link[rel="alternate"][hreflang="${hl}"]`);
+    if (!el) { el = document.createElement(`link`); el.setAttribute(`rel`, `alternate`); el.setAttribute(`hreflang`, hl); document.head.appendChild(el); }
+    el.setAttribute(`href`, url);
+  }
+}
+
+// Generic site-wide description per language (restored on non-breed/non-blog
+// routes so a breed/post description never leaks across navigation).
+const GENERIC_SEO_DESC = {
+  he: `הדפסות מותאמות אישית — חולצות, ספלים ומדבקות עם העיצוב שלך, לצד אוסף דיוקנאות BLOOM ל-70 גזעי כלבים וחתולים.`,
+  en: `Custom prints — shirts, mugs & stickers with your own design, plus the BLOOM pet-portrait collection across 70 dog & cat breeds.`,
+  ru: `Индивидуальная печать — футболки, кружки и стикеры с вашим дизайном, плюс коллекция портретов BLOOM для 70 пород собак и кошек.`,
+};
+
+// Restore the generic site title/description/OG/Twitter/canonical/hreflang and
+// drop any per-page JSON-LD. Called for every route that isn't a breed page or
+// a blog page (those own their SEO in their components). `title` is the
+// already-resolved per-route document title.
+function setGenericSeo(lang, title) {
+  const desc = GENERIC_SEO_DESC[lang] || GENERIC_SEO_DESC.he;
+  setMeta(`description`, desc);
+  setMeta(`og:title`, title, `property`);
+  setMeta(`og:description`, desc, `property`);
+  setMeta(`og:type`, `website`, `property`);
+  setMeta(`og:url`, `${SEO_ORIGIN}/`, `property`);
+  setMeta(`og:image`, SITE_OG_IMAGE, `property`);
+  setMeta(`twitter:card`, `summary_large_image`);
+  setMeta(`twitter:title`, title);
+  setMeta(`twitter:description`, desc);
+  setMeta(`twitter:image`, SITE_OG_IMAGE);
+  setCanonical(`${SEO_ORIGIN}/`);
+  setHreflang(`${SEO_ORIGIN}/`);
+  removeJsonLd(`breed-product-ld`);
+  removeJsonLd(`blog-article-ld`);
+}
+
 // Defensive HTML sanitizer for admin-authored post bodies. Removes dangerous
 // tags, on* handlers and javascript: URLs. Content is trusted (admin-only) so
 // this is belt-and-suspenders; falls back to a crude script-strip if no parser.
@@ -10931,12 +11039,21 @@ function BlogIndex({ lang, goToBlog }) {
 
   // Page-level SEO for the index.
   useEffect(() => {
+    const indexUrl = `${SEO_ORIGIN}/#/blog`;
     document.title = `${t.blogHeroTitle} — Sfalim Shop`;
     setMeta(`description`, t.blogHeroSubtitle);
     setMeta(`og:title`, t.blogHeroTitle, `property`);
     setMeta(`og:description`, t.blogHeroSubtitle, `property`);
     setMeta(`og:type`, `website`, `property`);
-    setMeta(`og:url`, `https://sfalimshop.com/#/blog`, `property`);
+    setMeta(`og:url`, indexUrl, `property`);
+    setMeta(`twitter:card`, `summary_large_image`);
+    setMeta(`twitter:title`, t.blogHeroTitle);
+    setMeta(`twitter:description`, t.blogHeroSubtitle);
+    setCanonical(indexUrl);
+    setHreflang(indexUrl);
+    // Coming from a post → clear its Article block; from a breed → its Product.
+    removeJsonLd(`blog-article-ld`);
+    removeJsonLd(`breed-product-ld`);
   }, [lang]);
 
   useEffect(() => {
@@ -11087,13 +11204,21 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
        post.seo_description_he) || post.excerpt_he || ``;
     const ogTitle = post[`title_${lang}`] || post.title_he || ``;
     const ogDesc = post[`excerpt_${lang}`] || post.excerpt_he || ``;
+    const postUrl = `${SEO_ORIGIN}/#/blog/${post.slug}`;
     document.title = `${seoTitle} — Sfalim Shop`;
     setMeta(`description`, seoDesc);
     setMeta(`og:title`, ogTitle, `property`);
     setMeta(`og:description`, ogDesc, `property`);
     setMeta(`og:image`, post.cover_image_url, `property`);
     setMeta(`og:type`, `article`, `property`);
-    setMeta(`og:url`, blogShareUrl(post.slug), `property`);
+    setMeta(`og:url`, postUrl, `property`);
+    setMeta(`twitter:card`, `summary_large_image`);
+    setMeta(`twitter:title`, ogTitle);
+    setMeta(`twitter:description`, ogDesc);
+    if (post.cover_image_url) setMeta(`twitter:image`, post.cover_image_url);
+    setCanonical(postUrl);
+    setHreflang(postUrl);
+    removeJsonLd(`breed-product-ld`); // never both at once
     const ld = {
       "@context": `https://schema.org`, "@type": `Article`,
       "headline": ogTitle, "image": [post.cover_image_url],
@@ -11102,7 +11227,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
       "author": { "@type": `Organization`, "name": `Sfalim Shop` },
       "publisher": { "@type": `Organization`, "name": `Sfalim Shop`, "logo": { "@type": `ImageObject`, "url": BLOG_LOGO_URL } },
       "description": ogDesc,
-      "mainEntityOfPage": blogShareUrl(post.slug),
+      "mainEntityOfPage": postUrl,
     };
     injectJsonLd(ld, `blog-article-ld`);
   }, [post, lang]);

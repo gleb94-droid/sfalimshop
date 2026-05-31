@@ -1,7 +1,7 @@
-// generate-sitemap — dynamic XML sitemap of published blog posts (+ key static
-// routes). Preferred over the static public/sitemap.xml because that file goes
-// stale as posts are published. Published posts are public per RLS, so the anon
-// key is enough.
+// generate-sitemap — dynamic XML sitemap of published blog posts + all active
+// BLOOM breed pages (+ key static routes). Preferred over the static
+// public/sitemap.xml because that file goes stale as posts/breeds change.
+// Published posts and active breeds are public per RLS, so the anon key is enough.
 //
 // Deploy:  supabase functions deploy generate-sitemap --no-verify-jwt
 // Public URL once deployed:
@@ -53,6 +53,14 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  // All active BLOOM breed pages (#/breed/<slug>). A bad fetch here is non-fatal:
+  // breeds is null and the sitemap still serves posts + static routes.
+  const { data: breeds } = await supabase
+    .from("pet_designs")
+    .select("slug")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+
   const staticUrls = [
     { loc: `${SITE}/`, priority: "1.0" },
     { loc: `${SITE}/#/blog`, priority: "0.8" },
@@ -64,6 +72,9 @@ Deno.serve(async (req: Request) => {
 
   const entries: string[] = [];
   for (const u of staticUrls) entries.push(urlTag(u.loc, null, u.priority));
+  for (const b of breeds ?? []) {
+    entries.push(urlTag(`${SITE}/#/breed/${b.slug}`, null, "0.7"));
+  }
   for (const p of posts ?? []) {
     const lastmod = (p.updated_at || p.published_at || "").slice(0, 10) || null;
     entries.push(urlTag(`${SITE}/#/blog/${p.slug}`, lastmod, "0.7"));
