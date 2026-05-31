@@ -17,7 +17,44 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ---
 
-## 📌 STATE AS OF 2026-05-31 (source of truth — read this first)
+## 📌 STATE AS OF 2026-06-01 (source of truth — read this first)
+
+> Supersedes the 2026-05-31 block and all older snapshots where they conflict.
+> Records the live production state + everything shipped since.
+
+### 🚀 Production / deploy
+- **`main` HEAD = `e26bc92`** (merge of `launch-prep`), **live on Vercel behind the maintenance gate** (deploy `dpl_5oz1gLwYndNKgnUUesVbCQfzc89o`, READY). Rollback candidate = the prior prod merge **`592f67d`** (quiz a11y widget). Flags unchanged: `MAINTENANCE_MODE=true`, `PAYMENTS_ENABLED=false`, `index.html` noindex ON, staff password gate (`VITE_STAFF_PASSWORD`).
+- **`launch-prep` is 1 commit ahead of `main`: `4d98049`** (WhatsApp FAB + trust strip) — committed, **NOT yet deployed**; ships in the next deploy.
+- This session merged to prod, in order: **`b19c4b1`** (a11y pass + payment-return UX + repo↔prod sync), **`8880fd1`** (high-contrast toggle fix), **`e3b9588`** (portal overlays fix), **`592f67d`** (quiz a11y widget), **`e26bc92`** (favorites). All behind maintenance.
+
+### 🆕 Frontend work shipped since 2026-05-31
+1. **Accessibility pass (IS 5568 / WCAG 2.1 AA)** — commit `29a399f` (in merge `b19c4b1`): keyboard operability for the 70 gallery cards + nav logos; dialog focus-trap/ARIA on overlays via a shared `useDialogFocus` hook; form-label associations; `role="alert"` / `aria-live` announcements; contrast bumps (`#555`/`#666` → `#8a8a8a`); hamburger `aria-expanded`; quiz a11y (progressbar role, `type="button"`, focus-to-result, `#qcount dir="rtl"`). **Decision:** `#888` and white-on-`#FF6B35` left as-is — they pass AA in the contexts used; preserves the brand.
+2. **Quiz accessibility widget** — commit `5f2cac6` (merge `592f67d`): self-contained vanilla widget on `public/quiz/index.html` (font-size, high-contrast, link to `/accessibility`, focus-trap, Esc, localStorage). Filter scoped to `#a11y-content`; the button sits **outside** that wrapper so it stays viewport-fixed.
+3. **High-contrast containing-block fix** — commits `39729dd` (merge `8880fd1`) + `982c445` (merge `e3b9588`): moved the high-contrast `filter` from `<body>` to `#root`, and **portaled to `document.body`** the a11y widget + the **5 fixed overlays** (zoom lightbox, PetModal, CartDrawer, both PaySoon modals). **Lesson (record):** a CSS `filter` (also `transform`/`perspective`) makes its element the **containing block for `position:fixed` descendants** — so a filtered ancestor reanchors fixed children. Fix = keep fixed UI outside the filtered element (portal to `<body>`).
+4. **Payment-return route handlers** — commit `9093d84` (merge `b19c4b1`): `#track?paid=1&order_group=…` shows a success/processing/unknown screen by **reading** `payment_status` (never writing it — the webhook owns it); `#order?paid=0` shows a failure-with-retry overlay. UI-only; inert while `PAYMENTS_ENABLED=false`; safe if visited directly.
+5. **Admin fetch error handling** — commit `9093d84`: `try/catch` + a `role="alert"` error banner + Reload on `fetchOrders`/`fetchPetDesigns`/`fetchStickerPacks` (no more silent blank/empty admin on a network failure).
+6. **Cancelled-order timeline fix** — commit `9093d84`: `#track` no longer renders the misleading `ORDER_STAGES` timeline for a cancelled order; shows the cancelled state instead.
+7. **Favorites feature (client-only, no DB/auth)** — commit `596a888` (merge `e26bc92`): `localStorage` key `sf_favorites` + `useFavorites()` hook (window-event synced across components/tabs), `FavHeart` on PetCard / PetModal / BreedPage, a "show favorites only" gallery toggle (nav deep-link `#/pets?fav=1`), and a live favorites count badge in the nav.
+8. **WhatsApp FAB + trust strip** — commit `4d98049` (**on `launch-prep`, NOT yet deployed**): floating WhatsApp `<a>` portaled to `<body>` (bottom inline-end, z-940 — below cart/modals, opposite the a11y FAB), gated by a `WHATSAPP_NUMBER` constant — still `WHATSAPP_PLACEHOLDER`, so the **button is HIDDEN until a real number is set**; renders only on the full app, not the maintenance screen. Trust strip in the CartDrawer footer: 🚚 "Ships anywhere in Israel" **always**; 🔒 "Secure payment" **only when `PAYMENTS_ENABLED===true`**.
+
+### 🔒 Backend (live on prod + mirrored to repo)
+- **Migration `restrict_customer_order_status_to_cancel`** — commit `cac9cef` (merge `b19c4b1`), file `supabase/migrations/20260531140000_*`. Extends `protect_order_payment_fields` so a non-privileged customer may only set `orders.status='cancelled'`; any other status change reverts to `OLD`. Admins / `service_role` unaffected. (Mirror-only — already applied on prod via MCP; not re-run.)
+- **Edge functions UNCHANGED this round:** `create-payment` v4, `tranzila-webhook` v2, `notify-design-decision` v1 (disabled), `generate-sitemap`, `waitlist-welcome` (enabled), `waitlist-launch-announce` (disabled). See the 2026-05-31 block for details.
+
+### 🧷 Open items / reminders
+- **`WHATSAPP_NUMBER` is a placeholder** (`App.jsx`, near the favorites module). Owner is getting a dedicated **WhatsApp Business** number → replace the one constant when provided; the FAB auto-appears (6–15 digit check). Carried live in the next deploy.
+- **Two MAINTENANCE flags at launch:** `App.jsx MAINTENANCE_MODE` **and** `api/og.js`'s own `MAINTENANCE` flag must BOTH be flipped, alongside reverting the `index.html` noindex.
+- **Next planned quick win:** an FAQ section (content TBD with owner).
+- **Phase-2 backlog (from the Cowork proposal — NOT started):** "Breed Almanac" / "Meet the Cast" homepage; quiz-as-front-door; gentle/floating character motion (owner wants examples first); **live pet-name personalization preview** (recommended "wow"); Israeli trust polish; paid on-product **3D customizer** (Zakeke best fit / PitchPrint budget option — phase-2, **post-revenue only**).
+- **Launch-arming sequence unchanged:** waiting on the **Tranzila supplier number** (supplier docs submitted 2026-05-31). See `PAYMENTS-LAUNCH-CHECKLIST.md`.
+
+---
+
+## 📌 STATE AS OF 2026-05-31 (historical — superseded by the 2026-06-01 block above)
+
+> ⚠️ **Historical.** Production has since advanced (`e3a31b4` → `e26bc92`) and more
+> work shipped — see the 2026-06-01 block above for the current source of truth.
+> Kept for the security/workflow/SEO/edge-function detail it still documents.
 
 > This block supersedes older snapshots below where they conflict. It records the
 > live production state, all security/workflow/SEO work shipped, edge-function
