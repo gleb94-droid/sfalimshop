@@ -9,6 +9,44 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 const MugStudio = lazy(() => import('./MugStudio.jsx'));
 const supabase = createClient('https://ubvgrxlxtelulwjtfudd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE')
 
+// ── A11y: dialog focus management (WCAG 2.4.3 / 2.1.2) ──────────────────────
+// When `active` becomes true: remember the currently-focused element, move focus
+// into the dialog (first focusable, or the container), and keep Tab/Shift+Tab
+// cycling inside it. On deactivate/unmount: restore focus to the trigger.
+// Esc-to-close stays each dialog's own concern (some have layered Esc logic).
+// Returns a ref to attach to the dialog container.
+function useDialogFocus(active) {
+  const ref = useRef(null);
+  const restoreRef = useRef(null);
+  useEffect(() => {
+    if (!active || typeof document === `undefined`) return;
+    const node = ref.current;
+    if (!node) return;
+    restoreRef.current = document.activeElement;
+    const SEL = `a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])`;
+    const focusables = () => Array.prototype.slice.call(node.querySelectorAll(SEL)).filter(el => el.offsetParent !== null || el === document.activeElement);
+    const first = focusables()[0];
+    if (first) first.focus();
+    else { node.setAttribute(`tabindex`, `-1`); node.focus(); }
+    const onKey = (e) => {
+      if (e.key !== `Tab`) return;
+      const f = focusables();
+      if (f.length === 0) { e.preventDefault(); node.focus(); return; }
+      const a = f[0], z = f[f.length - 1];
+      if (!node.contains(document.activeElement)) { e.preventDefault(); a.focus(); }
+      else if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+      else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+    };
+    node.addEventListener(`keydown`, onKey);
+    return () => {
+      node.removeEventListener(`keydown`, onKey);
+      const r = restoreRef.current;
+      if (r && typeof r.focus === `function`) { try { r.focus(); } catch (_) {} }
+    };
+  }, [active]);
+  return ref;
+}
+
 // ============================================================================
 // FloatingProductCard — כרטיס מוצר מרחף עם אפקט הטיה + זוהר הולוגרפי חם
 // ----------------------------------------------------------------------------
@@ -1253,7 +1291,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
 const COLORS = {
   bg: "#0f0f0f", bgCard: "#1a1a1a", border: "#2a2a2a",
   accent: "#FF6B35", accentHover: "#ff8255", accentDim: "rgba(255,107,53,0.15)",
-  white: "#ffffff", gray: "#888888", grayLight: "#555555", success: "#4ade80",
+  white: "#ffffff", gray: "#888888", grayLight: "#8a8a8a", success: "#4ade80",
 };
 
 // Legacy flat shipping fee. Kept for any code path that hasn't been moved
@@ -2237,11 +2275,11 @@ function AuthPage({ lang, onAuth }) {
           </div>
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>{t.auth.email}</label>
-              <input type="email" name="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+              <label htmlFor="auth-forgot-email" style={labelStyle}>{t.auth.email}</label>
+              <input id="auth-forgot-email" type="email" name="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
             </div>
-            {error && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
-            {success && <div style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
+            {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
+            {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
             <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
               {loading ? "..." : t.auth.forgotPwBtn}
             </button>
@@ -2265,23 +2303,24 @@ function AuthPage({ lang, onAuth }) {
         <form onSubmit={handleSubmit}>
           {mode === "register" && (
             <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>{t.auth.name}</label>
-              <input type="text" name="name" autoComplete="name" value={name} onChange={e => setName(e.target.value)} required style={inputStyle} />
+              <label htmlFor="auth-name" style={labelStyle}>{t.auth.name}</label>
+              <input id="auth-name" type="text" name="name" autoComplete="name" value={name} onChange={e => setName(e.target.value)} required style={inputStyle} />
             </div>
           )}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>{t.auth.email}</label>
-            <input type="email" name="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+            <label htmlFor="auth-email" style={labelStyle}>{t.auth.email}</label>
+            <input id="auth-email" type="email" name="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
           </div>
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <label style={labelStyle}>{t.auth.password}</label>
+              <label htmlFor="auth-password" style={labelStyle}>{t.auth.password}</label>
               {mode === "login" && (
                 <button type="button" onClick={() => { setMode("forgot"); setError(""); setSuccess(""); }} style={smallBtnStyle}>{t.auth.forgotPw}</button>
               )}
             </div>
             <div style={{ position: "relative" }}>
               <input
+                id="auth-password"
                 type={showPassword ? "text" : "password"}
                 name="password"
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
@@ -2308,8 +2347,8 @@ function AuthPage({ lang, onAuth }) {
               </div>
             )}
           </div>
-          {error && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
-          {success && <div style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
+          {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
+          {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
           <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
             {loading ? "..." : mode === "login" ? t.auth.loginBtn : t.auth.registerBtn}
           </button>
@@ -2415,9 +2454,9 @@ function ResetPasswordPage({ lang, setPage }) {
         ) : (
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>{t.auth.newPw}</label>
+              <label htmlFor="reset-new-password" style={labelStyle}>{t.auth.newPw}</label>
               <div style={{ position: "relative" }}>
-                <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 12, paddingInlineStart: 14, paddingInlineEnd: 80 }} />
+                <input id="reset-new-password" type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 12, paddingInlineStart: 14, paddingInlineEnd: 80 }} />
                 <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
                   {showPassword ? t.auth.hidePw : t.auth.showPw}
                 </button>
@@ -2434,10 +2473,10 @@ function ResetPasswordPage({ lang, setPage }) {
               </div>
             </div>
             <div style={{ marginBottom: 24 }}>
-              <label style={labelStyle}>{t.auth.confirmPw}</label>
-              <input type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
+              <label htmlFor="reset-confirm-password" style={labelStyle}>{t.auth.confirmPw}</label>
+              <input id="reset-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
             </div>
-            {error && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
+            {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
             <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
               {loading ? "..." : t.auth.setPw}
             </button>
@@ -2515,9 +2554,9 @@ function AccountSettings({ lang }) {
           ) : (
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: 12 }}>
-                <label style={labelStyle}>{t.auth.newPw}</label>
+                <label htmlFor="account-new-password" style={labelStyle}>{t.auth.newPw}</label>
                 <div style={{ position: "relative" }}>
-                  <input type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 10, paddingInlineStart: 12, paddingInlineEnd: 70 }} />
+                  <input id="account-new-password" type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 10, paddingInlineStart: 12, paddingInlineEnd: 70 }} />
                   <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
                     {showPassword ? t.auth.hidePw : t.auth.showPw}
                   </button>
@@ -2534,10 +2573,10 @@ function AccountSettings({ lang }) {
                 </div>
               </div>
               <div style={{ marginBottom: 14 }}>
-                <label style={labelStyle}>{t.auth.confirmPw}</label>
-                <input type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
+                <label htmlFor="account-confirm-password" style={labelStyle}>{t.auth.confirmPw}</label>
+                <input id="account-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
               </div>
-              {error && <div style={{ color: "#f87171", fontSize: 12, marginBottom: 12, background: "rgba(248,113,113,0.1)", padding: "8px 12px", borderRadius: 6 }}>{error}</div>}
+              {error && <div role="alert" style={{ color: "#f87171", fontSize: 12, marginBottom: 12, background: "rgba(248,113,113,0.1)", padding: "8px 12px", borderRadius: 6 }}>{error}</div>}
               <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
                 {loading ? "..." : t.auth.setPw}
               </button>
@@ -2569,6 +2608,8 @@ function TrackPage({ lang, user }) {
   const [actionBusy, setActionBusy] = useState(null); // order id currently resubmitting/cancelling
   const [resubmitOpenId, setResubmitOpenId] = useState(null);
   const [resubmitFile, setResubmitFile] = useState(null); // { dataUrl, name } | null
+  // A11y: focus-trap + restore for the "payments coming soon" modal.
+  const paySoonRef = useDialogFocus(paySoon);
 
   useEffect(() => {
     if (!user) return;
@@ -2716,13 +2757,13 @@ function TrackPage({ lang, user }) {
           </div>
         ) : (
           <>
-            <label style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>{t.auth.email}</label>
-            <input type="email" inputMode="email" autoComplete="email" value={guestEmail}
+            <label htmlFor="track-guest-email" style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>{t.auth.email}</label>
+            <input id="track-guest-email" type="email" inputMode="email" autoComplete="email" value={guestEmail}
               onChange={e => setGuestEmail(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") sendTrackLink(); }}
               placeholder="your@email.com"
               style={{ width: "100%", boxSizing: "border-box", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8, marginBottom: 16 }} />
-            {guestError && <div style={{ color: "#f87171", fontSize: 13, marginBottom: 14, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{guestError}</div>}
+            {guestError && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 14, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{guestError}</div>}
             <button onClick={sendTrackLink} disabled={guestLoading || !guestEmail.trim()}
               style={{ width: "100%", background: (guestLoading || !guestEmail.trim()) ? COLORS.border : COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: (guestLoading || !guestEmail.trim()) ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>
               {guestLoading ? "..." : t.track.guestBtn}
@@ -2930,7 +2971,7 @@ function TrackPage({ lang, user }) {
       {paySoon && (
         <div onClick={(e) => { if (e.target === e.currentTarget) setPaySoon(false); }}
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)", direction: t.dir }}>
-          <div style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
+          <div ref={paySoonRef} role="dialog" aria-modal="true" aria-label={t.payment.soonTitle} onKeyDown={(e) => { if (e.key === "Escape") setPaySoon(false); }} style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
             <button onClick={() => setPaySoon(false)} aria-label={LANGS[lang].bloom.closeModal}
               style={{ position: "absolute", top: 12, insetInlineEnd: 12, width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Varela Round',sans-serif" }}>×</button>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -4369,6 +4410,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // does NOT start payment (the customer pays later from /track, once approved).
   // BLOOM gallery items + pet-name personalization are unaffected — they pay now.
   const [submittedForApproval, setSubmittedForApproval] = useState(false);
+  // A11y: focus-trap + restore for the "payments coming soon" modal.
+  const paySoonRef = useDialogFocus(showPaymentSoonModal);
   // Shipping method (Locker / Home). Locker is the cheaper default — most
   // Israeli customers prefer pickup-point delivery. The chosen price feeds
   // into total math + the per-line shipping row in the order insert, and
@@ -5815,10 +5858,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <div style={{ color: COLORS.gray, fontSize: 12, marginBottom: 6, letterSpacing: "0.05em" }}>
                 {t.payment.securedBy} <span style={{ color: COLORS.white, fontWeight: 600 }}>Tranzila</span>
               </div>
-              <div style={{ color: "#666", fontSize: 11, letterSpacing: "0.05em" }}>
+              <div style={{ color: "#8a8a8a", fontSize: 11, letterSpacing: "0.05em" }}>
                 {t.payment.acceptedCards} VISA · Mastercard · Bit · Apple Pay · Google Pay
               </div>
-              <div style={{ color: "#555", fontSize: 10.5, marginTop: 6 }}>
+              <div style={{ color: "#8a8a8a", fontSize: 10.5, marginTop: 6 }}>
                 {t.payment.businessLine}
               </div>
             </div>
@@ -5868,7 +5911,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 onClick={(e) => { if (e.target === e.currentTarget) dismissPaymentSoonModal(); }}
                 style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)" }}
               >
-                <div style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
+                <div ref={paySoonRef} role="dialog" aria-modal="true" aria-label={t.payment.soonTitle} style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
                   <button
                     onClick={dismissPaymentSoonModal}
                     aria-label={LANGS[lang].bloom.closeModal}
@@ -6735,7 +6778,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
       {cartCount > 0 && (
-        <span key={bumpKey} className="cart-badge-bump" style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${lang === "he" ? "פריטים בסל" : lang === "ru" ? "товаров в корзине" : "items in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
       )}
     </button>
   );
@@ -6763,9 +6806,9 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     return (
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
         {/* Logo → coming-soon landing */}
-        <div style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => setPage("home")}>
-          <img src="/logo.jpg" alt="Sfalim Shop" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} />
-        </div>
+        <button type="button" onClick={() => setPage("home")} aria-label={lang === "he" ? "ספלים שופ — דף הבית" : lang === "ru" ? "Sfalim Shop — главная" : "Sfalim Shop — home"} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center" }}>
+          <img src="/logo.jpg" alt="" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} />
+        </button>
         {/* Explore BLOOM + language switcher */}
         <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12, flexShrink: 0 }}>
           <button onClick={() => setPage("pets")} style={{ background: page === "pets" ? COLORS.accentDim : "transparent", border: `1px solid ${page === "pets" ? COLORS.accent : COLORS.border}`, color: page === "pets" ? COLORS.accent : COLORS.white, padding: isMobile ? "8px 14px" : "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 13 : 14, letterSpacing: "0.5px", whiteSpace: "nowrap", transition: "all 0.2s" }}
@@ -6786,8 +6829,8 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     <>
     <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
       {/* Logo - LEFT */}
-      <div style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => setPage("home")}>
-        <img src="/logo.jpg" alt="Sfalim Shop" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} /></div>
+      <button type="button" onClick={() => setPage("home")} aria-label={lang === "he" ? "ספלים שופ — דף הבית" : lang === "ru" ? "Sfalim Shop — главная" : "Sfalim Shop — home"} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center" }}>
+        <img src="/logo.jpg" alt="" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} /></button>
 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
@@ -6834,7 +6877,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
             <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
-        <button onClick={() => setMobileMenu(m => !m)} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
+        <button onClick={() => setMobileMenu(m => !m)} aria-expanded={mobileMenu} aria-controls="mobile-nav-menu" aria-label={lang === "he" ? "תפריט" : lang === "ru" ? "Меню" : "Menu"} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
       </div>}
 
       {/* Auth + Lang - RIGHT (desktop only) */}
@@ -6862,7 +6905,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
     {/* Mobile dropdown */}
     {mobileMenu && (
-      <div style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
+      <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
         {["home", "order", "pets", "about"].map(p => (
           <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
@@ -6935,6 +6978,9 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
     }
   }, [reduceMotion]);
 
+  // A11y: focus the panel when open; restore focus to the toggle on close.
+  const a11yPanelRef = useDialogFocus(open);
+
   // Cart drawer slides in from inline-end (right in LTR, left in RTL). Anchor
   // the a11y button to inline-start so the two never share the same edge.
   // On mobile the cart is full-width, so just hide the button while it's open.
@@ -6979,7 +7025,7 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
 
       {/* Accessibility panel — sits on the same inline-start side as the button. */}
       {open && (
-        <div style={{
+        <div ref={a11yPanelRef} role="dialog" aria-label={t.title} onKeyDown={e => { if (e.key === "Escape") setOpen(false); }} style={{
           position: 'fixed', bottom: 88, insetInlineStart: 24, zIndex: 9997,
           background: '#1a1a1a', border: '1px solid #2a2a2a',
           borderRadius: 16, padding: 20, width: 260, maxWidth: "calc(100vw - 48px)",
@@ -6994,9 +7040,9 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
           <div style={{ marginBottom: 16 }}>
             <div style={{ color: '#888', fontSize: 11, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t.textSize}</div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button onClick={() => setFontSize(f => Math.max(80, f - 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>−</button>
+              <button aria-label={lang === 'he' ? 'הקטן טקסט' : lang === 'ru' ? 'Уменьшить текст' : 'Decrease text size'} onClick={() => setFontSize(f => Math.max(80, f - 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>−</button>
               <div style={{ flex: 1, textAlign: 'center', color: '#FF6B35', fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{fontSize}%</div>
-              <button onClick={() => setFontSize(f => Math.min(140, f + 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>+</button>
+              <button aria-label={lang === 'he' ? 'הגדל טקסט' : lang === 'ru' ? 'Увеличить текст' : 'Increase text size'} onClick={() => setFontSize(f => Math.min(140, f + 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>+</button>
             </div>
           </div>
 
@@ -7011,7 +7057,7 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
           </button>
 
           {/* Reset */}
-          <button onClick={() => { setFontSize(100); setHighContrast(false); setReduceMotion(false); }} style={{ ...btnBase, background: 'transparent', border: '1px solid #2a2a2a', color: '#555', textAlign: 'center', marginBottom: 0 }}>
+          <button onClick={() => { setFontSize(100); setHighContrast(false); setReduceMotion(false); }} style={{ ...btnBase, background: 'transparent', border: '1px solid #2a2a2a', color: '#8a8a8a', textAlign: 'center', marginBottom: 0 }}>
             {t.reset}
           </button>
         </div>
@@ -7145,7 +7191,7 @@ function AboutPage({ lang, setPage }) {
                 {i < (t.process.length - 1) && showConnector && <div style={{ position: 'absolute', top: 24, [isRTL ? 'right' : 'left']: '60%', [isRTL ? 'left' : 'right']: '-10%', height: 1, background: `linear-gradient(to ${isRTL ? 'left' : 'right'}, #FF6B35, #2a2a2a)`, opacity: 0.4 }} />}
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,107,53,0.15)', border: '2px solid #FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#FF6B35', fontWeight: 800, fontSize: 14 }}>{step.step}</div>
                 <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>{step.title}</div>
-                <div style={{ color: '#555', fontSize: 13, lineHeight: 1.6 }}>{step.desc}</div>
+                <div style={{ color: '#8a8a8a', fontSize: 13, lineHeight: 1.6 }}>{step.desc}</div>
               </div>
             ))}
           </div>
@@ -7297,6 +7343,9 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
+  // A11y: trap focus in the drawer while open; restore to the cart button on close.
+  const cartDialogRef = useDialogFocus(open);
+
   const TR = {
     he: { title: "סל הקניות", empty: "הסל ריק", emptySub: "הוסיפו מוצרים כדי להתחיל", subtotal: "סכום ביניים", shipping: "משלוח", total: "סה״כ", checkout: "מעבר לתשלום", remove: "הסר", close: "סגירה" },
     en: { title: "Your cart", empty: "Your cart is empty", emptySub: "Add products to get started", subtotal: "Subtotal", shipping: "Shipping", total: "Total", checkout: "Proceed to checkout", remove: "Remove", close: "Close" },
@@ -7328,7 +7377,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
       }} />
 
       {/* Panel */}
-      <div style={{
+      <div ref={cartDialogRef} role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" style={{
         position: "fixed", top: 0, bottom: 0,
         insetInlineEnd: 0,
         zIndex: 1101,
@@ -7343,7 +7392,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
       }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 22px", borderBottom: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
-          <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700 }}>
+          <div id="cart-drawer-title" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700 }}>
             {`${tr.title}${cart.length > 0 ? ` (${cart.length})` : ""}`}
           </div>
           <button onClick={onClose} aria-label={tr.close} style={{
@@ -8929,7 +8978,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         <p className="reveal" data-delay="3" style={{ color: COLORS.gray, fontSize: isMobile ? 15 : 18, fontFamily: "'Varela Round',sans-serif", maxWidth: 540, margin: "0 auto 8px", lineHeight: 1.5 }}>
           {t.subheading}
         </p>
-        <p className="reveal" data-delay="4" style={{ color: "#555", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
+        <p className="reveal" data-delay="4" style={{ color: "#8a8a8a", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
           {t.subheading2 ? t.subheading2(designs.length) : ``}
         </p>
       </section>
@@ -9335,6 +9384,10 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
   return (
     <div
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={lang === "he" ? `פרטים על ${name}` : lang === "ru" ? `Подробнее: ${name}` : `View ${name}`}
+      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onTouchStart={e => { e.currentTarget.style.transform = "scale(0.97)"; }}
@@ -9571,6 +9624,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     return () => { document.body.style.overflow = ""; };
   }, []);
 
+  // A11y: trap focus inside the modal while open; restore to the trigger on close.
+  const petDialogRef = useDialogFocus(true);
+
   // Keyboard: Esc closes the zoom overlay first, then the modal. View nav (←/→)
   // lives in the shared <BloomImageCarousel>; the modal no longer browses breeds.
   useEffect(() => {
@@ -9602,6 +9658,10 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         overflowY: "auto",
       }}>
       <div
+        ref={petDialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pet-modal-title"
         onClick={e => e.stopPropagation()}
         style={{
           background: COLORS.bgCard,
@@ -9693,7 +9753,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               {`BLOOM ${LANGS[lang].bloom.collection}`}
             </div>
 
-            <h2 style={{
+            <h2 id="pet-modal-title" style={{
               fontFamily: "'Playfair Display',serif",
               fontStyle: "italic",
               fontWeight: 900,
@@ -9940,6 +10000,9 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
     return () => window.removeEventListener(`keydown`, onKey);
   }, [zoomed, viewIdx, views.length]);
 
+  // A11y: focus-trap + restore for the full-screen zoom lightbox.
+  const zoomDialogRef = useDialogFocus(zoomed);
+
   const arrowStyle = (side) => ({ position: `absolute`, top: `50%`, [side]: isMobile ? 6 : 8, transform: `translateY(-50%)`, width: isMobile ? 48 : 42, height: isMobile ? 48 : 42, border: `none`, borderRadius: `50%`, background: `rgba(0,0,0,0.55)`, color: COLORS.accent, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, zIndex: 4, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, touchAction: `manipulation`, transition: `transform 0.18s cubic-bezier(.2,.6,.2,1), background 0.18s, color 0.18s` });
 
   return (
@@ -9987,7 +10050,9 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
       </div>
 
       {zoomed && (
-        <div onClick={() => setZoomed(false)} role="dialog"
+        <div onClick={() => setZoomed(false)} role="dialog" aria-modal="true"
+          ref={zoomDialogRef}
+          onKeyDown={(e) => { if (e.key === `Escape`) setZoomed(false); }}
           aria-label={lang === `he` ? `תמונה מוגדלת` : lang === `ru` ? `Увеличенное изображение` : `Zoomed image`}
           style={{ position: `fixed`, inset: 0, zIndex: 1100, background: `rgba(0,0,0,0.95)`, backdropFilter: `blur(8px)`, WebkitBackdropFilter: `blur(8px)`, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 16, cursor: `zoom-out`, animation: `bloomZoomFadeIn 0.2s ease-out` }}>
           <SmartImage src={imgSrc} alt={name} style={{ maxWidth: `100%`, maxHeight: `100%`, objectFit: `contain`, boxShadow: `0 30px 80px rgba(0,0,0,0.6)` }} />
@@ -10018,8 +10083,9 @@ function PetNameInput({ lang, t, value, onChange }) {
         </span>
         <span style={{ background: COLORS.accent, color: `#fff`, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
       </div>
-      <label style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
+      <label htmlFor="bloom-pet-name" style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
       <input
+        id="bloom-pet-name"
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/[<>]/g, ``).slice(0, 40))}
@@ -10637,7 +10703,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
           letterSpacing: lang === "he" ? "0.04em" : "0.02em"
         }}>{BUSINESS_INFO.tagline[lang]}</div>
       </div>
-      <div style={{ position: "absolute", bottom: 56, fontSize: 12, color: "#666", fontFamily: "'Varela Round',sans-serif", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "center", padding: "0 16px" }}>
+      <div style={{ position: "absolute", bottom: 56, fontSize: 12, color: "#8a8a8a", fontFamily: "'Varela Round',sans-serif", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "center", padding: "0 16px" }}>
         <a href="/privacy" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "פרטיות" : lang === "ru" ? "Конфиденциальность" : "Privacy Policy"}
         </a>
@@ -10654,9 +10720,9 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
           {lang === "he" ? "צור קשר" : lang === "ru" ? "Контакты" : "Contact"}
         </a>
       </div>
-      <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#555", fontFamily: "'Varela Round',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#8a8a8a", fontFamily: "'Varela Round',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
         {!showStaff ? (
-          <button onClick={() => setShowStaff(true)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", padding: 4 }}>· {m.staff} ·</button>
+          <button onClick={() => setShowStaff(true)} style={{ background: "none", border: "none", color: "#8a8a8a", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", padding: 4 }}>· {m.staff} ·</button>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, direction: lang === "he" ? "rtl" : "ltr" }}>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -10802,7 +10868,7 @@ function Footer({ lang, setPage }) {
             {lang === "he" ? "עקבו אחרינו" : lang === "ru" ? "Соцсети" : "Follow Us"}
           </div>
           <a href={SOCIAL.instagram} target="_blank" rel="noopener" className="footer-contact-link" style={{ display: "inline-block", color: "#888", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.3px" }}>
-            Instagram <span style={{ color: "#555" }}>· @sfalimshop</span>
+            Instagram <span style={{ color: "#8a8a8a" }}>· @sfalimshop</span>
           </a>
         </div>
       </div>
