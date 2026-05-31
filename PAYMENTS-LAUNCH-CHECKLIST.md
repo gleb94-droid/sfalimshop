@@ -133,6 +133,32 @@ When you want approval/changes emails to actually send:
 
 ---
 
+## 🛡️ Webhook payment integrity (`tranzila-webhook`)
+
+The `tranzila-webhook` function (live on prod, **v2**; repo mirrors it — no
+redeploy) is the ONLY place that flips `orders.payment_status` to paid/failed.
+Two integrity layers:
+
+- ✅ **Layer 2 — amount verification (DONE / LIVE):** on a success notice the
+  amount Tranzila reports (`sum`) must equal the sum of the `order_group`'s
+  `orders.total` in the DB (±0.01). On mismatch the order is **NOT** marked paid
+  — it's held as `payment_status='processing'` with a `failed_reason`, a
+  `payment_amount_mismatch` event is logged, the webhook returns `409`, and
+  **no confirmation email is sent**. Prevents "paid ₪1 on a ₪100 order" /
+  tampered notices. Complements `create-payment`'s server-side amount recompute.
+- ⏳ **Layer 1 — signature verification (TODO at Tranzila sandbox):** verify the
+  notice is genuinely from Tranzila using the secret/hash mechanism for the
+  supplier account. There's a marked `// TODO (Layer 1 …)` stub in the function
+  (`TRANZILA_WEBHOOK_SECRET`). Wire it up during sandbox testing once the
+  supplier details are known — until then the webhook trusts any POST that
+  passes Layer 2. (Tracked alongside the H2 webhook-HMAC security task.)
+
+Idempotent: an already-`succeeded` order short-circuits (logged as
+`webhook_duplicate_ignored`). Every raw notice is audit-logged to
+`payment_events` before processing.
+
+---
+
 ## 🟡 FUNCTIONAL GAPS — needed for a working payment flow
 
 1. **No `#pay-success` / `#pay-fail` landing handler.**
@@ -155,10 +181,12 @@ When you want approval/changes emails to actually send:
   validates the order, blocks already-paid/cancelled, logs a `payment_events`
   row. Gated: returns 503 "payments_disabled" if `TRANZILA_SUPPLIER` is unset,
   and the client falls back to a "coming soon" modal.
-- `supabase/functions/tranzila-webhook/` — verifies `TranzilaTK`, parses the
-  callback, writes `payment_events`, and on success flips `orders` to
-  `payment_status='paid'` / `status='received'` with `paid_at`, `amount_paid`,
-  `tranzila_transaction_id`.
+- `supabase/functions/tranzila-webhook/` (v2) — parses the callback, writes
+  `payment_events`, enforces **Layer 2 amount verification** (see the Webhook
+  payment integrity section above), and on a verified success flips `orders` to
+  `payment_status='succeeded'` / `status='paid'` with `paid_at`, `amount_paid`,
+  `tranzila_transaction_id`. **Layer 1 signature verification is still TODO**
+  (sandbox).
 - CSP in `vercel.json` already allows `frame-src` + `form-action` for
   `https://*.tranzila.com`.
 - `orders` / `payment_events` schema is ready (all payment columns exist).
