@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from '@supabase/supabase-js'
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -7089,11 +7090,17 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
   }, [fontSize]);
 
   useEffect(() => {
-    if (highContrast) {
-      document.body.style.filter = 'contrast(1.4) brightness(1.1)';
-    } else {
-      document.body.style.filter = 'none';
-    }
+    // High-contrast uses a CSS `filter`, and a `filter` makes the element it's
+    // set on the containing block for ALL position:fixed descendants. Setting it
+    // on <body> therefore re-anchored the fixed a11y button/panel to the (tall)
+    // body box, dropping them to the page bottom. Apply it to #root instead —
+    // and the a11y widget is portaled to <body> (a sibling of #root, unfiltered)
+    // below — so the widget keeps its viewport-fixed position while the whole app
+    // inside #root still gets the contrast boost.
+    const target = (typeof document !== `undefined` && (document.getElementById(`root`) || document.documentElement)) || null;
+    if (!target) return;
+    target.style.filter = highContrast ? `contrast(1.4) brightness(1.1)` : `none`;
+    return () => { if (target) target.style.filter = `none`; };
   }, [highContrast]);
 
   useEffect(() => {
@@ -7127,7 +7134,7 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
 
   const btnBase = { width: '100%', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textAlign: 'start', transition: 'all 0.2s', marginBottom: 8 };
 
-  return (
+  const widget = (
     <>
       {/* Accessibility button — fixed at the bottom inline-start corner so it
           always sits on the opposite side from the cart drawer. */}
@@ -7194,6 +7201,9 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
       )}
     </>
   );
+  // Portal the widget OUT of #root so the high-contrast filter on #root can never
+  // become its containing block — keeps the button + panel viewport-fixed.
+  return typeof document !== `undefined` ? createPortal(widget, document.body) : widget;
 }
 
 // ============ ABOUT PAGE ============
