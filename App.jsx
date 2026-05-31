@@ -1420,6 +1420,7 @@ const LANGS = {
       googleBtn: "המשך עם Google", emailRequired: "אנא הזן מייל למעלה תחילה",
     },
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך", guestTitle: "מעקב אחר ההזמנה שלך", guestDesc: "לא צריך סיסמה — נשלח לך למייל קישור מאובטח לצפייה בהזמנות שלך.", guestBtn: "שלח לי קישור" },
+    approval: { submittedTitle: "העיצוב נשלח לאישור", submittedDesc: "העיצוב שלך נשלח לאישור — נעדכן אותך במייל ברגע שהוא יאושר, ואז תוכל לשלם. ההזמנה נשמרה.", underReview: "העיצוב בבדיקה", underReviewDesc: "שלחנו את העיצוב שלך לאישור. נעדכן אותך במייל ברגע שהוא יאושר — ואז אפשר יהיה לשלם.", approvedTitle: "העיצוב אושר! 🎉", approvedDesc: "אפשר להשלים את התשלום וההזמנה תיכנס להפקה.", payNow: "שלם עכשיו", changesTitle: "נדרשים שינויים בעיצוב", reviewNote: "הערה מהצוות שלנו", editResubmit: "ערוך ושלח מחדש", uploadNew: "העלה עיצוב חדש (לא חובה)", resubmitBtn: "שלח מחדש לאישור", resubmitting: "שולח...", resubmitted: "נשלח מחדש — העיצוב בבדיקה שוב", cancelOrder: "בטל הזמנה", cancelConfirm: "לבטל את ההזמנה הזו?", cancelled: "ההזמנה בוטלה" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
     products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
@@ -1463,6 +1464,7 @@ const LANGS = {
       googleBtn: "Continue with Google", emailRequired: "Please enter your email above first",
     },
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
+    approval: { submittedTitle: "Your design was submitted for approval", submittedDesc: "Your design was submitted for approval — we'll email you once it's approved, then you can pay. Your order is saved.", underReview: "Design under review", underReviewDesc: "We've sent your design for approval. We'll email you the moment it's approved — then you can pay.", approvedTitle: "Design approved! 🎉", approvedDesc: "Complete payment and your order goes into production.", payNow: "Pay now", changesTitle: "Changes requested", reviewNote: "Note from our team", editResubmit: "Edit & resubmit", uploadNew: "Upload a new design (optional)", resubmitBtn: "Resubmit for approval", resubmitting: "Submitting...", resubmitted: "Resubmitted — under review again", cancelOrder: "Cancel order", cancelConfirm: "Cancel this order?", cancelled: "Order cancelled" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
     products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
@@ -1506,6 +1508,7 @@ const LANGS = {
       googleBtn: "Продолжить с Google", emailRequired: "Сначала введите email выше",
     },
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
+    approval: { submittedTitle: "Ваш дизайн отправлен на одобрение", submittedDesc: "Ваш дизайн отправлен на одобрение — мы сообщим по email, как только он будет одобрен, тогда можно оплатить. Заказ сохранён.", underReview: "Дизайн на проверке", underReviewDesc: "Мы отправили ваш дизайн на одобрение. Сообщим по email, как только он будет одобрен — тогда можно оплатить.", approvedTitle: "Дизайн одобрен! 🎉", approvedDesc: "Завершите оплату, и заказ отправится в производство.", payNow: "Оплатить", changesTitle: "Требуются изменения", reviewNote: "Комментарий нашей команды", editResubmit: "Изменить и отправить снова", uploadNew: "Загрузить новый дизайн (необязательно)", resubmitBtn: "Отправить на одобрение снова", resubmitting: "Отправка...", resubmitted: "Отправлено повторно — снова на проверке", cancelOrder: "Отменить заказ", cancelConfirm: "Отменить этот заказ?", cancelled: "Заказ отменён" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
     products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
@@ -2559,6 +2562,13 @@ function TrackPage({ lang, user }) {
   const [guestLoading, setGuestLoading] = useState(false);
   const [guestError, setGuestError] = useState("");
   const [guestSent, setGuestSent] = useState(false);
+  // Design-approval flow (custom uploads): pay-now redirect, resubmit panel,
+  // and the shared "payments coming soon" modal (reused while Tranzila is off).
+  const [paySoon, setPaySoon] = useState(false);
+  const [payBusy, setPayBusy] = useState(null);       // order id currently paying
+  const [actionBusy, setActionBusy] = useState(null); // order id currently resubmitting/cancelling
+  const [resubmitOpenId, setResubmitOpenId] = useState(null);
+  const [resubmitFile, setResubmitFile] = useState(null); // { dataUrl, name } | null
 
   useEffect(() => {
     if (!user) return;
@@ -2607,6 +2617,89 @@ function TrackPage({ lang, user }) {
       setGuestError(err.message);
     }
     setGuestLoading(false);
+  };
+
+  // ── Design-approval customer actions ──────────────────────────────────────
+  // Pay for an approved order. Mirrors the checkout pay flow: when PAYMENTS_ENABLED
+  // is off (no Tranzila supplier yet) we show the same "coming soon" modal; the
+  // edge function returns 503 payments_disabled, which we also route to that modal.
+  // The charge amount is recomputed server-side from orders.total — we never send it.
+  const payForApprovedOrder = async (order) => {
+    if (!PAYMENTS_ENABLED) { setPaySoon(true); return; }
+    setPayBusy(order.id);
+    try {
+      const { data, error } = await supabase.functions.invoke(`create-payment`, {
+        body: {
+          order_group: order.order_group || order.id,
+          currency: `ILS`,
+          customer: { name: order.customer_name, email: order.customer_email, phone: order.customer_phone },
+        },
+      });
+      if (error) {
+        const code = String(error.message || ``).toLowerCase();
+        if (code.includes(`payments_disabled`) || code.includes(`503`)) { setPayBusy(null); setPaySoon(true); return; }
+        throw error;
+      }
+      if (data && data.redirect_url) { window.location.href = data.redirect_url; return; }
+      throw new Error(`No redirect_url returned from create-payment`);
+    } catch (e) {
+      setPayBusy(null);
+      alert(`Payment error: ${e.message || e}`);
+    }
+  };
+
+  // Read a chosen file to a data URL for the optional design replacement.
+  const onResubmitFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setResubmitFile({ dataUrl: reader.result, name: file.name });
+    reader.readAsDataURL(file);
+  };
+
+  // Resubmit a rejected design: optionally upload a new image, then flip the
+  // status back to 'pending'. The DB only permits rejected -> pending for the
+  // customer, so this is the single allowed transition.
+  const resubmitDesign = async (order) => {
+    setActionBusy(order.id);
+    try {
+      const updates = { design_approval_status: `pending` };
+      if (resubmitFile && resubmitFile.dataUrl) {
+        const res = await fetch(resubmitFile.dataUrl);
+        const blob = await res.blob();
+        const ext = blob.type.includes(`png`) ? `png` : `jpg`;
+        const fileName = `design-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { data: up, error: upErr } = await supabase.storage.from(`designs`).upload(fileName, blob, { contentType: blob.type, upsert: false });
+        if (!upErr && up) {
+          const { data: urlData } = supabase.storage.from(`designs`).getPublicUrl(fileName);
+          updates.design_url = urlData.publicUrl;
+          updates.mockup_url = null; // re-composite from the saved position on display
+        }
+      }
+      const { error } = await supabase.from(`orders`).update(updates).eq(`id`, order.id);
+      if (error) throw error;
+      setOrders(os => os.map(o => o.id === order.id ? { ...o, ...updates } : o));
+      setResubmitOpenId(null);
+      setResubmitFile(null);
+    } catch (e) {
+      alert(`Error: ${e.message || e}`);
+    }
+    setActionBusy(null);
+  };
+
+  // Cancel an order from the approval flow. We only touch `status` — the
+  // payment columns are server-protected and a customer write to them is a no-op.
+  const cancelApprovalOrder = async (order) => {
+    if (!window.confirm(t.approval.cancelConfirm)) return;
+    setActionBusy(order.id);
+    try {
+      const { error } = await supabase.from(`orders`).update({ status: `cancelled` }).eq(`id`, order.id);
+      if (error) throw error;
+      setOrders(os => os.map(o => o.id === order.id ? { ...o, status: `cancelled` } : o));
+    } catch (e) {
+      alert(`Error: ${e.message || e}`);
+    }
+    setActionBusy(null);
   };
 
   if (!user) return (
@@ -2661,6 +2754,10 @@ function TrackPage({ lang, user }) {
                 const si = getStageIndex(order.status);
                 const stage = ORDER_STAGES[si] || ORDER_STAGES[0];
                 const isOpen = selected === order.id;
+                const ap = order.design_approval_status;
+                const isCancelled = order.status === "cancelled";
+                const needsApproval = !isCancelled && ap && ap !== "not_required";
+                const apMeta = { pending: { label: t.approval.underReview, color: "#facc15" }, approved: { label: t.approval.approvedTitle, color: COLORS.success }, rejected: { label: t.approval.changesTitle, color: "#f87171" } }[ap];
                 return (
                   <div key={order.id} className="reveal" data-delay={String((idx % 6) + 1)} style={{ background: COLORS.bgCard, border: `1px solid ${isOpen ? COLORS.accent : COLORS.border}`, borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}>
                     <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -2673,13 +2770,68 @@ function TrackPage({ lang, user }) {
                       </div>
                       <div style={{ textAlign: "end" }}>
                         <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{order.total}</div>
-                        <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4, display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 8px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
+                        {isCancelled ? (
+                          <div style={{ color: "#f87171", fontSize: 13, marginTop: 4, display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#f87171" }}></span>{t.approval.cancelled}</div>
+                        ) : needsApproval ? (
+                          <div style={{ color: apMeta.color, fontSize: 13, marginTop: 4, display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end", fontWeight: 700 }}><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: apMeta.color, boxShadow: `0 0 8px ${apMeta.color}66` }}></span>{apMeta.label}</div>
+                        ) : (
+                          <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 4, display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 8px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
+                        )}
                       </div>
                       </div>
                     </div>
 
                     {isOpen && (
                       <div style={{ padding: "0 24px 24px", borderTop: `1px solid ${COLORS.border}` }}>
+                        {/* ── Custom-design approval state ── */}
+                        {isCancelled && (
+                          <div style={{ marginTop: 20, background: "rgba(248,113,113,0.08)", border: `1px solid rgba(248,113,113,0.4)`, borderRadius: 12, padding: "14px 18px", color: "#f87171", fontSize: 14, fontWeight: 700 }}>
+                            {t.approval.cancelled}
+                          </div>
+                        )}
+                        {needsApproval && ap === "pending" && (
+                          <div style={{ marginTop: 20, background: "rgba(250,204,21,0.07)", border: `1px solid rgba(250,204,21,0.4)`, borderRadius: 12, padding: "16px 18px" }}>
+                            <div style={{ color: "#facc15", fontWeight: 700, fontSize: 15, marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}><span aria-hidden="true">🔍</span>{t.approval.underReview}</div>
+                            <div style={{ color: COLORS.gray, fontSize: 13.5, lineHeight: 1.6 }}>{t.approval.underReviewDesc}</div>
+                          </div>
+                        )}
+                        {needsApproval && ap === "approved" && (
+                          <div style={{ marginTop: 20, background: "rgba(74,222,128,0.07)", border: `1px solid rgba(74,222,128,0.4)`, borderRadius: 12, padding: "16px 18px" }}>
+                            <div style={{ color: COLORS.success, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{t.approval.approvedTitle}</div>
+                            <div style={{ color: COLORS.gray, fontSize: 13.5, lineHeight: 1.6, marginBottom: 14 }}>{t.approval.approvedDesc}</div>
+                            <button onClick={() => payForApprovedOrder(order)} disabled={payBusy === order.id}
+                              style={{ width: "100%", background: payBusy === order.id ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accent} 0%, #FF8855 100%)`, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", fontSize: 16, fontWeight: 700, cursor: payBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: payBusy === order.id ? "none" : "0 8px 24px rgba(255,107,53,0.35)" }}>
+                              {payBusy === order.id ? "..." : `${t.approval.payNow} · ₪${order.total}`}
+                            </button>
+                          </div>
+                        )}
+                        {needsApproval && ap === "rejected" && (
+                          <div style={{ marginTop: 20, background: "rgba(248,113,113,0.07)", border: `1px solid rgba(248,113,113,0.4)`, borderRadius: 12, padding: "16px 18px" }}>
+                            <div style={{ color: "#f87171", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>{t.approval.changesTitle}</div>
+                            {order.design_review_note && (
+                              <div style={{ background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", marginBottom: 14 }}>
+                                <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>{t.approval.reviewNote}</div>
+                                <div style={{ color: COLORS.white, fontSize: 13.5, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{order.design_review_note}</div>
+                              </div>
+                            )}
+                            {resubmitOpenId === order.id ? (
+                              <div style={{ background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", marginBottom: 12 }}>
+                                <label style={{ display: "block", color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.approval.uploadNew}</label>
+                                <input type="file" accept="image/*" onChange={onResubmitFile} style={{ color: COLORS.gray, fontSize: 12, marginBottom: 10, width: "100%" }} />
+                                {resubmitFile && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}><img src={resubmitFile.dataUrl} alt="" style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 4, border: `1px solid ${COLORS.border}` }} /><span style={{ color: COLORS.success, fontSize: 12 }}>✓ {resubmitFile.name}</span></div>}
+                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                  <button onClick={() => resubmitDesign(order)} disabled={actionBusy === order.id} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{actionBusy === order.id ? t.approval.resubmitting : t.approval.resubmitBtn}</button>
+                                  <button onClick={() => { setResubmitOpenId(null); setResubmitFile(null); }} disabled={actionBusy === order.id} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 16px", fontSize: 13, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>✕</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                                <button onClick={() => { setResubmitOpenId(order.id); setResubmitFile(null); }} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "11px 20px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.editResubmit}</button>
+                                <button onClick={() => cancelApprovalOrder(order)} disabled={actionBusy === order.id} style={{ background: "transparent", color: "#f87171", border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: "11px 20px", fontSize: 13.5, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.cancelOrder}</button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {order.design_url && (
                           <div style={{ marginTop: 20, display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
                             <div>
@@ -2772,6 +2924,24 @@ function TrackPage({ lang, user }) {
           )
         }
       </div>
+
+      {/* Payments-coming-soon modal — reused while Tranzila is off (the
+          create-payment 503 / PAYMENTS_ENABLED=false path lands here). */}
+      {paySoon && (
+        <div onClick={(e) => { if (e.target === e.currentTarget) setPaySoon(false); }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)", direction: t.dir }}>
+          <div style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
+            <button onClick={() => setPaySoon(false)} aria-label={LANGS[lang].bloom.closeModal}
+              style={{ position: "absolute", top: 12, insetInlineEnd: 12, width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Varela Round',sans-serif" }}>×</button>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+              <span style={{ width: 14, height: 14, borderRadius: "50%", background: COLORS.accent, display: "inline-block", boxShadow: `0 0 30px rgba(255,107,53,0.7)` }}></span>
+            </div>
+            <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
+            <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
+            <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -3083,6 +3253,7 @@ function AdminPage({ lang }) {
     { id: `admin-pets`, label: `BLOOM` },
     { id: `admin-packs`, label: lang === `he` ? `מדבקות` : lang === `ru` ? `Наклейки` : `Sticker packs` },
     { id: `admin-blog`, label: t.navBlog || `Blog` },
+    { id: `admin-approvals`, label: lang === `he` ? `אישור עיצובים` : lang === `ru` ? `Одобрение дизайнов` : `Design approvals` },
     { id: `admin-waitlist`, label: lang === `he` ? `רשימת המתנה` : lang === `ru` ? `Лист ожидания` : `Waitlist` },
   ];
   const [activeSection, setActiveSection] = useState(`admin-orders`);
@@ -3135,6 +3306,23 @@ function AdminPage({ lang }) {
     return (m[s] && (m[s][lang] || m[s].en)) || s;
   };
   const wlDate = (d) => { try { return new Date(d).toLocaleDateString(lang === `he` ? `he-IL` : lang === `ru` ? `ru-RU` : `en-US`, { day: `2-digit`, month: `2-digit`, year: `numeric` }); } catch { return ``; } };
+
+  // ── Pending design-approval queue (custom uploads awaiting review) ──
+  // Derived from the live orders list (the realtime subscription keeps it fresh),
+  // newest first. Approve / request-changes write back via reviewDesign().
+  const pendingApprovals = orders
+    .filter(o => o.design_approval_status === `pending`)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  const reviewDesign = async (orderId, decision) => {
+    const updates = { design_approval_status: decision, design_reviewed_at: new Date().toISOString() };
+    if (decision === `rejected`) {
+      const note = window.prompt(lang === `he` ? `מה צריך לתקן בעיצוב? (ההערה תישלח ללקוח)` : lang === `ru` ? `Что нужно изменить? (комментарий увидит клиент)` : `What needs to change? (the customer will see this note)`);
+      if (note === null) return; // admin cancelled the prompt
+      updates.design_review_note = note;
+    }
+    await supabase.from(`orders`).update(updates).eq(`id`, orderId);
+    fetchOrders();
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
@@ -3613,6 +3801,75 @@ function AdminPage({ lang }) {
         {/* ===== Blog manager — full CRUD for blog_posts (Slice 2) ===== */}
         <div id="admin-blog">
           <BlogAdmin uploadAdminImage={uploadAdminImage} lang={lang} />
+        </div>
+
+        {/* ===== Pending design-approval queue — custom uploads awaiting review ===== */}
+        <div id="admin-approvals" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ marginBottom: 20 }}>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+              {lang === `he` ? `אישור עיצובים` : lang === `ru` ? `Одобрение дизайнов` : `Pending design approval`}
+            </h2>
+            <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
+              {loading
+                ? (lang === `he` ? `טוען...` : lang === `ru` ? `Загрузка...` : `Loading...`)
+                : `${pendingApprovals.length} ${lang === `he` ? `ממתינים לאישור` : lang === `ru` ? `ожидают одобрения` : `awaiting review`}`}
+            </p>
+          </div>
+
+          {!loading && pendingApprovals.length === 0 && (
+            <div style={{ textAlign: `center`, padding: `32px 0`, color: COLORS.gray, fontSize: 14 }}>
+              {lang === `he` ? `אין עיצובים שממתינים לאישור 🎉` : lang === `ru` ? `Нет дизайнов на проверке 🎉` : `No designs awaiting approval 🎉`}
+            </div>
+          )}
+
+          {!loading && pendingApprovals.length > 0 && (
+            <div style={{ display: `flex`, flexDirection: `column`, gap: 14 }}>
+              {pendingApprovals.map(o => (
+                <div key={o.id} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: 16, display: `flex`, gap: 16, flexWrap: `wrap`, alignItems: `flex-start` }}>
+                  {/* Design + mockup thumbnails */}
+                  <div style={{ display: `flex`, gap: 10, flexShrink: 0 }}>
+                    {o.design_url && (
+                      <div>
+                        <div style={{ color: COLORS.gray, fontSize: 10, fontWeight: 600, textTransform: `uppercase`, marginBottom: 4 }}>{lang === `he` ? `העיצוב` : lang === `ru` ? `Дизайн` : `Design`}</div>
+                        <a href={o.design_url} target="_blank" rel="noreferrer" style={{ display: `block`, width: 110, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: 6 }}>
+                          <SmartImage src={o.design_url} alt="Uploaded design" style={{ width: `100%`, display: `block`, borderRadius: 4 }} />
+                        </a>
+                      </div>
+                    )}
+                    {o.mockup_url && o.mockup_url !== o.design_url && (
+                      <div>
+                        <div style={{ color: COLORS.gray, fontSize: 10, fontWeight: 600, textTransform: `uppercase`, marginBottom: 4 }}>{lang === `he` ? `תצוגה` : lang === `ru` ? `Превью` : `Mockup`}</div>
+                        <div style={{ width: 110, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: 6 }}>
+                          <SmartImage src={o.mockup_url} alt="Order mockup" style={{ width: `100%`, display: `block`, borderRadius: 4 }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {/* Order info + actions */}
+                  <div style={{ flex: 1, minWidth: 220 }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{o.customer_name}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 12, wordBreak: `break-all` }}>{o.customer_email}{o.customer_phone ? ` · ${o.customer_phone}` : ``}</div>
+                    <div style={{ color: COLORS.white, fontSize: 13, marginTop: 8 }}>{localizeProduct(o.product, lang)} · {localizeVariant(o.variant, lang)} × {o.quantity} · <span style={{ color: COLORS.accent, fontWeight: 700 }}>₪{o.total}</span></div>
+                    {o.pet_name && (
+                      <div style={{ display: `inline-flex`, alignItems: `center`, gap: 5, background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `3px 9px`, marginTop: 6, color: COLORS.accent, fontSize: 12, fontWeight: 700 }}>
+                        <span aria-hidden="true">🐾</span>{lang === `he` ? `שם החיה` : lang === `ru` ? `Имя питомца` : `Pet name`}: {o.pet_name}
+                      </div>
+                    )}
+                    {o.notes && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6, background: COLORS.bg, padding: `7px 10px`, borderRadius: 6 }}>{o.notes}</div>}
+                    <div style={{ color: COLORS.grayLight, fontSize: 11, marginTop: 6 }}>{wlDate(o.created_at)} · {timeAgo(o.created_at, lang)}</div>
+                    <div style={{ display: `flex`, gap: 10, marginTop: 12, flexWrap: `wrap` }}>
+                      <button onClick={() => reviewDesign(o.id, `approved`)} style={{ background: COLORS.success, color: `#0f0f0f`, border: `none`, borderRadius: 8, padding: `10px 20px`, fontSize: 13.5, fontWeight: 700, cursor: `pointer`, fontFamily: "'Varela Round',sans-serif" }}>
+                        ✓ {lang === `he` ? `אשר` : lang === `ru` ? `Одобрить` : `Approve`}
+                      </button>
+                      <button onClick={() => reviewDesign(o.id, `rejected`)} style={{ background: `transparent`, color: `#f87171`, border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: `10px 20px`, fontSize: 13.5, fontWeight: 700, cursor: `pointer`, fontFamily: "'Varela Round',sans-serif" }}>
+                        ✎ {lang === `he` ? `בקש שינויים` : lang === `ru` ? `Запросить изменения` : `Request changes`}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ===== Waitlist dashboard (read-only) — Task 10 ===== */}
@@ -4107,6 +4364,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [pendingTotal, setPendingTotal] = useState(0);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [showPaymentSoonModal, setShowPaymentSoonModal] = useState(false);
+  // Custom-upload design approval: when the cart contains an item the customer
+  // uploaded their OWN image for, checkout submits the order(s) for review and
+  // does NOT start payment (the customer pays later from /track, once approved).
+  // BLOOM gallery items + pet-name personalization are unaffected — they pay now.
+  const [submittedForApproval, setSubmittedForApproval] = useState(false);
   // Shipping method (Locker / Home). Locker is the cheaper default — most
   // Israeli customers prefer pickup-point delivery. The chosen price feeds
   // into total math + the per-line shipping row in the order insert, and
@@ -4605,6 +4867,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
     try {
       const createdOrderIds = [];
+      // Does this checkout contain a customer-uploaded custom design? If so the
+      // whole group waits for design approval before payment (you can't pay for
+      // half a cart). BLOOM / pet-name items carry an https design URL; only a
+      // user file upload arrives as a data: URL — that's the discriminator.
+      let groupNeedsApproval = false;
       for (let i = 0; i < cart.length; i++) {
         const it = cart[i];
 
@@ -4660,6 +4927,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         const itemTotal = it.itemPrice + (i === 0 ? shippingPrice : 0);
 
+        // Custom upload = the customer's own image (a data: URL pre-upload).
+        // BLOOM items carry an https:// design URL and skip approval.
+        const isCustomUpload = !!(it.uploadedImage && !/^https?:\/\//i.test(it.uploadedImage));
+        if (isCustomUpload) groupNeedsApproval = true;
+
         // Snapshot what the customer saw into one flattened mockup image.
         // BLOOM items already carry a public mockup URL (uploadDesignImage
         // returns http(s) URLs as-is). Mug Studio items carry a data URL —
@@ -4689,6 +4961,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           product: itProduct.name, variant: itVariant.label, color: it.color,
           quantity: it.qty, total: itemTotal, notes: form.notes,
           pet_name: it.petName || null,
+          // Custom uploads must be approved before payment. We set the status
+          // explicitly (the DB default is 'not_required' and there is no
+          // auto-set trigger, so relying on a default would never queue it).
+          requires_design_approval: isCustomUpload,
+          design_approval_status: isCustomUpload ? "pending" : "not_required",
           status: "pending_payment",
           payment_status: "idle",
           currency: "ILS",
@@ -4754,7 +5031,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       setPendingTotal(confirmedTotal);
 
       allowLeaveRef.current = true;
-      setStep(4);
+      if (groupNeedsApproval) {
+        // Custom design(s) submitted — skip payment. The customer pays later
+        // from /track once we approve. Go straight to the confirmation screen
+        // (it shows the "submitted for approval" message instead of payment).
+        setSubmittedForApproval(true);
+        setCart([]);
+        setStep(5);
+      } else {
+        setSubmittedForApproval(false);
+        setStep(4);
+      }
     } catch (e) {
       alert(`Error: ${e.message || e}`);
     }
@@ -5612,9 +5899,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         {step === 5 && (
           <div style={{ textAlign: "center", padding: "20px 0 60px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 88, height: 88, borderRadius: "50%", background: "rgba(34,197,94,0.12)", border: "2px solid #22c55e", marginBottom: 24, fontSize: 44 }}>✓</div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.confirm.title}</h2>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 88, height: 88, borderRadius: "50%", background: submittedForApproval ? "rgba(255,107,53,0.12)" : "rgba(34,197,94,0.12)", border: `2px solid ${submittedForApproval ? COLORS.accent : "#22c55e"}`, marginBottom: 24, fontSize: 44 }}>{submittedForApproval ? "🎨" : "✓"}</div>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{submittedForApproval ? t.approval.submittedTitle : t.confirm.title}</h2>
             <p style={{ color: COLORS.gray, fontSize: 15, marginBottom: 24 }}>{t.confirm.subtitle}</p>
+
+            {submittedForApproval && (
+              <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 12, padding: "16px 20px", maxWidth: 520, margin: "0 auto 24px", color: COLORS.white, fontSize: 14.5, lineHeight: 1.7 }}>
+                {t.approval.submittedDesc}
+              </div>
+            )}
 
             {pendingOrderGroupId && (
               <div style={{ display: "inline-block", background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: "10px 20px", marginBottom: 28 }}>
@@ -5676,7 +5969,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
-              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" }); setQty(1); setPendingOrderGroupId(null); setPendingOrderIds([]); setPendingTotal(0); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
+              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" }); setQty(1); setPendingOrderGroupId(null); setPendingOrderIds([]); setPendingTotal(0); setSubmittedForApproval(false); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
             </div>
           </div>
         )}
