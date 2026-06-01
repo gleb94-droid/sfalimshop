@@ -1507,7 +1507,7 @@ const CUSTOM_STICKERS_ENABLED = false;
 // Flip to true ONLY after: (a) `create-payment` is deployed, (b) supplier
 // number is set in env `TRANZILA_SUPPLIER`, (c) `tranzila-webhook` callback
 // flips orders.payment_status correctly in a sandbox test.
-const PAYMENTS_ENABLED = false;
+const PAYMENTS_ENABLED = true;
 
 // Versioned key for the in-browser cart mirror. Bump the suffix if the cart
 // item shape changes in a non-backwards-compatible way, so stale shapes
