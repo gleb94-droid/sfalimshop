@@ -5324,6 +5324,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         // Custom design(s) submitted — skip payment. The customer pays later
         // from /track once we approve. Go straight to the confirmation screen
         // (it shows the "submitted for approval" message instead of payment).
+        //
+        // Notify the business that a custom design is waiting for review. This is
+        // the ONLY pre-payment notification (the normal purchase path stays
+        // email-free until the webhook confirms payment). Fire-and-forget: a
+        // failed invoke must never block or break the customer's submission.
+        supabase.functions
+          .invoke(`notify-design-submission`, { body: { orderGroup: orderGroupId } })
+          .catch(() => {});
         setSubmittedForApproval(true);
         setCart([]);
         setStep(5);
