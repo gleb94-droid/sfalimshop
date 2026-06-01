@@ -1517,6 +1517,17 @@ const PAYMENTS_ENABLED = true;
 // don't trip up the new code on a returning visitor.
 const CART_STORAGE_KEY = `sxp_cart_v1`;
 
+// Central hash reader. Tranzila (and some redirectors) HTML-encode the ampersand
+// in our return URL, so the success hash can arrive as
+// `#track?order_group=grp-123&amp;paid=1` — which would make `paid` parse as the
+// param `amp;paid` and never be detected. Decode `&amp;` back to `&` BEFORE any
+// hash/query parsing, in one place, so it can't bite us anywhere. Always read the
+// hash through this helper (never window.location.hash directly) when parsing.
+function rawHash() {
+  if (typeof window === `undefined`) return ``;
+  return (window.location.hash || ``).replace(/&amp;/gi, `&`);
+}
+
 const IL_PREFIXES = [
   { value: "050" }, { value: "052" }, { value: "053" },
   { value: "054" }, { value: "055" }, { value: "057" }, { value: "058" },
@@ -2723,7 +2734,7 @@ function AccountSettings({ lang }) {
 }
 
 // Order Tracker
-function TrackPage({ lang, user }) {
+function TrackPage({ lang, user, clearCart }) {
   const t = LANGS[lang];
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2751,7 +2762,7 @@ function TrackPage({ lang, user }) {
   // never set it. Safe if visited directly (no order_group → friendly fallback).
   const [payReturn] = useState(() => {
     if (typeof window === `undefined`) return null;
-    const h = window.location.hash || ``;
+    const h = rawHash();
     const qi = h.indexOf(`?`);
     if (qi === -1) return null;
     const p = new URLSearchParams(h.slice(qi + 1));
@@ -2768,8 +2779,15 @@ function TrackPage({ lang, user }) {
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error || !data || data.length === 0) { setPayReturnStatus(`unknown`); return; }
-        const paid = data.some(o => o.payment_status === `succeeded` || o.payment_status === `paid` || o.status === `paid`);
-        setPayReturnStatus(paid ? `succeeded` : `processing`);
+        // Success is gated STRICTLY on payment_status === 'succeeded' (the value
+        // the Tranzila webhook writes on a confirmed charge). Never infer success
+        // from order status alone.
+        const succeeded = data.some(o => o.payment_status === `succeeded`);
+        setPayReturnStatus(succeeded ? `succeeded` : `processing`);
+        // Clear the cart ONLY on a confirmed-succeeded payment return — never on
+        // a failure or an unconfirmed/processing return. Guarded by `succeeded`
+        // above so we can't wipe a cart that wasn't actually paid for.
+        if (succeeded && typeof clearCart === `function`) clearCart();
       });
     return () => { cancelled = true; };
   }, []);
@@ -4614,7 +4632,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // UI-ONLY: surfaces a clear retry path. Safe if visited directly.
   const [payFailed, setPayFailed] = useState(() => {
     if (typeof window === `undefined`) return false;
-    const h = window.location.hash || ``;
+    const h = rawHash();
     const qi = h.indexOf(`?`);
     if (qi === -1) return false;
     return new URLSearchParams(h.slice(qi + 1)).get(`paid`) === `0`;
@@ -5289,29 +5307,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         }
       }
 
-      // Fire order-confirmation + admin-alert emails exactly once, right after the
-      // orders insert succeeds. Non-blocking: failures are logged but never block
-      // the checkout flow. Moved out of the payment-soon modal CTA so the email
-      // sends regardless of how that modal is closed.
+      // NO email is sent here. Order emails (customer confirmation + business
+      // alert) are sent SERVER-SIDE by the Tranzila webhook only AFTER a payment
+      // is confirmed succeeded — so nothing goes out before payment. The previous
+      // pre-payment send-order-confirmation + send-admin-order-alert calls were
+      // removed; do not re-add them.
       const confirmedTotal = cartItemsTotal + shippingPrice;
-      Promise.all([
-        supabase.functions.invoke(`send-order-confirmation`, {
-          body: {
-            customerName: form.name,
-            customerEmail: form.email,
-            product: cart.map(c => c.productName).join(`, `),
-            variant: `${cart.length} items`,
-            quantity: cart.reduce((s, c) => s + c.qty, 0),
-            total: confirmedTotal,
-            orderId: orderGroupId,
-            orderGroup: orderGroupId,
-            language: lang,
-          },
-        }),
-        supabase.functions.invoke(`send-admin-order-alert`, {
-          body: { orderGroup: orderGroupId },
-        }),
-      ]).catch(emailErr => console.error(`Order email send failed:`, emailErr));
 
       // Save context for the payment step.
       setPendingOrderGroupId(orderGroupId);
@@ -6060,7 +6061,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   // Supabase client returns 503 errors as FunctionsHttpError;
                   // we want to land back on the existing "coming soon" UX
                   // (which is graceful, since the order rows are already
-                  // saved and emails already sent) instead of an alert.
+                  // saved; no email is sent until payment is confirmed) instead
+                  // of an alert.
                   if (error) {
                     const code = String(error.message || ``).toLowerCase();
                     if (code.includes(`payments_disabled`) || code.includes(`503`)) {
@@ -7828,7 +7830,7 @@ export default function App() {
     // #blog) so the canonical #/blog/<slug> share/OG/sitemap URLs resolve too.
     // Existing routes (#pets, #order, #policies/...) have no leading slash and
     // are unaffected.
-    const hash = window.location.hash.replace('#', '').replace(/^\//, '');
+    const hash = rawHash().replace('#', '').replace(/^\//, '');
     const root = hash.split('/')[0].split('?')[0];
     return VALID_PAGES.includes(root) ? root : 'home';
   };
@@ -7893,6 +7895,14 @@ export default function App() {
       // Persistence is a nice-to-have; the in-memory cart still works.
     }
   }, [cart]);
+  // Wipe the cart completely — in-memory state AND the localStorage mirror.
+  // Called ONLY on a confirmed-succeeded payment return (see TrackPage), so
+  // purchased items don't linger after checkout. setCart([]) already triggers the
+  // effect above to remove the key; we also remove it directly to be certain.
+  const clearCart = () => {
+    setCart([]);
+    try { window.localStorage.removeItem(CART_STORAGE_KEY); } catch (_) {}
+  };
   const [cartOpen, setCartOpen] = useState(false);
   // True once the user has explicitly closed the cart drawer (or proceeded to
   // checkout from it). The /order auto-open effect respects this flag so the
@@ -8583,7 +8593,7 @@ export default function App() {
               ? <BlogPost slug={blogSlug} lang={lang} goToBlog={goToBlog} setPage={setPage} onShareToast={showToast} />
               : <BlogIndex lang={lang} goToBlog={goToBlog} />)}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
-            {page === "track" && <TrackPage lang={lang} user={user} />}
+            {page === "track" && <TrackPage lang={lang} user={user} clearCart={clearCart} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
             {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
@@ -9054,7 +9064,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
     const applyHash = () => {
       // Tolerate a leading slash ("#/pets..." as well as "#pets...") so deep
       // links from the blog / other tabs resolve the same as in-app navigation.
-      const hash = (window.location.hash || "").replace("#", "").replace(/^\//, "");
+      const hash = rawHash().replace("#", "").replace(/^\//, "");
       const path = hash.split("?")[0];
       const parts = path.split("/");
       if (parts[0] !== "pets") return;
@@ -11116,7 +11126,7 @@ function PoliciesPage({ lang }) {
   const sectionFromURL = (() => {
     if (typeof window === "undefined") return "refund";
     if (PATH_TO_SECTION[window.location.pathname]) return PATH_TO_SECTION[window.location.pathname];
-    return (window.location.hash.split("?")[0].replace("#", "") || "").split("/")[1] || "refund";
+    return (rawHash().split("?")[0].replace("#", "") || "").split("/")[1] || "refund";
   })();
   const [activeSection, setActiveSection] = useState(sectionFromURL);
   const content = POLICIES[lang] || POLICIES.he;
@@ -11124,7 +11134,7 @@ function PoliciesPage({ lang }) {
 
   useEffect(() => {
     const onHashChange = () => {
-      const s = (window.location.hash.replace("#", "") || "").split("/")[1] || "refund";
+      const s = (rawHash().replace("#", "") || "").split("/")[1] || "refund";
       setActiveSection(s);
     };
     window.addEventListener("hashchange", onHashChange);
@@ -11519,7 +11529,7 @@ function formatBlogDate(iso, lang) {
 // useState initializer + popstate handler can call it.
 function parseBlogSlugFromHash() {
   if (typeof window === `undefined`) return null;
-  const h = window.location.hash.replace(`#`, ``).replace(/^\//, ``);
+  const h = rawHash().replace(`#`, ``).replace(/^\//, ``);
   const path = h.split(`?`)[0];
   const parts = path.split(`/`);
   if (parts[0] !== `blog`) return null;
@@ -11530,7 +11540,7 @@ function parseBlogSlugFromHash() {
 // ?slug= form is also tolerated for symmetry with the /pets deep links.
 function parseBreedSlugFromHash() {
   if (typeof window === `undefined`) return null;
-  const h = window.location.hash.replace(`#`, ``).replace(/^\//, ``);
+  const h = rawHash().replace(`#`, ``).replace(/^\//, ``);
   const path = h.split(`?`)[0];
   const parts = path.split(`/`);
   if (parts[0] !== `breed`) return null;
@@ -11702,7 +11712,7 @@ function BlogIndex({ lang, goToBlog }) {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState(`all`);
   const readPageNum = () => {
-    const m = (typeof window !== `undefined` ? window.location.hash : ``).match(/[?&]page=(\d+)/);
+    const m = rawHash().match(/[?&]page=(\d+)/);
     return m ? Math.max(1, parseInt(m[1], 10)) : 1;
   };
   const [pageNum, setPageNum] = useState(readPageNum);
