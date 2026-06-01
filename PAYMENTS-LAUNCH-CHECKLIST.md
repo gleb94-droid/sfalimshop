@@ -13,6 +13,19 @@ the supplier number). Do not flip flags until Gleb confirms.
 > `e3a31b4` behind the maintenance gate. See "🔔 Launch-arming" below and the
 > "STATE AS OF 2026-05-31" block in `CLAUDE.md`.
 
+> **UPDATE 2026-06-01:** Production has advanced to `main` HEAD `e26bc92` (still
+> behind maintenance; flags unchanged). **Payment status is UNCHANGED from the
+> note above** — no edge-function or payment-flow changes this round (create-payment
+> v4, tranzila-webhook v2, notify-design-decision v1 all as-is; **Layer-1 webhook
+> signature still the main remaining payment-security TODO**). New since: a DB
+> migration `restrict_customer_order_status_to_cancel` (customer `orders.status`
+> writes limited to 'cancelled'; live on prod, mirrored to repo); UI-only
+> payment-RETURN handlers `#track?paid=1` / `#order?paid=0` (inert while payments
+> are off); plus a11y, favorites, and a WhatsApp FAB + trust strip. The trust
+> strip's 🔒 "Secure payment" item is **gated behind `PAYMENTS_ENABLED`** (hidden
+> until payments are live). `WHATSAPP_NUMBER` is still a placeholder (button
+> hidden). Full detail: the "STATE AS OF 2026-06-01" block in `CLAUDE.md`.
+
 Originally compiled from a read-only audit on 2026-05-30; kept current since.
 
 ---
@@ -217,9 +230,14 @@ Idempotent: an already-`succeeded` order short-circuits (logged as
 6b. **Implement Layer-1 webhook signature verification** (`TRANZILA_WEBHOOK_SECRET`)
    using Tranzila's real mechanism — the main remaining payment-security TODO.
 7. Flip `PAYMENTS_ENABLED = true`.
-8. Flip `MAINTENANCE_MODE = false` **and** switch `index.html` robots tags to `index, follow`.
+8. Flip `MAINTENANCE_MODE = false` (App.jsx) **AND** `api/og.js`'s own `MAINTENANCE`
+   flag to false **AND** switch the `index.html` robots tags to `index, follow`.
+   (Three separate switches — all must flip together at launch.)
 9. Swap sandbox → production `TRANZILA_SUPPLIER` / `TRANZILA_TK`.
 10. **Arm the custom-design approval emails** (independent of Tranzila — can be
     done any time): create the `orders` UPDATE DB webhook with the
     `x-webhook-secret` header + set `DESIGN_NOTIFY_ENABLED="true"`. See the
     "Custom-design approval workflow" section above.
+11. **Set `WHATSAPP_NUMBER`** (App.jsx, one constant near the favorites module) to
+    the real WhatsApp Business number (intl format, no `+`/spaces). The floating
+    WhatsApp button stays hidden until then. Independent of Tranzila.
