@@ -1424,15 +1424,18 @@ const COLORS = {
   white: "#ffffff", gray: "#888888", grayLight: "#8a8a8a", success: "#4ade80",
 };
 
+// ⚠️ TEMPORARY TEST — free shipping (all three zeroed) so a staff test order
+// totals exactly the product price with no shipping added. RESTORE AFTER THE
+// TEST: SHIPPING_PRICE = 30, SHIPPING_LOCKER = 20, SHIPPING_HOME = 35.
 // Legacy flat shipping fee. Kept for any code path that hasn't been moved
 // onto the Locker/Home selector yet (defensive — every active path now uses
 // the per-method constants below).
-const SHIPPING_PRICE = 30;
+const SHIPPING_PRICE = 0; // TEMP TEST (restore 30)
 // Locker (delivery point pickup) is the cheaper, faster default. Home is
 // door-to-door courier. shippingMethod state in OrderPage chooses between
 // them; orders.extra_prints.shipping_method records the customer's choice.
-const SHIPPING_LOCKER = 20;
-const SHIPPING_HOME = 35;
+const SHIPPING_LOCKER = 0; // TEMP TEST (restore 20)
+const SHIPPING_HOME = 0; // TEMP TEST (restore 35)
 const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
 // Per-item surcharge added when a customer personalizes a BLOOM item with a pet
 // name. Folded into the cart line's unitPrice so it threads through the cart
