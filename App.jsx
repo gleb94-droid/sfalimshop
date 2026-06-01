@@ -138,7 +138,7 @@ function FavHeart({ slug, name, lang, size = 38 }) {
 // ============================================================================
 // ⬇️ OWNER: replace with the shop's WhatsApp number — international format, no
 //    "+" and no spaces, e.g. 972501234567. Leave as-is to keep the button hidden.
-const WHATSAPP_NUMBER = `WHATSAPP_PLACEHOLDER`;
+const WHATSAPP_NUMBER = `972504847874`;
 function WhatsAppFab({ lang }) {
   // Only render once a real number is set (6–15 digits) — never a broken link.
   if (!/^\d{6,15}$/.test(WHATSAPP_NUMBER || ``)) return null;
@@ -1690,7 +1690,8 @@ const BUSINESS_INFO = {
   tagline: { he: "מעוצב לסגנון שלך", en: "Designed for Your Style", ru: "Создано в вашем стиле" },
   vatId: "321630279", // עוסק פטור
   address: { he: "רח׳ י\"א הספורטאים 28, באר שבע", en: "11 HaSportaim St. 28, Be'er Sheva, Israel", ru: "ул. 11 Спортсменов 28, Беэр-Шева, Израиль" },
-  phone: "054-6841662",
+  phone: "050-484-7874",
+  phoneIntl: "+972504847874", // E.164 form for tel: links
   email: "hello@sfalimshop.com",
   website: "www.sfalimshop.com",
 };
@@ -1776,7 +1777,7 @@ const POLICIES = {
       { type: "h", text: "מגבלות ידועות" },
       { type: "p", text: "אנו פועלים באופן שוטף לשיפור הנגישות בכל חלקי האתר. ייתכן שחלקים מסוימים, לרבות תכנים או רכיבים של צד שלישי, טרם הונגשו במלואם. אנו מתקנים ליקויים שמתגלים בהקדם האפשרי, ונשמח לקבל דיווח על כל בעיה.", },
       { type: "h", text: "רכז הנגישות ופנייה בנושא" },
-      { type: "p", text: "רכז הנגישות: ספלים שופ (גלב). בכל שאלה, בקשה או דיווח על בעיית נגישות ניתן לפנות במייל hello@sfalimshop.com או בטלפון 054-6841662 (972-54-6841662+). נשתדל להשיב תוך 48 שעות." },
+      { type: "p", text: "רכז הנגישות: ספלים שופ (גלב). בכל שאלה, בקשה או דיווח על בעיית נגישות ניתן לפנות במייל hello@sfalimshop.com או בטלפון 050-484-7874 (972-50-4847874+). נשתדל להשיב תוך 48 שעות." },
       { type: "p", text: "עודכן לאחרונה: 29.05.2026" },
     ],
   },
@@ -1852,7 +1853,7 @@ const POLICIES = {
       { type: "h", text: "Known Limitations" },
       { type: "p", text: "We continuously work to improve accessibility across the entire site. Some parts, including third-party content or components, may not yet be fully accessible. We fix issues as soon as they are found and welcome reports of any problem." },
       { type: "h", text: "Accessibility Coordinator & Contact" },
-      { type: "p", text: "Accessibility coordinator: Sfalim Shop (Gleb). For any question, request, or report of an accessibility problem, contact hello@sfalimshop.com or +972-54-6841662. We aim to respond within 48 hours." },
+      { type: "p", text: "Accessibility coordinator: Sfalim Shop (Gleb). For any question, request, or report of an accessibility problem, contact hello@sfalimshop.com or +972-50-4847874. We aim to respond within 48 hours." },
       { type: "p", text: "Last updated: May 29, 2026" },
     ],
   },
@@ -1928,7 +1929,7 @@ const POLICIES = {
       { type: "h", text: "Известные ограничения" },
       { type: "p", text: "Мы постоянно работаем над улучшением доступности на всём сайте. Некоторые части, включая контент или компоненты сторонних поставщиков, могут быть пока адаптированы не полностью. Мы устраняем выявленные недостатки в кратчайшие сроки и будем рады сообщениям о любых проблемах." },
       { type: "h", text: "Координатор по доступности и обратная связь" },
-      { type: "p", text: "Координатор по доступности: Sfalim Shop (Глеб). По любым вопросам, просьбам или сообщениям о проблеме доступности обращайтесь: hello@sfalimshop.com или +972-54-6841662. Мы постараемся ответить в течение 48 часов." },
+      { type: "p", text: "Координатор по доступности: Sfalim Shop (Глеб). По любым вопросам, просьбам или сообщениям о проблеме доступности обращайтесь: hello@sfalimshop.com или +972-50-4847874. Мы постараемся ответить в течение 48 часов." },
       { type: "p", text: "Последнее обновление: 29.05.2026" },
     ],
   },
@@ -11171,7 +11172,7 @@ function PoliciesPage({ lang }) {
         <div style={{ color: "#FF6B35", fontWeight: 700, marginBottom: 6, letterSpacing: "0.05em" }}>
           {lang === "he" ? "צריכים עזרה?" : lang === "ru" ? "Нужна помощь?" : "Need help?"}
         </div>
-        <div><a href={`mailto:${BUSINESS_INFO.email}`} style={{ color: "#ccc", textDecoration: "none" }}>{BUSINESS_INFO.email}</a> · <a href={`tel:${BUSINESS_INFO.phone}`} style={{ color: "#ccc", textDecoration: "none" }}>{BUSINESS_INFO.phone}</a></div>
+        <div><a href={`mailto:${BUSINESS_INFO.email}`} style={{ color: "#ccc", textDecoration: "none" }}>{BUSINESS_INFO.email}</a> · <a href={`tel:${BUSINESS_INFO.phoneIntl}`} style={{ color: "#ccc", textDecoration: "none" }}>{BUSINESS_INFO.phone}</a></div>
         <div style={{ marginTop: 4 }}>{BUSINESS_INFO.address[lang]}</div>
       </div>
     </div>
@@ -11203,7 +11204,7 @@ function Footer({ lang, setPage }) {
           <div style={{ color: "#888", fontSize: 13, fontFamily: "'Varela Round',sans-serif", lineHeight: 1.9 }}>
             <div style={{ marginBottom: 4 }}>{BUSINESS_INFO.address[lang]}</div>
             <div style={{ marginBottom: 4 }}>
-              <a href={`tel:${BUSINESS_INFO.phone}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.phone}</a>
+              <a href={`tel:${BUSINESS_INFO.phoneIntl}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.phone}</a>
             </div>
             <div>
               <a href={`mailto:${BUSINESS_INFO.email}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.email}</a>
@@ -11364,9 +11365,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `איך יוצרים איתכם קשר?`, en: `How can I contact you?`, ru: `Как с вами связаться?` },
         a: {
-          he: `במייל hello@sfalimshop.com, בוואטסאפ (בקרוב), או באינסטגרם @sfalimshop.`,
-          en: `By email at hello@sfalimshop.com, on WhatsApp (coming soon), or on Instagram @sfalimshop.`,
-          ru: `По электронной почте hello@sfalimshop.com, в WhatsApp (скоро) или в Instagram @sfalimshop.`,
+          he: `במייל hello@sfalimshop.com, בוואטסאפ 050-484-7874, או באינסטגרם @sfalimshop.`,
+          en: `By email at hello@sfalimshop.com, on WhatsApp at 050-484-7874, or on Instagram @sfalimshop.`,
+          ru: `По электронной почте hello@sfalimshop.com, в WhatsApp 050-484-7874 или в Instagram @sfalimshop.`,
         },
       },
       {
