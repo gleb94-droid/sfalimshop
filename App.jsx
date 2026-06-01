@@ -1437,10 +1437,22 @@ const SHIPPING_PRICE = 0; // TEMP TEST (restore 30)
 const SHIPPING_LOCKER = 0; // TEMP TEST (restore 20)
 const SHIPPING_HOME = 0; // TEMP TEST (restore 35)
 const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
-// Per-item surcharge added when a customer personalizes a BLOOM item with a pet
-// name. Folded into the cart line's unitPrice so it threads through the cart
-// total, the order total, and the stored orders.total. Empty name = no surcharge.
+// Live pet-name personalization for customizable products (mugs + shirts only;
+// never stickers/packs). The typed name is printed on the product. It is OPTIONAL
+// and FREE — it does NOT affect price. Font + color pickers appear only after a
+// name is typed (progressive disclosure); both reset when the name is cleared.
+// Persisted to orders.pet_name / pet_name_font / pet_name_color (font NAME + hex,
+// or all null when no name). All 5 fonts support Hebrew (loaded in index.html).
+const PET_NAME_FONTS = [`Heebo`, `Assistant`, `Secular One`, `Suez One`, `Rubik`];
+const PET_NAME_COLORS = [`#FF6B35`, `#1a1a1a`, `#ffffff`, `#e91e8c`, `#7c4dff`, `#0a8f5b`, `#d4a017`];
+const PET_NAME_FONT_DEFAULT = `Heebo`;
+const PET_NAME_COLOR_DEFAULT = `#FF6B35`;
+// Per-item personalization surcharge: +₪20 when (and only when) a pet name is
+// entered. Folded into the cart line's unitPrice so it threads through the cart
+// total, the order total, and the stored orders.total; shown to the customer via
+// the +₪20 pill and the cart line. Empty name = no surcharge.
 const PET_NAME_SURCHARGE = 20;
+const hasHebrew = (s) => /[֐-׿]/.test(s || ``);
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 // Single source of truth for social links — referenced anywhere the Instagram
 // profile is linked (Nav, mobile menu, BLOOM page CTA, Footer).
@@ -3796,13 +3808,9 @@ function AdminPage({ lang }) {
                                 <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
                                   <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{localizeProduct(it.product, lang)} × {it.quantity}</div>
                                   <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{localizeVariant(it.variant, lang)} · ₪{it.total}</div>
-                                  {/* Pet-name personalization (Task 8) — printed in-house, so it
-                                      reads prominently here. Only shows when the customer supplied one. */}
-                                  {it.pet_name && (
-                                    <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,107,53,0.12)", border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: "4px 9px", marginBottom: 8, color: COLORS.accent, fontSize: 12, fontWeight: 700 }}>
-                                      <span aria-hidden="true">🐾</span>{lang === "he" ? "שם החיה" : lang === "ru" ? "Имя питомца" : "Pet name"}: {it.pet_name}
-                                    </div>
-                                  )}
+                                  {/* Pet-name personalization — printed in-house, so the name, font
+                                      and colour read prominently here. Only shows when supplied. */}
+                                  <AdminPetNameBlock order={it} lang={lang} />
                                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
                                     {(it.product_color || it.color) && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: it.product_color || it.color, border: "1px solid #555", flexShrink: 0 }} />{colorName(it.product_color || it.color, lang)}</div>}
                                     {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((it.design_size / 160) * 30)} cm</div>}
@@ -4145,11 +4153,7 @@ function AdminPage({ lang }) {
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{o.customer_name}</div>
                     <div style={{ color: COLORS.gray, fontSize: 12, wordBreak: `break-all` }}>{o.customer_email}{o.customer_phone ? ` · ${o.customer_phone}` : ``}</div>
                     <div style={{ color: COLORS.white, fontSize: 13, marginTop: 8 }}>{localizeProduct(o.product, lang)} · {localizeVariant(o.variant, lang)} × {o.quantity} · <span style={{ color: COLORS.accent, fontWeight: 700 }}>₪{o.total}</span></div>
-                    {o.pet_name && (
-                      <div style={{ display: `inline-flex`, alignItems: `center`, gap: 5, background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `3px 9px`, marginTop: 6, color: COLORS.accent, fontSize: 12, fontWeight: 700 }}>
-                        <span aria-hidden="true">🐾</span>{lang === `he` ? `שם החיה` : lang === `ru` ? `Имя питомца` : `Pet name`}: {o.pet_name}
-                      </div>
-                    )}
+                    <AdminPetNameBlock order={o} lang={lang} />
                     {o.notes && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6, background: COLORS.bg, padding: `7px 10px`, borderRadius: 6 }}>{o.notes}</div>}
                     <div style={{ color: COLORS.grayLight, fontSize: 11, marginTop: 6 }}>{wlDate(o.created_at)} · {timeAgo(o.created_at, lang)}</div>
                     <div style={{ display: `flex`, gap: 10, marginTop: 12, flexWrap: `wrap` }}>
@@ -4517,7 +4521,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
-          {it.petName && <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, marginTop: 3 }}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
+          {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
             {it.color && (
@@ -4887,6 +4891,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       uploadedImage: pendingBloomItem.designUrl,
       mockupUrl: pendingBloomItem.mockupUrl || null,
       petName: pendingBloomItem.petName || null,
+      petNameFont: pendingBloomItem.petNameFont || null,
+      petNameColor: pendingBloomItem.petNameColor || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -5267,6 +5273,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           product: itProduct.name, variant: itVariant.label, color: it.color,
           quantity: it.qty, total: itemTotal, notes: form.notes,
           pet_name: it.petName || null,
+          pet_name_font: it.petNameFont || null,
+          pet_name_color: it.petNameColor || null,
           // Custom uploads must be approved before payment. We set the status
           // explicitly (the DB default is 'not_required' and there is no
           // auto-set trigger, so relying on a default would never queue it).
@@ -7733,7 +7741,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
-                    {it.petName && <div style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, marginTop: 4 }}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
+                    {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
                       {it.color && (
@@ -8019,6 +8027,8 @@ export default function App() {
       uploadedImage: item.designUrl,
       mockupUrl: item.mockupUrl || null,
       petName: item.petName || null,
+      petNameFont: item.petNameFont || null,
+      petNameColor: item.petNameColor || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -9180,9 +9190,11 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       madeToOrder: "נוצר בהזמנה",
       dispatchTime: "זמן ייצור 3-5 ימי עסקים",
       petNameTitle: "התאמה אישית",
-      petNameLabel: "שם החיה (לא חובה)",
+      petNameLabel: "שם חיית המחמד (אופציונלי)",
       petNamePlaceholder: "למשל: רקסי",
-      petNameHelper: "נדפיס את השם על המוצר בדיוק כפי שתכתבו",
+      petNameHelper: "גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כִּתבו בהערות.",
+      petNameFontLabel: "גופן",
+      petNameColorLabel: "צבע",
     },
     en: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -9227,7 +9239,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       petNameTitle: "Personalization",
       petNameLabel: "Pet name (optional)",
       petNamePlaceholder: "e.g. Rex",
-      petNameHelper: "We'll print the name on your product exactly as typed",
+      petNameHelper: "Print size is matched to the product — for special requests, add a note at checkout.",
+      petNameFontLabel: "Font",
+      petNameColorLabel: "Color",
     },
     ru: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -9272,7 +9286,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       petNameTitle: "Персонализация",
       petNameLabel: "Имя питомца (необязательно)",
       petNamePlaceholder: "напр. Рекс",
-      petNameHelper: "Напечатаем имя на товаре ровно так, как вы введёте",
+      petNameHelper: "Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.",
+      petNameFontLabel: "Шрифт",
+      petNameColorLabel: "Цвет",
     },
   }[lang] || {};
 
@@ -9858,7 +9874,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
-  const [petName, setPetName] = useState(``); // optional personalization (Task 8)
+  const [petName, setPetName] = useState(``); // optional personalization (free)
+  const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
+  const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
   // Slice 3: if a published blog post links to this breed, surface a "read more
   // about the breed" link at the bottom of the modal.
   const [breedPost, setBreedPost] = useState(null);
@@ -9937,9 +9955,16 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
     : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
 
-  // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
-  // Folded into the price passed to onOrderBloom so it threads into the cart line.
-  const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
+  // Personalization: +₪20 per item when (and only when) a pet name is entered,
+  // folded into the price passed to onOrderBloom so it threads into the cart line.
+  // The name + chosen font/color also ride the cart line into the order.
+  const petTrim = petName.trim();
+  const petSurcharge = petTrim ? PET_NAME_SURCHARGE : 0;
+  const personalization = {
+    petName: petTrim || null,
+    petNameFont: petTrim ? petNameFont : null,
+    petNameColor: petTrim ? petNameColor : null,
+  };
 
   // Add this BLOOM character to the order cart with its design already fixed.
   // Shirt carries the chosen type, size and color; mug/sticker keep defaults.
@@ -9963,7 +9988,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         mockupUrl,
         characterName: name,
         shirtColor: selectedColor,
-        petName: petName.trim() || null,
+        ...personalization,
       });
       return;
     }
@@ -9981,7 +10006,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       mockupUrl,
       characterName: name,
       shirtColor: null,
-      petName: petName.trim() || null,
+      ...personalization,
     });
   };
 
@@ -10110,14 +10135,18 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0, alignItems: "start" }}>
           {/* Image — shared in-place view carousel (panel = the modal's dark
               image panel). Flips THIS breed's views (portrait/white/black/mug);
-              it no longer browses breeds. Same component the breed page uses. */}
-          <BloomImageCarousel
-            design={design} lang={lang} isMobile={isMobile}
-            previewProduct={previewProduct} setPreviewProduct={setPreviewProduct}
-            selectedColor={selectedColor} setSelectedColor={setSelectedColor}
-            zoomed={zoomed} setZoomed={setZoomed}
-            panel
-          />
+              it no longer browses breeds. Same component the breed page uses.
+              The live pet-name preview sits directly under it. */}
+          <div>
+            <BloomImageCarousel
+              design={design} lang={lang} isMobile={isMobile}
+              previewProduct={previewProduct} setPreviewProduct={setPreviewProduct}
+              selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+              zoomed={zoomed} setZoomed={setZoomed}
+              panel
+            />
+            <PetNamePreview name={petName} font={petNameFont} color={petNameColor} />
+          </div>
 
           {/* Info */}
           <div style={{ padding: isMobile ? "28px 24px" : "40px 36px", display: "flex", flexDirection: "column" }}>
@@ -10193,7 +10222,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 on the product; it rides the cart line into the order and shows
                 in the admin order view. Empty → omitted. Shared shape with
                 BreedPage. */}
-            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} />
+            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} />
 
             {/* Shirt color/type/size — shown only when the shirt product is
                 selected. Shared with BreedPage via <BloomShirtOptions>. */}
@@ -10441,16 +10470,25 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
   );
 }
 
-// ============ PET NAME INPUT — optional personalization (Task 8) ============
-// Shared by PetModal and BreedPage. Optional, max 40 chars, strips angle
-// brackets (defence-in-depth; React already escapes on render). Empty value =
-// no personalization. Reads t.petNameLabel / t.petNamePlaceholder / t.petNameHelper.
-function PetNameInput({ lang, t, value, onChange }) {
+// ============ PET NAME INPUT — live personalization (free) ============
+// Shared by PetModal and BreedPage (customizable products only). The name is
+// ALWAYS-visible + optional, max 20 chars, strips angle brackets. FREE — no
+// price effect. Progressive disclosure: the FONT + COLOR pickers appear only
+// once a non-empty (trimmed) name is typed; clearing the name hides them and
+// resets font/color to defaults. The live preview lives separately (under the
+// design image) via <PetNamePreview>. Reads t.petName* labels.
+function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }) {
   const isRTL = lang === `he`;
+  const show = (value || ``).trim().length > 0;
+  const handleName = (raw) => {
+    const next = raw.replace(/[<>]/g, ``).slice(0, 20);
+    onChange(next);
+    // Cleared → hide pickers AND clear the stored font/color (back to defaults).
+    if (!next.trim()) { onFont && onFont(PET_NAME_FONT_DEFAULT); onColor && onColor(PET_NAME_COLOR_DEFAULT); }
+  };
+  const pickerLabelStyle = { display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 10, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 };
   return (
     <div style={{ marginBottom: 20, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 12, padding: `15px 16px 17px` }}>
-      {/* Premium personalization block — visually distinct from the plain
-          product options. 🐾 heading + the +₪20 surcharge pill. */}
       <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10, marginBottom: 12 }}>
         <span style={{ display: `inline-flex`, alignItems: `center`, gap: 8 }}>
           <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>🐾</span>
@@ -10463,15 +10501,101 @@ function PetNameInput({ lang, t, value, onChange }) {
         id="bloom-pet-name"
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value.replace(/[<>]/g, ``).slice(0, 40))}
+        onChange={(e) => handleName(e.target.value)}
         placeholder={t.petNamePlaceholder}
-        maxLength={40}
+        maxLength={20}
         dir={isRTL ? `rtl` : `ltr`}
         style={{ width: `100%`, boxSizing: `border-box`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px 14px`, color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: `none`, transition: `border-color 0.2s` }}
         onFocus={(e) => { e.currentTarget.style.borderColor = COLORS.accent; }}
         onBlur={(e) => { e.currentTarget.style.borderColor = COLORS.border; }}
       />
-      {t.petNameHelper && <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif", marginTop: 6 }}>{t.petNameHelper}</div>}
+      {t.petNameHelper && <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif", marginTop: 6, lineHeight: 1.5 }}>{t.petNameHelper}</div>}
+
+      {/* Progressive disclosure — only after a name is typed. */}
+      {show && (
+        <>
+          <div role="group" aria-label={t.petNameFontLabel} style={{ marginTop: 16 }}>
+            <span style={pickerLabelStyle}>{t.petNameFontLabel}</span>
+            <div style={{ display: `flex`, flexWrap: `wrap`, gap: 8 }}>
+              {PET_NAME_FONTS.map((f) => {
+                const active = font === f;
+                return (
+                  <button key={f} type="button" onClick={() => onFont && onFont(f)} aria-pressed={active}
+                    style={{ fontFamily: `'${f}', sans-serif`, fontSize: 15, lineHeight: 1, padding: `9px 12px`, borderRadius: 8, cursor: `pointer`,
+                      background: active ? `rgba(255,107,53,0.18)` : COLORS.bg,
+                      border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+                      color: active ? COLORS.accent : COLORS.white, transition: `border-color 0.15s, color 0.15s, background 0.15s` }}>
+                    {f}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div role="group" aria-label={t.petNameColorLabel} style={{ marginTop: 16 }}>
+            <span style={pickerLabelStyle}>{t.petNameColorLabel}</span>
+            <div style={{ display: `flex`, flexWrap: `wrap`, gap: 10 }}>
+              {PET_NAME_COLORS.map((c) => {
+                const active = color === c;
+                return (
+                  <button key={c} type="button" onClick={() => onColor && onColor(c)} aria-pressed={active} aria-label={c} title={c}
+                    style={{ width: 30, height: 30, borderRadius: `50%`, background: c, cursor: `pointer`, padding: 0,
+                      border: active ? `2px solid ${COLORS.white}` : `1px solid #555`,
+                      boxShadow: active ? `0 0 0 2px ${COLORS.accent}` : `none`, transition: `box-shadow 0.15s` }} />
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============ PET NAME LIVE PREVIEW ============
+// Shown UNDER the design image while the customer types. Renders the typed name
+// large, in the chosen font + color, on a light-orange rounded background. Only
+// appears when a name is present. Hebrew text → RTL, Latin → LTR.
+function PetNamePreview({ name, font, color }) {
+  const v = (name || ``).trim();
+  if (!v) return null;
+  return (
+    <div style={{ marginTop: 14, background: `rgba(255,107,53,0.12)`, borderRadius: 14, padding: `18px 16px`, textAlign: `center` }}>
+      <div dir={hasHebrew(v) ? `rtl` : `ltr`} style={{
+        fontFamily: `'${font || PET_NAME_FONT_DEFAULT}', sans-serif`,
+        color: color || PET_NAME_COLOR_DEFAULT,
+        fontSize: `clamp(32px, 8vw, 48px)`,
+        fontWeight: 700, lineHeight: 1.15, wordBreak: `break-word`,
+      }}>{v}</div>
+    </div>
+  );
+}
+
+// ============ ADMIN — pet-name personalization block ============
+// Shown in the admin order view whenever an order/line has a pet_name. Makes the
+// print-ready personalization obvious: the name rendered in its chosen font +
+// color, plus the font name and the colour hex + swatch. Renders nothing when
+// there is no pet_name (no empty block). `order` = an order row (has pet_name /
+// pet_name_font / pet_name_color).
+function AdminPetNameBlock({ order, lang }) {
+  if (!order || !order.pet_name) return null;
+  const font = order.pet_name_font || PET_NAME_FONT_DEFAULT;
+  const color = order.pet_name_color || PET_NAME_COLOR_DEFAULT;
+  const label = lang === `he` ? `התאמה אישית · שם להדפסה` : lang === `ru` ? `Персонализация · имя для печати` : `Personalization · name to print`;
+  const fontLbl = lang === `he` ? `גופן` : lang === `ru` ? `Шрифт` : `Font`;
+  const colorLbl = lang === `he` ? `צבע` : lang === `ru` ? `Цвет` : `Color`;
+  return (
+    <div style={{ marginTop: 8, marginBottom: 8, background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 12px` }}>
+      <div style={{ color: COLORS.accent, fontSize: 10.5, fontWeight: 700, textTransform: `uppercase`, letterSpacing: `0.12em`, marginBottom: 8, display: `inline-flex`, alignItems: `center`, gap: 5 }}>
+        <span aria-hidden="true">🐾</span>{label}
+      </div>
+      <div dir={hasHebrew(order.pet_name) ? `rtl` : `ltr`} style={{ fontFamily: `'${font}', sans-serif`, color, fontSize: 26, fontWeight: 700, lineHeight: 1.2, wordBreak: `break-word`, marginBottom: 8 }}>{order.pet_name}</div>
+      <div style={{ display: `flex`, flexWrap: `wrap`, gap: 14, alignItems: `center`, color: COLORS.gray, fontSize: 11 }}>
+        <span>{fontLbl}: <span style={{ color: COLORS.white, fontWeight: 600 }}>{font}</span></span>
+        <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6 }}>{colorLbl}:
+          <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: `50%`, background: color, border: `1px solid #555`, display: `inline-block` }} />
+          <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'IBM Plex Mono','Courier New',monospace" }}>{color}</span>
+        </span>
+      </div>
     </div>
   );
 }
@@ -10729,13 +10853,15 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [shirtType, setShirtType] = useState(`basic`);
   const [shirtSize, setShirtSize] = useState(`m`);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
-  const [petName, setPetName] = useState(``); // optional personalization (Task 8)
+  const [petName, setPetName] = useState(``); // optional personalization (free)
+  const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
+  const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
   const [zoomed, setZoomed] = useState(false); // full-screen enlarge (shared <BloomImageCarousel>)
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו`, railTitle: `כל אוסף BLOOM` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed`, railTitle: `The whole BLOOM family` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте`, railTitle: `Вся коллекция BLOOM` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כִּתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `Print size is matched to the product — for special requests, add a note at checkout.`, petNameFontLabel: `Font`, petNameColorLabel: `Color`, railTitle: `The whole BLOOM family` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.`, petNameFontLabel: `Шрифт`, petNameColorLabel: `Цвет`, railTitle: `Вся коллекция BLOOM` },
   }[lang] || {};
 
   useEffect(() => {
@@ -10859,8 +10985,16 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
     : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
 
-  // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
-  const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
+  // Personalization: +₪20 per item when (and only when) a pet name is entered,
+  // folded into the price passed to onOrderBloom so it threads into the cart line.
+  // The name + chosen font/color also ride the cart line into the order.
+  const petTrim = petName.trim();
+  const petSurcharge = petTrim ? PET_NAME_SURCHARGE : 0;
+  const personalization = {
+    petName: petTrim || null,
+    petNameFont: petTrim ? petNameFont : null,
+    petNameColor: petTrim ? petNameColor : null,
+  };
 
   // Add this BLOOM character to the shared cart. Identical payload shape to
   // PetModal.handleOrder — the cart logic itself lives in addBloomToCart.
@@ -10874,10 +11008,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       ) :
       (design.mockup_url || design.design_url);
     if (kind === `shirt`) {
-      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, petName: petName.trim() || null });
+      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, ...personalization });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, petName: petName.trim() || null });
+    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, ...personalization });
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -10920,6 +11054,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
               selectedColor={selectedColor} setSelectedColor={setSelectedColor}
               zoomed={zoomed} setZoomed={setZoomed}
             />
+            {/* Live pet-name preview, directly under the design image. */}
+            <PetNamePreview name={petName} font={petNameFont} color={petNameColor} />
           </div>
 
           {/* Info */}
@@ -10959,7 +11095,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>{tt.available}</div>
                 {/* Optional pet-name personalization (Task 8) — same component
                     and cart path as the modal. */}
-                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} />
+                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} />
                 {previewProduct === `shirt` && (
                   <BloomShirtOptions
                     lang={lang}
