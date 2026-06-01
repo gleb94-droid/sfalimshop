@@ -7806,7 +7806,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
+ const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -8262,6 +8262,7 @@ export default function App() {
         about:    "על ספלים שופ | מי אנחנו",
         track:    "מעקב הזמנות | ספלים שופ",
         admin:    "ניהול | ספלים שופ",
+        faq:      "שאלות נפוצות | ספלים שופ",
         policies: "מידע משפטי | ספלים שופ",
       },
       en: {
@@ -8271,6 +8272,7 @@ export default function App() {
         about:    "About Sfalim Shop",
         track:    "Track Orders | Sfalim Shop",
         admin:    "Admin | Sfalim Shop",
+        faq:      "FAQ | Sfalim Shop",
         policies: "Legal | Sfalim Shop",
       },
       ru: {
@@ -8280,15 +8282,16 @@ export default function App() {
         about:    "О Sfalim Shop",
         track:    "Отслеживание заказов | Sfalim Shop",
         admin:    "Админ | Sfalim Shop",
+        faq:      "Частые вопросы | Sfalim Shop",
         policies: "Правовая информация | Sfalim Shop",
       },
     };
     const langTitles = titles[lang] || titles.he;
-    // The blog pages (index + post) and breed pages set their own full SEO
-    // (title + description + OG + JSON-LD) in their components — don't clobber
-    // it here. For every OTHER route, restore the generic site SEO so a
-    // breed/post's tags never leak across navigation.
-    if (page !== "blog" && page !== "breed") {
+    // The blog pages (index + post), breed pages and the FAQ page set their own
+    // full SEO (title + description + OG + JSON-LD) in their components — don't
+    // clobber it here. For every OTHER route, restore the generic site SEO so a
+    // breed/post/FAQ's tags never leak across navigation.
+    if (page !== "blog" && page !== "breed" && page !== "faq") {
       const title = langTitles[page] || langTitles.home;
       document.title = title;
       setGenericSeo(lang, title);
@@ -8580,6 +8583,7 @@ export default function App() {
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
             {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
+            {page === "faq" && <FaqPage lang={lang} />}
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
             {MUG_STUDIO_ENABLED && page === "mug-studio" && (
@@ -11181,6 +11185,10 @@ function Footer({ lang, setPage }) {
     setPage("policies");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  const goFaq = () => {
+    setPage("faq");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   return (
     <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "48px 24px 24px", marginTop: 60, direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 40 }}>
@@ -11217,6 +11225,16 @@ function Footer({ lang, setPage }) {
         </div>
         <div className="reveal" data-delay="3">
           <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
+            {lang === "he" ? "עזרה" : lang === "ru" ? "Помощь" : "Help"}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <button onClick={goFaq} className="footer-link" style={{ textAlign: "start" }}>
+              {lang === "he" ? "שאלות נפוצות" : lang === "ru" ? "Частые вопросы" : "FAQ"}
+            </button>
+          </div>
+        </div>
+        <div className="reveal" data-delay="4">
+          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
             {lang === "he" ? "עקבו אחרינו" : lang === "ru" ? "Соцсети" : "Follow Us"}
           </div>
           <a href={SOCIAL.instagram} target="_blank" rel="noopener" className="footer-contact-link" style={{ display: "inline-block", color: "#888", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.3px" }}>
@@ -11228,6 +11246,241 @@ function Footer({ lang, setPage }) {
         © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
       </div>
     </footer>
+  );
+}
+
+// ============================================================================
+// FAQ — #faq route. Accordion grouped under section headings, fully trilingual
+// (Hebrew is the source of truth; en/ru translated from it). Owns its own SEO:
+// title + description + FAQPage JSON-LD (id `faq-ld`), cleaned up on unmount and
+// by setGenericSeo so it never leaks onto other routes. The payment-methods Q&A
+// is gated behind PAYMENTS_ENABLED for BOTH the UI and the JSON-LD.
+// All strings via template literals — never `+` concatenation. No emoji.
+// ============================================================================
+
+const FAQ_GROUPS = [
+  {
+    id: `shipping`,
+    title: { he: `משלוח ואספקה`, en: `Shipping & Delivery`, ru: `Доставка` },
+    items: [
+      {
+        q: { he: `כמה זמן לוקח לקבל את ההזמנה?`, en: `How long does it take to get my order?`, ru: `Сколько времени занимает получение заказа?` },
+        a: {
+          he: `כל פריט מודפס במיוחד עבורכם, אז אנחנו מכינים ושולחים תוך 2–4 ימי עסקים. המשלוח מגיע עם UPS תוך 2–4 ימי עסקים נוספים — סה״כ כ-4–8 ימי עסקים מההזמנה ועד הדלת, עם מספר מעקב.`,
+          en: `Every item is printed especially for you, so we prepare and ship within 2–4 business days. Delivery is by UPS within another 2–4 business days — about 4–8 business days in total from order to doorstep, with a tracking number.`,
+          ru: `Каждое изделие печатается специально для вас, поэтому мы изготавливаем и отправляем его в течение 2–4 рабочих дней. Доставка осуществляется службой UPS ещё за 2–4 рабочих дня — всего около 4–8 рабочих дней от заказа до двери, с номером для отслеживания.`,
+        },
+      },
+      {
+        q: { he: `כמה עולה המשלוח? יש איסוף עצמי?`, en: `How much is shipping? Is local pickup available?`, ru: `Сколько стоит доставка? Есть ли самовывоз?` },
+        a: {
+          he: `אנחנו שולחים לכל הארץ עם UPS. לתושבי באר שבע — משלוח חינם לרגל הפתיחה! ניתן גם לתאם איסוף עצמי מבאר שבע, חינם, בתיאום מראש. עלות המשלוח לשאר הארץ מתעדכנת בקופה.`,
+          en: `We ship throughout Israel with UPS. For Be'er Sheva residents — free shipping to celebrate our opening! You can also arrange free local pickup in Be'er Sheva, by prior coordination. Shipping cost for the rest of the country is shown at checkout.`,
+          ru: `Мы доставляем по всему Израилю службой UPS. Для жителей Беэр-Шевы — бесплатная доставка в честь открытия! Также можно договориться о бесплатном самовывозе в Беэр-Шеве по предварительной координации. Стоимость доставки в остальные районы страны указывается на кассе.`,
+        },
+      },
+    ],
+  },
+  {
+    id: `custom`,
+    title: { he: `עיצוב אישי (מתמונה שלכם)`, en: `Custom Design (From Your Photo)`, ru: `Индивидуальный дизайн (по вашему фото)` },
+    items: [
+      {
+        q: { he: `איך מזמינים מוצר עם תמונה של החיה שלי?`, en: `How do I order a product with a photo of my pet?`, ru: `Как заказать товар с фотографией моего питомца?` },
+        a: {
+          he: `בוחרים מוצר, מעלים תמונה, ואנחנו מעצבים אותה בסגנון BLOOM. לפני שאתם משלמים — אנחנו שולחים לכם את העיצוב לאישור. רק כשאתם מרוצים ומאשרים, עוברים לתשלום והפקה.`,
+          en: `Choose a product, upload a photo, and we'll design it in the BLOOM style. Before you pay, we send you the design for approval. Only once you're happy and approve it do we move on to payment and production.`,
+          ru: `Выберите товар, загрузите фотографию, и мы оформим её в стиле BLOOM. Перед оплатой мы пришлём вам дизайн на утверждение. Только когда вы довольны и подтверждаете его, мы переходим к оплате и производству.`,
+        },
+      },
+      {
+        q: { he: `אילו תמונות הכי מתאימות?`, en: `Which photos work best?`, ru: `Какие фотографии подходят лучше всего?` },
+        a: {
+          he: `תמונה חדה, בתאורה טובה (אור יום מצוין), עם פרצוף ברור וממורכז. ככל שהתמונה איכותית יותר — העיצוב יוצא טוב יותר.`,
+          en: `A sharp photo in good lighting (daylight is excellent), with a clear, centered face. The better the photo's quality, the better the design comes out.`,
+          ru: `Чёткая фотография при хорошем освещении (дневной свет — отлично), с ясной и расположенной по центру мордочкой. Чем выше качество фотографии, тем лучше получается дизайн.`,
+        },
+      },
+      {
+        q: { he: `ומה אם לא אהבתי את העיצוב?`, en: `What if I don't like the design?`, ru: `А что, если мне не понравился дизайн?` },
+        a: {
+          he: `אין בעיה — לפני התשלום אפשר לבקש תיקונים, ונשפר עד שתהיו מרוצים. רק לאחר אישור עוברים לתשלום.`,
+          en: `No problem — before payment you can request changes, and we'll refine it until you're happy. Only after your approval do we proceed to payment.`,
+          ru: `Не проблема — до оплаты вы можете попросить правки, и мы будем дорабатывать его, пока вы не останетесь довольны. К оплате переходим только после вашего одобрения.`,
+        },
+      },
+    ],
+  },
+  {
+    id: `products`,
+    title: { he: `מוצרים ואיכות`, en: `Products & Quality`, ru: `Товары и качество` },
+    items: [
+      {
+        q: { he: `מאיזה חומר המוצרים? ההדפסה מחזיקה בכביסה?`, en: `What are the products made of? Will the print survive washing?`, ru: `Из чего сделаны товары? Сохранится ли печать после стирки?` },
+        a: {
+          he: `הספלים קרמיים והחולצות מכותנה איכותית. כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
+          en: `The mugs are ceramic and the shirts are quality cotton. To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
+          ru: `Кружки керамические, а футболки — из качественного хлопка. Чтобы печать держалась долго: кружку рекомендуется мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
+        },
+      },
+      {
+        q: { he: `אילו מידות חולצות יש?`, en: `What shirt sizes are available?`, ru: `Какие размеры футболок есть?` },
+        a: {
+          he: `מגוון מידות מ-S ועד XXL.`,
+          en: `A range of sizes from S to XXL.`,
+          ru: `Размеры в диапазоне от S до XXL.`,
+        },
+      },
+    ],
+  },
+  {
+    id: `payment`,
+    title: { he: `תשלום, ביטולים והחזרות`, en: `Payment, Cancellations & Returns`, ru: `Оплата, отмена и возврат` },
+    items: [
+      {
+        q: { he: `מה מדיניות הביטולים וההחזרות?`, en: `What is your cancellation and return policy?`, ru: `Какова политика отмены и возврата?` },
+        a: {
+          he: `מוצרי BLOOM רגילים ניתנים לביטול/החזרה בהתאם לחוק הגנת הצרכן. מוצרים בעיצוב אישי (תמונה שלכם) מיוצרים במיוחד עבורכם ולכן אינם ניתנים להחזרה — אלא במקרה של פגם בהדפסה, שאותו נתקן או נחליף.`,
+          en: `Standard BLOOM products can be cancelled/returned in accordance with the Israeli Consumer Protection Law. Custom-design products (made from your photo) are produced especially for you and therefore cannot be returned — except in the case of a printing defect, which we will fix or replace.`,
+          ru: `Стандартные товары BLOOM можно отменить/вернуть в соответствии с израильским Законом о защите прав потребителей. Товары с индивидуальным дизайном (по вашему фото) изготавливаются специально для вас и поэтому возврату не подлежат — за исключением случая дефекта печати, который мы исправим или заменим.`,
+        },
+      },
+      {
+        // Gated: rendered (UI + JSON-LD) only while PAYMENTS_ENABLED === true.
+        paymentOnly: true,
+        q: { he: `אילו אמצעי תשלום אתם מקבלים?`, en: `What payment methods do you accept?`, ru: `Какие способы оплаты вы принимаете?` },
+        a: {
+          he: `תשלום מאובטח בכרטיס אשראי; פרטי הכרטיס אינם נשמרים אצלנו.`,
+          en: `Secure payment by credit card; your card details are not stored by us.`,
+          ru: `Безопасная оплата кредитной картой; данные вашей карты у нас не хранятся.`,
+        },
+      },
+    ],
+  },
+  {
+    id: `general`,
+    title: { he: `כללי`, en: `General`, ru: `Общее` },
+    items: [
+      {
+        q: { he: `איך יוצרים איתכם קשר?`, en: `How can I contact you?`, ru: `Как с вами связаться?` },
+        a: {
+          he: `במייל hello@sfalimshop.com, בוואטסאפ (בקרוב), או באינסטגרם @sfalimshop.`,
+          en: `By email at hello@sfalimshop.com, on WhatsApp (coming soon), or on Instagram @sfalimshop.`,
+          ru: `По электронной почте hello@sfalimshop.com, в WhatsApp (скоро) или в Instagram @sfalimshop.`,
+        },
+      },
+      {
+        q: { he: `באילו שפות אפשר להזמין?`, en: `In which languages can I order?`, ru: `На каких языках можно сделать заказ?` },
+        a: {
+          he: `האתר זמין בעברית, אנגלית ורוסית.`,
+          en: `The site is available in Hebrew, English, and Russian.`,
+          ru: `Сайт доступен на иврите, английском и русском.`,
+        },
+      },
+    ],
+  },
+];
+
+// Per-language FAQ meta description (FAQ-specific; restored to generic on exit).
+const FAQ_SEO_DESC = {
+  he: `שאלות ותשובות על משלוח, עיצוב אישי מתמונה, מוצרים, החזרות ותשלום בספלים שופ.`,
+  en: `Answers about shipping, custom photo designs, products, returns and payment at Sfalim Shop.`,
+  ru: `Ответы о доставке, индивидуальном дизайне по фото, товарах, возврате и оплате в Sfalim Shop.`,
+};
+
+function FaqAccordionItem({ item, lang, isRTL, idBase }) {
+  const [open, setOpen] = useState(false);
+  const btnId = `${idBase}-q`;
+  const panelId = `${idBase}-a`;
+  return (
+    <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 12, marginBottom: 10, overflow: `hidden` }}>
+      <h3 style={{ margin: 0 }}>
+        <button
+          id={btnId}
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen(o => !o)}
+          style={{
+            width: `100%`, display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 14,
+            background: `transparent`, border: `none`, cursor: `pointer`,
+            padding: `18px 20px`, textAlign: `start`,
+            color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 16, fontWeight: 600, lineHeight: 1.4,
+          }}>
+          <span>{item.q[lang]}</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={open ? COLORS.accent : COLORS.gray} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, transition: `transform 0.25s ease, stroke 0.2s ease`, transform: open ? `rotate(180deg)` : `rotate(0deg)` }}>
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+      </h3>
+      <div id={panelId} role="region" aria-labelledby={btnId} hidden={!open} style={{ padding: `0 20px 18px` }}>
+        <p style={{ margin: 0, color: `#d6d6d6`, fontFamily: `'Varela Round',sans-serif`, fontSize: 15, lineHeight: 1.75 }}>{item.a[lang]}</p>
+      </div>
+    </div>
+  );
+}
+
+function FaqPage({ lang }) {
+  const isRTL = lang === `he`;
+  const pageTitle = lang === `he` ? `שאלות נפוצות` : lang === `ru` ? `Частые вопросы` : `Frequently Asked Questions`;
+  const intro = lang === `he` ? `כל מה שכדאי לדעת לפני שמזמינים.` : lang === `ru` ? `Всё, что стоит знать перед заказом.` : `Everything worth knowing before you order.`;
+
+  // One filtered list used for BOTH the UI and the JSON-LD — the payment Q&A is
+  // dropped from both while payments are off.
+  const groups = FAQ_GROUPS
+    .map(g => ({ ...g, items: g.items.filter(it => !it.paymentOnly || PAYMENTS_ENABLED) }))
+    .filter(g => g.items.length > 0);
+
+  useEffect(() => {
+    if (typeof document === `undefined`) return;
+    const docTitle = lang === `he` ? `שאלות נפוצות | ספלים שופ` : lang === `ru` ? `Частые вопросы | Sfalim Shop` : `FAQ | Sfalim Shop`;
+    const desc = FAQ_SEO_DESC[lang] || FAQ_SEO_DESC.he;
+    const url = `${SEO_ORIGIN}/#faq`;
+    document.title = docTitle;
+    setMeta(`description`, desc);
+    setMeta(`og:title`, pageTitle, `property`);
+    setMeta(`og:description`, desc, `property`);
+    setMeta(`og:type`, `website`, `property`);
+    setMeta(`og:url`, url, `property`);
+    setMeta(`twitter:card`, `summary`);
+    setMeta(`twitter:title`, pageTitle);
+    setMeta(`twitter:description`, desc);
+    setCanonical(url);
+    setHreflang(url);
+    // Never two dynamic blocks at once (parity with breed/blog).
+    removeJsonLd(`breed-product-ld`);
+    removeJsonLd(`blog-article-ld`);
+    const ld = {
+      "@context": `https://schema.org`,
+      "@type": `FAQPage`,
+      "inLanguage": lang,
+      "mainEntity": groups.flatMap(g => g.items).map(it => ({
+        "@type": `Question`,
+        "name": it.q[lang],
+        "acceptedAnswer": { "@type": `Answer`, "text": it.a[lang] },
+      })),
+    };
+    injectJsonLd(ld, `faq-ld`);
+    // Drop our JSON-LD when leaving the FAQ (any destination) so it never leaks.
+    return () => removeJsonLd(`faq-ld`);
+  }, [lang]);
+
+  return (
+    <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
+      <div style={{ maxWidth: 820, margin: `0 auto`, padding: `48px 22px 100px`, textAlign: isRTL ? `right` : `left` }}>
+        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `2.4rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 10px`, letterSpacing: `-0.01em` }}>{pageTitle}</h1>
+        <p style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 15, margin: `0 0 40px` }}>{intro}</p>
+
+        {groups.map(g => (
+          <section key={g.id} style={{ marginBottom: 36 }}>
+            <h2 style={{ color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 13, letterSpacing: `1.5px`, textTransform: `uppercase`, margin: `0 0 16px`, fontWeight: 700 }}>{g.title[lang]}</h2>
+            {g.items.map((it, i) => (
+              <FaqAccordionItem key={`${g.id}-${i}`} item={it} lang={lang} isRTL={isRTL} idBase={`faq-${g.id}-${i}`} />
+            ))}
+          </section>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -11367,6 +11620,7 @@ function setGenericSeo(lang, title) {
   setHreflang(`${SEO_ORIGIN}/`);
   removeJsonLd(`breed-product-ld`);
   removeJsonLd(`blog-article-ld`);
+  removeJsonLd(`faq-ld`);
 }
 
 // Defensive HTML sanitizer for admin-authored post bodies. Removes dangerous
@@ -11414,10 +11668,10 @@ function BlogCard({ post, lang, goToBlog, compact = false }) {
         transform: hover ? `translateY(-4px)` : `translateY(0)`,
         boxShadow: hover ? `0 16px 40px rgba(0,0,0,0.35)` : `none`,
       }}>
-      <div style={{ width: `100%`, aspectRatio: `16 / 9`, background: `#0d0d0d`, overflow: `hidden`, flexShrink: 0 }}>
+      <div style={{ width: `100%`, aspectRatio: `4 / 3`, background: `#0d0d0d`, overflow: `hidden`, flexShrink: 0 }}>
         {post.cover_image_url && (
           <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title}
-            style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block`, transition: `transform 0.5s cubic-bezier(.2,.6,.2,1)`, transform: hover ? `scale(1.05)` : `scale(1)` }} />
+            style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center 15%`, display: `block`, transition: `transform 0.5s cubic-bezier(.2,.6,.2,1)`, transform: hover ? `scale(1.05)` : `scale(1)` }} />
         )}
       </div>
       <div style={{ padding: compact ? `16px 18px` : `20px 22px`, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
@@ -11693,8 +11947,8 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
 
         {/* Cover */}
         {post.cover_image_url && (
-          <div style={{ width: `100%`, maxHeight: 480, overflow: `hidden`, borderRadius: 16, marginBottom: 32, background: `#0d0d0d` }}>
-            <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title} style={{ width: `100%`, maxHeight: 480, objectFit: `cover`, display: `block` }} />
+          <div style={{ width: `100%`, aspectRatio: `4 / 3`, overflow: `hidden`, borderRadius: 16, marginBottom: 32, background: `#0d0d0d` }}>
+            <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title} style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center 15%`, display: `block` }} />
           </div>
         )}
 
