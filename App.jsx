@@ -521,7 +521,7 @@ const FLOATING_CARD_CSS = `
   padding: 0 1.5em;
   direction: rtl;
 }
-.fpc-details h3 {
+.fpc-details .fpc-name {
   font-weight: 700;
   margin: 0;
   font-size: min(4.5svh, 2.4em);
@@ -599,7 +599,7 @@ const FLOATING_CARD_CSS = `
 @media (max-width: 768px) {
   .fpc-card { height: 70svh; max-height: 450px; }
   .fpc-details { top: 1em; }
-  .fpc-details h3 { font-size: min(4svh, 2em); }
+  .fpc-details .fpc-name { font-size: min(4svh, 2em); }
   .fpc-details p { font-size: 13px; }
   .fpc-user-info { bottom: 15px; left: 15px; right: 15px; padding: 10px 12px; }
   .fpc-user-details { gap: 10px; }
@@ -610,7 +610,7 @@ const FLOATING_CARD_CSS = `
 @media (max-width: 480px) {
   .fpc-card { height: 60svh; max-height: 380px; }
   .fpc-details { top: 0.8em; }
-  .fpc-details h3 { font-size: min(3.5svh, 1.7em); }
+  .fpc-details .fpc-name { font-size: min(3.5svh, 1.7em); }
   .fpc-details p { font-size: 12px; }
   .fpc-user-info { bottom: 12px; left: 12px; right: 12px; padding: 10px 12px; border-radius: 14px; }
   .fpc-user-details { gap: 8px; }
@@ -858,7 +858,7 @@ const FloatingProductCardComponent = ({
           <div className="fpc-glare" />
           <div className="fpc-content">
             <div className="fpc-details">
-              <h3>{name}</h3>
+              <div className="fpc-name">{name}</div>
               <p>{description}</p>
             </div>
           </div>
@@ -935,14 +935,14 @@ const BloomCardLite = React.memo(function BloomCardLite({
         />
       </div>
       <div style={{ display: `flex`, flexDirection: `column`, gap: 4 }}>
-        <h3 style={{
+        <div style={{
           margin: 0,
           color: COLORS.white,
           fontFamily: `'Playfair Display',serif`,
           fontSize: 20,
           letterSpacing: `0.02em`,
           lineHeight: 1.15,
-        }}>{name}</h3>
+        }}>{name}</div>
         {description && (
           <p style={{
             margin: 0,
@@ -968,7 +968,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
           type="button"
           onClick={(e) => { e.stopPropagation(); onClick && onClick(); }}
           style={{
-            background: COLORS.accent,
+            background: COLORS.accentBtn,
             color: COLORS.white,
             border: `none`,
             borderRadius: 999,
@@ -1421,6 +1421,11 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
 const COLORS = {
   bg: "#0f0f0f", bgCard: "#1a1a1a", border: "#2a2a2a",
   accent: "#FF6B35", accentHover: "#ff8255", accentDim: "rgba(255,107,53,0.15)",
+  // accentBtn / accentBtnHover: a DARKER orange used ONLY as the FILL of buttons
+  // that carry WHITE text, so #fff text reaches WCAG AA (#C0501A on #fff = 4.77:1;
+  // hover #A8461A = 5.9:1). The bright `accent` (#FF6B35) stays for icons,
+  // borders, dots, dims and orange TEXT on the dark bg (those already pass AA).
+  accentBtn: "#C0501A", accentBtnHover: "#A8461A",
   white: "#ffffff", gray: "#888888", grayLight: "#8a8a8a", success: "#4ade80",
 };
 
@@ -2450,7 +2455,7 @@ function AuthPage({ lang, onAuth }) {
             </div>
             {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
             {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
-            <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+            <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
               {loading ? "..." : t.auth.forgotPwBtn}
             </button>
           </form>
@@ -2519,7 +2524,7 @@ function AuthPage({ lang, onAuth }) {
           </div>
           {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
           {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
-          <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+          <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
             {loading ? "..." : mode === "login" ? t.auth.loginBtn : t.auth.registerBtn}
           </button>
         </form>
@@ -2647,7 +2652,7 @@ function ResetPasswordPage({ lang, setPage }) {
               <input id="reset-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
             </div>
             {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
-            <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+            <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
               {loading ? "..." : t.auth.setPw}
             </button>
           </form>
@@ -2747,7 +2752,7 @@ function AccountSettings({ lang }) {
                 <input id="account-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
               </div>
               {error && <div role="alert" style={{ color: "#f87171", fontSize: 12, marginBottom: 12, background: "rgba(248,113,113,0.1)", padding: "8px 12px", borderRadius: 6 }}>{error}</div>}
-              <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
                 {loading ? "..." : t.auth.setPw}
               </button>
             </form>
@@ -2977,7 +2982,7 @@ function TrackPage({ lang, user, clearCart }) {
             </div>
           )}
           <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#track`); } catch (_) {} setPayReturnDismissed(true); }}
-            style={{ width: `100%`, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, marginBottom: 10 }}>
+            style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, marginBottom: 10 }}>
             {lang === `he` ? `למעקב ההזמנות שלי` : lang === `ru` ? `К моим заказам` : `View my orders`}
           </button>
           <button onClick={() => { window.location.hash = ``; }}
@@ -3023,7 +3028,7 @@ function TrackPage({ lang, user, clearCart }) {
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
-        <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h2>
+        <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h1>
         <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
 
         <AccountSettings lang={lang} />
@@ -3087,7 +3092,7 @@ function TrackPage({ lang, user, clearCart }) {
                             <div style={{ color: COLORS.success, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{t.approval.approvedTitle}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13.5, lineHeight: 1.6, marginBottom: 14 }}>{t.approval.approvedDesc}</div>
                             <button onClick={() => payForApprovedOrder(order)} disabled={payBusy === order.id}
-                              style={{ width: "100%", background: payBusy === order.id ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accent} 0%, #FF8855 100%)`, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", fontSize: 16, fontWeight: 700, cursor: payBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: payBusy === order.id ? "none" : "0 8px 24px rgba(255,107,53,0.35)" }}>
+                              style={{ width: "100%", background: payBusy === order.id ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)`, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", fontSize: 16, fontWeight: 700, cursor: payBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: payBusy === order.id ? "none" : "0 8px 24px rgba(255,107,53,0.35)" }}>
                               {payBusy === order.id ? "..." : `${t.approval.payNow} · ₪${order.total}`}
                             </button>
                           </div>
@@ -3107,13 +3112,13 @@ function TrackPage({ lang, user, clearCart }) {
                                 <input type="file" accept="image/*" onChange={onResubmitFile} style={{ color: COLORS.gray, fontSize: 12, marginBottom: 10, width: "100%" }} />
                                 {resubmitFile && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}><img src={resubmitFile.dataUrl} alt="" style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 4, border: `1px solid ${COLORS.border}` }} /><span style={{ color: COLORS.success, fontSize: 12 }}>✓ {resubmitFile.name}</span></div>}
                                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                                  <button onClick={() => resubmitDesign(order)} disabled={actionBusy === order.id} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{actionBusy === order.id ? t.approval.resubmitting : t.approval.resubmitBtn}</button>
+                                  <button onClick={() => resubmitDesign(order)} disabled={actionBusy === order.id} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{actionBusy === order.id ? t.approval.resubmitting : t.approval.resubmitBtn}</button>
                                   <button onClick={() => { setResubmitOpenId(null); setResubmitFile(null); }} disabled={actionBusy === order.id} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 16px", fontSize: 13, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>✕</button>
                                 </div>
                               </div>
                             ) : (
                               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                                <button onClick={() => { setResubmitOpenId(order.id); setResubmitFile(null); }} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "11px 20px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.editResubmit}</button>
+                                <button onClick={() => { setResubmitOpenId(order.id); setResubmitFile(null); }} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "11px 20px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.editResubmit}</button>
                                 <button onClick={() => cancelApprovalOrder(order)} disabled={actionBusy === order.id} style={{ background: "transparent", color: "#f87171", border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: "11px 20px", fontSize: 13.5, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.cancelOrder}</button>
                               </div>
                             )}
@@ -3225,7 +3230,7 @@ function TrackPage({ lang, user, clearCart }) {
             </div>
             <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
-            <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
+            <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
           </div>
         </div>
       , document.body) : null)}
@@ -3933,7 +3938,7 @@ function AdminPage({ lang }) {
             <button
               type="button"
               onClick={() => { setAddingDesign(true); setEditingDesignId(null); setDesignForm(BLANK_DESIGN); }}
-              style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
               {lang === `he` ? `+ הוסף דמות` : lang === `ru` ? `+ Добавить персонажа` : `+ Add character`}
             </button>
           </div>
@@ -4043,7 +4048,7 @@ function AdminPage({ lang }) {
             <button
               type="button"
               onClick={() => { setAddingPack(true); setEditingPackId(null); setPackForm(BLANK_PACK); }}
-              style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
               {lang === `he` ? `+ הוסף חבילה` : lang === `ru` ? `+ Добавить набор` : `+ Add pack`}
             </button>
           </div>
@@ -4219,7 +4224,7 @@ function AdminPage({ lang }) {
                     {wlTopBreeds.map(([slug, count]) => (
                       <div key={slug} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `7px 14px` }}>
                         <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{wlBreedLabel(slug)}</span>
-                        <span style={{ background: COLORS.accent, color: `#fff`, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: `1px 8px` }}>{count}</span>
+                        <span style={{ background: COLORS.accentBtn, color: `#fff`, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: `1px 8px` }}>{count}</span>
                       </div>
                     ))}
                   </div>
@@ -4415,7 +4420,7 @@ function DesignEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadA
       </div>
       <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
         <div style={{ display: `flex`, gap: 8 }}>
-          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
           <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
         </div>
         {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
@@ -4464,7 +4469,7 @@ function PackEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadAdm
       </label>
       <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
         <div style={{ display: `flex`, gap: 8 }}>
-          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
           <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
         </div>
         {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
@@ -4756,6 +4761,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [leaveWarning]);
+
+  // Escape dismisses the payment-failure return overlay (#order?paid=0).
+  useEffect(() => {
+    if (!payFailed) return;
+    const onKey = (e) => { if (e.key === "Escape") setPayFailed(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [payFailed]);
 
   // Non-passive touch listeners — re-attach when step 2 renders (mockupRef becomes available)
   useEffect(() => {
@@ -5416,7 +5429,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 26, margin: "0 0 10px" }}>{lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}</h2>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{lang === "he" ? "לא חויבת. אפשר לנסות שוב — ההזמנה שלך נשמרה." : lang === "ru" ? "С вас не списали. Можно попробовать снова — ваш заказ сохранён." : "You weren't charged. You can try again — your order is saved."}</p>
             <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setStep(1); }}
-              style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", marginBottom: 10 }}>
+              style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", marginBottom: 10 }}>
               {lang === "he" ? "לנסות שוב" : lang === "ru" ? "Попробовать снова" : "Try again"}
             </button>
             <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setPage("track"); }}
@@ -5479,7 +5492,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <button onClick={() => {
                   if (nextChoiceIsBloom) { setShowNextChoice(false); setNextChoiceIsBloom(false); setStep(3); }
                   else if (addToCart()) { setShowNextChoice(false); setStep(3); }
-                }} style={{ background: COLORS.accent, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
+                }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
                   {lang === "he" ? "לתשלום ולסיום" : lang === "ru" ? "К оплате" : "Proceed to checkout"}
                 </button>
                 <button onClick={() => { setShowNextChoice(false); setNextChoiceIsBloom(false); }} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
@@ -5502,19 +5515,21 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + shippingPrice}
                   </div>
                 </div>
-                <button onClick={() => setStep(3)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+                <button onClick={() => setStep(3)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
                   {lang === "he" ? "לתשלום" : lang === "ru" ? "К оплате" : "Checkout"} →
                 </button>
               </div>
             )}
-            <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h2>
+            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h1>
             <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 20 }}>{t.product.sub}</p>
             <div className="reveal" data-delay="2" style={{ marginBottom: 24 }}>
               <TrustRow lang={lang} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {products.map((p, idx) => (
-                <div key={p.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
+                <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
+                  onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); } }}
                   style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                     <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
@@ -5524,7 +5539,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                         <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
-                        {p.is_bestseller && <span style={{ background: COLORS.accent, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
+                        {p.is_bestseller && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
                         {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
                       </div>
                       <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
@@ -5541,7 +5556,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         {step === 2 && product && (
           <div>
-            <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h2>
+            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h1>
             <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
@@ -5665,7 +5680,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <div>
                   <label style={labelStyle}>{["tshirt","oversized","stonewash","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {product.variants.map(v => <button key={v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
+                    {product.variants.map(v => <button key={v.id} type="button" aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
                   </div>
                 </div>
                 <div>
@@ -5679,10 +5694,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                     {product.colors.map((c, i) => (
-                      <div key={i} onClick={() => setSelectedColor(i)}
+                      <button key={i} type="button" onClick={() => setSelectedColor(i)}
                         title={colorName(c, lang)}
                         aria-label={colorName(c, lang)}
-                        style={{ width: 28, height: 28, borderRadius: "50%", background: c, cursor: "pointer", border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
+                        aria-pressed={selectedColor === i}
+                        style={{ width: 32, height: 32, borderRadius: "50%", background: c, cursor: "pointer", padding: 0, border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
                     ))}
                   </div>
                 </div>
@@ -5854,41 +5870,47 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
             {/* Form column — wider on desktop (flex 1.5 vs sidebar's 1) */}
             <div style={{ flex: isMobile ? "none" : "1.5", width: "100%", minWidth: 0 }}>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h2>
+            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h1>
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.form.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <div><label style={labelStyle}>{t.form.name}</label><input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder={t.form.namePh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
-              <div><label style={labelStyle}>{t.form.email}</label><input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder={t.form.emailPh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
+              <div><label htmlFor="order-name" style={labelStyle}>{t.form.name}</label><input id="order-name" type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder={t.form.namePh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
+              <div><label htmlFor="order-email" style={labelStyle}>{t.form.email}</label><input id="order-email" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder={t.form.emailPh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div>
-                <label style={labelStyle}>{t.form.phone}</label>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
-                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
+                <label htmlFor="order-phone" style={labelStyle}>{t.form.phone}</label>
+                <div role="group" aria-label={t.form.phone} style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
+                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" aria-pressed={form.phonePrefix === pf.value} onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
                 </div>
-                <input type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") }))} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") }))} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
               </div>
               <div style={{ position: "relative" }}>
-                <label style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
-                <input type="text" value={form.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }} onBlur={() => setTimeout(() => setShowAddrSugg(false), 200)} placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" />
-                {addrLoading && <div style={{ position: "absolute", insetInlineStart: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</div>}
+                <label htmlFor="order-street" style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
+                <input type="text" value={form.street} id="order-street" onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }}
+                  onKeyDown={e => { if (e.key === "Escape") setShowAddrSugg(false); }}
+                  onBlur={e => { if (e.relatedTarget && e.relatedTarget.classList && e.relatedTarget.classList.contains("addr-sugg-item")) return; setTimeout(() => setShowAddrSugg(false), 200); }}
+                  placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" role="combobox" aria-expanded={showAddrSugg && addrSuggestions.length > 0} aria-controls="addr-suggestions" aria-autocomplete="list" />
+                {addrLoading && <><span aria-hidden="true" style={{ position: "absolute", insetInlineStart: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</span><span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }} role="status">{lang === "he" ? "טוען הצעות כתובת" : lang === "ru" ? "Загрузка вариантов адреса" : "Loading address suggestions"}</span></>}
                 {showAddrSugg && addrSuggestions.length > 0 && (
-                  <div style={{ position: "absolute", top: "100%", insetInlineStart: 0, insetInlineEnd: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
+                  <div id="addr-suggestions" role="listbox" aria-label={lang === "he" ? "הצעות כתובת" : lang === "ru" ? "Варианты адреса" : "Address suggestions"} style={{ position: "absolute", top: "100%", insetInlineStart: 0, insetInlineEnd: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
                     {addrSuggestions.map((s, i) => (
-                      <div key={i} onMouseDown={(e) => { e.preventDefault(); selectAddress(s); }} style={{ padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      <button type="button" className="addr-sugg-item" role="option" aria-selected="false" key={i}
+                        onClick={() => selectAddress(s)}
+                        onKeyDown={e => { if (e.key === "Escape") { setShowAddrSugg(false); const el = document.getElementById("order-street"); if (el) el.focus(); } }}
+                        style={{ display: "block", width: "100%", textAlign: lang === "he" ? "right" : "left", background: "transparent", padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, border: "none", borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"} onFocus={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onBlur={e => e.currentTarget.style.background = "transparent"}>
                         <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.display_name.split(",").slice(0, 2).join(",")}</div>
                         <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.display_name.split(",").slice(2).join(",").trim()}</div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
-                  <label style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
-                  <input type="text" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <label htmlFor="order-city" style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
+                  <input id="order-city" type="text" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
-                  <label style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
-                  <input type="text" value={form.postalCode} maxLength={7} onChange={e => setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") }))} placeholder="1234567" style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <label htmlFor="order-postal" style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
+                  <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") }))} placeholder="1234567" style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
               </div>
               {/* Shipping method — Locker (cheaper, pickup-point) vs Home
@@ -5986,7 +6008,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
               </div>
-              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h2>
+              <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h1>
               <p style={{ color: COLORS.gray, fontSize: 15 }}>{t.payment.subtitle}</p>
             </div>
 
@@ -6115,7 +6137,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               disabled={paymentProcessing}
               style={{
                 width: "100%",
-                background: paymentProcessing ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accent} 0%, #FF8855 100%)`,
+                background: paymentProcessing ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)`,
                 color: "#fff",
                 border: "none",
                 borderRadius: 12,
@@ -6226,7 +6248,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                   <button
                     onClick={dismissPaymentSoonModal}
-                    style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}
+                    style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}
                   >
                     {t.payment.soonBtn}
                   </button>
@@ -6239,7 +6261,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         {step === 5 && (
           <div style={{ textAlign: "center", padding: "20px 0 60px" }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 88, height: 88, borderRadius: "50%", background: submittedForApproval ? "rgba(255,107,53,0.12)" : "rgba(34,197,94,0.12)", border: `2px solid ${submittedForApproval ? COLORS.accent : "#22c55e"}`, marginBottom: 24, fontSize: 44 }}>{submittedForApproval ? "🎨" : "✓"}</div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{submittedForApproval ? t.approval.submittedTitle : t.confirm.title}</h2>
+            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{submittedForApproval ? t.approval.submittedTitle : t.confirm.title}</h1>
             <p style={{ color: COLORS.gray, fontSize: 15, marginBottom: 24 }}>{t.confirm.subtitle}</p>
 
             {submittedForApproval && (
@@ -6307,7 +6329,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             )}
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
+              {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
               <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" }); setQty(1); setPendingOrderGroupId(null); setPendingOrderIds([]); setPendingTotal(0); setSubmittedForApproval(false); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
             </div>
           </div>
@@ -6349,7 +6371,7 @@ function CookieConsent({ lang, onAccept, onReject }) {
   };
 
   return (
-    <div role="dialog" aria-label="Cookie consent" style={{
+    <div role="region" aria-label={lang === "he" ? "הסכמת קובצי Cookie" : lang === "ru" ? "Согласие на использование cookie" : "Cookie consent"} style={{
       position: "fixed",
       bottom: 16,
       left: 16,
@@ -6870,9 +6892,9 @@ function EventOrdersSection({ lang }) {
 
         {waValid && (
           <a href={href} target="_blank" rel="noopener noreferrer" aria-label={ctaLabel}
-            style={{ display: `inline-flex`, alignItems: `center`, gap: 10, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, textDecoration: `none`, transition: `background 0.2s, box-shadow 0.3s`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)` }}
-            onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentHover; }}
-            onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accent; }}>
+            style={{ display: `inline-flex`, alignItems: `center`, gap: 10, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, textDecoration: `none`, transition: `background 0.2s, box-shadow 0.3s`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)` }}
+            onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accentBtn; }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.892c0 2.096.549 4.142 1.595 5.945L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.582 0 11.94-5.335 11.944-11.893a11.821 11.821 0 0 0-3.487-8.46z" /></svg>
             <span>{ctaLabel}</span>
           </a>
@@ -7026,7 +7048,7 @@ function ProductBadges({ product, lang }) {
   return (
     <div style={{ position: "absolute", top: 10, insetInlineStart: 10, display: "flex", flexDirection: "column", gap: 6, zIndex: 3, pointerEvents: "none" }}>
       {showBest && (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accent, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21.02 7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
@@ -7072,14 +7094,14 @@ function Hero({ setPage, lang }) {
       </h1>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Varela Round',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
       <span className="reveal" data-delay="3" style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-        <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accent, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentHover} onMouseOut={e => e.target.style.background = COLORS.accent}>{t.hero.cta}</MagneticButton>
+        <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentBtnHover} onMouseOut={e => e.target.style.background = COLORS.accentBtn}>{t.hero.cta}</MagneticButton>
         <button onClick={() => setPage("pets")} style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", letterSpacing: "0.3px", transition: "background 0.2s, color 0.2s" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
         >{t.hero.ctaSecondary} →</button>
         <a href="/quiz" style={{ display: "inline-flex", alignItems: "center", background: COLORS.accentDim, color: COLORS.accent, border: `1px solid rgba(255,107,53,0.4)`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", textDecoration: "none", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, color 0.2s" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
-          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentDim; e.currentTarget.style.color = COLORS.accent; }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtnDim; e.currentTarget.style.color = COLORS.accent; }}
         >{t.quiz.hero_cta}</a>
       </span>
       <div className="reveal" data-delay="4" style={{ marginTop: isMobile ? 48 : 64, width: "100%", maxWidth: 720, padding: "0 8px", boxSizing: "border-box" }}>
@@ -7146,7 +7168,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
       {cartCount > 0 && (
-        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${lang === "he" ? "פריטים בסל" : lang === "ru" ? "товаров в корзине" : "items in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${lang === "he" ? "פריטים בסל" : lang === "ru" ? "товаров в корзине" : "items in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
       )}
     </button>
   );
@@ -7164,7 +7186,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
       {favCount > 0 && (
-        <span role="status" aria-live="polite" aria-label={`${favCount} ${lang === "he" ? "מועדפים" : lang === "ru" ? "в избранном" : "favorites"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{favCount}</span>
+        <span role="status" aria-live="polite" aria-label={`${favCount} ${lang === "he" ? "מועדפים" : lang === "ru" ? "в избранном" : "favorites"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{favCount}</span>
       )}
     </button>
   );
@@ -7201,9 +7223,9 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
             onMouseOver={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; } }}
             onMouseOut={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; } }}
           >{t.nav.pets}</button>
-          <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
+          <div role="group" aria-label={lang === "he" ? "שפה" : lang === "ru" ? "Язык" : "Language"} style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
             {Object.keys(LANGS).map(l => (
-              <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "5px 10px" : "5px 12px", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+              <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "7px 11px" : "7px 13px", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
             ))}
           </div>
         </div>
@@ -7261,7 +7283,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         {cartButton}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
         <button onClick={() => setMobileMenu(m => !m)} aria-expanded={mobileMenu} aria-controls="mobile-nav-menu" aria-label={lang === "he" ? "תפריט" : lang === "ru" ? "Меню" : "Menu"} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
@@ -7278,14 +7300,14 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.gray; }}
           >{t.nav.logout}</button>
         ) : (
-          <button onClick={() => setPage("auth")} style={{ background: COLORS.accent, border: "none", color: "#fff", padding: "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", boxShadow: "0 0 20px rgba(255,107,53,0.3)" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.boxShadow = "0 0 30px rgba(255,107,53,0.5)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-          onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,107,53,0.3)"; e.currentTarget.style.transform = "translateY(0)"; }}
+          <button onClick={() => setPage("auth")} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", boxShadow: "0 0 20px rgba(255,107,53,0.3)" }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.boxShadow = "0 0 30px rgba(255,107,53,0.5)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,107,53,0.3)"; e.currentTarget.style.transform = "translateY(0)"; }}
           >{t.nav.login}</button>
         )}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>}
@@ -7303,12 +7325,12 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
         {user
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
-          : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accent, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
+          : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
         }
         <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
           onClick={() => setMobileMenu(false)}
           style={{ background: "transparent", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%", boxSizing: "border-box", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all 0.2s" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
@@ -7319,7 +7341,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         </a>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accent : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accentBtn : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>
@@ -7665,15 +7687,15 @@ function CartToast({ message, lang, onClose, onViewCart, actionLabel, onAction }
       <span style={{ flex: 1, fontSize: 14, lineHeight: 1.35 }}>{message}</span>
       {showButton && (
         <button onClick={buttonHandler} type="button" style={{
-          background: COLORS.accent, border: "none", color: "#fff",
+          background: COLORS.accentBtn, border: "none", color: "#fff",
           padding: isMobile ? "10px 14px" : "8px 14px",
           borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 700,
           fontFamily: "'Varela Round',sans-serif", flexShrink: 0,
           minHeight: isMobile ? 40 : "auto", touchAction: "manipulation",
           transition: "background 0.2s",
         }}
-        onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
-        onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
+        onMouseOver={e => e.currentTarget.style.background = COLORS.accentBtnHover}
+        onMouseOut={e => e.currentTarget.style.background = COLORS.accentBtn}
         >{buttonLabel}</button>
       )}
       {!isMobile && (
@@ -7885,13 +7907,13 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
             {/* Trust strip — supports the buying decision right by the checkout CTA */}
             <div style={{ marginBottom: 15 }}><TrustStrip lang={lang} /></div>
             <button onClick={onCheckout} style={{
-              width: "100%", background: COLORS.accent, color: "#fff", border: "none",
+              width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none",
               borderRadius: 12, padding: isMobile ? "16px" : "15px", fontSize: 16, fontWeight: 700, cursor: "pointer",
               fontFamily: "'Varela Round',sans-serif", boxShadow: "0 6px 20px rgba(255,107,53,0.35)",
               transition: "background 0.2s", touchAction: "manipulation",
             }}
-            onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
-            onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
+            onMouseOver={e => e.currentTarget.style.background = COLORS.accentBtnHover}
+            onMouseOut={e => e.currentTarget.style.background = COLORS.accentBtn}
             >{tr.checkout}</button>
           </div>
         )}
@@ -8012,6 +8034,21 @@ export default function App() {
   // Lifted from AccessibilityMenu so the background animation components
   // (ParticlesBackground, CursorGlow) can be skipped entirely when on.
   const [reduceMotion, setReduceMotion] = useState(false);
+
+  // SPA focus management + route announcement (a11y). On a client-side route
+  // change we move keyboard focus into <main> and announce the new page to
+  // screen readers (complements the existing <title> update). The first render
+  // is skipped so we don't yank focus on initial load.
+  const mainRef = useRef(null);
+  const isFirstRoute = useRef(true);
+  const [routeAnnounce, setRouteAnnounce] = useState(``);
+  useEffect(() => {
+    if (isFirstRoute.current) { isFirstRoute.current = false; return; }
+    const el = mainRef.current;
+    if (el) { try { el.focus({ preventScroll: true }); } catch (_) {} }
+    // Announce after the title effect has run for this route.
+    try { setRouteAnnounce(``); const id = requestAnimationFrame(() => setRouteAnnounce(document.title || ``)); return () => cancelAnimationFrame(id); } catch (_) {}
+  }, [page, blogSlug, breedSlug]);
 
   // Centralised open/close helpers — every caller that touches cartOpen
   // should go through these so userClosedCart stays accurate.
@@ -8520,6 +8557,9 @@ export default function App() {
         :focus { outline: none; }
         :focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
         input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
+        /* WCAG 2.4.1 — skip to content. Off-screen until focused, then pinned top-center. */
+        .skip-link { position: fixed; top: -100px; inset-inline-start: 50%; transform: translateX(-50%); z-index: 10000; background: #C0501A; color: #fff; padding: 12px 22px; border-radius: 0 0 10px 10px; font-family: 'Varela Round', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: top 0.15s ease; }
+        .skip-link:focus { top: 0; outline: 2px solid #fff; outline-offset: 2px; }
 
         /* === Premium Animations === */
 
@@ -8682,9 +8722,17 @@ export default function App() {
         }
         return (
           <>
+            {/* Skip-to-content — first focusable element; visually hidden until
+                focused (see .skip-link CSS), jumps keyboard users straight to <main>. */}
+            <a href="#main" className="skip-link">{lang === "he" ? "דלג לתוכן" : lang === "ru" ? "Перейти к содержимому" : "Skip to content"}</a>
+            {/* Polite route announcer for screen readers on SPA navigation. */}
+            <div aria-live="polite" role="status" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap", border: 0 }}>{routeAnnounce}</div>
             <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
             <WhatsAppFab lang={lang} />
-            <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
+            <header>
+              <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
+            </header>
+            <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
@@ -8723,6 +8771,7 @@ export default function App() {
                 <MugStudio lang={lang} setPage={setPage} onAddToCart={addMugStudioToCart} />
               </Suspense>
             )}
+            </main>
             <Footer lang={lang} setPage={setPage} />
             <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} />
             {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
@@ -8944,9 +8993,9 @@ function WaitlistForm({ lang, source, breedInterest = null, autoFocus = false })
           onFocus={(ev) => { ev.target.style.borderColor = COLORS.accent; }}
           onBlur={(ev) => { ev.target.style.borderColor = COLORS.border; }}
         />
-        <button type="submit" disabled={busy} style={{ flexShrink: 0, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: busy ? `wait` : `pointer`, opacity: busy ? 0.7 : 1, transition: `background 0.2s` }}
-          onMouseOver={(ev) => { if (!busy) ev.currentTarget.style.background = COLORS.accentHover; }}
-          onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accent; }}>
+        <button type="submit" disabled={busy} style={{ flexShrink: 0, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: busy ? `wait` : `pointer`, opacity: busy ? 0.7 : 1, transition: `background 0.2s` }}
+          onMouseOver={(ev) => { if (!busy) ev.currentTarget.style.background = COLORS.accentBtnHover; }}
+          onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accentBtn; }}>
           {busy ? w.submitting : w.submit}
         </button>
       </div>
@@ -8988,9 +9037,9 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
           {ctaText}
         </div>
       )}
-      <button type="button" onClick={() => setOpen(true)} style={{ width: variant === `breed` ? `100%` : `auto`, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 32px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 28px rgba(255,107,53,0.35)`, transition: `background 0.2s, transform 0.2s` }}
-        onMouseOver={(ev) => { ev.currentTarget.style.background = COLORS.accentHover; ev.currentTarget.style.transform = `translateY(-2px)`; }}
-        onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accent; ev.currentTarget.style.transform = `translateY(0)`; }}>
+      <button type="button" onClick={() => setOpen(true)} style={{ width: variant === `breed` ? `100%` : `auto`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 32px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 28px rgba(255,107,53,0.35)`, transition: `background 0.2s, transform 0.2s` }}
+        onMouseOver={(ev) => { ev.currentTarget.style.background = COLORS.accentBtnHover; ev.currentTarget.style.transform = `translateY(-2px)`; }}
+        onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accentBtn; ev.currentTarget.style.transform = `translateY(0)`; }}>
         {w.joinBtn}
       </button>
     </div>
@@ -9447,7 +9496,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
               <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 20 : 24, marginBottom: 6 }}>{quizT.banner_title}</div>
               <div style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: isMobile ? 13 : 15, lineHeight: 1.5 }}>{quizT.banner_sub}</div>
             </div>
-            <span style={{ flexShrink: 0, background: COLORS.accent, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
+            <span style={{ flexShrink: 0, background: COLORS.accentBtn, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
           </div>
         </a>
       </section>
@@ -9637,7 +9686,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                           type="button"
                           onClick={() => onAddStickerPack(pack)}
                           style={{
-                            background: COLORS.accent,
+                            background: COLORS.accentBtn,
                             color: `#fff`,
                             border: `none`,
                             borderRadius: 8,
@@ -9648,8 +9697,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                             cursor: `pointer`,
                             transition: `background 0.2s`,
                           }}
-                          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; }}
-                          onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}>
+                          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
                           {t.packAddToCart}
                         </button>
                       </div>
@@ -9703,7 +9752,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           </div>
         ) : (
         <button onClick={() => setPage("order")} style={{
-          background: COLORS.accent,
+          background: COLORS.accentBtn,
           border: "none",
           color: "#fff",
           padding: isMobile ? "14px 28px" : "16px 36px",
@@ -9716,8 +9765,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           boxShadow: "0 8px 28px rgba(255,107,53,0.35)",
           transition: "all 0.25s cubic-bezier(.2,.6,.2,1)",
         }}
-        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 36px rgba(255,107,53,0.5)"; }}
-        onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,107,53,0.35)"; }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 36px rgba(255,107,53,0.5)"; }}
+        onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,107,53,0.35)"; }}
         >{t.ctaBtn}</button>
         )}
       </section>
@@ -9779,7 +9828,7 @@ function PetBadges({ design, lang }) {
           display: "inline-flex",
           alignItems: "center",
           gap: 4,
-          background: COLORS.accent,
+          background: COLORS.accentBtn,
           color: "#fff",
           fontFamily: "'Varela Round',sans-serif",
           fontSize: 10,
@@ -10168,7 +10217,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           zIndex: 10,
           transition: "all 0.2s",
         }}
-        onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.borderColor = COLORS.accent; }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.borderColor = COLORS.accent; }}
         onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; e.currentTarget.style.borderColor = COLORS.border; }}
         aria-label={t.modalClose}
         >×</button>
@@ -10200,7 +10249,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           transition: "all 0.2s",
           touchAction: "manipulation",
         }}
-        onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.borderColor = COLORS.accent; }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.borderColor = COLORS.accent; }}
         onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; e.currentTarget.style.borderColor = COLORS.border; }}
         aria-label={t.shareBtn || `Share`}
         title={t.shareBtn || `Share`}
@@ -10331,9 +10380,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <button
                 onClick={() => handleOrder(previewProduct)}
                 disabled={!design.design_url}
-                onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentHover; }}
-                onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
-                style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}
+                onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+                style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}
               >
                 🛒 {lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
               </button>
@@ -10360,7 +10409,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 type="button"
                 onClick={() => goToBlog(breedPost.slug)}
                 style={{ marginTop: 4, marginBottom: 8, background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 18px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, transition: `background 0.2s, color 0.2s` }}
-                onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = `#fff`; }}
+                onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = `#fff`; }}
                 onMouseOut={(e) => { e.currentTarget.style.background = `transparent`; e.currentTarget.style.color = COLORS.accent; }}>
                 {(LANGS[lang] || LANGS.he).blogReadMoreBreed}
               </button>
@@ -10573,10 +10622,12 @@ function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }
     <div style={{ marginBottom: 20, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 12, padding: `15px 16px 17px` }}>
       <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10, marginBottom: 12 }}>
         <span style={{ display: `inline-flex`, alignItems: `center`, gap: 8 }}>
-          <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>🐾</span>
+          <span aria-hidden="true" style={{ display: `inline-flex`, color: COLORS.accent }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9L12 3z" /></svg>
+          </span>
           <span style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 700 }}>{t.petNameTitle}</span>
         </span>
-        <span style={{ background: COLORS.accent, color: `#fff`, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
+        <span style={{ background: COLORS.accentBtn, color: `#fff`, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
       </div>
       <label htmlFor="bloom-pet-name" style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
       <input
@@ -10668,7 +10719,7 @@ function AdminPetNameBlock({ order, lang }) {
   return (
     <div style={{ marginTop: 8, marginBottom: 8, background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 12px` }}>
       <div style={{ color: COLORS.accent, fontSize: 10.5, fontWeight: 700, textTransform: `uppercase`, letterSpacing: `0.12em`, marginBottom: 8, display: `inline-flex`, alignItems: `center`, gap: 5 }}>
-        <span aria-hidden="true">🐾</span>{label}
+        <span aria-hidden="true" style={{ display: `inline-flex` }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9L12 3z" /></svg></span>{label}
       </div>
       <div dir={hasHebrew(order.pet_name) ? `rtl` : `ltr`} style={{ fontFamily: `'${font}', sans-serif`, color, fontSize: 26, fontWeight: 700, lineHeight: 1.2, wordBreak: `break-word`, marginBottom: 8 }}>{order.pet_name}</div>
       <div style={{ display: `flex`, flexWrap: `wrap`, gap: 14, alignItems: `center`, color: COLORS.gray, fontSize: 11 }}>
@@ -10692,7 +10743,7 @@ function BreedStoryCard({ design, lang }) {
   return (
     <div style={{ marginBottom: 24, padding: `16px 18px`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 12, textAlign: isRTL ? `right` : `left` }}>
       <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 8, display: `flex`, alignItems: `center`, gap: 6 }}>
-        <span aria-hidden="true">🐾</span>
+        <span aria-hidden="true" style={{ display: `inline-flex` }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="5.5" cy="12" rx="1.7" ry="2.3" /><ellipse cx="9.5" cy="8.5" rx="1.8" ry="2.5" /><ellipse cx="14.5" cy="8.5" rx="1.8" ry="2.5" /><ellipse cx="18.5" cy="12" rx="1.7" ry="2.3" /><path d="M12 12.5c-2.8 0-4.8 2.1-4.8 4.3 0 1.8 1.8 2.7 4.8 2.7s4.8-.9 4.8-2.7c0-2.2-2-4.3-4.8-4.3z" /></svg></span>
         <span>{lang === `he` ? `על הגזע` : lang === `ru` ? `О породе` : `About the breed`}</span>
       </div>
       <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{design[`breed_origin_${lang}`]}</p>
@@ -10729,12 +10780,15 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {BLOOM_SHIRT_COLORS.map((c) => (
-            <div
+            <button
               key={c.id}
+              type="button"
               onClick={() => { setSelectedColor(c); if (onColorPreview) onColorPreview(); }}
               title={c[lang] || c.en}
+              aria-label={c[lang] || c.en}
+              aria-pressed={selectedColor.id === c.id}
               style={{
-                width: 30, height: 30, borderRadius: "50%", background: c.hex, cursor: "pointer",
+                width: 32, height: 32, borderRadius: "50%", background: c.hex, cursor: "pointer", padding: 0,
                 border: `3px solid ${selectedColor.id === c.id ? COLORS.accent : "transparent"}`,
                 boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
                 transition: "transform 0.15s, border-color 0.15s",
@@ -10754,10 +10808,12 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
           {BLOOM_SHIRT_TYPES.map((st) => (
             <button
               key={st.id}
+              type="button"
+              aria-pressed={shirtType === st.id}
               onClick={() => setShirtType(st.id)}
               style={{
                 flex: 1,
-                background: shirtType === st.id ? COLORS.accent : COLORS.bg,
+                background: shirtType === st.id ? COLORS.accentBtn : COLORS.bg,
                 border: `1px solid ${shirtType === st.id ? COLORS.accent : COLORS.border}`,
                 color: shirtType === st.id ? "#fff" : COLORS.white,
                 borderRadius: 8, padding: "10px 12px", cursor: "pointer",
@@ -10778,10 +10834,12 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
           {BLOOM_SHIRT_SIZES.map((sz) => (
             <button
               key={sz}
+              type="button"
+              aria-pressed={shirtSize === sz}
               onClick={() => setShirtSize(sz)}
               style={{
                 minWidth: 46,
-                background: shirtSize === sz ? COLORS.accent : COLORS.bg,
+                background: shirtSize === sz ? COLORS.accentBtn : COLORS.bg,
                 border: `1px solid ${shirtSize === sz ? COLORS.accent : COLORS.border}`,
                 color: shirtSize === sz ? "#fff" : COLORS.white,
                 borderRadius: 8, padding: "8px 12px", cursor: "pointer",
@@ -11053,7 +11111,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
         <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{tt.notFound}</div>
-        <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
+        <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
       </div>
     );
   }
@@ -11195,9 +11253,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                   <button
                     onClick={() => handleOrder(previewProduct)}
                     disabled={!design.design_url}
-                    onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentHover; }}
-                    onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
-                    style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
+                    onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                    onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+                    style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
                     🛒 {tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
                   </button>
                 )}
@@ -11261,7 +11319,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
     <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: 24, zIndex: 10, direction: lang === "he" ? "rtl" : "ltr" }}>
       <div style={{ position: "absolute", top: 20, insetInlineEnd: 20, display: "flex", gap: 8 }}>
         {["he", "en", "ru"].map(l => (
-          <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? "#FF6B35" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+          <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? "#C0501A" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
             {l.toUpperCase()}
           </button>
         ))}
@@ -11275,9 +11333,9 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
         <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 28 }}>{m.back}</p>
         {/* Public entry into the pre-launch BLOOM "Find Your Breed" preview. */}
         <div style={{ marginBottom: 24 }}>
-          <button onClick={() => setPage("pets")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", boxShadow: "0 8px 28px rgba(255,107,53,0.35)", transition: "background 0.2s, transform 0.2s" }}
-            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
-            onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.transform = "translateY(0)"; }}>
+          <button onClick={() => setPage("pets")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", boxShadow: "0 8px 28px rgba(255,107,53,0.35)", transition: "background 0.2s, transform 0.2s" }}
+            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.transform = "translateY(0)"; }}>
             {m.explore}
           </button>
         </div>
@@ -11303,15 +11361,15 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
         <a href="/privacy" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "פרטיות" : lang === "ru" ? "Конфиденциальность" : "Privacy Policy"}
         </a>
-        <span style={{ color: "#444" }}>·</span>
+        <span style={{ color: "#808080" }}>·</span>
         <a href="/terms" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "תקנון" : lang === "ru" ? "Условия" : "Terms of Service"}
         </a>
-        <span style={{ color: "#444" }}>·</span>
+        <span style={{ color: "#808080" }}>·</span>
         <a href="/accessibility" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "נגישות" : lang === "ru" ? "Доступность" : "Accessibility"}
         </a>
-        <span style={{ color: "#444" }}>·</span>
+        <span style={{ color: "#808080" }}>·</span>
         <a href="mailto:hello@sfalimshop.com" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "צור קשר" : lang === "ru" ? "Контакты" : "Contact"}
         </a>
@@ -11331,7 +11389,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
                 placeholder={m.pwPlaceholder}
                 aria-label={m.pwPlaceholder}
                 style={{ background: "#181818", border: `1px solid ${pwErr ? "#a33" : "#333"}`, borderRadius: 8, color: "#ddd", padding: "8px 12px", fontSize: 13, fontFamily: "'Varela Round',sans-serif", width: 170, outline: "none" }} />
-              <button onClick={submitStaff} style={{ background: COLORS.accent, border: "none", borderRadius: 8, color: "#fff", padding: "8px 14px", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer" }}>{m.pwGo}</button>
+              <button onClick={submitStaff} style={{ background: COLORS.accentBtn, border: "none", borderRadius: 8, color: "#fff", padding: "8px 14px", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer" }}>{m.pwGo}</button>
             </div>
             {pwErr && <span style={{ color: "#e06a5a", fontSize: 11 }}>{m.pwErr}</span>}
           </div>
@@ -11482,7 +11540,7 @@ function Footer({ lang, setPage }) {
           </a>
         </div>
       </div>
-      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#444", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
+      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#808080", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
         © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
       </div>
     </footer>
@@ -12172,7 +12230,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
         <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{t.blogNotFound}</div>
-        <button onClick={() => goToBlog()} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
+        <button onClick={() => goToBlog()} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
       </div>
     );
   }
@@ -12396,7 +12454,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
           <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>{loading ? (lang === `he` ? `טוען...` : `Loading...`) : `${posts.length} ${lang === `he` ? `פוסטים` : `posts`}`}</p>
         </div>
         {!editing && (
-          <button onClick={startNew} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `+ פוסט חדש` : `+ New post`}</button>
+          <button onClick={startNew} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `+ פוסט חדש` : `+ New post`}</button>
         )}
       </div>
 
@@ -12457,7 +12515,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
 
           <div style={{ display: `flex`, gap: 10, marginTop: 18, flexWrap: `wrap` }}>
             <button onClick={() => save(false)} disabled={busy} style={{ background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `שמור טיוטה` : `Save draft`)}</button>
-            <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
+            <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
             <button onClick={() => setShowPreview((s) => !s)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `תצוגה מקדימה` : `Preview`}</button>
             <button onClick={cancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `ביטול` : `Cancel`}</button>
             <style>{`.blog-body h2{font-family:'Playfair Display',serif;font-style:italic;color:#fff;font-size:1.5rem;margin:20px 0 10px} .blog-body p{margin:0 0 14px} .blog-body a{color:#FF6B35} .blog-body img{max-width:100%;height:auto;border-radius:10px}`}</style>
