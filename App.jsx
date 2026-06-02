@@ -526,7 +526,7 @@ const FLOATING_CARD_CSS = `
   margin: 0;
   font-size: min(4.5svh, 2.4em);
   line-height: 1.15;
-  text-align: right;
+  text-align: center;
   background-image: linear-gradient(to bottom, #ffffff, #f97316);
   background-size: 1em 1.5em;
   -webkit-text-fill-color: transparent;
@@ -540,7 +540,7 @@ const FLOATING_CARD_CSS = `
   top: 4px;
   font-size: 15px;
   margin: 0;
-  text-align: right;
+  text-align: center;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.4;
 }
@@ -942,6 +942,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
           fontSize: 20,
           letterSpacing: `0.02em`,
           lineHeight: 1.15,
+          textAlign: `center`,
         }}>{name}</div>
         {description && (
           <p style={{
@@ -950,6 +951,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
             fontFamily: `'Varela Round',sans-serif`,
             fontSize: 12,
             lineHeight: 1.4,
+            textAlign: `center`,
           }}>{description}</p>
         )}
       </div>
@@ -1255,8 +1257,10 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         )}
         {designs.map((d, idx) => {
           const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
-          const animal = d[`animal_${lang}`] || d.animal_he || d.animal_en || ``;
-          const description = [tagline, animal].filter(Boolean).join(` · `);
+          // Species (dog/cat) intentionally NOT shown on the card — only the
+          // character tagline. The species field stays in the data for the
+          // gallery filter; it's just hidden from the card display.
+          const description = tagline;
           const displayName = (d.name_en || d.name_he || ``).toUpperCase();
           const isActive = idx === activeIdx;
           return (
@@ -4836,6 +4840,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const sleeveLeftRef = useRef();
   const sleeveRightRef = useRef();
   const [leaveWarning, setLeaveWarning] = useState(false);
+  const leaveDialogRef = useDialogFocus(leaveWarning); // focus-trap + restore for the leave-order modal
   const [pendingNav, setPendingNav] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   // Below 360px the 5-step labels run out of room and clip; track this
@@ -5581,9 +5586,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         {/* Leave warning modal */}
         {leaveWarning && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 360, width: "100%", textAlign: "center" }}>
+            <div ref={leaveDialogRef} role="dialog" aria-modal="true" aria-labelledby="leave-warn-title" onKeyDown={(e) => { if (e.key === "Escape") setLeaveWarning(false); }} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 360, width: "100%", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-              <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+              <div id="leave-warn-title" style={{ color: COLORS.white, fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
                 {lang === "he" ? "לעזוב את ההזמנה?" : lang === "ru" ? "Покинуть заказ?" : "Leave order?"}
               </div>
               <div style={{ color: COLORS.gray, fontSize: 14, marginBottom: 24 }}>
@@ -7270,7 +7275,11 @@ function Hero({ setPage, lang }) {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 900 ? 900 : vw >= 600 ? 560 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
-          <div key={p.id} onClick={() => setPage("order")} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
+          <div key={p.id} onClick={() => setPage("order")}
+            role="button" tabIndex={0}
+            aria-label={lang === "he" ? `להזמנה: ${p.name}` : lang === "ru" ? `Заказать: ${p.name}` : `Order: ${p.name}`}
+            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPage("order"); } }}
+            className="reveal" data-delay={String(Math.min(idx + 1, 6))}
             style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
@@ -7437,15 +7446,12 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         )}
       </div>}
 
-      {/* Lang + Hamburger - MOBILE RIGHT */}
+      {/* Hamburger - MOBILE RIGHT. The language switcher is NOT inlined here: it
+          lives inside the dropdown menu below (it was duplicated, and the extra
+          ~125px box pushed the hamburger off-screen on phones). */}
       {isMobile && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         {favButton}
         {cartButton}
-        <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
-          {Object.keys(LANGS).map(l => (
-            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "8px 11px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
-          ))}
-        </div>
         <button onClick={() => setMobileMenu(m => !m)} aria-expanded={mobileMenu} aria-controls="mobile-nav-menu" aria-label={lang === "he" ? "תפריט" : lang === "ru" ? "Меню" : "Menu"} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
       </div>}
 
@@ -10183,14 +10189,8 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
           margin: 0,
           letterSpacing: "-0.01em",
         }}>{name}</h3>
-        <div style={{
-          color: COLORS.gray,
-          fontFamily: "'IBM Plex Mono','Courier New',monospace",
-          fontSize: 10,
-          letterSpacing: "1.5px",
-          textTransform: "uppercase",
-          marginTop: 4,
-        }}>{animal}</div>
+        {/* Species (dog/cat) intentionally not shown on the card. The species
+            field stays in the data for the gallery filter — display only. */}
         <div style={{
           color: COLORS.accent,
           fontFamily: "'Playfair Display',serif",
@@ -10516,14 +10516,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               letterSpacing: "-0.02em",
             }}>{name}</h2>
 
-            <div style={{
-              color: COLORS.gray,
-              fontFamily: "'IBM Plex Mono','Courier New',monospace",
-              fontSize: 11,
-              letterSpacing: "2px",
-              textTransform: "uppercase",
-              marginBottom: 12,
-            }}>{animal}</div>
+            {/* Species (dog/cat) intentionally not shown — display only; the
+                species field stays in the data for the gallery filter. */}
 
             <div style={{
               color: COLORS.accent,
@@ -11464,7 +11458,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
 
             <h1 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 900, fontSize: isMobile ? "2.6rem" : "3.6rem", color: COLORS.white, margin: "0 0 4px 0", lineHeight: 1, letterSpacing: "-0.02em" }}>{name}</h1>
 
-            {animal && <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", marginBottom: 12 }}>{animal}</div>}
+            {/* Species (dog/cat) intentionally not shown — display only; the
+                species field stays in the data for the gallery filter. */}
             {tagline && <div style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 400, fontSize: isMobile ? 18 : 22, marginBottom: 24 }}>— {tagline}</div>}
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
@@ -11686,15 +11681,32 @@ function PoliciesPage({ lang }) {
         {BUSINESS_INFO.name[lang]}
       </p>
 
-      <div className="reveal" data-delay="2" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
-        {POLICY_SECTIONS.map(s => (
-          <button key={s.id} onClick={() => goSection(s.id)} style={{ background: activeSection === s.id ? "#FF6B35" : "#1a1a1a", color: activeSection === s.id ? "#fff" : "#999", border: `1px solid ${activeSection === s.id ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
+      <div className="reveal" data-delay="2" role="tablist" aria-label={lang === "he" ? "מדיניות ותקנון" : lang === "ru" ? "Политики" : "Policies"} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
+        {POLICY_SECTIONS.map(s => {
+          const active = activeSection === s.id;
+          return (
+          <button key={s.id} id={`policy-tab-${s.id}`} role="tab" aria-selected={active} aria-controls="policy-panel" tabIndex={active ? 0 : -1}
+            onClick={() => goSection(s.id)}
+            onKeyDown={(e) => {
+              const ids = POLICY_SECTIONS.map(x => x.id);
+              const i = ids.indexOf(s.id);
+              const fwd = lang === "he" ? ["ArrowLeft", "ArrowDown"] : ["ArrowRight", "ArrowDown"];
+              const back = lang === "he" ? ["ArrowRight", "ArrowUp"] : ["ArrowLeft", "ArrowUp"];
+              let n = -1;
+              if (fwd.includes(e.key)) n = (i + 1) % ids.length;
+              else if (back.includes(e.key)) n = (i - 1 + ids.length) % ids.length;
+              else if (e.key === "Home") n = 0;
+              else if (e.key === "End") n = ids.length - 1;
+              if (n >= 0) { e.preventDefault(); goSection(ids[n]); const el = document.getElementById(`policy-tab-${ids[n]}`); if (el) el.focus(); }
+            }}
+            style={{ background: active ? "#FF6B35" : "#1a1a1a", color: active ? "#fff" : "#a0a0a0", border: `1px solid ${active ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
             {s.title[lang]}
           </button>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="reveal" data-delay="3" style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
+      <div className="reveal" data-delay="3" id="policy-panel" role="tabpanel" tabIndex={0} aria-labelledby={`policy-tab-${activeSection}`} style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
         <h2 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
           {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
         </h2>
@@ -11787,7 +11799,7 @@ function Footer({ lang, setPage }) {
           </a>
         </div>
       </div>
-      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#808080", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
+      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#a0a0a0", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
         © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
       </div>
     </footer>
