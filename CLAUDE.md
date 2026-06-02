@@ -17,13 +17,63 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ---
 
-## 📌 STATE AS OF 2026-06-02 (source of truth — read this first)
+## 📌 STATE AS OF 2026-06-02 (pre-launch audit complete — source of truth, read this first)
 
-> Supersedes the 2026-06-01 block and all older snapshots where they conflict.
-> All the work below is committed on **`launch-prep`** (4 commits ahead of
-> `origin/launch-prep`: `bbe3440`, `62d16df`, `93f1d53`, `400e610`) — **NOT yet
-> merged to `main` / deployed**. Production (`main`) is still the 2026-06-01 state
-> behind the maintenance gate.
+> Supersedes every block below where they conflict. **All technical pre-launch
+> work is now DONE on `launch-prep`** (`~11 commits ahead of `main`), all behind
+> the maintenance gate. Production (`main`) is unchanged. The site is
+> launch-ready pending the owner-side items + the launch-gate flips listed here.
+
+### ✅ PRE-LAUNCH AUDIT — COMPLETE
+
+**Accessibility (WCAG 2.1 AA remediation — commit `452912f`).** Keyboard-operable product cards, color pickers and the address listbox; `main`/`header` landmarks; skip link; SPA focus-on-route-change + an `aria-live` route announcer; checkout form labels; AA contrast (white text on `#C0501A` buttons = **4.77:1**; footer `#808080`); correct heading order. Optional residuals **deferred** (decorative carousel touch-targets; secondary lang-switcher group label) — not required for 2.1 AA.
+
+**SEO (Option B — no routing migration).** Real crawlable paths for breeds (`/breed/<slug>`) and blog (`/blog/<slug>`) via the `api/og.js` crawler-HTML + 302-human pattern; **sitemap rebuilt to 80 real URLs** (no hash fragments); `index.html` Product `ItemList` refreshed to current catalog/prices; per-view trilingual meta; real-path canonicals; per-language `og:locale`; breed Product JSON-LD now carries an **`AggregateOffer` (₪59–₪119)**. A full `vite-ssg` + path-routing migration is **explicitly DEFERRED** as a separate post-launch project (hash routing remains today).
+
+**UX/QA fixes (commit `741cd0d`).** Stone-wash hidden behind `STONEWASH_ENABLED=false` (re-enable = flip to `true` **and** restore its Product row in the `index.html` ItemList) until a real photo exists; all customer-facing `alert()` replaced with styled **trilingual** error banners/toasts (no raw `e.message`, esp. payment); **iOS 16px inputs** (no zoom); trilingual **load-error + retry** states on customer data fetches; checkout **inline validation** (entered values kept); **RTL price-range** ordering; trilingual **404 page**; mobile cookie banner pinned to bottom; product-name consistency. **three.js/MugStudio left as-is** (separate lazy chunk, zero main-bundle weight, intentionally kept).
+
+**Legal text strengthened (commit `7c343cb`).** Privacy **"storage & processing abroad"** disclosure (Supabase/Vercel/Tranzila, Amendment 13) + a voluntary-data line; Terms now state **exempt-dealer / no-VAT / receipt (not tax invoice)**; Refunds **extended-cancellation clause for protected groups** (sections renumbered 1–7); footer label fixed to **"עוסק פטור מס׳ 321630279"** (was "ח.פ."); policy **"last updated"** dates. ⚠️ Self-prepared good-faith drafts — **lawyer review still advised later** (cross-border basis; custom-vs-stock cancellation classification).
+
+**Final full-site audit fix wave (commit `e92514e`).** **Restored shipping to 30/20/35** (it had been TEMP-set to `0` — a real blocker, now fixed); cookie banner no longer overlaps the breed **Add-to-cart** CTA (+ focus / Esc / privacy link); phone field marked required; breed Product offers; real-path blog/FAQ canonicals; per-lang `og:locale`; a11y (notes label, **trilingual color-swatch names**, shipping group, cookie focus); **RTL** mobile design arrows & CartToast slide direction; removed stale `supabase.js`; minor polish batch. **Two audit "blockers" were verified externally as already fine and NOT changed:** the webhook query-back verification is implemented/enforced, and all 4 emailing edge functions are deployed & ACTIVE on prod.
+
+### 🔍 External verifications (confirmed via Supabase, not just code)
+- **All 10 edge functions ACTIVE on prod**, incl. `send-order-confirmation` **v9**, `send-admin-order-alert` **v7**, `send-status-update` **v7**, `notify-design-submission` **v1**.
+- **`tranzila-webhook` v12** is `VERIFY_MODE="enforce"` with a real query-back to `report.tranzila.com` (**Layer-1 strong**; the in-code "TODO" is a stale comment only).
+
+### 🧭 Decisions
+- **MJ-1** (rotate hardcoded edge-fn fallback secrets) + **MJ-2** (Vercel WAF rate-limiting on payment endpoints): **DEFERRED to post-launch / part of the launch process.** Critical security is already strong (query-back webhook, RLS, no service-role key client-side, security headers). Waitlist secrets are effectively moot — no real signups.
+- **Waitlist launch-announce email:** not relevant (no real signups; only the owner's own test row).
+- **Stone-wash** stays hidden until a real product photo is shot.
+- The **ת.ז.-based exempt-dealer number is displayed** (required for distance selling); owner may confirm comfort level with a lawyer.
+
+### 🔔 Launch gates (current → at launch)
+| Gate | Location | Current | At launch |
+|---|---|---|---|
+| `MAINTENANCE_MODE` | App.jsx:1509 | `true` | → **`false`** |
+| index.html noindex | index.html:49-51 | `noindex,nofollow` | → **`index,follow`** |
+| `api/og.js` MAINTENANCE | api/og.js (~26) | `true` | → **`false`** |
+| `PAYMENTS_ENABLED` | App.jsx:1561 | `true` | **stays `true`** |
+| shipping constants | App.jsx | **30/20/35 ✓** | unchanged |
+| `STONEWASH_ENABLED` | App.jsx | `false` | keep `false` |
+| `MUG_STUDIO_ENABLED` | App.jsx | `false` | keep `false` |
+| `VITE_STAFF_PASSWORD` gate | Vercel env | set | optional remove |
+| `WHATSAPP_NUMBER` | App.jsx:141 | live ✓ | unchanged |
+
+### 🧷 Still open (owner side — NOT blocking the code)
+- Real **Stone-wash photo**.
+- **Interspace:** make the **ת.ז. field optional** on the Tranzila terminal (was causing `026` declines).
+- **Accountant:** confirm turnover + receipt settings + refund the 3 test charges (`374782` / `374798` / `374836`).
+- **Lawyer:** policy review when revenue justifies.
+- **Post-launch backlog (researched, parked):** n8n/Make automation, WhatsApp auto-notify, GEO, email marketing.
+
+---
+
+## 📌 STATE AS OF 2026-06-02 (historical — payments, pet-name, shirts; superseded by the audit-complete block above)
+
+> Superseded by the audit-complete 2026-06-02 block above. Supersedes the
+> 2026-06-01 block and older snapshots where they conflict. The work below was
+> committed on **`launch-prep`** (commits `bbe3440`, `62d16df`, `93f1d53`,
+> `400e610`) — kept for the payment/personalization/shirt detail it documents.
 
 ### 💳 Payments — now fully live & secured (behind maintenance for staff testing)
 - **`tranzila-webhook` is at v12** (`verify_jwt=false`, `VERIFY_MODE="enforce"`). Reads `order_group` from **`u71`** (Tranzila overwrites `myid` with the merchant id). **Query-back** to `report.tranzila.com/v1/transaction` with `transaction_index` sent as an **INTEGER** (a string is rejected — `error_code 20004`); verifies `processor_response_code`, amount (**agorot/100**), currency, and `child_terminal`. **Layer 2** = amount match. An **unverified** success → order held as `payment_status='processing'` (safe; never wrongly marked paid).
