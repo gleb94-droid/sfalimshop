@@ -996,6 +996,8 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const [designs, setDesigns] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const [isPaused, setIsPaused] = useState(false);
   // Mobile + reduced-motion users get the LIGHT card variant (no tilt, no
@@ -1109,6 +1111,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       return shuffle(out);
     };
     (async () => {
+      setLoadError(false);
       try {
         const { data, error } = await supabase
           .from("pet_designs")
@@ -1124,10 +1127,11 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         setDesigns(pickBalanced(data, 12, 6));
       } catch (err) {
         console.error(`Failed to load BLOOM carousel:`, err);
+        if (!cancelled) setLoadError(true);
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
 
   // Auto-advance every 5s, paused on hover or while user is mid-swipe.
   useEffect(() => {
@@ -1246,6 +1250,9 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
           maxWidth: `100%`,
           margin: `0 auto`,
         }}>
+        {loadError && designs.length === 0 && (
+          <LoadError lang={lang} onRetry={() => setReloadKey((k) => k + 1)} compact />
+        )}
         {designs.map((d, idx) => {
           const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
           const animal = d[`animal_${lang}`] || d.animal_he || d.animal_en || ``;
@@ -1475,7 +1482,7 @@ const BLOOM_SHIRT_COLORS = [
 // match the PRODUCTS variant ids.
 const BLOOM_SHIRT_TYPES = [
   { id: `basic`,     productId: `tshirt`,    label: { he: `בייסיק`,   en: `Basic`,     ru: `Базовая` } },
-  { id: `oversized`, productId: `oversized`, label: { he: `אוברסייז`, en: `Oversized`, ru: `Оверсайз` } },
+  { id: `oversized`, productId: `oversized`, label: { he: `אוברסייז`, en: `Oversize`, ru: `Оверсайз` } },
 ];
 const BLOOM_SHIRT_SIZES = [`s`, `m`, `l`, `xl`, `xxl`];
 
@@ -1518,6 +1525,30 @@ const MUG_STUDIO_ENABLED = false;
 // their mockups via ProductMockupBase, and (c) localizeProduct still
 // translates saved sticker product names across languages.
 const CUSTOM_STICKERS_ENABLED = false;
+
+// 👕 Oversize Stone-wash — HIDDEN from the catalog until a real product photo
+// exists (it currently reuses the Oversize mockup, so the two look identical).
+// The product + all its wiring stay in place; flip this to TRUE to show it in
+// the order-wizard grid again (also re-add it to the index.html ItemList JSON-LD).
+const STONEWASH_ENABLED = false;
+
+// Friendly, trilingual user-facing error text. The raw error is logged to the
+// console for debugging — never surfaced to the customer (no raw e.message).
+const uiGenericError = (lang) => lang === `he` ? `משהו השתבש. נסו שוב בעוד רגע.` : lang === `ru` ? `Что-то пошло не так. Попробуйте ещё раз.` : `Something went wrong. Please try again.`;
+const uiPaymentError = (lang) => lang === `he` ? `התשלום לא הצליח. בדקו את הפרטים ונסו שוב.` : lang === `ru` ? `Оплата не прошла. Проверьте данные и попробуйте снова.` : `Payment didn't go through — check your details and try again.`;
+const uiLoadError = (lang) => lang === `he` ? `לא הצלחנו לטעון. בדקו את החיבור ונסו שוב.` : lang === `ru` ? `Не удалось загрузить. Проверьте соединение и попробуйте снова.` : `Couldn't load. Check your connection and try again.`;
+const uiRetry = (lang) => lang === `he` ? `נסו שוב` : lang === `ru` ? `Повторить` : `Try again`;
+
+// Friendly trilingual "couldn't load — retry" block for customer-facing data
+// fetches (mirrors the admin error+reload pattern). onRetry re-runs the fetch.
+function LoadError({ lang, onRetry, compact = false }) {
+  return (
+    <div role="alert" style={{ textAlign: `center`, padding: compact ? `28px 16px` : `60px 20px`, color: `#9a9a9a`, fontFamily: `'Varela Round',sans-serif` }}>
+      <div style={{ fontSize: 15, lineHeight: 1.6, marginBottom: 16 }}>{uiLoadError(lang)}</div>
+      <button type="button" onClick={onRetry} style={{ background: `#C0501A`, color: `#fff`, border: `none`, borderRadius: 8, padding: `11px 24px`, fontSize: 14, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{uiRetry(lang)}</button>
+    </div>
+  );
+}
 
 // 💳 PAYMENTS — when false, the "Pay" button shows the existing "coming soon"
 // modal (order rows are already inserted in step 3, emails already sent, so
@@ -1665,7 +1696,7 @@ const LANGS = {
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
     approval: { submittedTitle: "Your design was submitted for approval", submittedDesc: "Your design was submitted for approval — we'll email you once it's approved, then you can pay. Your order is saved.", underReview: "Design under review", underReviewDesc: "We've sent your design for approval. We'll email you the moment it's approved — then you can pay.", approvedTitle: "Design approved! 🎉", approvedDesc: "Complete payment and your order goes into production.", payNow: "Pay now", changesTitle: "Changes requested", reviewNote: "Note from our team", editResubmit: "Edit & resubmit", uploadNew: "Upload a new design (optional)", resubmitBtn: "Resubmit for approval", resubmitting: "Submitting...", resubmitted: "Resubmitted — under review again", cancelOrder: "Cancel order", cancelConfirm: "Cancel this order?", cancelled: "Order cancelled" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
-    products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
+    products: { tshirt: "Basic T-Shirt", oversized: "Oversize T-Shirt", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
     bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close", seeAll: (n) => `See all ${n} →` },
   },
@@ -1709,7 +1740,7 @@ const LANGS = {
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
     approval: { submittedTitle: "Ваш дизайн отправлен на одобрение", submittedDesc: "Ваш дизайн отправлен на одобрение — мы сообщим по email, как только он будет одобрен, тогда можно оплатить. Заказ сохранён.", underReview: "Дизайн на проверке", underReviewDesc: "Мы отправили ваш дизайн на одобрение. Сообщим по email, как только он будет одобрен — тогда можно оплатить.", approvedTitle: "Дизайн одобрен! 🎉", approvedDesc: "Завершите оплату, и заказ отправится в производство.", payNow: "Оплатить", changesTitle: "Требуются изменения", reviewNote: "Комментарий нашей команды", editResubmit: "Изменить и отправить снова", uploadNew: "Загрузить новый дизайн (необязательно)", resubmitBtn: "Отправить на одобрение снова", resubmitting: "Отправка...", resubmitted: "Отправлено повторно — снова на проверке", cancelOrder: "Отменить заказ", cancelConfirm: "Отменить этот заказ?", cancelled: "Заказ отменён" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
-    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", stonewash: "Футболка оверсайз стоунвош", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
+    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
     bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть", seeAll: (n) => `Смотреть все ${n} →` },
   },
@@ -2014,17 +2045,21 @@ const PRODUCTS = (t) => [
 // re-renders, localizeProduct) keep functioning.
 const CUSTOM_STICKER_IDS = ['sticker', 'sticker_sq'];
 const getCustomProducts = (t) => {
-  const all = PRODUCTS(t);
+  let all = PRODUCTS(t);
+  if (!STONEWASH_ENABLED) all = all.filter(p => p.id !== `stonewash`);
   if (CUSTOM_STICKERS_ENABLED) return all;
   return all.filter(p => !CUSTOM_STICKER_IDS.includes(p.id));
 };
 
 // Format a price range for product cards: "₪89" if min===max, otherwise "₪89–₪99".
+// The range is wrapped in Unicode LTR isolates (U+2066 … U+2069) so that inside
+// the Hebrew (RTL) layout the "₪89–₪99" run stays low→high left-to-right and the
+// en-dash isn't flipped to read "₪99–₪89". Single value needs no isolation.
 const formatPriceRange = (variants) => {
   const prices = variants.map(v => v.price);
   const min = Math.min(...prices);
   const max = Math.max(...prices);
-  return min === max ? `₪${min}` : `₪${min}–₪${max}`;
+  return min === max ? `₪${min}` : `⁦₪${min}–₪${max}⁩`;
 };
 
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
@@ -2781,6 +2816,7 @@ function TrackPage({ lang, user, clearCart }) {
   const [paySoon, setPaySoon] = useState(false);
   const [payBusy, setPayBusy] = useState(null);       // order id currently paying
   const [actionBusy, setActionBusy] = useState(null); // order id currently resubmitting/cancelling
+  const [actionError, setActionError] = useState(""); // friendly inline error for pay/resubmit/cancel
   const [resubmitOpenId, setResubmitOpenId] = useState(null);
   const [resubmitFile, setResubmitFile] = useState(null); // { dataUrl, name } | null
   // A11y: focus-trap + restore for the "payments coming soon" modal.
@@ -2895,8 +2931,9 @@ function TrackPage({ lang, user, clearCart }) {
       if (data && data.redirect_url) { window.location.href = data.redirect_url; return; }
       throw new Error(`No redirect_url returned from create-payment`);
     } catch (e) {
+      console.error(`[pay] create-payment failed:`, e);
       setPayBusy(null);
-      alert(`Payment error: ${e.message || e}`);
+      setActionError(uiPaymentError(lang));
     }
   };
 
@@ -2934,7 +2971,8 @@ function TrackPage({ lang, user, clearCart }) {
       setResubmitOpenId(null);
       setResubmitFile(null);
     } catch (e) {
-      alert(`Error: ${e.message || e}`);
+      console.error(`[resubmit] design resubmit failed:`, e);
+      setActionError(uiGenericError(lang));
     }
     setActionBusy(null);
   };
@@ -2949,7 +2987,8 @@ function TrackPage({ lang, user, clearCart }) {
       if (error) throw error;
       setOrders(os => os.map(o => o.id === order.id ? { ...o, status: `cancelled` } : o));
     } catch (e) {
-      alert(`Error: ${e.message || e}`);
+      console.error(`[cancel] order cancel failed:`, e);
+      setActionError(uiGenericError(lang));
     }
     setActionBusy(null);
   };
@@ -3030,6 +3069,13 @@ function TrackPage({ lang, user, clearCart }) {
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
         <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h1>
         <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
+
+        {actionError && (
+          <div role="alert" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", color: "#f87171", fontSize: 14, marginBottom: 20, background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>
+            <span>{actionError}</span>
+            <button onClick={() => setActionError("")} style={{ background: "transparent", border: "1px solid rgba(248,113,113,0.5)", color: "#f87171", borderRadius: 8, padding: "6px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{uiRetry(lang)}</button>
+          </div>
+        )}
 
         <AccountSettings lang={lang} />
 
@@ -4690,6 +4736,25 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [pendingTotal, setPendingTotal] = useState(0);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [showPaymentSoonModal, setShowPaymentSoonModal] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({}); // checkout inline validation
+  const [submitError, setSubmitError] = useState("");  // friendly inline error (submit/pay)
+  // Trilingual checkout validation — required + email/phone/postal format. Returns
+  // a {field: message} map; empty = valid. Values stay in `form` so nothing is lost.
+  const validateCheckout = () => {
+    const req = lang === "he" ? "שדה חובה" : lang === "ru" ? "Обязательное поле" : "Required";
+    const e = {};
+    if (!form.name.trim()) e.name = req;
+    if (!form.email.trim()) e.email = req;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = lang === "he" ? "כתובת אימייל לא תקינה" : lang === "ru" ? "Неверный email" : "Invalid email address";
+    if (!form.phoneNumber) e.phone = req;
+    else if (form.phoneNumber.length !== 7) e.phone = lang === "he" ? "מספר טלפון לא תקין (7 ספרות)" : lang === "ru" ? "Неверный номер (7 цифр)" : "Invalid phone (7 digits)";
+    if (!form.street.trim()) e.street = req;
+    if (!form.city.trim()) e.city = req;
+    if (!form.postalCode) e.postal = req;
+    else if (form.postalCode.length < 5) e.postal = lang === "he" ? "מיקוד לא תקין" : lang === "ru" ? "Неверный индекс" : "Invalid postal code";
+    return e;
+  };
+  const fieldErrStyle = { color: "#f87171", fontSize: 12, marginTop: 4, fontFamily: "'Varela Round',sans-serif" };
   // Custom-upload design approval: when the cart contains an item the customer
   // uploaded their OWN image for, checkout submits the order(s) for review and
   // does NOT start payment (the customer pays later from /track, once approved).
@@ -5197,8 +5262,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   };
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode) return;
     if (cart.length === 0) return;
+    // Inline validation — show field-level trilingual errors instead of silently
+    // doing nothing; values stay in `form`.
+    const errs = validateCheckout();
+    if (Object.keys(errs).length > 0) { setFieldErrors(errs); setSubmitError(lang === "he" ? "יש לתקן את השדות המסומנים." : lang === "ru" ? "Исправьте отмеченные поля." : "Please fix the highlighted fields."); return; }
+    setFieldErrors({}); setSubmitError("");
     setSubmitting(true);
     const phone = form.phoneNumber ? `${form.phonePrefix}-${form.phoneNumber}` : "";
     const orderGroupId = `grp-${Date.now()}`;
@@ -5374,7 +5443,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         setStep(4);
       }
     } catch (e) {
-      alert(`Error: ${e.message || e}`);
+      console.error(`[checkout] order submit failed:`, e);
+      setSubmitError(uiGenericError(lang));
     }
     setSubmitting(false);
   };
@@ -5871,20 +5941,22 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             {/* Form column — wider on desktop (flex 1.5 vs sidebar's 1) */}
             <div style={{ flex: isMobile ? "none" : "1.5", width: "100%", minWidth: 0 }}>
             <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h1>
+            {submitError && <div role="alert" style={{ color: "#f87171", fontSize: 14, margin: "8px 0 16px", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>{submitError}</div>}
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.form.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <div><label htmlFor="order-name" style={labelStyle}>{t.form.name}</label><input id="order-name" type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder={t.form.namePh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
-              <div><label htmlFor="order-email" style={labelStyle}>{t.form.email}</label><input id="order-email" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder={t.form.emailPh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
+              <div><label htmlFor="order-name" style={labelStyle}>{t.form.name}</label><input id="order-name" type="text" value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); if (fieldErrors.name) setFieldErrors(fe => ({ ...fe, name: undefined })); }} placeholder={t.form.namePh} aria-invalid={!!fieldErrors.name} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.name && <div role="alert" style={fieldErrStyle}>{fieldErrors.name}</div>}</div>
+              <div><label htmlFor="order-email" style={labelStyle}>{t.form.email}</label><input id="order-email" type="email" value={form.email} onChange={e => { setForm(p => ({ ...p, email: e.target.value })); if (fieldErrors.email) setFieldErrors(fe => ({ ...fe, email: undefined })); }} placeholder={t.form.emailPh} aria-invalid={!!fieldErrors.email} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.email && <div role="alert" style={fieldErrStyle}>{fieldErrors.email}</div>}</div>
               <div>
                 <label htmlFor="order-phone" style={labelStyle}>{t.form.phone}</label>
                 <div role="group" aria-label={t.form.phone} style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
                   {IL_PREFIXES.map(pf => <button key={pf.value} type="button" aria-pressed={form.phonePrefix === pf.value} onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
                 </div>
-                <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") }))} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-invalid={!!fieldErrors.phone} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                {fieldErrors.phone && <div role="alert" style={fieldErrStyle}>{fieldErrors.phone}</div>}
               </div>
               <div style={{ position: "relative" }}>
                 <label htmlFor="order-street" style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
-                <input type="text" value={form.street} id="order-street" onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }}
+                <input type="text" value={form.street} id="order-street" aria-invalid={!!fieldErrors.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }}
                   onKeyDown={e => { if (e.key === "Escape") setShowAddrSugg(false); }}
                   onBlur={e => { if (e.relatedTarget && e.relatedTarget.classList && e.relatedTarget.classList.contains("addr-sugg-item")) return; setTimeout(() => setShowAddrSugg(false), 200); }}
                   placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" role="combobox" aria-expanded={showAddrSugg && addrSuggestions.length > 0} aria-controls="addr-suggestions" aria-autocomplete="list" />
@@ -5902,15 +5974,16 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     ))}
                   </div>
                 )}
+                {fieldErrors.street && <div role="alert" style={fieldErrStyle}>{fieldErrors.street}</div>}
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
                   <label htmlFor="order-city" style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
-                  <input id="order-city" type="text" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <input id="order-city" type="text" value={form.city} onChange={e => { setForm(p => ({ ...p, city: e.target.value })); if (fieldErrors.city) setFieldErrors(fe => ({ ...fe, city: undefined })); }} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} aria-invalid={!!fieldErrors.city} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.city && <div role="alert" style={fieldErrStyle}>{fieldErrors.city}</div>}
                 </div>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
                   <label htmlFor="order-postal" style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
-                  <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") }))} placeholder="1234567" style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => { setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") })); if (fieldErrors.postal) setFieldErrors(fe => ({ ...fe, postal: undefined })); }} placeholder="1234567" aria-invalid={!!fieldErrors.postal} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.postal && <div role="alert" style={fieldErrStyle}>{fieldErrors.postal}</div>}
                 </div>
               </div>
               {/* Shipping method — Locker (cheaper, pickup-point) vs Home
@@ -6009,6 +6082,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </svg>
               </div>
               <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h1>
+              {submitError && <div role="alert" style={{ color: "#f87171", fontSize: 14, margin: "10px 0", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>{submitError}</div>}
               <p style={{ color: COLORS.gray, fontSize: 15 }}>{t.payment.subtitle}</p>
             </div>
 
@@ -6130,8 +6204,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   }
                   throw new Error(`No redirect_url returned from create-payment`);
                 } catch (e) {
+                  console.error(`[pay] create-payment failed:`, e);
                   setPaymentProcessing(false);
-                  alert(`Payment error: ${e.message || e}`);
+                  setSubmitError(uiPaymentError(lang));
                 }
               }}
               disabled={paymentProcessing}
@@ -6212,7 +6287,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     setSelectedProduct(null);
                     setUploadedImage(null);
                   } catch (e) {
-                    alert(`Error: ${e.message || e}`);
+                    console.error(`[cancel-order] failed:`, e);
+                    setSubmitError(uiGenericError(lang));
                   }
                   setPaymentProcessing(false);
                 }}
@@ -6344,6 +6420,16 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 // ============ COOKIE CONSENT — premium, Hebrew-first, brand-matching ============
 function CookieConsent({ lang, onAccept, onReject }) {
   const isRTL = lang === "he";
+  // On phones the floating, side-inset card sat mid-air over the hero's lower
+  // content (and on top of the two corner FABs). Pin it flush to the bottom edge
+  // as a full-width bar there (rounded top corners only) so it reads as a clear
+  // bottom consent bar and stops overlapping hero content.
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
   const t = {
     he: {
       title: "פרטיות",
@@ -6373,17 +6459,17 @@ function CookieConsent({ lang, onAccept, onReject }) {
   return (
     <div role="region" aria-label={lang === "he" ? "הסכמת קובצי Cookie" : lang === "ru" ? "Согласие на использование cookie" : "Cookie consent"} style={{
       position: "fixed",
-      bottom: 16,
-      left: 16,
-      right: 16,
-      maxWidth: 720,
-      margin: "0 auto",
+      bottom: isMobile ? 0 : 16,
+      left: isMobile ? 0 : 16,
+      right: isMobile ? 0 : 16,
+      maxWidth: isMobile ? "none" : 720,
+      margin: isMobile ? 0 : "0 auto",
       background: "rgba(15,15,15,0.96)",
       backdropFilter: "blur(20px)",
       WebkitBackdropFilter: "blur(20px)",
       border: "1px solid rgba(255,107,53,0.25)",
-      borderRadius: 16,
-      padding: "20px 24px",
+      borderRadius: isMobile ? "16px 16px 0 0" : 16,
+      padding: isMobile ? "18px 18px calc(18px + env(safe-area-inset-bottom))" : "20px 24px",
       boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,107,53,0.08)",
       zIndex: 9999,
       direction: isRTL ? "rtl" : "ltr",
@@ -7931,6 +8017,33 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
   return typeof document !== `undefined` ? createPortal(__drawer, document.body) : __drawer;
 }
 
+// 404 — shown for any non-empty hash route that matches no known page. Trilingual,
+// RTL-aware, offers a way back home + into the BLOOM gallery.
+function NotFoundPage({ lang, setPage }) {
+  const isRTL = lang === `he`;
+  const title = lang === `he` ? `הדף לא נמצא` : lang === `ru` ? `Страница не найдена` : `Page not found`;
+  const body = lang === `he`
+    ? `לא הצלחנו למצוא את העמוד שחיפשתם. ייתכן שהקישור שגוי או שהדף הוסר.`
+    : lang === `ru`
+      ? `Мы не нашли запрашиваемую страницу. Возможно, ссылка неверна или страница удалена.`
+      : `We couldn't find the page you were looking for. The link may be broken or the page may have moved.`;
+  const homeBtn = lang === `he` ? `חזרה לדף הבית` : lang === `ru` ? `На главную` : `Back home`;
+  const petsBtn = lang === `he` ? `לאוסף BLOOM` : lang === `ru` ? `Коллекция BLOOM` : `Browse BLOOM`;
+  return (
+    <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `70vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+      <div style={{ textAlign: `center`, padding: `60px 24px`, maxWidth: 560 }}>
+        <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `5rem`, color: COLORS.accent, lineHeight: 1, marginBottom: 12 }}>404</div>
+        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 700, fontSize: `1.8rem`, color: COLORS.white, margin: `0 0 12px` }}>{title}</h1>
+        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 16, lineHeight: 1.6, margin: `0 0 28px` }}>{body}</p>
+        <div style={{ display: `flex`, gap: 12, justifyContent: `center`, flexWrap: `wrap` }}>
+          <button type="button" onClick={() => setPage(`home`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{homeBtn}</button>
+          <button type="button" onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{petsBtn}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
  const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
@@ -7952,7 +8065,16 @@ export default function App() {
     // are unaffected.
     const hash = rawHash().replace('#', '').replace(/^\//, '');
     const root = hash.split('/')[0].split('?')[0];
-    return VALID_PAGES.includes(root) ? root : 'home';
+    // Empty hash = home. A non-empty hash that matches no known route gets a
+    // real 404 page (was silently falling back to 'home', which masked broken
+    // links). Scroll/anchor hashes all use known roots (pets/policies/...), so
+    // they're unaffected.
+    if (root === '') return 'home';
+    // Supabase auth callbacks can drop tokens straight into the hash
+    // (#access_token=...&type=recovery in implicit flow, or an OAuth error). Never
+    // 404 those — fall back to home and let the SDK consume + clean the URL.
+    if (/(access_token|refresh_token|provider_token|error_code|error_description)=/.test(hash)) return 'home';
+    return VALID_PAGES.includes(root) ? root : 'not-found';
   };
 
   const getPageFromHash = getPageFromURL;
@@ -8561,6 +8683,12 @@ export default function App() {
         /* WCAG 2.4.1 — skip to content. Off-screen until focused, then pinned top-center. */
         .skip-link { position: fixed; top: -100px; inset-inline-start: 50%; transform: translateX(-50%); z-index: 10000; background: #C0501A; color: #fff; padding: 12px 22px; border-radius: 0 0 10px 10px; font-family: 'Varela Round', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: top 0.15s ease; }
         .skip-link:focus { top: 0; outline: 2px solid #fff; outline-offset: 2px; }
+        /* iOS Safari auto-zooms when a focused input's font-size is < 16px. The
+           form inputs use 13–14px; force >=16px on small screens so no field
+           triggers the zoom. Desktop keeps its original sizing (media-scoped). */
+        @media (max-width: 768px) {
+          input, textarea, select { font-size: 16px !important; }
+        }
 
         /* === Premium Animations === */
 
@@ -8749,6 +8877,7 @@ export default function App() {
             {page === "faq" && <FaqPage lang={lang} />}
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
+            {page === "not-found" && <NotFoundPage lang={lang} setPage={setPage} />}
             {MUG_STUDIO_ENABLED && page === "mug-studio" && (
               <Suspense fallback={
                 <div style={{
@@ -9055,6 +9184,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
   const [designs, setDesigns] = useState([]);
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [selected, setSelected] = useState(null); // currently opened character in modal
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
   // Browse filters. species: `all`|`dog`|`cat`. query: substring matched
@@ -9079,6 +9210,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
   // doesn't block the grid — packs are an add-on offering, not the main UI.
   useEffect(() => {
     (async () => {
+      setLoadError(false); setLoading(true);
       try {
         const [designsRes, packsRes] = await Promise.all([
           supabase
@@ -9101,11 +9233,12 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         }
       } catch (err) {
         console.error("Failed to load BLOOM collection:", err);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [reloadKey]);
 
   // Latest published blog posts for the "from our blog" stripe (Slice 3). Only
   // shown when there are 3+; a fetch failure or <3 simply hides it.
@@ -9627,14 +9760,18 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           </div>
         )}
 
-        {loading && (
+        {loadError && (
+          <LoadError lang={lang} onRetry={() => setReloadKey((k) => k + 1)} />
+        )}
+
+        {loading && !loadError && (
           <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Varela Round',sans-serif" }}>
             <div style={{ display: "inline-block", width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: "50%", animation: "petsSpin 0.8s linear infinite", marginBottom: 16 }} />
             <div>{t.loading}</div>
           </div>
         )}
 
-        {!loading && designs.length === 0 && (
+        {!loading && !loadError && designs.length === 0 && (
           <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 20 }}>
             {t.empty}
           </div>
@@ -10989,6 +11126,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   // Buy state — mirrors PetModal so the hero image reacts to the selection.
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState(`basic`);
@@ -11027,7 +11166,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true); setNotFound(false); setDesign(null); setRelated([]);
+    setLoading(true); setNotFound(false); setLoadError(false); setDesign(null); setRelated([]);
     setPreviewProduct(null); setSelectedColor(BLOOM_SHIRT_COLORS[0]); setShirtType(`basic`); setShirtSize(`m`); setPetName(``);
     window.scrollTo(0, 0);
     if (!slug) { setNotFound(true); setLoading(false); return; }
@@ -11036,7 +11175,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
         .from(`pet_designs`).select(`*`)
         .eq(`slug`, slug).eq(`is_active`, true).maybeSingle();
       if (cancelled) return;
-      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      // Distinguish a load failure (show retry) from a genuinely missing breed
+      // (show not-found).
+      if (error) { console.error(`[breed] load failed:`, error); setLoadError(true); setLoading(false); return; }
+      if (!data) { setNotFound(true); setLoading(false); return; }
       setDesign(data); setLoading(false);
       // Full active roster (all 70 — dogs + cats) for the bottom marquee rail.
       const { data: rel } = await supabase
@@ -11047,7 +11189,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       if (!cancelled && rel) setRelated(rel);
     })();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   // Full per-breed SEO — title + description + Open Graph + Twitter card +
   // Product JSON-LD + canonical/hreflang, set on navigation via the same
@@ -11105,6 +11247,13 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       <div style={{ background: COLORS.bg, minHeight: `100vh`, paddingTop: 72, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
         <div style={{ width: 36, height: 36, border: `3px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `breedSpin 0.8s linear infinite` }} />
         <style>{`@keyframes breedSpin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+  if (loadError) {
+    return (
+      <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, direction: isRTL ? `rtl` : `ltr` }}>
+        <LoadError lang={lang} onRetry={() => setReloadKey(k => k + 1)} />
       </div>
     );
   }
@@ -12035,6 +12184,8 @@ function BlogIndex({ lang, goToBlog }) {
   const [posts, setPosts] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [category, setCategory] = useState(`all`);
   const readPageNum = () => {
     const m = rawHash().match(/[?&]page=(\d+)/);
@@ -12070,6 +12221,7 @@ function BlogIndex({ lang, goToBlog }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setLoadError(false);
     (async () => {
       const offset = (pageNum - 1) * BLOG_PAGE_SIZE;
       let q = supabase
@@ -12081,12 +12233,12 @@ function BlogIndex({ lang, goToBlog }) {
       if (category !== `all`) q = q.eq(`category`, category);
       const { data, count: c, error } = await q;
       if (cancelled) return;
-      if (error) { console.error(`Failed to load blog posts:`, error); setPosts([]); setCount(0); }
+      if (error) { console.error(`Failed to load blog posts:`, error); setPosts([]); setCount(0); setLoadError(true); }
       else { setPosts(data || []); setCount(c || 0); }
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [category, pageNum]);
+  }, [category, pageNum, reloadKey]);
 
   const totalPages = Math.max(1, Math.ceil(count / BLOG_PAGE_SIZE));
   const gotoPageNum = (n) => {
@@ -12124,7 +12276,9 @@ function BlogIndex({ lang, goToBlog }) {
 
       {/* Grid */}
       <section style={{ position: `relative`, zIndex: 1, maxWidth: 1200, margin: `0 auto`, padding: isMobile ? `0 16px 80px` : `0 40px 120px` }}>
-        {loading ? (
+        {loadError ? (
+          <LoadError lang={lang} onRetry={() => setReloadKey((k) => k + 1)} />
+        ) : loading ? (
           <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif` }}>
             <div style={{ display: `inline-block`, width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `blogSpin 0.8s linear infinite` }} />
           </div>
@@ -12162,6 +12316,8 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -12172,14 +12328,16 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true); setNotFound(false); setPet(null); setRelated([]);
+    setLoading(true); setNotFound(false); setLoadError(false); setPet(null); setRelated([]);
     window.scrollTo(0, 0);
     (async () => {
       const { data, error } = await supabase
         .from(`blog_posts`).select(`*`)
-        .eq(`slug`, slug).eq(`status`, `published`).single();
+        .eq(`slug`, slug).eq(`status`, `published`).maybeSingle();
       if (cancelled) return;
-      if (error || !data) { setNotFound(true); setPost(null); setLoading(false); return; }
+      // A real fetch error → retry; a missing/unpublished post → not-found.
+      if (error) { console.error(`[blog] load failed:`, error); setLoadError(true); setPost(null); setLoading(false); return; }
+      if (!data) { setNotFound(true); setPost(null); setLoading(false); return; }
       setPost(data);
       setLoading(false);
       // No view-count RPC call (intentional).
@@ -12198,7 +12356,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
       if (!cancelled && rel) setRelated(rel);
     })();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   // SEO meta + OG + JSON-LD Article — language-aware with Hebrew fallback so
   // nothing renders blank. There are NO seo_*_ru columns, so RU falls back to
@@ -12248,6 +12406,13 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
       <div style={{ background: COLORS.bg, minHeight: `100vh`, paddingTop: 72, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
         <div style={{ width: 36, height: 36, border: `3px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `blogSpin 0.8s linear infinite` }} />
         <style>{`@keyframes blogSpin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+  if (loadError) {
+    return (
+      <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, direction: isRTL ? `rtl` : `ltr` }}>
+        <LoadError lang={lang} onRetry={() => setReloadKey(k => k + 1)} />
       </div>
     );
   }
