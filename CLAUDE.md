@@ -17,9 +17,51 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ---
 
-## 📌 STATE AS OF 2026-06-01 (source of truth — read this first)
+## 📌 STATE AS OF 2026-06-02 (source of truth — read this first)
 
-> Supersedes the 2026-05-31 block and all older snapshots where they conflict.
+> Supersedes the 2026-06-01 block and all older snapshots where they conflict.
+> All the work below is committed on **`launch-prep`** (4 commits ahead of
+> `origin/launch-prep`: `bbe3440`, `62d16df`, `93f1d53`, `400e610`) — **NOT yet
+> merged to `main` / deployed**. Production (`main`) is still the 2026-06-01 state
+> behind the maintenance gate.
+
+### 💳 Payments — now fully live & secured (behind maintenance for staff testing)
+- **`tranzila-webhook` is at v12** (`verify_jwt=false`, `VERIFY_MODE="enforce"`). Reads `order_group` from **`u71`** (Tranzila overwrites `myid` with the merchant id). **Query-back** to `report.tranzila.com/v1/transaction` with `transaction_index` sent as an **INTEGER** (a string is rejected — `error_code 20004`); verifies `processor_response_code`, amount (**agorot/100**), currency, and `child_terminal`. **Layer 2** = amount match. An **unverified** success → order held as `payment_status='processing'` (safe; never wrongly marked paid).
+- **ALL order emails fire only AFTER confirmed payment, from the webhook:** customer confirmation (`send-order-confirmation`) + business alert (`send-admin-order-alert`). **No emails are sent before payment** anymore — the frontend pre-payment email calls were removed.
+- **Frontend post-payment return fixes** (commit `bbe3440`): decode `&amp;`→`&` in the URL hash (central `rawHash()` helper) so `paid=1` is detected; **strict success gate** (`payment_status==='succeeded'` only); **clear cart on confirmed success only**; clear thank-you screen.
+
+### 🆕 New edge function
+- **`notify-design-submission` (v1, `verify_jwt=false`):** emails the admin when a **custom design is submitted for approval** — a **pre-payment WORKFLOW alert**, only for orders with `requires_design_approval=true`. Called **fire-and-forget** from the custom-design submission path (commit `62d16df`). (Distinct from order emails, which remain post-payment only.)
+
+### 🐾 Pet-name personalization (commit `93f1d53`)
+- **Product card (mug + shirt only):** optional pet-name input; a **font picker** (Heebo, Assistant, Secular One, Suez One, Rubik) + **7 fixed color swatches** appear only **after a name is typed** (progressive disclosure); **live preview** under the design (light-orange card, RTL/LTR aware). The **+₪20 `PET_NAME_SURCHARGE`** applies **only when a name is entered**. Admin order view shows an **`AdminPetNameBlock`** (name rendered in the chosen font + font name + color swatch/hex).
+- **New `orders` columns:** `pet_name_font`, `pet_name_color` (text). `pet_name` already existed.
+
+### 👕 Shirt products (commit `400e610`)
+- Shirt/mug products are defined **in code** (the `PRODUCTS` array in `App.jsx`), **not the DB**. Per-size pricing: S/M/L base, XL/XXL **+₪10**, except where set flat.
+- **NEW product "Oversize Stone-wash"** (`חולצת אוברסייז סטון ווש`) @ **₪119 flat** — mirrors Oversize exactly (reuses the oversize mockup image **for now** — to be replaced).
+- **Oversize price → ₪119 flat** (removed its per-size surcharge). **Removed all "240g heavy cotton" wording.**
+- **Fabric facts:** Tee Basic / Oversize / Stone-wash = **100% combed cotton**; **Dri-FIT = breathable technical polyester (NOT cotton)**; mugs = **ceramic**. New FAQ **"what fabric"** entry added + the **old material FAQ aligned** to this.
+
+### 🧹 DB data cleanup
+- **Dogs Sticker Pack price restored ₪1 → ₪35** (both packs now ₪35).
+
+### 🧷 Still pending (Gleb's side / future)
+- **Refund 3 test charges** in the Tranzila admin: `374782`, `374798`, `374836` (₪3).
+- **Interspace:** make the **ת.ז. (ID) field optional/disabled** on the terminal (caused `026` declines).
+- **Accountant:** confirm the Tranzila **receipt settings** (exempt-dealer "קבלה", 0% VAT).
+- **Replace the Stone-wash product image** (currently reuses the oversize mockup).
+- **After-launch backlog:** WhatsApp auto-notify (Business API/provider vs Telegram), personal area / save customer details, on-product designer (ZAKEKE) once orders are flowing.
+
+### 🔔 Launch arming (unchanged, when ready)
+- Merge `launch-prep` → `main`; flip **`MAINTENANCE_MODE=false`** + **`index.html` noindex off** + **`api/og.js` MAINTENANCE off**; **`PAYMENTS_ENABLED` stays `true`**; set up the design-decision **DB webhook** + `DESIGN_NOTIFY_ENABLED`; arm `waitlist-launch-announce`.
+
+---
+
+## 📌 STATE AS OF 2026-06-01 (historical — superseded by the 2026-06-02 block above)
+
+> Superseded by the 2026-06-02 block. Supersedes the 2026-05-31 block and all
+> older snapshots where they conflict.
 > Records the live production state + everything shipped since.
 
 ### 🚀 Production / deploy
