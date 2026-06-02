@@ -6814,6 +6814,74 @@ function TrustRow({ lang }) {
   );
 }
 
+// ============ EVENT / GROUP ORDERS — WhatsApp-led inquiry section ============
+// Home-page section promoting custom shirts for events. NOT a checkout — the CTA
+// opens WhatsApp (same WHATSAPP_NUMBER as the floating button) with a prefilled
+// message so the customer becomes a lead and the shop replies with a quote. No
+// pricing/cart/order changes. On-brand (dark + burnt-orange), feather-style line
+// icons matching TrustRow, trilingual + RTL.
+function EventOrdersSection({ lang }) {
+  const isRTL = lang === `he`;
+  const dir = isRTL ? `rtl` : `ltr`;
+  const eyebrow = lang === `he` ? `הזמנות קבוצתיות` : lang === `ru` ? `Групповые заказы` : `Group orders`;
+  const heading = lang === `he` ? `חולצות מותאמות לאירועים` : lang === `ru` ? `Футболки на заказ для мероприятий` : `Custom shirts for events`;
+  const copy = lang === `he`
+    ? `מסיבות רווקים/רווקות, חתונות, ימי הולדת ואירועי צוות/חברה — עיצובים אישיים, שמות ומחיר מיוחד לכמות (5 חולצות ומעלה), עם מבחר צבעים רחב יותר להזמנות קבוצתיות. ייצור מקומי בבאר שבע עם זמן אספקה מהיר לתאריך האירוע שלכם.`
+    : lang === `ru`
+    ? `Девичники/мальчишники, свадьбы, дни рождения и корпоративы — персональный дизайн, имена и специальные цены на количество (от 5 футболок), с расширенным выбором цветов для групповых заказов. Местное производство в Беэр-Шеве с быстрым сроком к дате вашего мероприятия.`
+    : `Bachelor/ette parties, weddings, birthdays, and team/company events — personalized designs, names, and special pricing for quantity (5+ shirts), with a wider color range for group orders. Local production in Be'er Sheva with fast turnaround for your event date.`;
+  const ctaLabel = lang === `he` ? `דברו איתנו בוואטסאפ` : lang === `ru` ? `Напишите нам в WhatsApp` : `Chat with us on WhatsApp`;
+  const prefill = lang === `he`
+    ? `היי! אני מעוניין/ת בהזמנה קבוצתית לחולצות לאירוע`
+    : lang === `ru`
+    ? `Здравствуйте! Меня интересует групповой заказ футболок для мероприятия`
+    : `Hi! I'm interested in a group order of shirts for an event`;
+  const waValid = /^\d{6,15}$/.test(WHATSAPP_NUMBER || ``);
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(prefill)}`;
+
+  // Feather-style line icons — same shape as TrustRow (24-grid, stroke, no fill).
+  const iconProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  const chips = [
+    { key: `bachelor`, label: lang === `he` ? `מסיבת רווקות/רווקים` : lang === `ru` ? `Девичник·мальчишник` : `Bachelor/ette party`,
+      icon: <svg {...iconProps}><path d="M6 3h12l-6 8z" /><line x1="12" y1="11" x2="12" y2="20" /><line x1="8" y1="20" x2="16" y2="20" /></svg> },
+    { key: `wedding`, label: lang === `he` ? `חתונה` : lang === `ru` ? `Свадьба` : `Wedding`,
+      icon: <svg {...iconProps}><circle cx="9" cy="14" r="6" /><circle cx="15" cy="14" r="6" /><path d="M9 4l3 3 3-3" /></svg> },
+    { key: `birthday`, label: lang === `he` ? `יום הולדת` : lang === `ru` ? `День рождения` : `Birthday`,
+      icon: <svg {...iconProps}><path d="M4 21h16v-7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2z" /><path d="M4 16h16" /><line x1="8" y1="9" x2="8" y2="6" /><line x1="12" y1="9" x2="12" y2="6" /><line x1="16" y1="9" x2="16" y2="6" /></svg> },
+    { key: `team`, label: lang === `he` ? `גיבוש צוות` : lang === `ru` ? `Корпоратив` : `Team event`,
+      icon: <svg {...iconProps}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
+  ];
+
+  return (
+    <section aria-labelledby="event-orders-title" dir={dir} style={{ background: COLORS.bg, padding: `8px 24px 72px` }}>
+      <div style={{ maxWidth: 860, margin: `0 auto`, background: `linear-gradient(180deg, rgba(255,107,53,0.08) 0%, rgba(255,107,53,0.03) 100%)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 20, padding: isRTL ? `40px 28px` : `40px 28px`, textAlign: `center` }}>
+        <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Varela Round',sans-serif` }}>{eyebrow}</span>
+        <h2 id="event-orders-title" style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 900, fontSize: `clamp(28px,5vw,42px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 16px` }}>{heading}</h2>
+        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 15.5, lineHeight: 1.7, maxWidth: 640, margin: `0 auto 26px` }}>{copy}</p>
+
+        <ul role="list" style={{ listStyle: `none`, margin: `0 0 30px`, padding: 0, display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 10 }}>
+          {chips.map((c) => (
+            <li key={c.key} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, padding: `9px 15px`, borderRadius: 999, border: `1px solid rgba(255,107,53,0.25)`, background: `rgba(255,107,53,0.06)`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13.5, fontWeight: 500, whiteSpace: `nowrap` }}>
+              <span style={{ display: `inline-flex`, color: COLORS.accent, flexShrink: 0 }}>{c.icon}</span>
+              <span>{c.label}</span>
+            </li>
+          ))}
+        </ul>
+
+        {waValid && (
+          <a href={href} target="_blank" rel="noopener noreferrer" aria-label={ctaLabel}
+            style={{ display: `inline-flex`, alignItems: `center`, gap: 10, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, textDecoration: `none`, transition: `background 0.2s, box-shadow 0.3s`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)` }}
+            onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentHover; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accent; }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.892c0 2.096.549 4.142 1.595 5.945L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.582 0 11.94-5.335 11.944-11.893a11.821 11.821 0 0 0-3.487-8.46z" /></svg>
+            <span>{ctaLabel}</span>
+          </a>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // Star rating row — small Playfair-styled stars. role="img" gives screen readers the rating.
 function ReviewStars({ rating, label }) {
   const full = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
@@ -8617,7 +8685,7 @@ export default function App() {
             <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
             <WhatsAppFab lang={lang} />
             <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
@@ -11555,6 +11623,14 @@ const FAQ_GROUPS = [
           he: `האתר זמין בעברית, אנגלית ורוסית.`,
           en: `The site is available in Hebrew, English, and Russian.`,
           ru: `Сайт доступен на иврите, английском и русском.`,
+        },
+      },
+      {
+        q: { he: `אתם עושים הזמנות קבוצתיות לאירועים?`, en: `Do you do group orders for events?`, ru: `Делаете ли вы групповые заказы для мероприятий?` },
+        a: {
+          he: `כן! אנחנו מתמחים בחולצות מותאמות לאירועים — מסיבות רווקים/רווקות, חתונות, ימי הולדת, גיבושים וצוותים. אפשר עיצוב אישי, שמות, ומחיר מיוחד להזמנות כמות (5 חולצות ומעלה), עם מבחר צבעים רחב יותר. כתבו לנו בוואטסאפ ונכין לכם הצעת מחיר אישית.`,
+          en: `Yes! We specialize in custom shirts for events — bachelor/ette parties, weddings, birthdays, and team/company events. Personalized designs, names, and special pricing for quantity orders (5+ shirts), with a wider color range. Message us on WhatsApp for a personal quote.`,
+          ru: `Да! Мы делаем футболки на заказ для мероприятий — девичники/мальчишники, свадьбы, дни рождения, корпоративы. Персональный дизайн, имена и специальные цены на количество (от 5 футболок), с расширенным выбором цветов. Напишите нам в WhatsApp — подготовим индивидуальное предложение.`,
         },
       },
     ],
