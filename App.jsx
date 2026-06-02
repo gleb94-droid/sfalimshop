@@ -8445,7 +8445,8 @@ export default function App() {
     if (page !== "blog" && page !== "breed" && page !== "faq") {
       const title = langTitles[page] || langTitles.home;
       document.title = title;
-      setGenericSeo(lang, title);
+      const viewDesc = (VIEW_SEO_DESC[lang] || VIEW_SEO_DESC.he)[page];
+      setGenericSeo(lang, title, viewDesc);
     }
     // Update html lang+dir to match current selection
     document.documentElement.lang = lang;
@@ -11070,7 +11071,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       `${name} בסגנון BLOOM — דיוקן חיה מאויר על חולצות, ספלים ומדבקות איכותיים.`;
     const desc = `${base}${origin ? ` ${origin}` : (tagline ? ` ${tagline}` : ``)}`.slice(0, 300);
     const img = design.mockup_url || design.mockup_shirt_url || design.design_url || ``;
-    const url = `${SEO_ORIGIN}/#/breed/${design.slug}`;
+    const url = `${SEO_ORIGIN}/breed/${design.slug}`;
     document.title = title;
     setMeta(`description`, desc);
     setMeta(`og:title`, name, `property`);
@@ -11914,12 +11915,36 @@ const GENERIC_SEO_DESC = {
   ru: `Индивидуальная печать — футболки, кружки и стикеры с вашим дизайном, плюс коллекция портретов BLOOM для 70 пород собак и кошек.`,
 };
 
+// Per-view meta descriptions (trilingual) for the main non-breed/blog/faq views,
+// so each route gets its own description + OG instead of the single generic one.
+// Falls back to GENERIC_SEO_DESC for any view not listed (home/admin/policies).
+const VIEW_SEO_DESC = {
+  he: {
+    order: `עצבו מוצר משלכם — העלו תמונה, בחרו חולצה/ספל/מדבקה, צבע ומידה, ואנחנו מדפיסים בישראל ושולחים עד הבית.`,
+    pets: `אוסף BLOOM — 70 דיוקנאות מאוירים של כלבים וחתולים על חולצות, ספלים ומדבקות. מצאו את הגזע שלכם.`,
+    about: `הסיפור של ספלים שופ — הדפסה מקומית בבאר שבע, באהבה ובדיוק, עם משלוח לכל הארץ.`,
+    track: `מעקב אחר ההזמנה שלכם בספלים שופ.`,
+  },
+  en: {
+    order: `Design your own — upload a photo, pick a shirt/mug/sticker, colour and size; printed in Israel and shipped to your door.`,
+    pets: `The BLOOM collection — 70 hand-illustrated dog & cat portraits on shirts, mugs and stickers. Find your breed.`,
+    about: `The Sfalim Shop story — printed locally in Be'er Sheva with care, shipped anywhere in Israel.`,
+    track: `Track your Sfalim Shop order.`,
+  },
+  ru: {
+    order: `Создайте свой товар — загрузите фото, выберите футболку/кружку/стикер, цвет и размер; печатаем в Израиле с доставкой на дом.`,
+    pets: `Коллекция BLOOM — 70 рисованных портретов собак и кошек на футболках, кружках и стикерах. Найдите свою породу.`,
+    about: `История Sfalim Shop — печатаем в Беэр-Шеве с любовью, доставка по всему Израилю.`,
+    track: `Отслеживание вашего заказа в Sfalim Shop.`,
+  },
+};
+
 // Restore the generic site title/description/OG/Twitter/canonical/hreflang and
 // drop any per-page JSON-LD. Called for every route that isn't a breed page or
 // a blog page (those own their SEO in their components). `title` is the
 // already-resolved per-route document title.
-function setGenericSeo(lang, title) {
-  const desc = GENERIC_SEO_DESC[lang] || GENERIC_SEO_DESC.he;
+function setGenericSeo(lang, title, descOverride) {
+  const desc = descOverride || GENERIC_SEO_DESC[lang] || GENERIC_SEO_DESC.he;
   setMeta(`description`, desc);
   setMeta(`og:title`, title, `property`);
   setMeta(`og:description`, desc, `property`);
@@ -12190,7 +12215,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
        post.seo_description_he) || post.excerpt_he || ``;
     const ogTitle = post[`title_${lang}`] || post.title_he || ``;
     const ogDesc = post[`excerpt_${lang}`] || post.excerpt_he || ``;
-    const postUrl = `${SEO_ORIGIN}/#/blog/${post.slug}`;
+    const postUrl = `${SEO_ORIGIN}/blog/${post.slug}`;
     document.title = `${seoTitle} — Sfalim Shop`;
     setMeta(`description`, seoDesc);
     setMeta(`og:title`, ogTitle, `property`);

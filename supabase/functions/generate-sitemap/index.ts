@@ -8,12 +8,13 @@
 //   https://ubvgrxlxtelulwjtfudd.supabase.co/functions/v1/generate-sitemap
 // Point robots.txt's Sitemap: line at that URL.
 //
-// NOTE: the app is a hash-router SPA, so post URLs are #/blog/<slug>. Search
-// engines ignore URL fragments, so these entries mainly help discovery/record-
-// keeping; full-path SEO would require prerendering. Kept per project routing.
+// URLs are REAL crawlable paths (no #fragments): breeds at /breed/<slug> and
+// posts at /blog/<slug> are served as per-entity HTML to crawlers by api/og.js
+// (which 302s humans into the SPA hash route). Mirrors public/sitemap.xml.
 //
 // While MAINTENANCE_MODE keeps the site noindex/nofollow, crawlers won't index
 // anything yet — this is ready for launch.
+// MIRROR ONLY: edit committed for repo↔prod parity; redeploy at launch.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -63,8 +64,11 @@ Deno.serve(async (req: Request) => {
 
   const staticUrls = [
     { loc: `${SITE}/`, priority: "1.0" },
-    { loc: `${SITE}/#/blog`, priority: "0.8" },
-    { loc: `${SITE}/#pets`, priority: "0.8" },
+    { loc: `${SITE}/privacy`, priority: "0.3" },
+    { loc: `${SITE}/terms`, priority: "0.3" },
+    { loc: `${SITE}/refunds`, priority: "0.3" },
+    { loc: `${SITE}/shipping`, priority: "0.3" },
+    { loc: `${SITE}/accessibility`, priority: "0.2" },
   ];
 
   const urlTag = (loc: string, lastmod: string | null, priority: string) =>
@@ -73,11 +77,11 @@ Deno.serve(async (req: Request) => {
   const entries: string[] = [];
   for (const u of staticUrls) entries.push(urlTag(u.loc, null, u.priority));
   for (const b of breeds ?? []) {
-    entries.push(urlTag(`${SITE}/#/breed/${b.slug}`, null, "0.7"));
+    entries.push(urlTag(`${SITE}/breed/${b.slug}`, null, "0.7"));
   }
   for (const p of posts ?? []) {
     const lastmod = (p.updated_at || p.published_at || "").slice(0, 10) || null;
-    entries.push(urlTag(`${SITE}/#/blog/${p.slug}`, lastmod, "0.7"));
+    entries.push(urlTag(`${SITE}/blog/${p.slug}`, lastmod, "0.6"));
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join("\n")}\n</urlset>`;

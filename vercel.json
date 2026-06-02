@@ -9,6 +9,14 @@
       "destination": "/api/og?handle=:handle"
     },
     {
+      "source": "/breed/:slug",
+      "destination": "/api/og?type=breed&handle=:slug"
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/api/og?type=blog&handle=:slug"
+    },
+    {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
