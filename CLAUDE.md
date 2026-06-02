@@ -17,12 +17,31 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ---
 
-## 📌 STATE AS OF 2026-06-02 (pre-launch audit complete — source of truth, read this first)
+## 📌 STATE AS OF 2026-06-02 (final pre-launch fixes — launch-ready, read this first)
 
-> Supersedes every block below where they conflict. **All technical pre-launch
-> work is now DONE on `launch-prep`** (`~11 commits ahead of `main`), all behind
-> the maintenance gate. Production (`main`) is unchanged. The site is
-> launch-ready pending the owner-side items + the launch-gate flips listed here.
+> Supersedes every block below where they conflict. **`launch-prep` is now
+> technically LAUNCH-READY** (HEAD `1bb03ef`, ~14 commits ahead of `main`), all
+> behind the maintenance gate. Production (`main`) is unchanged.
+
+### 🔍 Deep re-audit + final fix wave (commit `1bb03ef`)
+- **Deep full-site re-audit** (he/en/ru, desktop + mobile) surfaced **one real blocker** that earlier URL-based audits missed: the **mobile nav hamburger rendered off-screen** (right-cluster overflow), so phone users couldn't open the menu. **FIXED** by removing the **duplicated inline language switcher** from the mobile nav cluster (it stays inside the dropdown). **Desktop nav unchanged.**
+- **Owner card-display changes:** carousel/character card **name centered**; the **dog/cat species label removed from all user-facing CARDS** (carousel, gallery `PetCard`, `PetModal`, breed-page eyebrow). The gallery **filter (All/Dogs/Cats) is intentionally kept and still works** — the `species` data field is intact (the filter needs it); the species is only **hidden from card display**.
+- **Accessibility refinements:** home hero product cards keyboard-operable (`role="button"`/`tabIndex`/Enter-Space); the **"Leave order?" modal** got `role="dialog"` + `aria-modal` + `aria-labelledby` + focus-move (`useDialogFocus`), Esc kept; the **Policies section is now a real tablist** (`role=tablist/tab/tabpanel` + `aria-selected` + roving `tabindex` + RTL arrow-key nav); two failing small-text contrasts fixed (footer copyright + inactive policy tab → `#a0a0a0`, **≥6.6:1**).
+- **Debunked three stale false-positives:** SEO images **exist** on disk (`og-image.png`/`logo.jpg`/favicons/manifest); the iOS **16px input rule is global**; single prices **render correctly in RTL** (₪ left of digits — measured). All prior fix waves held; **build clean; 0 console errors.**
+
+### 🚦 Verdict — LAUNCH-READY
+Only remaining step to go live is the **launch flip**: merge `launch-prep` → `main` + flip **`MAINTENANCE_MODE`→false**, **`index.html` noindex → index,follow**, **`api/og.js` MAINTENANCE → false**. (`PAYMENTS_ENABLED` stays `true`; shipping already **30/20/35**; **Stone-wash stays hidden** until a real photo.)
+
+**Owner-side, non-blocking:** real Stone-wash photo; Interspace **ת.ז.** field optional on the terminal; **post-launch security** — rotate the edge-fn fallback secrets (**MJ-1**) + Vercel rate-limiting (**MJ-2**); **lawyer** policy review when revenue justifies.
+
+---
+
+## 📌 STATE AS OF 2026-06-02 (pre-launch audit complete — historical, superseded by the launch-ready block above)
+
+> Superseded by the "final pre-launch fixes — launch-ready" block above. Kept for
+> the a11y / SEO / UX-QA / legal detail it documents. **All technical pre-launch
+> work is now DONE on `launch-prep`**, all behind the maintenance gate. Production
+> (`main`) is unchanged.
 
 ### ✅ PRE-LAUNCH AUDIT — COMPLETE
 
