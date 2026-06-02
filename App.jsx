@@ -1616,7 +1616,7 @@ const LANGS = {
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך", guestTitle: "מעקב אחר ההזמנה שלך", guestDesc: "לא צריך סיסמה — נשלח לך למייל קישור מאובטח לצפייה בהזמנות שלך.", guestBtn: "שלח לי קישור" },
     approval: { submittedTitle: "העיצוב נשלח לאישור", submittedDesc: "העיצוב שלך נשלח לאישור — נעדכן אותך במייל ברגע שהוא יאושר, ואז תוכל לשלם. ההזמנה נשמרה.", underReview: "העיצוב בבדיקה", underReviewDesc: "שלחנו את העיצוב שלך לאישור. נעדכן אותך במייל ברגע שהוא יאושר — ואז אפשר יהיה לשלם.", approvedTitle: "העיצוב אושר! 🎉", approvedDesc: "אפשר להשלים את התשלום וההזמנה תיכנס להפקה.", payNow: "שלם עכשיו", changesTitle: "נדרשים שינויים בעיצוב", reviewNote: "הערה מהצוות שלנו", editResubmit: "ערוך ושלח מחדש", uploadNew: "העלה עיצוב חדש (לא חובה)", resubmitBtn: "שלח מחדש לאישור", resubmitting: "שולח...", resubmitted: "נשלח מחדש — העיצוב בבדיקה שוב", cancelOrder: "בטל הזמנה", cancelConfirm: "לבטל את ההזמנה הזו?", cancelled: "ההזמנה בוטלה" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
-    products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
+    products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
     bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} →` },
   },
@@ -1660,7 +1660,7 @@ const LANGS = {
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
     approval: { submittedTitle: "Your design was submitted for approval", submittedDesc: "Your design was submitted for approval — we'll email you once it's approved, then you can pay. Your order is saved.", underReview: "Design under review", underReviewDesc: "We've sent your design for approval. We'll email you the moment it's approved — then you can pay.", approvedTitle: "Design approved! 🎉", approvedDesc: "Complete payment and your order goes into production.", payNow: "Pay now", changesTitle: "Changes requested", reviewNote: "Note from our team", editResubmit: "Edit & resubmit", uploadNew: "Upload a new design (optional)", resubmitBtn: "Resubmit for approval", resubmitting: "Submitting...", resubmitted: "Resubmitted — under review again", cancelOrder: "Cancel order", cancelConfirm: "Cancel this order?", cancelled: "Order cancelled" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
-    products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
+    products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
     bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close", seeAll: (n) => `See all ${n} →` },
   },
@@ -1704,7 +1704,7 @@ const LANGS = {
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
     approval: { submittedTitle: "Ваш дизайн отправлен на одобрение", submittedDesc: "Ваш дизайн отправлен на одобрение — мы сообщим по email, как только он будет одобрен, тогда можно оплатить. Заказ сохранён.", underReview: "Дизайн на проверке", underReviewDesc: "Мы отправили ваш дизайн на одобрение. Сообщим по email, как только он будет одобрен — тогда можно оплатить.", approvedTitle: "Дизайн одобрен! 🎉", approvedDesc: "Завершите оплату, и заказ отправится в производство.", payNow: "Оплатить", changesTitle: "Требуются изменения", reviewNote: "Комментарий нашей команды", editResubmit: "Изменить и отправить снова", uploadNew: "Загрузить новый дизайн (необязательно)", resubmitBtn: "Отправить на одобрение снова", resubmitting: "Отправка...", resubmitted: "Отправлено повторно — снова на проверке", cancelOrder: "Отменить заказ", cancelConfirm: "Отменить этот заказ?", cancelled: "Заказ отменён" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
-    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
+    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", stonewash: "Футболка оверсайз стоунвош", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
     bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть", seeAll: (n) => `Смотреть все ${n} →` },
   },
@@ -1962,7 +1962,7 @@ const POLICIES = {
 };
 
 // Localization helpers - translate a saved product/variant name to target language
-const PRODUCT_IDS = ['tshirt', 'oversized', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
+const PRODUCT_IDS = ['tshirt', 'oversized', 'stonewash', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
 const localizeProduct = (savedName, targetLang) => {
   if (!savedName) return savedName;
   for (const id of PRODUCT_IDS) {
@@ -1995,7 +1995,8 @@ const SHIRT_COLOR_PALETTE = BLOOM_SHIRT_COLORS.map(c => c.hex);
 const PRODUCTS = (t) => [
   { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
   { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · גזרה רגילה · הדפסת DTF", en: "100% combed cotton · regular fit · DTF print", ru: "100% хлопок · обычный крой · DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "oversized",  name: t.products.oversized, desc: { he: "כותנה כבדה 240 גרם · גזרה אוברסייז · הדפסת DTF", en: "Heavy 240gsm cotton · oversize cut · DTF print", ru: "Плотный хлопок 240 г/м² · оверсайз · DTF-печать" }, is_new: true, variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "oversized",  name: t.products.oversized, desc: { he: "100% כותנה סרוקה · אוברסייז", en: "100% combed cotton · oversize", ru: "100% чёсаный хлопок · оверсайз" }, is_new: true, variants: [{ id: "s", label: "S", price: 119 }, { id: "m", label: "M", price: 119 }, { id: "l", label: "L", price: 119 }, { id: "xl", label: "XL", price: 119 }, { id: "xxl", label: "XXL", price: 119 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "stonewash",  name: t.products.stonewash, desc: { he: "100% כותנה סרוקה · אוברסייז, גימור וינטג' סטון-ווש", en: "100% combed cotton · oversize, vintage stone-wash finish", ru: "100% чёсаный хлопок · оверсайз, винтажная отделка стоунвош" }, is_new: true, variants: [{ id: "s", label: "S", price: 119 }, { id: "m", label: "M", price: 119 }, { id: "l", label: "L", price: 119 }, { id: "xl", label: "XL", price: 119 }, { id: "xxl", label: "XXL", price: 119 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "dryfit",     name: t.products.dryfit,    desc: { he: "פוליאסטר נושם · מתאים לאימון · הדפסת סובלימציה", en: "Breathable polyester · sport-ready · sublimation print", ru: "Дышащий полиэстер · для спорта · сублимационная печать" }, variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "sticker",    name: t.products.sticker,   desc: { he: "מדבקת ויניל עגולה · עמידה במים ובשמש", en: "Round vinyl sticker · water- and UV-resistant", ru: "Круглый виниловый стикер · водо- и UV-устойчивый" }, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
   { id: "sticker_sq", name: t.products.sticker_sq, desc: { he: "מדבקת ויניל מרובעת · עמידה במים ובשמש", en: "Square vinyl sticker · water- and UV-resistant", ru: "Квадратный виниловый стикер · водо- и UV-устойчивый" }, is_new: true, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
@@ -2029,6 +2030,11 @@ const PLACEMENTS = {
     { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 270 },
   ],
   oversized: [
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest", ru: "Левый карман", cx: 242, cy: 145, smallOnly: true },
+    { id: "center_chest", he: "מרכז",       en: "Center",     ru: "Центр",        cx: 200, cy: 165 },
+    { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 280 },
+  ],
+  stonewash: [
     { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest", ru: "Левый карман", cx: 242, cy: 145, smallOnly: true },
     { id: "center_chest", he: "מרכז",       en: "Center",     ru: "Центр",        cx: 200, cy: 165 },
     { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 280 },
@@ -2067,6 +2073,11 @@ const SIZE_OPTIONS = {
     { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
     { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
+  stonewash: [
+    { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
+    { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+  ],
   dryfit: [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
     { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
@@ -2094,6 +2105,8 @@ const SIZE_OPTIONS = {
 const MOCKUP_URLS = {
   tshirt:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
   oversized:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
+  // Stone-wash reuses the Oversize mockup for now (owner will replace later).
+  stonewash:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   dryfit:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
   mug:        "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/mug.png",
   sticker:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
@@ -5540,6 +5553,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div ref={mockupImageRef} style={{ position: "relative" }}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
+                    {product.id === "stonewash" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker"    && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
@@ -5649,7 +5663,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
-                  <label style={labelStyle}>{["tshirt","oversized","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
+                  <label style={labelStyle}>{["tshirt","oversized","stonewash","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {product.variants.map(v => <button key={v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
                   </div>
@@ -5735,7 +5749,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 )}
                 {/* Placement removed - users drag to position */}
                 {/* Extra prints — shirts only */}
-                {["tshirt","oversized","dryfit"].includes(product.id) && (
+                {["tshirt","oversized","stonewash","dryfit"].includes(product.id) && (
                   <div>
                     <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : lang === "ru" ? "Дополнительные принты" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -11476,9 +11490,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `מאיזה חומר המוצרים? ההדפסה מחזיקה בכביסה?`, en: `What are the products made of? Will the print survive washing?`, ru: `Из чего сделаны товары? Сохранится ли печать после стирки?` },
         a: {
-          he: `הספלים קרמיים והחולצות מכותנה איכותית. כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
-          en: `The mugs are ceramic and the shirts are quality cotton. To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
-          ru: `Кружки керамические, а футболки — из качественного хлопка. Чтобы печать держалась долго: кружку рекомендуется мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
+          he: `הספלים קרמיים. רוב החולצות (טי בייסיק, אוברסייז, סטון ווש) הן 100% כותנה סרוקה, והדרייפיט הוא פוליאסטר טכני נושם (לא כותנה). כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
+          en: `The mugs are ceramic. Most shirts (Tee Basic, Oversize, Stone-wash) are 100% combed cotton, while the Dri-FIT is a breathable technical polyester (not cotton). To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
+          ru: `Кружки керамические. Большинство футболок (Тибейсик, Оверсайз, Стоунвош) — 100% чёсаный хлопок, а Dri-FIT — дышащий технический полиэстер (не хлопок). Чтобы печать держалась долго: кружку мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
         },
       },
       {
@@ -11487,6 +11501,14 @@ const FAQ_GROUPS = [
           he: `מגוון מידות מ-S ועד XXL.`,
           en: `A range of sizes from S to XXL.`,
           ru: `Размеры в диапазоне от S до XXL.`,
+        },
+      },
+      {
+        q: { he: `מאיזה בד החולצות שלכם?`, en: `What fabric are your shirts made of?`, ru: `Из какой ткани ваши футболки?` },
+        a: {
+          he: `רוב החולצות שלנו עשויות 100% כותנה סרוקה — סיב איכותי ונעים. טי בייסיק — גזרה קלאסית; אוברסייז — גזרה רחבה; סטון ווש — אוברסייז עם גימור כביסת סטון-ווש למראה דהוי/וינטג'. חולצת הדרייפיט שונה: בד פוליאסטר טכני נושם שמנדף זיעה, מתאים לפעילות וספורט. מילון: כותנה סרוקה = כותנה שעברה סירוק להסרת סיבים קצרים (חלקה, חזקה ונעימה יותר); סטון ווש = כביסה שמרככת ונותנת מראה וינטג' דהוי; דרייפיט = בד טכני נושם שמנדף זיעה, שונה מכותנה.`,
+          en: `Most of our shirts are 100% combed cotton — a soft, high-quality fiber. Tee Basic — classic fit; Oversize — relaxed fit; Stone-wash — oversize with a stone-wash finish for a faded vintage look. The Dri-FIT shirt is different: a breathable technical polyester that wicks sweat, made for activity and sport. Glossary: Combed cotton = cotton brushed to remove short fibers (smoother, stronger, softer); Stone-wash = a wash that softens the fabric and gives a faded vintage look; Dri-FIT = a breathable technical fabric that wicks sweat, different from cotton.`,
+          ru: `Большинство наших футболок — 100% чёсаный хлопок, мягкое качественное волокно. Тибейсик — классический крой; Оверсайз — свободный крой; Стоунвош — оверсайз с отделкой стоунвош для выцветшего винтажного вида. Футболка Dri-FIT отличается: дышащий технический полиэстер, отводит влагу, для активности и спорта. Словарь: чёсаный хлопок = хлопок без коротких волокон (глаже, прочнее, мягче); стоунвош = стирка для мягкости и винтажного вида; Dri-FIT = дышащая техническая ткань, отводит влагу, отличается от хлопка.`,
         },
       },
     ],
