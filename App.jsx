@@ -10,6 +10,25 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 const MugStudio = lazy(() => import('./MugStudio.jsx'));
 const supabase = createClient('https://ubvgrxlxtelulwjtfudd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE')
 
+// Reactive "is a full-screen overlay open?" signal. Every drawer/modal (cart
+// drawer, PetModal, lightbox, …) locks scroll via `document.body.style.overflow
+// = "hidden"`, so we watch that one attribute with a MutationObserver. Used to
+// hide the cookie banner + corner FABs while an overlay is open, so they never
+// overlap or intercept taps on it (e.g. the cart checkout CTA on mobile, where
+// the bottom-pinned banner otherwise sat over the button). They reappear on close.
+function useOverlayOpen() {
+  const [open, setOpen] = useState(() => typeof document !== `undefined` && document.body.style.overflow === `hidden`);
+  useEffect(() => {
+    if (typeof document === `undefined`) return;
+    const check = () => setOpen(document.body.style.overflow === `hidden`);
+    check();
+    const mo = new MutationObserver(check);
+    mo.observe(document.body, { attributes: true, attributeFilter: [`style`] });
+    return () => mo.disconnect();
+  }, []);
+  return open;
+}
+
 // ── A11y: dialog focus management (WCAG 2.4.3 / 2.1.2) ──────────────────────
 // When `active` becomes true: remember the currently-focused element, move focus
 // into the dialog (first focusable, or the container), and keep Tab/Shift+Tab
@@ -7519,7 +7538,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 // Main App
 
 // ============ ACCESSIBILITY ============
-function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
+function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduceMotion }) {
   const [open, setOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
   const [highContrast, setHighContrast] = useState(false);
@@ -7563,13 +7582,13 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
   // A11y: focus the panel when open; restore focus to the toggle on close.
   const a11yPanelRef = useDialogFocus(open);
 
-  // Cart drawer slides in from inline-end (right in LTR, left in RTL). Anchor
-  // the a11y button to inline-start so the two never share the same edge.
-  // On mobile the cart is full-width, so just hide the button while it's open.
-  // Early-return MUST sit after every hook call above — otherwise toggling
-  // cartOpen on mobile changes how many hooks React sees per render and the
-  // component crashes (Rules of Hooks).
-  if (cartOpen && isMobile) return null;
+  // Hide the FAB while ANY drawer/modal is open (cart, PetModal, lightbox, …)
+  // so it never overlaps or sits over an open overlay. `overlayOpen` already
+  // covers the cart (which locks body scroll); the legacy `cartOpen && isMobile`
+  // is kept as a belt-and-suspenders fallback. Settings effects above keep
+  // running while hidden (returning null does NOT unmount). This early-return
+  // MUST sit after every hook call above (Rules of Hooks).
+  if (overlayOpen || (cartOpen && isMobile)) return null;
 
   const t = {
     he: { title: 'נגישות', textSize: 'גודל טקסט', contrast: 'ניגודיות גבוהה', motion: 'הפחת אנימציות', reset: 'איפוס', close: 'סגור' },
@@ -8227,6 +8246,7 @@ export default function App() {
     try { window.localStorage.removeItem(CART_STORAGE_KEY); } catch (_) {}
   };
   const [cartOpen, setCartOpen] = useState(false);
+  const overlayOpen = useOverlayOpen(); // any drawer/modal open → hide banner + FABs
   // True once the user has explicitly closed the cart drawer (or proceeded to
   // checkout from it). The /order auto-open effect respects this flag so the
   // drawer doesn't reopen behind the user's back. Re-opening the cart from
@@ -8937,8 +8957,8 @@ export default function App() {
             <a href="#main" className="skip-link">{lang === "he" ? "דלג לתוכן" : lang === "ru" ? "Перейти к содержимому" : "Skip to content"}</a>
             {/* Polite route announcer for screen readers on SPA navigation. */}
             <div aria-live="polite" role="status" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap", border: 0 }}>{routeAnnounce}</div>
-            <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
-            <WhatsAppFab lang={lang} />
+            <AccessibilityMenu lang={lang} cartOpen={cartOpen} overlayOpen={overlayOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
+            {!overlayOpen && <WhatsAppFab lang={lang} />}
             <header>
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
@@ -9008,7 +9028,7 @@ export default function App() {
               @keyframes cartBadgeBump { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
               .cart-badge-bump { animation: cartBadgeBump 0.35s cubic-bezier(.2,.6,.2,1); }
             `}</style>
-            {showCookieBanner && cookieConsent === null && (
+            {showCookieBanner && cookieConsent === null && !overlayOpen && (
               <CookieConsent
                 lang={lang}
                 onAccept={() => { localStorage.setItem("sxp_cookie_consent", "accepted"); setCookieConsent("accepted"); setShowCookieBanner(false); }}
