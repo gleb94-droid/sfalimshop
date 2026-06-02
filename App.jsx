@@ -10,6 +10,26 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 const MugStudio = lazy(() => import('./MugStudio.jsx'));
 const supabase = createClient('https://ubvgrxlxtelulwjtfudd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE')
 
+// Google Places Autocomplete (New) — key is read from a Vite env var so it is
+// NEVER hardcoded in source. Set VITE_GOOGLE_MAPS_API_KEY in Vercel (Settings →
+// Environment Variables) and in a local .env for dev. The key is client-side by
+// design (Places Autocomplete is a browser API) — restrict it by HTTP referrer +
+// API restrictions in the Google Cloud console. If the var is unset, the address
+// autocomplete silently disables and manual typing still works.
+const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+// One Places session token spans all autocomplete keystrokes + the final Place
+// Details lookup (Google session-based billing → stays in the free tier), then a
+// fresh token starts. crypto.randomUUID with an RFC4122-shaped fallback.
+function newPlacesSessionToken() {
+  try { if (typeof crypto !== `undefined` && crypto.randomUUID) return crypto.randomUUID(); } catch (_) {}
+  return `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (c) => {
+    const r = Math.floor(Math.random() * 16);
+    const v = c === `x` ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 // Reactive "is a full-screen overlay open?" signal. Every drawer/modal (cart
 // drawer, PetModal, lightbox, …) locks scroll via `document.body.style.overflow
 // = "hidden"`, so we watch that one attribute with a MutationObserver. Used to
@@ -4812,6 +4832,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [showAddrSugg, setShowAddrSugg] = useState(false);
   const [addrLoading, setAddrLoading] = useState(false);
   const addrTimerRef = useRef();
+  const addrSessionRef = useRef(null); // Places session token (one per address search)
   const [qty, setQty] = useState(1);
   const [uploadError, setUploadError] = useState(""); // oversized/invalid custom-design upload
   const [submitting, setSubmitting] = useState(false);
@@ -5316,9 +5337,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // Keep ref updated so native listeners always call latest version
   touchHandlersRef.current = { start: handleTouchStart, move: handleTouchMove };
 
+  // Google Places Autocomplete (New). Israel-constrained, UI-language aware,
+  // 400ms debounce + 3-char min. Suggestions are normalised to
+  // { placeId, primary, secondary } for the listbox + selectAddress. If the key
+  // is missing or the API errors, suggestions are cleared and manual typing
+  // still works (checkout never breaks).
   const fetchAddrSuggestions = (query) => {
     if (addrTimerRef.current) clearTimeout(addrTimerRef.current);
-    if (!query || query.trim().length < 3) {
+    if (!query || query.trim().length < 3 || !GOOGLE_MAPS_KEY) {
       setAddrSuggestions([]);
       setShowAddrSugg(false);
       return;
@@ -5326,28 +5352,76 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     addrTimerRef.current = setTimeout(async () => {
       try {
         setAddrLoading(true);
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&countrycodes=il&limit=6&addressdetails=1&accept-language=${lang === "he" ? "he" : lang === "ru" ? "ru" : "en"}`;
-        const res = await fetch(url);
+        if (!addrSessionRef.current) addrSessionRef.current = newPlacesSessionToken();
+        const langCode = lang === "he" ? "he" : lang === "ru" ? "ru" : "en";
+        const res = await fetch(`https://places.googleapis.com/v1/places:autocomplete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Goog-Api-Key": GOOGLE_MAPS_KEY },
+          body: JSON.stringify({
+            input: query,
+            includedRegionCodes: ["il"],
+            languageCode: langCode,
+            sessionToken: addrSessionRef.current,
+          }),
+        });
+        if (!res.ok) throw new Error(`places autocomplete ${res.status}`);
         const data = await res.json();
-        setAddrSuggestions(Array.isArray(data) ? data : []);
-        setShowAddrSugg(true);
+        const preds = (data.suggestions || [])
+          .map((s) => s.placePrediction)
+          .filter(Boolean)
+          .map((p) => {
+            const sf = p.structuredFormat || {};
+            return {
+              placeId: p.placeId,
+              primary: (sf.mainText && sf.mainText.text) || (p.text && p.text.text) || "",
+              secondary: (sf.secondaryText && sf.secondaryText.text) || "",
+            };
+          });
+        setAddrSuggestions(preds);
+        setShowAddrSugg(preds.length > 0);
       } catch (e) {
-        console.error("Nominatim error:", e);
+        console.error("Places autocomplete error:", e);
+        setAddrSuggestions([]);
+        setShowAddrSugg(false);
       }
       setAddrLoading(false);
     }, 400);
   };
 
-  const selectAddress = (item) => {
-    const a = item.address || {};
-    const houseNumber = a.house_number ? `${a.house_number} ` : "";
-    const street = a.road || a.pedestrian || a.suburb || "";
-    const fullStreet = (street ? `${street} ${houseNumber}`.trim() : item.display_name.split(",")[0]).trim();
-    const city = a.city || a.town || a.village || a.municipality || "";
-    const postalCode = a.postcode || "";
-    setForm(p => ({ ...p, street: fullStreet, city, postalCode }));
+  // Fetch Place Details (with the active session token) for the chosen
+  // suggestion and map Israeli address components → street (route + house no.),
+  // city, postal code. The session ends here (fresh token next search). Any
+  // failure falls back to the suggestion's main text so the field is never empty.
+  const selectAddress = async (item) => {
     setShowAddrSugg(false);
     setAddrSuggestions([]);
+    if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined }));
+    if (!item || !item.placeId || !GOOGLE_MAPS_KEY) {
+      if (item && item.primary) setForm(p => ({ ...p, street: item.primary }));
+      addrSessionRef.current = null;
+      return;
+    }
+    try {
+      const langCode = lang === "he" ? "he" : lang === "ru" ? "ru" : "en";
+      const token = addrSessionRef.current ? `&sessionToken=${encodeURIComponent(addrSessionRef.current)}` : "";
+      const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(item.placeId)}?languageCode=${langCode}${token}`, {
+        headers: { "X-Goog-Api-Key": GOOGLE_MAPS_KEY, "X-Goog-FieldMask": "addressComponents,formattedAddress" },
+      });
+      if (!res.ok) throw new Error(`place details ${res.status}`);
+      const place = await res.json();
+      const comps = place.addressComponents || [];
+      const get = (type) => { const c = comps.find(x => (x.types || []).includes(type)); return c ? (c.longText || c.shortText || "") : ""; };
+      const route = get("route");
+      const houseNumber = get("street_number");
+      const city = get("locality") || get("postal_town") || get("administrative_area_level_2") || "";
+      const postalCode = get("postal_code");
+      const street = (route ? `${route}${houseNumber ? ` ${houseNumber}` : ""}` : (item.primary || (place.formattedAddress || "").split(",")[0])).trim();
+      setForm(p => ({ ...p, street: street || p.street, city: city || p.city, postalCode: postalCode || p.postalCode }));
+    } catch (e) {
+      console.error("Place details error:", e);
+      if (item.primary) setForm(p => ({ ...p, street: item.primary }));
+    }
+    addrSessionRef.current = null; // session consumed — start fresh next time
   };
 
   const handleSubmit = async () => {
@@ -6046,7 +6120,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
               <div style={{ position: "relative" }}>
                 <label htmlFor="order-street" style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
-                <input type="text" value={form.street} id="order-street" aria-invalid={!!fieldErrors.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }}
+                <input type="text" value={form.street} id="order-street" aria-invalid={!!fieldErrors.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined })); fetchAddrSuggestions(v); }}
                   onKeyDown={e => { if (e.key === "Escape") setShowAddrSugg(false); }}
                   onBlur={e => { if (e.relatedTarget && e.relatedTarget.classList && e.relatedTarget.classList.contains("addr-sugg-item")) return; setTimeout(() => setShowAddrSugg(false), 200); }}
                   placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" role="combobox" aria-expanded={showAddrSugg && addrSuggestions.length > 0} aria-controls="addr-suggestions" aria-autocomplete="list" />
@@ -6058,8 +6132,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         onClick={() => selectAddress(s)}
                         onKeyDown={e => { if (e.key === "Escape") { setShowAddrSugg(false); const el = document.getElementById("order-street"); if (el) el.focus(); } }}
                         style={{ display: "block", width: "100%", textAlign: lang === "he" ? "right" : "left", background: "transparent", padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, border: "none", borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"} onFocus={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onBlur={e => e.currentTarget.style.background = "transparent"}>
-                        <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.display_name.split(",").slice(0, 2).join(",")}</div>
-                        <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.display_name.split(",").slice(2).join(",").trim()}</div>
+                        <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.primary}</div>
+                        {s.secondary && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.secondary}</div>}
                       </button>
                     ))}
                   </div>
