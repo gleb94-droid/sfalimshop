@@ -865,7 +865,7 @@ const FloatingProductCardComponent = ({
           <div className="fpc-user-info">
             <div className="fpc-user-details">
               <div className="fpc-user-text">
-                <div className="fpc-handle">{price}</div>
+                <div className="fpc-handle"><bdi dir="ltr">{price}</bdi></div>
                 <div className="fpc-status">
                   <span className="fpc-status-dot" aria-hidden="true" />
                   {status}
@@ -961,7 +961,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
         marginTop: 2,
       }}>
         <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-          <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: 18 }}>{price}</div>
+          <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: 18 }}><bdi dir="ltr">{price}</bdi></div>
           <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 10, letterSpacing: `0.05em`, textTransform: `uppercase` }}>{status}</div>
         </div>
         <button
@@ -1383,16 +1383,30 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
               aria-label={label}
               onClick={() => setActiveIdx(idx)}
               style={{
+                // Visual pill stays small; the button itself is a larger
+                // transparent tap target (min 24px) so it's comfortable to hit
+                // on touch without spreading the dots row apart.
+                width: isActive ? 36 : 24,
+                height: 24,
+                minHeight: 24,
+                display: `inline-flex`,
+                alignItems: `center`,
+                justifyContent: `center`,
+                background: `transparent`,
+                border: `none`,
+                cursor: `pointer`,
+                padding: 0,
+              }}
+            >
+              <span aria-hidden="true" style={{
+                display: `block`,
                 width: isActive ? 28 : 10,
                 height: 10,
                 borderRadius: 999,
                 background: isActive ? `#f97316` : `rgba(255,255,255,0.25)`,
-                border: `none`,
-                cursor: `pointer`,
-                padding: 0,
                 transition: `width 0.3s ease, background-color 0.3s ease`,
-              }}
-            />
+              }} />
+            </button>
           );
         })}
       </div>
@@ -1436,18 +1450,15 @@ const COLORS = {
   white: "#ffffff", gray: "#888888", grayLight: "#8a8a8a", success: "#4ade80",
 };
 
-// ⚠️ TEMPORARY TEST — free shipping (all three zeroed) so a staff test order
-// totals exactly the product price with no shipping added. RESTORE AFTER THE
-// TEST: SHIPPING_PRICE = 30, SHIPPING_LOCKER = 20, SHIPPING_HOME = 35.
 // Legacy flat shipping fee. Kept for any code path that hasn't been moved
 // onto the Locker/Home selector yet (defensive — every active path now uses
 // the per-method constants below).
-const SHIPPING_PRICE = 0; // TEMP TEST (restore 30)
+const SHIPPING_PRICE = 30;
 // Locker (delivery point pickup) is the cheaper, faster default. Home is
 // door-to-door courier. shippingMethod state in OrderPage chooses between
 // them; orders.extra_prints.shipping_method records the customer's choice.
-const SHIPPING_LOCKER = 0; // TEMP TEST (restore 20)
-const SHIPPING_HOME = 0; // TEMP TEST (restore 35)
+const SHIPPING_LOCKER = 20;
+const SHIPPING_HOME = 35;
 const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
 // Live pet-name personalization for customizable products (mugs + shirts only;
 // never stickers/packs). The typed name is printed on the product. It is OPTIONAL
@@ -1457,6 +1468,18 @@ const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
 // or all null when no name). All 5 fonts support Hebrew (loaded in index.html).
 const PET_NAME_FONTS = [`Heebo`, `Assistant`, `Secular One`, `Suez One`, `Rubik`];
 const PET_NAME_COLORS = [`#FF6B35`, `#1a1a1a`, `#ffffff`, `#e91e8c`, `#7c4dff`, `#0a8f5b`, `#d4a017`];
+// Human-readable, trilingual names for each swatch — used as the swatch
+// aria-label so screen-reader users hear "Pink" instead of "#e91e8c".
+const PET_NAME_COLOR_NAMES = {
+  "#FF6B35": { he: `כתום`, en: `Orange`, ru: `Оранжевый` },
+  "#1a1a1a": { he: `שחור`, en: `Black`, ru: `Чёрный` },
+  "#ffffff": { he: `לבן`, en: `White`, ru: `Белый` },
+  "#e91e8c": { he: `ורוד`, en: `Pink`, ru: `Розовый` },
+  "#7c4dff": { he: `סגול`, en: `Purple`, ru: `Фиолетовый` },
+  "#0a8f5b": { he: `ירוק`, en: `Green`, ru: `Зелёный` },
+  "#d4a017": { he: `זהב`, en: `Gold`, ru: `Золотой` },
+};
+const petColorName = (hex, lang) => (PET_NAME_COLOR_NAMES[hex] && (PET_NAME_COLOR_NAMES[hex][lang] || PET_NAME_COLOR_NAMES[hex].en)) || hex;
 const PET_NAME_FONT_DEFAULT = `Heebo`;
 const PET_NAME_COLOR_DEFAULT = `#FF6B35`;
 // Per-item personalization surcharge: +₪20 when (and only when) a pet name is
@@ -1538,6 +1561,10 @@ const uiGenericError = (lang) => lang === `he` ? `משהו השתבש. נסו ש
 const uiPaymentError = (lang) => lang === `he` ? `התשלום לא הצליח. בדקו את הפרטים ונסו שוב.` : lang === `ru` ? `Оплата не прошла. Проверьте данные и попробуйте снова.` : `Payment didn't go through — check your details and try again.`;
 const uiLoadError = (lang) => lang === `he` ? `לא הצלחנו לטעון. בדקו את החיבור ונסו שוב.` : lang === `ru` ? `Не удалось загрузить. Проверьте соединение и попробуйте снова.` : `Couldn't load. Check your connection and try again.`;
 const uiRetry = (lang) => lang === `he` ? `נסו שוב` : lang === `ru` ? `Повторить` : `Try again`;
+// Custom-design upload size cap — mirrors the Supabase `designs` bucket limit
+// (10 MB). Checked client-side so oversized files are rejected before upload.
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const uiFileTooLarge = (lang) => lang === `he` ? `הקובץ גדול מדי (עד 10MB). בחרו קובץ קטן יותר.` : lang === `ru` ? `Файл слишком большой (до 10 МБ). Выберите файл поменьше.` : `File is too large (max 10MB). Please choose a smaller file.`;
 
 // Friendly trilingual "couldn't load — retry" block for customer-facing data
 // fetches (mirrors the admin error+reload pattern). onRetry re-runs the fetch.
@@ -1625,7 +1652,7 @@ const LANGS = {
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
-    payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "החזרים תוך 14 יום *", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו" },
+    payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור מס׳ 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "החזרים תוך 14 יום *", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו" },
     confirm: { title: "התשלום אושר!", subtitle: "ההזמנה שלך התקבלה", orderNum: "מספר הזמנה", thanksLine: "תודה {name}! שלחנו אישור לכתובת", whatsNext: "מה קורה עכשיו", step1Title: "אנחנו מתחילים בייצור", step1Sub: "ההזמנה שלך נכנסת לסבב הייצור הקרוב", step2Title: "ייצור: 2-4 ימי עסקים", step2Sub: "הדפסה איכותית של העיצוב שבחרת", step3Title: "משלוח: 1-3 ימי עסקים", step3Sub: "תקבל מספר מעקב באימייל", step4Title: "עדכון על כל שלב", step4Sub: "ניצור איתך קשר בכל שינוי", track: "מעקב אחר ההזמנה", another: "הזמנה נוספת", accountTitle: "פתיחת חשבון", accountDesc: "פתחו חשבון כדי לעקוב אחרי ההזמנה ולעבור לתשלום מהר יותר בפעם הבאה — בלחיצה אחת עם Google.", accountLater: "אולי מאוחר יותר" },
     auth: {
       login: "כניסה", register: "הרשמה", email: "אימייל", password: "סיסמה", name: "שם מלא",
@@ -1669,7 +1696,7 @@ const LANGS = {
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
     form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
-    payment: { title: "Secure Payment", subtitle: "Review and confirm your order", orderNum: "Order #", summary: "Order Summary", subtotal: "Subtotal", shipping: "Shipping", total: "Total to Pay", deliveryTo: "Delivery Address", payBtn: "Pay ", paySuffix: " Securely →", processing: "Processing...", soonTitle: "Payment system coming soon", soonSub: "We're finalizing setup with our payment processor. Your order is saved and we'll personally contact you when the system is live.", soonBtn: "Close and save order", cancel: "Cancel Order", editDetails: "← Edit Details", confirmCancel: "Cancel this order?", securedBy: "Secured by", acceptedCards: "We accept:", businessLine: "Sfalim Shop · Exempt Dealer 321630279", trustFast: "Fast and secure payment", trustSSL: "256-bit SSL encryption", trustReturn: "14-day returns *", trustNoSave: "We never store card details" },
+    payment: { title: "Secure Payment", subtitle: "Review and confirm your order", orderNum: "Order #", summary: "Order Summary", subtotal: "Subtotal", shipping: "Shipping", total: "Total to Pay", deliveryTo: "Delivery Address", payBtn: "Pay ", paySuffix: " Securely →", processing: "Processing...", soonTitle: "Payment system coming soon", soonSub: "We're finalizing setup with our payment processor. Your order is saved and we'll personally contact you when the system is live.", soonBtn: "Close and save order", cancel: "Cancel Order", editDetails: "← Edit Details", confirmCancel: "Cancel this order?", securedBy: "Secured by", acceptedCards: "We accept:", businessLine: "Sfalim Shop · Exempt Dealer No. 321630279", trustFast: "Fast and secure payment", trustSSL: "256-bit SSL encryption", trustReturn: "14-day returns *", trustNoSave: "We never store card details" },
     confirm: { title: "Payment Confirmed!", subtitle: "Your order has been received", orderNum: "Order Number", thanksLine: "Thanks {name}! Confirmation sent to", whatsNext: "What happens next", step1Title: "We start production", step1Sub: "Your order enters the next production batch", step2Title: "Production: 2-4 business days", step2Sub: "Quality printing of your chosen design", step3Title: "Shipping: 1-3 business days", step3Sub: "You'll receive tracking info by email", step4Title: "Updates at every step", step4Sub: "We'll contact you with any changes", track: "Track Order", another: "New Order", accountTitle: "Create an account", accountDesc: "Create an account to track your order and check out faster next time — one tap with Google.", accountLater: "Maybe later" },
     auth: {
       login: "Login", register: "Register", email: "Email", password: "Password", name: "Full Name",
@@ -1713,7 +1740,7 @@ const LANGS = {
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
     form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
-    payment: { title: "Безопасная оплата", subtitle: "Проверьте и подтвердите заказ", orderNum: "Заказ №", summary: "Сводка заказа", subtotal: "Промежуточный итог", shipping: "Доставка", total: "Итого к оплате", deliveryTo: "Адрес доставки", payBtn: "Оплатить ", paySuffix: " безопасно →", processing: "Обработка...", soonTitle: "Платёжная система скоро запустится", soonSub: "Мы завершаем настройку с провайдером платежей. Ваш заказ сохранён, мы свяжемся с вами лично, когда система заработает.", soonBtn: "Закрыть и сохранить заказ", cancel: "Отменить заказ", editDetails: "← Изменить данные", confirmCancel: "Отменить заказ?", securedBy: "Защищено", acceptedCards: "Способы оплаты:", businessLine: "Sfalim Shop · Освобождённый предприниматель 321630279", trustFast: "Быстрая и безопасная оплата", trustSSL: "256-bit SSL шифрование", trustReturn: "Возврат в течение 14 дней *", trustNoSave: "Мы не сохраняем данные карты" },
+    payment: { title: "Безопасная оплата", subtitle: "Проверьте и подтвердите заказ", orderNum: "Заказ №", summary: "Сводка заказа", subtotal: "Промежуточный итог", shipping: "Доставка", total: "Итого к оплате", deliveryTo: "Адрес доставки", payBtn: "Оплатить ", paySuffix: " безопасно →", processing: "Обработка...", soonTitle: "Платёжная система скоро запустится", soonSub: "Мы завершаем настройку с провайдером платежей. Ваш заказ сохранён, мы свяжемся с вами лично, когда система заработает.", soonBtn: "Закрыть и сохранить заказ", cancel: "Отменить заказ", editDetails: "← Изменить данные", confirmCancel: "Отменить заказ?", securedBy: "Защищено", acceptedCards: "Способы оплаты:", businessLine: "Sfalim Shop · Освобождённый предприниматель № 321630279", trustFast: "Быстрая и безопасная оплата", trustSSL: "256-bit SSL шифрование", trustReturn: "Возврат в течение 14 дней *", trustNoSave: "Мы не сохраняем данные карты" },
     confirm: { title: "Оплата подтверждена!", subtitle: "Ваш заказ получен", orderNum: "Номер заказа", thanksLine: "Спасибо {name}! Подтверждение отправлено на", whatsNext: "Что дальше", step1Title: "Начинаем производство", step1Sub: "Ваш заказ попадает в ближайшую партию", step2Title: "Производство: 2-4 рабочих дня", step2Sub: "Качественная печать вашего дизайна", step3Title: "Доставка: 1-3 рабочих дня", step3Sub: "Вы получите трек-номер на email", step4Title: "Обновления на каждом этапе", step4Sub: "Мы свяжемся при любых изменениях", track: "Отследить заказ", another: "Новый заказ", accountTitle: "Создать аккаунт", accountDesc: "Создайте аккаунт, чтобы отслеживать заказ и оформлять покупки быстрее в следующий раз — в одно касание через Google.", accountLater: "Может быть позже" },
     auth: {
       login: "Войти", register: "Регистрация", email: "Email", password: "Пароль", name: "Полное имя",
@@ -1828,7 +1855,7 @@ const POLICIES = {
       { type: "h", text: "כשרות לרכישה" },
       { type: "p", text: "מינימום גיל 18 (או באישור הורה). חובת מסירת פרטים אמיתיים ומלאים." },
       { type: "h", text: "הזמנות ותשלום" },
-      { type: "p", text: `ההזמנה נחשבת מאושרת רק לאחר אישור התשלום. אישור ישלח לאימייל. ספלים שופ פועלת כעוסק פטור (מס׳ 321630279). המחירים נקובים בשקלים חדשים ואינם כוללים מע"מ, ובגין כל רכישה תופק קבלה (לא חשבונית מס). התשלום מתבצע באמצעות Tranzila.` },
+      { type: "p", text: `ההזמנה נחשבת מאושרת רק לאחר אישור התשלום. אישור ישלח לאימייל. ספלים שופ פועלת כעוסק פטור מס׳ 321630279. המחירים נקובים בשקלים חדשים ואינם כוללים מע"מ, ובגין כל רכישה תופק קבלה (לא חשבונית מס). התשלום מתבצע באמצעות Tranzila.` },
       { type: "h", text: "⚠️ זכויות יוצרים ותוכן פוגעני" },
       { type: "p", text: "הלקוח מתחייב להעלות רק עיצובים שיש לו זכויות עליהם. אסור להעלות:" },
       { type: "l", items: ["תוכן פוגעני, גזעני, אלים או מיני", "לוגואים/דמויות מוגנים בזכויות יוצרים (דיסני, מארוול, NBA, אנימה וכו')", "תוכן המסית לאלימות או שנאה", "תוכן המפר חוק"] },
@@ -1849,7 +1876,7 @@ const POLICIES = {
       { type: "p", text: "אנו פועלים באופן שוטף לשיפור הנגישות בכל חלקי האתר. ייתכן שחלקים מסוימים, לרבות תכנים או רכיבים של צד שלישי, טרם הונגשו במלואם. אנו מתקנים ליקויים שמתגלים בהקדם האפשרי, ונשמח לקבל דיווח על כל בעיה.", },
       { type: "h", text: "רכז הנגישות ופנייה בנושא" },
       { type: "p", text: "רכז הנגישות: ספלים שופ (גלב). בכל שאלה, בקשה או דיווח על בעיית נגישות ניתן לפנות במייל hello@sfalimshop.com או בטלפון 050-484-7874 (972-50-4847874+). נשתדל להשיב תוך 48 שעות." },
-      { type: "p", text: "עודכן לאחרונה: 29.05.2026" },
+      { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
     ],
   },
   en: {
@@ -1913,7 +1940,7 @@ const POLICIES = {
       { type: "h", text: "Purchase Eligibility" },
       { type: "p", text: "Minimum age 18 (or with parental approval). Must provide accurate and complete information." },
       { type: "h", text: "Orders and Payment" },
-      { type: "p", text: "Orders are confirmed only after payment approval. Confirmation sent by email. Sfalim Shop operates as an Exempt Dealer (No. 321630279). Prices are in Israeli Shekels and do not include VAT; a receipt (not a tax invoice) is issued for each purchase. Payment is processed via Tranzila." },
+      { type: "p", text: "Orders are confirmed only after payment approval. Confirmation sent by email. Sfalim Shop operates as an Exempt Dealer No. 321630279. Prices are in Israeli Shekels and do not include VAT; a receipt (not a tax invoice) is issued for each purchase. Payment is processed via Tranzila." },
       { type: "h", text: "⚠️ Copyright and Offensive Content" },
       { type: "p", text: "Customer agrees to upload only designs they have rights to. Prohibited content:" },
       { type: "l", items: ["Offensive, racist, violent, or sexual content", "Copyrighted logos/characters (Disney, Marvel, NBA, anime, etc.)", "Content inciting violence or hatred", "Content violating any law"] },
@@ -1934,7 +1961,7 @@ const POLICIES = {
       { type: "p", text: "We continuously work to improve accessibility across the entire site. Some parts, including third-party content or components, may not yet be fully accessible. We fix issues as soon as they are found and welcome reports of any problem." },
       { type: "h", text: "Accessibility Coordinator & Contact" },
       { type: "p", text: "Accessibility coordinator: Sfalim Shop (Gleb). For any question, request, or report of an accessibility problem, contact hello@sfalimshop.com or +972-50-4847874. We aim to respond within 48 hours." },
-      { type: "p", text: "Last updated: May 29, 2026" },
+      { type: "p", text: "Last updated: June 2, 2026" },
     ],
   },
   ru: {
@@ -1998,7 +2025,7 @@ const POLICIES = {
       { type: "h", text: "Право на покупку" },
       { type: "p", text: "Минимальный возраст 18 (или с согласия родителя). Обязательное предоставление точных и полных данных." },
       { type: "h", text: "Заказы и оплата" },
-      { type: "p", text: "Заказ подтверждается только после одобрения платежа. Подтверждение отправляется на email. Sfalim Shop работает как освобождённый предприниматель (№ 321630279). Цены указаны в израильских шекелях и не включают НДС; на каждую покупку выдаётся квитанция (не налоговая накладная). Оплата производится через Tranzila." },
+      { type: "p", text: "Заказ подтверждается только после одобрения платежа. Подтверждение отправляется на email. Sfalim Shop работает как освобождённый предприниматель № 321630279. Цены указаны в израильских шекелях и не включают НДС; на каждую покупку выдаётся квитанция (не налоговая накладная). Оплата производится через Tranzila." },
       { type: "h", text: "⚠️ Авторские права и недопустимый контент" },
       { type: "p", text: "Клиент обязуется загружать только дизайны с правами. Запрещено:" },
       { type: "l", items: ["Оскорбительный, расистский, агрессивный или сексуальный контент", "Защищённые авторским правом логотипы/персонажи (Disney, Marvel, NBA, аниме и др.)", "Контент, разжигающий насилие или ненависть", "Контент, нарушающий закон"] },
@@ -2019,7 +2046,7 @@ const POLICIES = {
       { type: "p", text: "Мы постоянно работаем над улучшением доступности на всём сайте. Некоторые части, включая контент или компоненты сторонних поставщиков, могут быть пока адаптированы не полностью. Мы устраняем выявленные недостатки в кратчайшие сроки и будем рады сообщениям о любых проблемах." },
       { type: "h", text: "Координатор по доступности и обратная связь" },
       { type: "p", text: "Координатор по доступности: Sfalim Shop (Глеб). По любым вопросам, просьбам или сообщениям о проблеме доступности обращайтесь: hello@sfalimshop.com или +972-50-4847874. Мы постараемся ответить в течение 48 часов." },
-      { type: "p", text: "Последнее обновление: 29.05.2026" },
+      { type: "p", text: "Последнее обновление: 02.06.2026" },
     ],
   },
 };
@@ -3739,7 +3766,7 @@ function AdminPage({ lang }) {
             const active = activeSection === s.id;
             return (
               <button key={s.id} type="button" onClick={() => scrollToSection(s.id)}
-                aria-current={active ? "true" : undefined}
+                aria-current={active ? "location" : undefined}
                 style={{
                   flexShrink: 0,
                   background: active ? COLORS.accent : "transparent",
@@ -4757,6 +4784,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [addrLoading, setAddrLoading] = useState(false);
   const addrTimerRef = useRef();
   const [qty, setQty] = useState(1);
+  const [uploadError, setUploadError] = useState(""); // oversized/invalid custom-design upload
   const [submitting, setSubmitting] = useState(false);
   const [pendingOrderGroupId, setPendingOrderGroupId] = useState(null);
   const [pendingOrderIds, setPendingOrderIds] = useState([]);
@@ -5078,6 +5106,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
+    if (file.size > MAX_UPLOAD_BYTES) { setUploadError(uiFileTooLarge(lang)); e.target.value = ``; return; }
+    setUploadError("");
     const reader = new FileReader();
     reader.onload = (ev) => {
       setUploadedImage(ev.target.result);
@@ -5090,6 +5120,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   const handleExtraUpload = (e, setter, isSecondFront = false) => {
     const file = e.target.files[0]; if (!file) return;
+    if (file.size > MAX_UPLOAD_BYTES) { setUploadError(uiFileTooLarge(lang)); e.target.value = ``; return; }
+    setUploadError("");
     const reader = new FileReader();
     reader.onload = (ev) => {
       setter(prev => ({ ...prev, image: ev.target.result, sameAsMain: false }));
@@ -5719,9 +5751,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                                 <div />
                                 <button onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
                                 <div />
-                                <button onClick={() => nudge(-5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>←</button>
+                                <button onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
                                 <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>✛</span></div>
-                                <button onClick={() => nudge(5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>→</button>
+                                <button onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
                                 <div />
                                 <button onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
                                 <div />
@@ -5805,6 +5837,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     {uploadedImage ? <><img src={uploadedImage} alt={lang === "he" ? "תצוגה מקדימה של העיצוב שהועלה" : lang === "ru" ? "Предпросмотр загруженного дизайна" : "Uploaded design preview"} style={{ width: 50, height: 50, objectFit: "contain", borderRadius: 6, marginBottom: 6 }} /><div style={{ color: COLORS.accent, fontSize: 12 }}>{t.customize.uploaded}</div><div style={{ color: COLORS.gray, fontSize: 11 }}>{t.customize.changeFile}</div></> : <><div style={{ fontSize: 24, marginBottom: 6 }}>📁</div><div style={{ color: COLORS.white, fontSize: 13 }}>{t.customize.uploadTitle}</div><div style={{ color: COLORS.gray, fontSize: 11 }}>{t.customize.uploadSub}</div></>}
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
+                  {uploadError && <div role="alert" style={{ color: "#f87171", fontSize: 12, marginTop: 8, background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "8px 12px", borderRadius: 8 }}>{uploadError}</div>}
                 </div>
                 {/* Free size control — desktop only (mobile has it below mockup) */}
                 {!isMobile && uploadedImage && (
@@ -5927,8 +5960,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 )}
                 {/* Notes */}
                 <div>
-                  <label style={labelStyle}>{t.form.notes}</label>
-                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <label htmlFor="order-notes-design" style={labelStyle}>{t.form.notes}</label>
+                  <textarea id="order-notes-design" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
@@ -5974,11 +6007,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <div><label htmlFor="order-name" style={labelStyle}>{t.form.name}</label><input id="order-name" type="text" value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); if (fieldErrors.name) setFieldErrors(fe => ({ ...fe, name: undefined })); }} placeholder={t.form.namePh} aria-invalid={!!fieldErrors.name} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.name && <div role="alert" style={fieldErrStyle}>{fieldErrors.name}</div>}</div>
               <div><label htmlFor="order-email" style={labelStyle}>{t.form.email}</label><input id="order-email" type="email" value={form.email} onChange={e => { setForm(p => ({ ...p, email: e.target.value })); if (fieldErrors.email) setFieldErrors(fe => ({ ...fe, email: undefined })); }} placeholder={t.form.emailPh} aria-invalid={!!fieldErrors.email} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.email && <div role="alert" style={fieldErrStyle}>{fieldErrors.email}</div>}</div>
               <div>
-                <label htmlFor="order-phone" style={labelStyle}>{t.form.phone}</label>
+                <label htmlFor="order-phone" style={labelStyle}>{`${t.form.phone} *`}</label>
                 <div role="group" aria-label={t.form.phone} style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
                   {IL_PREFIXES.map(pf => <button key={pf.value} type="button" aria-pressed={form.phonePrefix === pf.value} onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
                 </div>
-                <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-invalid={!!fieldErrors.phone} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-required="true" aria-invalid={!!fieldErrors.phone} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 {fieldErrors.phone && <div role="alert" style={fieldErrStyle}>{fieldErrors.phone}</div>}
               </div>
               <div style={{ position: "relative" }}>
@@ -6018,10 +6051,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   extra_prints.shipping_method; the chosen rate feeds the
                   totals via shippingPrice (above). */}
               <div>
-                <label style={labelStyle}>
+                <label id="shipping-method-label" style={labelStyle}>
                   {lang === `he` ? `שיטת משלוח` : lang === `ru` ? `Способ доставки` : `Shipping method`}
                 </label>
-                <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
+                <div role="group" aria-labelledby="shipping-method-label" style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
                   {[
                     { id: `locker`, price: SHIPPING_LOCKER, label_he: `נקודת איסוף`, label_en: `Pickup locker`, label_ru: `Пункт выдачи`, sub_he: `מהיר וזול`, sub_en: `Fast & affordable`, sub_ru: `Быстро и дёшево` },
                     { id: `home`, price: SHIPPING_HOME, label_he: `שליח עד הבית`, label_en: `Home delivery`, label_ru: `Курьер на дом`, sub_he: `נוחות מקסימלית`, sub_en: `Door to door`, sub_ru: `Прямо к двери` },
@@ -6031,6 +6064,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <button
                         key={opt.id}
                         type="button"
+                        aria-pressed={active}
                         onClick={() => setShippingMethod(opt.id)}
                         style={{
                           flex: `1 1 160px`,
@@ -6054,13 +6088,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   })}
                 </div>
               </div>
-              <div><label style={labelStyle}>{t.form.notes}</label><textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
+              <div><label htmlFor="order-notes" style={labelStyle}>{t.form.notes}</label><textarea id="order-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{t.form.paymentSub}</div>
               </div>
             </div>
             {(() => {
+              // Only surface the "missing fields" hint once the user has started
+              // filling the form — not on first load before any interaction. The
+              // disabled submit button is the pre-interaction guide.
+              const formDirty = !!(form.name || form.email || form.phoneNumber || form.street || form.city || form.postalCode || form.notes);
               const missing = [];
               if (!form.name) missing.push(lang === "he" ? "שם" : lang === "ru" ? "Имя" : "Name");
               if (!form.email) missing.push(lang === "he" ? "אימייל" : lang === "ru" ? "Email" : "Email");
@@ -6068,7 +6106,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               if (!form.street) missing.push(lang === "he" ? "כתובת" : lang === "ru" ? "Адрес" : "Address");
               if (!form.city) missing.push(lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City");
               if (!form.postalCode) missing.push(lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code");
-              if (missing.length === 0) return null;
+              if (!formDirty || missing.length === 0) return null;
               return (
                 <div style={{ background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: "12px 14px", marginTop: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <span style={{ fontSize: 18, lineHeight: 1 }}>⚠️</span>
@@ -6457,6 +6495,11 @@ function CookieConsent({ lang, onAccept, onReject }) {
     window.addEventListener("resize", h);
     return () => window.removeEventListener("resize", h);
   }, []);
+  // A11y: move focus to the banner when it appears so keyboard users find it,
+  // and let Escape dismiss it (treated as "decline" / essential-only).
+  const regionRef = useRef(null);
+  useEffect(() => { regionRef.current && regionRef.current.focus(); }, []);
+  const onKeyDown = (e) => { if (e.key === "Escape") { e.stopPropagation(); onReject(); } };
   const t = {
     he: {
       title: "פרטיות",
@@ -6484,7 +6527,8 @@ function CookieConsent({ lang, onAccept, onReject }) {
   };
 
   return (
-    <div role="region" aria-label={lang === "he" ? "הסכמת קובצי Cookie" : lang === "ru" ? "Согласие на использование cookie" : "Cookie consent"} style={{
+    <div ref={regionRef} tabIndex={-1} onKeyDown={onKeyDown} role="region" aria-label={lang === "he" ? "הסכמת קובצי Cookie" : lang === "ru" ? "Согласие на использование cookie" : "Cookie consent"} style={{
+      outline: "none",
       position: "fixed",
       bottom: isMobile ? 0 : 16,
       left: isMobile ? 0 : 16,
@@ -6506,8 +6550,11 @@ function CookieConsent({ lang, onAccept, onReject }) {
         <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF6B35", boxShadow: "0 0 12px rgba(255,107,53,0.6)" }}></span>
         <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: "italic", letterSpacing: "0.5px" }}>{t.title}</div>
       </div>
-      <p style={{ color: "#bbb", fontFamily: "'Varela Round',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 16, marginTop: 0 }}>
+      <p style={{ color: "#bbb", fontFamily: "'Varela Round',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 10, marginTop: 0 }}>
         {t.body}
+      </p>
+      <p style={{ marginTop: 0, marginBottom: 16 }}>
+        <a href="#policies/privacy" style={{ color: "#FF6B35", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, textDecoration: "underline" }}>{t.more}</a>
       </p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: isRTL ? "flex-start" : "flex-end" }}>
         <button onClick={onReject} style={{
@@ -7338,7 +7385,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           >{t.nav.pets}</button>
           <div role="group" aria-label={lang === "he" ? "שפה" : lang === "ru" ? "Язык" : "Language"} style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
             {Object.keys(LANGS).map(l => (
-              <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "7px 11px" : "7px 13px", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+              <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "8px 12px" : "9px 14px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
             ))}
           </div>
         </div>
@@ -7356,7 +7403,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
         {["home", "order", "pets", "about"].map(p => (
-          <button key={p} onClick={() => setPage(p)} style={{
+          <button key={p} onClick={() => setPage(p)} aria-current={page === p ? "page" : undefined} style={{
             background: page === p ? COLORS.accentDim : "transparent",
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
             color: page === p ? COLORS.accent : COLORS.gray,
@@ -7371,7 +7418,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           onMouseOut={e => { if(page !== p) { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav[p]}</button>
         ))}
-        <button onClick={() => goToBlog && goToBlog()} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+        <button onClick={() => goToBlog && goToBlog()} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "blog") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
           onMouseOut={e => { if(page !== "blog") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
         >{t.navBlog}</button>
@@ -7380,13 +7427,13 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           onMouseOut={e => { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}
         >{t.quiz.nav}</a>
         {user && (
-          <button onClick={() => setPage("track")} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+          <button onClick={() => setPage("track")} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "track") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
           onMouseOut={e => { if(page !== "track") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav.track}</button>
         )}
         {isAdmin && (
-          <button onClick={() => setPage("admin")} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>{t.nav.admin}</button>
+          <button onClick={() => setPage("admin")} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>{t.nav.admin}</button>
         )}
       </div>}
 
@@ -7396,7 +7443,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         {cartButton}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "8px 11px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
         <button onClick={() => setMobileMenu(m => !m)} aria-expanded={mobileMenu} aria-controls="mobile-nav-menu" aria-label={lang === "he" ? "תפריט" : lang === "ru" ? "Меню" : "Menu"} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
@@ -7420,7 +7467,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         )}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "9px 13px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>}
@@ -7430,11 +7477,11 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     {mobileMenu && (
       <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
         {["home", "order", "pets", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
-        <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
-        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
-        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
+        <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
+        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
+        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
         {user
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
@@ -7531,7 +7578,8 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
       {/* Accessibility button — fixed at the bottom inline-start corner so it
           always sits on the opposite side from the cart drawer. */}
       <button
-        aria-label="Accessibility menu"
+        aria-label={t.title}
+        aria-expanded={open}
         onClick={() => setOpen(!open)}
         style={{
           position: 'fixed', bottom: 24, insetInlineStart: 24, zIndex: 9998,
@@ -7812,7 +7860,7 @@ function CartToast({ message, lang, onClose, onViewCart, actionLabel, onAction }
         >{buttonLabel}</button>
       )}
       {!isMobile && (
-        <button onClick={onClose} type="button" aria-label="dismiss" style={{
+        <button onClick={onClose} type="button" aria-label={lang === "he" ? "סגירה" : lang === "ru" ? "Закрыть" : "Dismiss"} style={{
           background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer",
           fontSize: 18, lineHeight: 1, padding: 4, flexShrink: 0,
         }}>×</button>
@@ -8930,6 +8978,13 @@ export default function App() {
             )}
             </main>
             <Footer lang={lang} setPage={setPage} />
+            {/* Spacer so the fixed cookie banner floats over empty space below the
+                footer instead of covering a page's bottom CTA (e.g. the breed-page
+                "Add to cart"). Only present while the banner is shown; removed on
+                consent. aria-hidden — purely a layout cushion. */}
+            {showCookieBanner && cookieConsent === null && (
+              <div aria-hidden="true" style={{ height: 200 }} />
+            )}
             <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} />
             {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
                 top-corner pill on desktop. Action button opens the cart drawer. */}
@@ -8942,7 +8997,7 @@ export default function App() {
               onAction={cartToastAction ? () => { setCartToast(null); setCartToastAction(null); cartToastAction.handler(); } : undefined}
             />}
             <style>{`
-              @keyframes cartToastInDesktop { from { opacity: 0; transform: translateX(${lang === "he" ? "100%" : "-100%"}); } to { opacity: 1; transform: translateX(0); } }
+              @keyframes cartToastInDesktop { from { opacity: 0; transform: translateX(${lang === "he" ? "-100%" : "100%"}); } to { opacity: 1; transform: translateX(0); } }
               @keyframes cartToastInMobile { from { opacity: 0; transform: translateY(120%); } to { opacity: 1; transform: translateY(0); } }
               @keyframes cartBadgeBump { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
               .cart-badge-bump { animation: cartBadgeBump 0.35s cubic-bezier(.2,.6,.2,1); }
@@ -9484,7 +9539,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       petNameTitle: "התאמה אישית",
       petNameLabel: "שם חיית המחמד (אופציונלי)",
       petNamePlaceholder: "למשל: רקסי",
-      petNameHelper: "גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כִּתבו בהערות.",
+      petNameHelper: "גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.",
       petNameFontLabel: "גופן",
       petNameColorLabel: "צבע",
     },
@@ -10602,6 +10657,7 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
     <button
       onClick={onClick}
       disabled={disabled}
+      aria-pressed={selected}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -10835,7 +10891,7 @@ function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }
               {PET_NAME_COLORS.map((c) => {
                 const active = color === c;
                 return (
-                  <button key={c} type="button" onClick={() => onColor && onColor(c)} aria-pressed={active} aria-label={c} title={c}
+                  <button key={c} type="button" onClick={() => onColor && onColor(c)} aria-pressed={active} aria-label={petColorName(c, lang)} title={petColorName(c, lang)}
                     style={{ width: 30, height: 30, borderRadius: `50%`, background: c, cursor: `pointer`, padding: 0,
                       border: active ? `2px solid ${COLORS.white}` : `1px solid #555`,
                       boxShadow: active ? `0 0 0 2px ${COLORS.accent}` : `none`, transition: `box-shadow 0.15s` }} />
@@ -11166,7 +11222,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [zoomed, setZoomed] = useState(false); // full-screen enlarge (shared <BloomImageCarousel>)
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כִּתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
     en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `Print size is matched to the product — for special requests, add a note at checkout.`, petNameFontLabel: `Font`, petNameColorLabel: `Color`, railTitle: `The whole BLOOM family` },
     ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.`, petNameFontLabel: `Шрифт`, petNameColorLabel: `Цвет`, railTitle: `Вся коллекция BLOOM` },
   }[lang] || {};
@@ -11248,6 +11304,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     if (img) setMeta(`og:image`, img, `property`);
     setMeta(`og:type`, `product`, `property`);
     setMeta(`og:url`, url, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, name);
     setMeta(`twitter:description`, desc);
@@ -11255,6 +11312,12 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     setCanonical(url);
     setHreflang(url);
     removeJsonLd(`blog-article-ld`); // never both at once
+    // Price span across this breed's purchasable products (shirt + mug), so the
+    // Product rich result can show a price. Pet-name (+₪20) is an optional add-on
+    // and intentionally excluded from the base offer range.
+    const offerPrices = [design.price_shirt_basic, design.price_shirt_oversized, design.price_shirt, design.price_mug]
+      .map((p) => Number(p))
+      .filter((p) => Number.isFinite(p) && p > 0);
     const ld = {
       "@context": `https://schema.org`,
       "@type": `Product`,
@@ -11265,6 +11328,13 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       "brand": { "@type": `Brand`, "name": `BLOOM / Sfalim Shop` },
       "category": design.species === `cat` ? `Cat portrait apparel & gifts` : `Dog portrait apparel & gifts`,
       "url": url,
+      "offers": offerPrices.length ? {
+        "@type": `AggregateOffer`,
+        "priceCurrency": `ILS`,
+        "lowPrice": Math.min(...offerPrices),
+        "highPrice": Math.max(...offerPrices),
+        "availability": `https://schema.org/InStock`,
+      } : undefined,
     };
     injectJsonLd(ld, `breed-product-ld`);
   }, [design, lang]);
@@ -11795,7 +11865,7 @@ const FAQ_GROUPS = [
         a: {
           he: `הספלים קרמיים. רוב החולצות (טי בייסיק, אוברסייז, סטון ווש) הן 100% כותנה סרוקה, והדרייפיט הוא פוליאסטר טכני נושם (לא כותנה). כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
           en: `The mugs are ceramic. Most shirts (Tee Basic, Oversize, Stone-wash) are 100% combed cotton, while the Dri-FIT is a breathable technical polyester (not cotton). To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
-          ru: `Кружки керамические. Большинство футболок (Тибейсик, Оверсайз, Стоунвош) — 100% чёсаный хлопок, а Dri-FIT — дышащий технический полиэстер (не хлопок). Чтобы печать держалась долго: кружку мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
+          ru: `Кружки керамические. Большинство футболок (Tee Basic, Oversize, Stone-wash) — 100% чёсаный хлопок, а Dri-FIT — дышащий технический полиэстер (не хлопок). Чтобы печать держалась долго: кружку мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
         },
       },
       {
@@ -11811,7 +11881,7 @@ const FAQ_GROUPS = [
         a: {
           he: `רוב החולצות שלנו עשויות 100% כותנה סרוקה — סיב איכותי ונעים. טי בייסיק — גזרה קלאסית; אוברסייז — גזרה רחבה; סטון ווש — אוברסייז עם גימור כביסת סטון-ווש למראה דהוי/וינטג'. חולצת הדרייפיט שונה: בד פוליאסטר טכני נושם שמנדף זיעה, מתאים לפעילות וספורט. מילון: כותנה סרוקה = כותנה שעברה סירוק להסרת סיבים קצרים (חלקה, חזקה ונעימה יותר); סטון ווש = כביסה שמרככת ונותנת מראה וינטג' דהוי; דרייפיט = בד טכני נושם שמנדף זיעה, שונה מכותנה.`,
           en: `Most of our shirts are 100% combed cotton — a soft, high-quality fiber. Tee Basic — classic fit; Oversize — relaxed fit; Stone-wash — oversize with a stone-wash finish for a faded vintage look. The Dri-FIT shirt is different: a breathable technical polyester that wicks sweat, made for activity and sport. Glossary: Combed cotton = cotton brushed to remove short fibers (smoother, stronger, softer); Stone-wash = a wash that softens the fabric and gives a faded vintage look; Dri-FIT = a breathable technical fabric that wicks sweat, different from cotton.`,
-          ru: `Большинство наших футболок — 100% чёсаный хлопок, мягкое качественное волокно. Тибейсик — классический крой; Оверсайз — свободный крой; Стоунвош — оверсайз с отделкой стоунвош для выцветшего винтажного вида. Футболка Dri-FIT отличается: дышащий технический полиэстер, отводит влагу, для активности и спорта. Словарь: чёсаный хлопок = хлопок без коротких волокон (глаже, прочнее, мягче); стоунвош = стирка для мягкости и винтажного вида; Dri-FIT = дышащая техническая ткань, отводит влагу, отличается от хлопка.`,
+          ru: `Большинство наших футболок — 100% чёсаный хлопок, мягкое качественное волокно. Tee Basic — классический крой; Oversize — свободный крой; Stone-wash — оверсайз с отделкой стоунвош для выцветшего винтажного вида. Футболка Dri-FIT отличается: дышащий технический полиэстер, отводит влагу, для активности и спорта. Словарь: чёсаный хлопок = хлопок без коротких волокон (глаже, прочнее, мягче); стоунвош = стирка для мягкости и винтажного вида; Dri-FIT = дышащая техническая ткань, отводит влагу, отличается от хлопка.`,
         },
       },
     ],
@@ -11926,13 +11996,14 @@ function FaqPage({ lang }) {
     if (typeof document === `undefined`) return;
     const docTitle = lang === `he` ? `שאלות נפוצות | ספלים שופ` : lang === `ru` ? `Частые вопросы | Sfalim Shop` : `FAQ | Sfalim Shop`;
     const desc = FAQ_SEO_DESC[lang] || FAQ_SEO_DESC.he;
-    const url = `${SEO_ORIGIN}/#faq`;
+    const url = `${SEO_ORIGIN}/faq`;
     document.title = docTitle;
     setMeta(`description`, desc);
     setMeta(`og:title`, pageTitle, `property`);
     setMeta(`og:description`, desc, `property`);
     setMeta(`og:type`, `website`, `property`);
     setMeta(`og:url`, url, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary`);
     setMeta(`twitter:title`, pageTitle);
     setMeta(`twitter:description`, desc);
@@ -12041,6 +12112,12 @@ function setMeta(name, content, attr) {
   el.setAttribute(`content`, String(content));
 }
 
+// Map a UI language to its Open Graph locale code (og:locale). Used so EN/RU
+// shares advertise the correct locale instead of the static he_IL from index.html.
+function ogLocale(lang) {
+  return lang === `en` ? `en_US` : lang === `ru` ? `ru_RU` : `he_IL`;
+}
+
 // Create or update a JSON-LD <script> by id (idempotent).
 function injectJsonLd(obj, id) {
   if (typeof document === `undefined`) return;
@@ -12127,6 +12204,7 @@ function setGenericSeo(lang, title, descOverride) {
   setMeta(`og:type`, `website`, `property`);
   setMeta(`og:url`, `${SEO_ORIGIN}/`, `property`);
   setMeta(`og:image`, SITE_OG_IMAGE, `property`);
+  setMeta(`og:locale`, ogLocale(lang), `property`);
   setMeta(`twitter:card`, `summary_large_image`);
   setMeta(`twitter:title`, title);
   setMeta(`twitter:description`, desc);
@@ -12228,13 +12306,14 @@ function BlogIndex({ lang, goToBlog }) {
 
   // Page-level SEO for the index.
   useEffect(() => {
-    const indexUrl = `${SEO_ORIGIN}/#/blog`;
+    const indexUrl = `${SEO_ORIGIN}/blog`;
     document.title = `${t.blogHeroTitle} — Sfalim Shop`;
     setMeta(`description`, t.blogHeroSubtitle);
     setMeta(`og:title`, t.blogHeroTitle, `property`);
     setMeta(`og:description`, t.blogHeroSubtitle, `property`);
     setMeta(`og:type`, `website`, `property`);
     setMeta(`og:url`, indexUrl, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, t.blogHeroTitle);
     setMeta(`twitter:description`, t.blogHeroSubtitle);
@@ -12408,6 +12487,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     setMeta(`og:image`, post.cover_image_url, `property`);
     setMeta(`og:type`, `article`, `property`);
     setMeta(`og:url`, postUrl, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, ogTitle);
     setMeta(`twitter:description`, ogDesc);

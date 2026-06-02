@@ -77,7 +77,7 @@ async function lookupDesign(handle) {
   const anonKey = process.env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
 
   const safeHandle = encodeURIComponent(String(handle || ``).toLowerCase());
-  const select = `id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,mockup_url,design_url`;
+  const select = `id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,mockup_url,design_url,price_shirt_basic,price_shirt_oversized,price_shirt,price_mug`;
   const endpoint = `${url}/rest/v1/pet_designs?slug=eq.${safeHandle}&is_active=eq.true&select=${select}&limit=1`;
   try {
     const res = await fetch(endpoint, {
@@ -136,6 +136,13 @@ function buildBreedHtml(d, handle) {
   const nameAttr = escapeHtml(name);
   const robotsAttr = escapeHtml(robots);
 
+  // Price span across this breed's purchasable products (shirt + mug) so the
+  // Product rich result can show a price. Pet-name (+₪20) is an optional add-on,
+  // excluded from the base offer range. Mirrors the runtime BreedPage JSON-LD.
+  const offerPrices = [d.price_shirt_basic, d.price_shirt_oversized, d.price_shirt, d.price_mug]
+    .map((p) => Number(p))
+    .filter((p) => Number.isFinite(p) && p > 0);
+
   const ld = jsonLdScript({
     "@context": `https://schema.org`,
     "@type": `Product`,
@@ -144,6 +151,15 @@ function buildBreedHtml(d, handle) {
     description,
     brand: { "@type": `Brand`, name: `BLOOM / Sfalim Shop` },
     url: canonical,
+    ...(offerPrices.length ? {
+      offers: {
+        "@type": `AggregateOffer`,
+        priceCurrency: `ILS`,
+        lowPrice: Math.min(...offerPrices),
+        highPrice: Math.max(...offerPrices),
+        availability: `https://schema.org/InStock`,
+      },
+    } : {}),
   });
 
   return `<!DOCTYPE html>
