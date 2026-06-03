@@ -17,11 +17,91 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ---
 
-## 📌 STATE AS OF 2026-06-02 (final pre-launch fixes — launch-ready, read this first)
+## 📌 STATE AS OF 2026-06-03 (production deploy behind maintenance gate; pre-public-launch polish — read this first)
 
-> Supersedes every block below where they conflict. **`launch-prep` is now
-> technically LAUNCH-READY** (HEAD `1bb03ef`, ~14 commits ahead of `main`), all
-> behind the maintenance gate. Production (`main`) is unchanged.
+> Supersedes every block below where they conflict. **Code is now LIVE ON
+> PRODUCTION (Vercel) but the site STAYS in maintenance** — all 3 launch flags
+> are still ON. Public sees the maintenance page; staff see the full live site.
+
+### 🚀 Production state
+- **`main` has been merged + deployed to production** (latest merge, post the
+  about/dots/shipping/pay-return work) and is **live on Vercel behind the
+  maintenance gate.** All 3 launch flags still ON: **`MAINTENANCE_MODE=true`**,
+  **`index.html` noindex ×3**, **`api/og.js` MAINTENANCE=true**. Public sees the
+  maintenance page; **staff** (`?staff=1` + `VITE_STAFF_PASSWORD`) see the full
+  live site.
+- ⚠️ **`launch-prep` has commits NOT yet merged to `main`** — see *Pending merge*
+  below.
+
+### ✅ Done this session (verified live on production where noted)
+- **PAYMENTS verified end-to-end on production:** real **₪36 test orders
+  succeeded** (e.g. tx `376598`, `376992`); webhook **query-back enforced**;
+  orders marked paid; thank-you page renders.
+- **Post-payment 405 fixed:** added **`api/pay-return.js`** (Vercel serverless,
+  accepts GET+POST, **302-redirects** to the SPA hash route) so Tranzila's POST
+  return no longer hits a 405. `create-payment` success/fail URLs repointed to
+  `/api/pay-return`. **Deployed as `create-payment` v10.**
+- **Tranzila ת.ז.-field + right-stuck page fixed:** ROOT CAUSE was the **`myid`**
+  param (maps to the ID field on Tranzila's hosted page). **Removed `myid`** from
+  `create-payment` (the order group is carried by **`u71`** only, which the
+  webhook reads). **Deployed as `create-payment` v11.** Verified live: ID field
+  empty + page centered.
+  - ⚠️ **REPO SYNC TODO (next code session, not now):** `create-payment` v10/v11
+    were deployed **directly to Supabase**. The repo
+    `supabase/functions/create-payment/index.ts` already has the pay-return URL
+    change but **must also REMOVE the `myid` line** so the repo matches the
+    deployed v11.
+- **Google Places address autocomplete:** working on production. The 403 was the
+  API key being restricted to the **old "Places API"** instead of **"Places API
+  (New)"** — fixed in Google Cloud Console (key also allows the live domain).
+  Manual-typing fallback intact.
+- **Shipping → single flat ₪35** everywhere (cart / checkout / FAQ / policies,
+  he/en/ru). Committed on `launch-prep`, **merged to `main` + deployed.**
+- **About page enriched** (hero "Where animal love meets art", first-person
+  story, "Why us" 4-benefit block, CTA → BLOOM collection), trilingual, + polish
+  (alternating section backgrounds, story→why-us divider, consistent card
+  radius/padding). **Carousel pagination dots → single centered line.** **"How it
+  works" → 5 steps** incl. the **design-approval step (scoped to custom /
+  personalized orders only**, with a clarifying note). All on `launch-prep`.
+
+### ⏳ Pending merge to `main` (still only on `launch-prep`, NOT yet in production)
+The **enriched About page**, the **single-line carousel dots**, and the **5-step
+"how it works"**. When ready to go public: **merge `launch-prep` → `main`** to
+bring these live, then flip the launch flags.
+
+### 🧷 Owner-side / non-blocking (before public launch, owner's choice)
+- **Interspace/Tranzila RECEIPT (קבלה, exempt-dealer, 0% VAT) auto-emailed to the
+  customer + logo on receipt.** Owner configured the document settings in the
+  Tranzila panel (auto-send + logo `Invoice_logo_fxpsfalimshop.png` + sender
+  `hello@sfalimshop.com`) and is sending Interspace the activation answers (doc
+  type=receipt, numbering starts ~1001 pending accountant, no retro, auto-email
+  on). Interspace said ~1 day to activate. **Receipt did NOT arrive on the test
+  order yet — pending their activation.** Accountant wants a monthly receipts
+  report (owner pulls it from Tranzila directly).
+- **Shipping carrier decision (owner researching):** owner does **NOT** want
+  Israel Post, does **NOT** want lockers — wants **private door-to-door**. Top
+  private options found: **GetPackage** (no minimum/contract, door-to-door
+  nationwide, from ₪65 or a special ~₪30 tier to confirm), **ZigZag**
+  (small-customer no-monthly-minimum, nationwide incl. Eilat), **Deal Delivery**
+  (from ₪49), **UPS/SHIP** (door-to-door if self-deposit at the Be'er Sheva
+  branch; do **NOT** order the ₪118 pickup). Reality: true private door-to-door at
+  low volume is ~₪49–65, so **the flat ₪35 may not cover door-to-door** — owner to
+  confirm a real price with a carrier and decide pricing. **No code change made.**
+
+### 🔔 Launch gates (unchanged, still all ON)
+- `MAINTENANCE_MODE` (App.jsx, find by name) `true` → **`false`**
+- `index.html` noindex ×3 → **`index, follow`**
+- `api/og.js` MAINTENANCE → **`false`**
+- Keep: `PAYMENTS_ENABLED=true`, `SHIPPING_PRICE=35`, `STONEWASH_ENABLED=false`,
+  `MUG_STUDIO_ENABLED=false`.
+
+---
+
+## 📌 STATE AS OF 2026-06-02 (final pre-launch fixes — launch-ready — historical, superseded by the 2026-06-03 block above)
+
+> Superseded by the 2026-06-03 block above. Kept for the deep-audit / a11y detail
+> it documents. **`launch-prep` was tagged technically LAUNCH-READY** here (HEAD
+> `1bb03ef`), all behind the maintenance gate.
 
 ### 🔍 Deep re-audit + final fix wave (commit `1bb03ef`)
 - **Deep full-site re-audit** (he/en/ru, desktop + mobile) surfaced **one real blocker** that earlier URL-based audits missed: the **mobile nav hamburger rendered off-screen** (right-cluster overflow), so phone users couldn't open the menu. **FIXED** by removing the **duplicated inline language switcher** from the mobile nav cluster (it stays inside the dropdown). **Desktop nav unchanged.**
