@@ -10,6 +10,45 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 const MugStudio = lazy(() => import('./MugStudio.jsx'));
 const supabase = createClient('https://ubvgrxlxtelulwjtfudd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidmdyeGx4dGVsdWx3anRmdWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODIyODMsImV4cCI6MjA5NDM1ODI4M30.79zQ0LMAzzocGSMD3ruNl2m_jan6siQJ_A1Ex7lOxyE')
 
+// Google Places Autocomplete (New) — key is read from a Vite env var so it is
+// NEVER hardcoded in source. Set VITE_GOOGLE_MAPS_API_KEY in Vercel (Settings →
+// Environment Variables) and in a local .env for dev. The key is client-side by
+// design (Places Autocomplete is a browser API) — restrict it by HTTP referrer +
+// API restrictions in the Google Cloud console. If the var is unset, the address
+// autocomplete silently disables and manual typing still works.
+const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+// One Places session token spans all autocomplete keystrokes + the final Place
+// Details lookup (Google session-based billing → stays in the free tier), then a
+// fresh token starts. crypto.randomUUID with an RFC4122-shaped fallback.
+function newPlacesSessionToken() {
+  try { if (typeof crypto !== `undefined` && crypto.randomUUID) return crypto.randomUUID(); } catch (_) {}
+  return `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (c) => {
+    const r = Math.floor(Math.random() * 16);
+    const v = c === `x` ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// Reactive "is a full-screen overlay open?" signal. Every drawer/modal (cart
+// drawer, PetModal, lightbox, …) locks scroll via `document.body.style.overflow
+// = "hidden"`, so we watch that one attribute with a MutationObserver. Used to
+// hide the cookie banner + corner FABs while an overlay is open, so they never
+// overlap or intercept taps on it (e.g. the cart checkout CTA on mobile, where
+// the bottom-pinned banner otherwise sat over the button). They reappear on close.
+function useOverlayOpen() {
+  const [open, setOpen] = useState(() => typeof document !== `undefined` && document.body.style.overflow === `hidden`);
+  useEffect(() => {
+    if (typeof document === `undefined`) return;
+    const check = () => setOpen(document.body.style.overflow === `hidden`);
+    check();
+    const mo = new MutationObserver(check);
+    mo.observe(document.body, { attributes: true, attributeFilter: [`style`] });
+    return () => mo.disconnect();
+  }, []);
+  return open;
+}
+
 // ── A11y: dialog focus management (WCAG 2.4.3 / 2.1.2) ──────────────────────
 // When `active` becomes true: remember the currently-focused element, move focus
 // into the dialog (first focusable, or the container), and keep Tab/Shift+Tab
@@ -521,12 +560,12 @@ const FLOATING_CARD_CSS = `
   padding: 0 1.5em;
   direction: rtl;
 }
-.fpc-details h3 {
+.fpc-details .fpc-name {
   font-weight: 700;
   margin: 0;
   font-size: min(4.5svh, 2.4em);
   line-height: 1.15;
-  text-align: right;
+  text-align: center;
   background-image: linear-gradient(to bottom, #ffffff, #f97316);
   background-size: 1em 1.5em;
   -webkit-text-fill-color: transparent;
@@ -540,7 +579,7 @@ const FLOATING_CARD_CSS = `
   top: 4px;
   font-size: 15px;
   margin: 0;
-  text-align: right;
+  text-align: center;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.4;
 }
@@ -599,7 +638,7 @@ const FLOATING_CARD_CSS = `
 @media (max-width: 768px) {
   .fpc-card { height: 70svh; max-height: 450px; }
   .fpc-details { top: 1em; }
-  .fpc-details h3 { font-size: min(4svh, 2em); }
+  .fpc-details .fpc-name { font-size: min(4svh, 2em); }
   .fpc-details p { font-size: 13px; }
   .fpc-user-info { bottom: 15px; left: 15px; right: 15px; padding: 10px 12px; }
   .fpc-user-details { gap: 10px; }
@@ -610,7 +649,7 @@ const FLOATING_CARD_CSS = `
 @media (max-width: 480px) {
   .fpc-card { height: 60svh; max-height: 380px; }
   .fpc-details { top: 0.8em; }
-  .fpc-details h3 { font-size: min(3.5svh, 1.7em); }
+  .fpc-details .fpc-name { font-size: min(3.5svh, 1.7em); }
   .fpc-details p { font-size: 12px; }
   .fpc-user-info { bottom: 12px; left: 12px; right: 12px; padding: 10px 12px; border-radius: 14px; }
   .fpc-user-details { gap: 8px; }
@@ -858,14 +897,14 @@ const FloatingProductCardComponent = ({
           <div className="fpc-glare" />
           <div className="fpc-content">
             <div className="fpc-details">
-              <h3>{name}</h3>
+              <div className="fpc-name">{name}</div>
               <p>{description}</p>
             </div>
           </div>
           <div className="fpc-user-info">
             <div className="fpc-user-details">
               <div className="fpc-user-text">
-                <div className="fpc-handle">{price}</div>
+                <div className="fpc-handle"><bdi dir="ltr">{price}</bdi></div>
                 <div className="fpc-status">
                   <span className="fpc-status-dot" aria-hidden="true" />
                   {status}
@@ -935,14 +974,15 @@ const BloomCardLite = React.memo(function BloomCardLite({
         />
       </div>
       <div style={{ display: `flex`, flexDirection: `column`, gap: 4 }}>
-        <h3 style={{
+        <div style={{
           margin: 0,
           color: COLORS.white,
           fontFamily: `'Playfair Display',serif`,
           fontSize: 20,
           letterSpacing: `0.02em`,
           lineHeight: 1.15,
-        }}>{name}</h3>
+          textAlign: `center`,
+        }}>{name}</div>
         {description && (
           <p style={{
             margin: 0,
@@ -950,6 +990,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
             fontFamily: `'Varela Round',sans-serif`,
             fontSize: 12,
             lineHeight: 1.4,
+            textAlign: `center`,
           }}>{description}</p>
         )}
       </div>
@@ -961,14 +1002,14 @@ const BloomCardLite = React.memo(function BloomCardLite({
         marginTop: 2,
       }}>
         <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-          <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: 18 }}>{price}</div>
+          <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: 18 }}><bdi dir="ltr">{price}</bdi></div>
           <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 10, letterSpacing: `0.05em`, textTransform: `uppercase` }}>{status}</div>
         </div>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onClick && onClick(); }}
           style={{
-            background: COLORS.accent,
+            background: COLORS.accentBtn,
             color: COLORS.white,
             border: `none`,
             borderRadius: 999,
@@ -996,6 +1037,8 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
   const [designs, setDesigns] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
   const [isPaused, setIsPaused] = useState(false);
   // Mobile + reduced-motion users get the LIGHT card variant (no tilt, no
@@ -1109,6 +1152,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
       return shuffle(out);
     };
     (async () => {
+      setLoadError(false);
       try {
         const { data, error } = await supabase
           .from("pet_designs")
@@ -1124,10 +1168,11 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         setDesigns(pickBalanced(data, 12, 6));
       } catch (err) {
         console.error(`Failed to load BLOOM carousel:`, err);
+        if (!cancelled) setLoadError(true);
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
 
   // Auto-advance every 5s, paused on hover or while user is mid-swipe.
   useEffect(() => {
@@ -1246,10 +1291,15 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
           maxWidth: `100%`,
           margin: `0 auto`,
         }}>
+        {loadError && designs.length === 0 && (
+          <LoadError lang={lang} onRetry={() => setReloadKey((k) => k + 1)} compact />
+        )}
         {designs.map((d, idx) => {
           const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
-          const animal = d[`animal_${lang}`] || d.animal_he || d.animal_en || ``;
-          const description = [tagline, animal].filter(Boolean).join(` · `);
+          // Species (dog/cat) intentionally NOT shown on the card — only the
+          // character tagline. The species field stays in the data for the
+          // gallery filter; it's just hidden from the card display.
+          const description = tagline;
           const displayName = (d.name_en || d.name_he || ``).toUpperCase();
           const isActive = idx === activeIdx;
           return (
@@ -1376,16 +1426,30 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
               aria-label={label}
               onClick={() => setActiveIdx(idx)}
               style={{
+                // Visual pill stays small; the button itself is a larger
+                // transparent tap target (min 24px) so it's comfortable to hit
+                // on touch without spreading the dots row apart.
+                width: isActive ? 36 : 24,
+                height: 24,
+                minHeight: 24,
+                display: `inline-flex`,
+                alignItems: `center`,
+                justifyContent: `center`,
+                background: `transparent`,
+                border: `none`,
+                cursor: `pointer`,
+                padding: 0,
+              }}
+            >
+              <span aria-hidden="true" style={{
+                display: `block`,
                 width: isActive ? 28 : 10,
                 height: 10,
                 borderRadius: 999,
                 background: isActive ? `#f97316` : `rgba(255,255,255,0.25)`,
-                border: `none`,
-                cursor: `pointer`,
-                padding: 0,
                 transition: `width 0.3s ease, background-color 0.3s ease`,
-              }}
-            />
+              }} />
+            </button>
           );
         })}
       </div>
@@ -1421,26 +1485,52 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
 const COLORS = {
   bg: "#0f0f0f", bgCard: "#1a1a1a", border: "#2a2a2a",
   accent: "#FF6B35", accentHover: "#ff8255", accentDim: "rgba(255,107,53,0.15)",
+  // accentBtn / accentBtnHover: a DARKER orange used ONLY as the FILL of buttons
+  // that carry WHITE text, so #fff text reaches WCAG AA (#C0501A on #fff = 4.77:1;
+  // hover #A8461A = 5.9:1). The bright `accent` (#FF6B35) stays for icons,
+  // borders, dots, dims and orange TEXT on the dark bg (those already pass AA).
+  accentBtn: "#C0501A", accentBtnHover: "#A8461A",
   white: "#ffffff", gray: "#888888", grayLight: "#8a8a8a", success: "#4ade80",
 };
 
-// ⚠️ TEMPORARY TEST — free shipping (all three zeroed) so a staff test order
-// totals exactly the product price with no shipping added. RESTORE AFTER THE
-// TEST: SHIPPING_PRICE = 30, SHIPPING_LOCKER = 20, SHIPPING_HOME = 35.
 // Legacy flat shipping fee. Kept for any code path that hasn't been moved
 // onto the Locker/Home selector yet (defensive — every active path now uses
 // the per-method constants below).
-const SHIPPING_PRICE = 0; // TEMP TEST (restore 30)
+const SHIPPING_PRICE = 30;
 // Locker (delivery point pickup) is the cheaper, faster default. Home is
 // door-to-door courier. shippingMethod state in OrderPage chooses between
 // them; orders.extra_prints.shipping_method records the customer's choice.
-const SHIPPING_LOCKER = 0; // TEMP TEST (restore 20)
-const SHIPPING_HOME = 0; // TEMP TEST (restore 35)
+const SHIPPING_LOCKER = 20;
+const SHIPPING_HOME = 35;
 const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
-// Per-item surcharge added when a customer personalizes a BLOOM item with a pet
-// name. Folded into the cart line's unitPrice so it threads through the cart
-// total, the order total, and the stored orders.total. Empty name = no surcharge.
+// Live pet-name personalization for customizable products (mugs + shirts only;
+// never stickers/packs). The typed name is printed on the product. It is OPTIONAL
+// and FREE — it does NOT affect price. Font + color pickers appear only after a
+// name is typed (progressive disclosure); both reset when the name is cleared.
+// Persisted to orders.pet_name / pet_name_font / pet_name_color (font NAME + hex,
+// or all null when no name). All 5 fonts support Hebrew (loaded in index.html).
+const PET_NAME_FONTS = [`Heebo`, `Assistant`, `Secular One`, `Suez One`, `Rubik`];
+const PET_NAME_COLORS = [`#FF6B35`, `#1a1a1a`, `#ffffff`, `#e91e8c`, `#7c4dff`, `#0a8f5b`, `#d4a017`];
+// Human-readable, trilingual names for each swatch — used as the swatch
+// aria-label so screen-reader users hear "Pink" instead of "#e91e8c".
+const PET_NAME_COLOR_NAMES = {
+  "#FF6B35": { he: `כתום`, en: `Orange`, ru: `Оранжевый` },
+  "#1a1a1a": { he: `שחור`, en: `Black`, ru: `Чёрный` },
+  "#ffffff": { he: `לבן`, en: `White`, ru: `Белый` },
+  "#e91e8c": { he: `ורוד`, en: `Pink`, ru: `Розовый` },
+  "#7c4dff": { he: `סגול`, en: `Purple`, ru: `Фиолетовый` },
+  "#0a8f5b": { he: `ירוק`, en: `Green`, ru: `Зелёный` },
+  "#d4a017": { he: `זהב`, en: `Gold`, ru: `Золотой` },
+};
+const petColorName = (hex, lang) => (PET_NAME_COLOR_NAMES[hex] && (PET_NAME_COLOR_NAMES[hex][lang] || PET_NAME_COLOR_NAMES[hex].en)) || hex;
+const PET_NAME_FONT_DEFAULT = `Heebo`;
+const PET_NAME_COLOR_DEFAULT = `#FF6B35`;
+// Per-item personalization surcharge: +₪20 when (and only when) a pet name is
+// entered. Folded into the cart line's unitPrice so it threads through the cart
+// total, the order total, and the stored orders.total; shown to the customer via
+// the +₪20 pill and the cart line. Empty name = no surcharge.
 const PET_NAME_SURCHARGE = 20;
+const hasHebrew = (s) => /[֐-׿]/.test(s || ``);
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 // Single source of truth for social links — referenced anywhere the Instagram
 // profile is linked (Nav, mobile menu, BLOOM page CTA, Footer).
@@ -1458,7 +1548,7 @@ const BLOOM_SHIRT_COLORS = [
 // match the PRODUCTS variant ids.
 const BLOOM_SHIRT_TYPES = [
   { id: `basic`,     productId: `tshirt`,    label: { he: `בייסיק`,   en: `Basic`,     ru: `Базовая` } },
-  { id: `oversized`, productId: `oversized`, label: { he: `אוברסייז`, en: `Oversized`, ru: `Оверсайз` } },
+  { id: `oversized`, productId: `oversized`, label: { he: `אוברסייז`, en: `Oversize`, ru: `Оверсайз` } },
 ];
 const BLOOM_SHIRT_SIZES = [`s`, `m`, `l`, `xl`, `xxl`];
 
@@ -1502,6 +1592,34 @@ const MUG_STUDIO_ENABLED = false;
 // translates saved sticker product names across languages.
 const CUSTOM_STICKERS_ENABLED = false;
 
+// 👕 Oversize Stone-wash — HIDDEN from the catalog until a real product photo
+// exists (it currently reuses the Oversize mockup, so the two look identical).
+// The product + all its wiring stay in place; flip this to TRUE to show it in
+// the order-wizard grid again (also re-add it to the index.html ItemList JSON-LD).
+const STONEWASH_ENABLED = false;
+
+// Friendly, trilingual user-facing error text. The raw error is logged to the
+// console for debugging — never surfaced to the customer (no raw e.message).
+const uiGenericError = (lang) => lang === `he` ? `משהו השתבש. נסו שוב בעוד רגע.` : lang === `ru` ? `Что-то пошло не так. Попробуйте ещё раз.` : `Something went wrong. Please try again.`;
+const uiPaymentError = (lang) => lang === `he` ? `התשלום לא הצליח. בדקו את הפרטים ונסו שוב.` : lang === `ru` ? `Оплата не прошла. Проверьте данные и попробуйте снова.` : `Payment didn't go through — check your details and try again.`;
+const uiLoadError = (lang) => lang === `he` ? `לא הצלחנו לטעון. בדקו את החיבור ונסו שוב.` : lang === `ru` ? `Не удалось загрузить. Проверьте соединение и попробуйте снова.` : `Couldn't load. Check your connection and try again.`;
+const uiRetry = (lang) => lang === `he` ? `נסו שוב` : lang === `ru` ? `Повторить` : `Try again`;
+// Custom-design upload size cap — mirrors the Supabase `designs` bucket limit
+// (10 MB). Checked client-side so oversized files are rejected before upload.
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const uiFileTooLarge = (lang) => lang === `he` ? `הקובץ גדול מדי (עד 10MB). בחרו קובץ קטן יותר.` : lang === `ru` ? `Файл слишком большой (до 10 МБ). Выберите файл поменьше.` : `File is too large (max 10MB). Please choose a smaller file.`;
+
+// Friendly trilingual "couldn't load — retry" block for customer-facing data
+// fetches (mirrors the admin error+reload pattern). onRetry re-runs the fetch.
+function LoadError({ lang, onRetry, compact = false }) {
+  return (
+    <div role="alert" style={{ textAlign: `center`, padding: compact ? `28px 16px` : `60px 20px`, color: `#9a9a9a`, fontFamily: `'Varela Round',sans-serif` }}>
+      <div style={{ fontSize: 15, lineHeight: 1.6, marginBottom: 16 }}>{uiLoadError(lang)}</div>
+      <button type="button" onClick={onRetry} style={{ background: `#C0501A`, color: `#fff`, border: `none`, borderRadius: 8, padding: `11px 24px`, fontSize: 14, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{uiRetry(lang)}</button>
+    </div>
+  );
+}
+
 // 💳 PAYMENTS — when false, the "Pay" button shows the existing "coming soon"
 // modal (order rows are already inserted in step 3, emails already sent, so
 // the experience stays graceful). When true, the same button calls the
@@ -1516,6 +1634,17 @@ const PAYMENTS_ENABLED = true;
 // item shape changes in a non-backwards-compatible way, so stale shapes
 // don't trip up the new code on a returning visitor.
 const CART_STORAGE_KEY = `sxp_cart_v1`;
+
+// Central hash reader. Tranzila (and some redirectors) HTML-encode the ampersand
+// in our return URL, so the success hash can arrive as
+// `#track?order_group=grp-123&amp;paid=1` — which would make `paid` parse as the
+// param `amp;paid` and never be detected. Decode `&amp;` back to `&` BEFORE any
+// hash/query parsing, in one place, so it can't bite us anywhere. Always read the
+// hash through this helper (never window.location.hash directly) when parsing.
+function rawHash() {
+  if (typeof window === `undefined`) return ``;
+  return (window.location.hash || ``).replace(/&amp;/gi, `&`);
+}
 
 const IL_PREFIXES = [
   { value: "050" }, { value: "052" }, { value: "053" },
@@ -1566,7 +1695,7 @@ const LANGS = {
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
-    payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "החזרים תוך 14 יום *", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו" },
+    payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור מס׳ 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "החזרים תוך 14 יום *", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו" },
     confirm: { title: "התשלום אושר!", subtitle: "ההזמנה שלך התקבלה", orderNum: "מספר הזמנה", thanksLine: "תודה {name}! שלחנו אישור לכתובת", whatsNext: "מה קורה עכשיו", step1Title: "אנחנו מתחילים בייצור", step1Sub: "ההזמנה שלך נכנסת לסבב הייצור הקרוב", step2Title: "ייצור: 2-4 ימי עסקים", step2Sub: "הדפסה איכותית של העיצוב שבחרת", step3Title: "משלוח: 1-3 ימי עסקים", step3Sub: "תקבל מספר מעקב באימייל", step4Title: "עדכון על כל שלב", step4Sub: "ניצור איתך קשר בכל שינוי", track: "מעקב אחר ההזמנה", another: "הזמנה נוספת", accountTitle: "פתיחת חשבון", accountDesc: "פתחו חשבון כדי לעקוב אחרי ההזמנה ולעבור לתשלום מהר יותר בפעם הבאה — בלחיצה אחת עם Google.", accountLater: "אולי מאוחר יותר" },
     auth: {
       login: "כניסה", register: "הרשמה", email: "אימייל", password: "סיסמה", name: "שם מלא",
@@ -1593,7 +1722,7 @@ const LANGS = {
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך", guestTitle: "מעקב אחר ההזמנה שלך", guestDesc: "לא צריך סיסמה — נשלח לך למייל קישור מאובטח לצפייה בהזמנות שלך.", guestBtn: "שלח לי קישור" },
     approval: { submittedTitle: "העיצוב נשלח לאישור", submittedDesc: "העיצוב שלך נשלח לאישור — נעדכן אותך במייל ברגע שהוא יאושר, ואז תוכל לשלם. ההזמנה נשמרה.", underReview: "העיצוב בבדיקה", underReviewDesc: "שלחנו את העיצוב שלך לאישור. נעדכן אותך במייל ברגע שהוא יאושר — ואז אפשר יהיה לשלם.", approvedTitle: "העיצוב אושר! 🎉", approvedDesc: "אפשר להשלים את התשלום וההזמנה תיכנס להפקה.", payNow: "שלם עכשיו", changesTitle: "נדרשים שינויים בעיצוב", reviewNote: "הערה מהצוות שלנו", editResubmit: "ערוך ושלח מחדש", uploadNew: "העלה עיצוב חדש (לא חובה)", resubmitBtn: "שלח מחדש לאישור", resubmitting: "שולח...", resubmitted: "נשלח מחדש — העיצוב בבדיקה שוב", cancelOrder: "בטל הזמנה", cancelConfirm: "לבטל את ההזמנה הזו?", cancelled: "ההזמנה בוטלה" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
-    products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
+    products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
     bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} →` },
   },
@@ -1610,7 +1739,7 @@ const LANGS = {
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
     form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
-    payment: { title: "Secure Payment", subtitle: "Review and confirm your order", orderNum: "Order #", summary: "Order Summary", subtotal: "Subtotal", shipping: "Shipping", total: "Total to Pay", deliveryTo: "Delivery Address", payBtn: "Pay ", paySuffix: " Securely →", processing: "Processing...", soonTitle: "Payment system coming soon", soonSub: "We're finalizing setup with our payment processor. Your order is saved and we'll personally contact you when the system is live.", soonBtn: "Close and save order", cancel: "Cancel Order", editDetails: "← Edit Details", confirmCancel: "Cancel this order?", securedBy: "Secured by", acceptedCards: "We accept:", businessLine: "Sfalim Shop · Exempt Dealer 321630279", trustFast: "Fast and secure payment", trustSSL: "256-bit SSL encryption", trustReturn: "14-day returns *", trustNoSave: "We never store card details" },
+    payment: { title: "Secure Payment", subtitle: "Review and confirm your order", orderNum: "Order #", summary: "Order Summary", subtotal: "Subtotal", shipping: "Shipping", total: "Total to Pay", deliveryTo: "Delivery Address", payBtn: "Pay ", paySuffix: " Securely →", processing: "Processing...", soonTitle: "Payment system coming soon", soonSub: "We're finalizing setup with our payment processor. Your order is saved and we'll personally contact you when the system is live.", soonBtn: "Close and save order", cancel: "Cancel Order", editDetails: "← Edit Details", confirmCancel: "Cancel this order?", securedBy: "Secured by", acceptedCards: "We accept:", businessLine: "Sfalim Shop · Exempt Dealer No. 321630279", trustFast: "Fast and secure payment", trustSSL: "256-bit SSL encryption", trustReturn: "14-day returns *", trustNoSave: "We never store card details" },
     confirm: { title: "Payment Confirmed!", subtitle: "Your order has been received", orderNum: "Order Number", thanksLine: "Thanks {name}! Confirmation sent to", whatsNext: "What happens next", step1Title: "We start production", step1Sub: "Your order enters the next production batch", step2Title: "Production: 2-4 business days", step2Sub: "Quality printing of your chosen design", step3Title: "Shipping: 1-3 business days", step3Sub: "You'll receive tracking info by email", step4Title: "Updates at every step", step4Sub: "We'll contact you with any changes", track: "Track Order", another: "New Order", accountTitle: "Create an account", accountDesc: "Create an account to track your order and check out faster next time — one tap with Google.", accountLater: "Maybe later" },
     auth: {
       login: "Login", register: "Register", email: "Email", password: "Password", name: "Full Name",
@@ -1637,7 +1766,7 @@ const LANGS = {
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
     approval: { submittedTitle: "Your design was submitted for approval", submittedDesc: "Your design was submitted for approval — we'll email you once it's approved, then you can pay. Your order is saved.", underReview: "Design under review", underReviewDesc: "We've sent your design for approval. We'll email you the moment it's approved — then you can pay.", approvedTitle: "Design approved! 🎉", approvedDesc: "Complete payment and your order goes into production.", payNow: "Pay now", changesTitle: "Changes requested", reviewNote: "Note from our team", editResubmit: "Edit & resubmit", uploadNew: "Upload a new design (optional)", resubmitBtn: "Resubmit for approval", resubmitting: "Submitting...", resubmitted: "Resubmitted — under review again", cancelOrder: "Cancel order", cancelConfirm: "Cancel this order?", cancelled: "Order cancelled" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
-    products: { tshirt: "Basic T-Shirt", oversized: "Oversized T-Shirt", dryfit: "Dryfit T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
+    products: { tshirt: "Basic T-Shirt", oversized: "Oversize T-Shirt", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
     bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close", seeAll: (n) => `See all ${n} →` },
   },
@@ -1654,7 +1783,7 @@ const LANGS = {
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
     form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
-    payment: { title: "Безопасная оплата", subtitle: "Проверьте и подтвердите заказ", orderNum: "Заказ №", summary: "Сводка заказа", subtotal: "Промежуточный итог", shipping: "Доставка", total: "Итого к оплате", deliveryTo: "Адрес доставки", payBtn: "Оплатить ", paySuffix: " безопасно →", processing: "Обработка...", soonTitle: "Платёжная система скоро запустится", soonSub: "Мы завершаем настройку с провайдером платежей. Ваш заказ сохранён, мы свяжемся с вами лично, когда система заработает.", soonBtn: "Закрыть и сохранить заказ", cancel: "Отменить заказ", editDetails: "← Изменить данные", confirmCancel: "Отменить заказ?", securedBy: "Защищено", acceptedCards: "Способы оплаты:", businessLine: "Sfalim Shop · Освобождённый предприниматель 321630279", trustFast: "Быстрая и безопасная оплата", trustSSL: "256-bit SSL шифрование", trustReturn: "Возврат в течение 14 дней *", trustNoSave: "Мы не сохраняем данные карты" },
+    payment: { title: "Безопасная оплата", subtitle: "Проверьте и подтвердите заказ", orderNum: "Заказ №", summary: "Сводка заказа", subtotal: "Промежуточный итог", shipping: "Доставка", total: "Итого к оплате", deliveryTo: "Адрес доставки", payBtn: "Оплатить ", paySuffix: " безопасно →", processing: "Обработка...", soonTitle: "Платёжная система скоро запустится", soonSub: "Мы завершаем настройку с провайдером платежей. Ваш заказ сохранён, мы свяжемся с вами лично, когда система заработает.", soonBtn: "Закрыть и сохранить заказ", cancel: "Отменить заказ", editDetails: "← Изменить данные", confirmCancel: "Отменить заказ?", securedBy: "Защищено", acceptedCards: "Способы оплаты:", businessLine: "Sfalim Shop · Освобождённый предприниматель № 321630279", trustFast: "Быстрая и безопасная оплата", trustSSL: "256-bit SSL шифрование", trustReturn: "Возврат в течение 14 дней *", trustNoSave: "Мы не сохраняем данные карты" },
     confirm: { title: "Оплата подтверждена!", subtitle: "Ваш заказ получен", orderNum: "Номер заказа", thanksLine: "Спасибо {name}! Подтверждение отправлено на", whatsNext: "Что дальше", step1Title: "Начинаем производство", step1Sub: "Ваш заказ попадает в ближайшую партию", step2Title: "Производство: 2-4 рабочих дня", step2Sub: "Качественная печать вашего дизайна", step3Title: "Доставка: 1-3 рабочих дня", step3Sub: "Вы получите трек-номер на email", step4Title: "Обновления на каждом этапе", step4Sub: "Мы свяжемся при любых изменениях", track: "Отследить заказ", another: "Новый заказ", accountTitle: "Создать аккаунт", accountDesc: "Создайте аккаунт, чтобы отслеживать заказ и оформлять покупки быстрее в следующий раз — в одно касание через Google.", accountLater: "Может быть позже" },
     auth: {
       login: "Войти", register: "Регистрация", email: "Email", password: "Пароль", name: "Полное имя",
@@ -1681,7 +1810,7 @@ const LANGS = {
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
     approval: { submittedTitle: "Ваш дизайн отправлен на одобрение", submittedDesc: "Ваш дизайн отправлен на одобрение — мы сообщим по email, как только он будет одобрен, тогда можно оплатить. Заказ сохранён.", underReview: "Дизайн на проверке", underReviewDesc: "Мы отправили ваш дизайн на одобрение. Сообщим по email, как только он будет одобрен — тогда можно оплатить.", approvedTitle: "Дизайн одобрен! 🎉", approvedDesc: "Завершите оплату, и заказ отправится в производство.", payNow: "Оплатить", changesTitle: "Требуются изменения", reviewNote: "Комментарий нашей команды", editResubmit: "Изменить и отправить снова", uploadNew: "Загрузить новый дизайн (необязательно)", resubmitBtn: "Отправить на одобрение снова", resubmitting: "Отправка...", resubmitted: "Отправлено повторно — снова на проверке", cancelOrder: "Отменить заказ", cancelConfirm: "Отменить этот заказ?", cancelled: "Заказ отменён" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
-    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", dryfit: "Драйфит футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
+    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
     bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть", seeAll: (n) => `Смотреть все ${n} →` },
   },
@@ -1723,8 +1852,11 @@ const POLICIES = {
       { type: "p", text: "ההחזר הכספי יבוצע תוך 7 ימי עסקים דרך אותו אמצעי תשלום. החלפת מוצר — שליחת מוצר חליפי תוך 7-14 ימי עסקים." },
       { type: "h", text: "5. דמי ביטול" },
       { type: "p", text: "במקרה של ביטול עסקה כדין, רשאי בית העסק לגבות דמי ביטול בשיעור 5% ממחיר העסקה או 100₪ — הנמוך מביניהם." },
-      { type: "h", text: "6. ביטול מצד בית העסק" },
+      { type: "h", text: "6. הארכת זכות ביטול לאוכלוסיות מסוימות" },
+      { type: "p", text: "אדם עם מוגבלות, אזרח ותיק (בן 65 ומעלה) או עולה חדש רשאי לבטל עסקה בתוך 4 חודשים מיום העסקה או מקבלת המוצר (לפי המאוחר), בכפוף לתנאי החוק ובהצגת תעודה מתאימה. הסייג לגבי מוצרים בעיצוב/התאמה אישית חל גם במקרים אלה." },
+      { type: "h", text: "7. ביטול מצד בית העסק" },
       { type: "p", text: "ספלים שופ שומרת על הזכות לבטל הזמנה ולהחזיר את הכסף במקרים של חוסר במלאי, שגיאה במחיר, חשד להונאה, או תוכן פוגעני/אלים/המפר זכויות יוצרים." },
+      { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
     ],
     shipping: [
       { type: "h", text: "אזורי שירות" },
@@ -1737,12 +1869,14 @@ const POLICIES = {
       { type: "p", text: "ניתן לתאם איסוף עצמי מבאר שבע — ללא עלות. צרו קשר טלפונית לתיאום." },
       { type: "h", text: "התעכבות במשלוח" },
       { type: "p", text: "אם החבילה לא הגיעה תוך 21 ימי עסקים, אנא צרו קשר ונדאג לפתרון — משלוח חוזר או החזר כספי מלא." },
+      { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
     ],
     privacy: [
       { type: "h", text: "איזה מידע אנחנו אוספים" },
       { type: "l", items: ["מידע אישי: שם מלא, אימייל, טלפון, כתובת למשלוח", "מידע על ההזמנה: מוצרים, עיצובים, הערות", "מידע טכני (אוטומטי): IP, סוג דפדפן, Cookies בסיסיים"] },
       { type: "h", text: "מטרת איסוף המידע" },
       { type: "l", items: ["ביצוע ההזמנה והאספקה", "תקשורת עם הלקוח", "תמיכה ופניות", "שיפור השירות", "עמידה בדרישות חוק"] },
+      { type: "p", text: "מסירת המידע תלויה ברצונך, אך ללא הפרטים הנדרשים (שם, כתובת, פרטי קשר) לא נוכל לעבד ולשלוח את הזמנתך." },
       { type: "h", text: "מה אנחנו לא עושים" },
       { type: "l", items: ["לא נמכור את פרטיך לצדדים שלישיים", "לא נשלח ספאם ללא הסכמה", "לא נשמור פרטי אשראי (התשלום דרך Tranzila — חברה מאובטחת PCI-DSS)"] },
       { type: "h", text: "אבטחת מידע" },
@@ -1750,10 +1884,13 @@ const POLICIES = {
       { type: "h", text: "הצהרת PCI DSS — אבטחת כרטיסי אשראי" },
       { type: "p", text: "ספלים שופ מצהירה על עמידה בדרישות האבטחה של ארגוני כרטיסי האשראי ובתקן PCI DSS:" },
       { type: "l", items: ["בית העסק אינו שומר פרטי כרטיסי אשראי במערכות שלו או באופן ידני כלשהו", "ספק דף התשלום המאובטח שלנו הוא Tranzila — חברה מוסמכת PCI DSS Level 1, רמת האבטחה הגבוהה ביותר בתעשייה", "פרטי האשראי נשלחים ישירות מהלקוח ל-Tranzila בערוץ מוצפן (SSL/TLS)", "אנו לא רואים, לא שומרים, ולא יכולים לגשת לפרטי האשראי בשום שלב"] },
+      { type: "h", text: `אחסון ועיבוד מידע בחו"ל` },
+      { type: "p", text: `חלק משירותי האתר מסופקים על ידי ספקים המאחסנים ומעבדים מידע מחוץ לישראל: Supabase (אחסון בסיס הנתונים — שמות, הזמנות, פרטי קשר), Vercel (אירוח האתר), ו-Tranzila (עיבוד תשלומים — חברה ישראלית; פרטי האשראי אינם נשמרים אצלנו). בעצם השימוש באתר ומסירת פרטיך, אתה מאשר את העברת המידע ואחסונו אצל ספקים אלה, לרבות מחוץ לישראל. אנו פועלים מול ספקים המחויבים לאמצעי הצפנה והגנה מקובלים, והמידע מועבר אך ורק לצורך תפעול האתר וביצוע ההזמנה.` },
       { type: "h", text: "שיתוף מידע עם צדדים שלישיים" },
       { type: "p", text: "המידע ישותף אך ורק עם חברת השליחים (לאספקה), Tranzila (לתשלום), ורשויות החוק אם נדרש בצו." },
       { type: "h", text: "הזכויות שלך" },
       { type: "p", text: "יש לך זכות לעיין, לתקן, למחוק ולקבל את המידע שלך. לבקשה — שלח אימייל ל-hello@sfalimshop.com." },
+      { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
     ],
     terms: [
       { type: "h", text: "כללי" },
@@ -1761,15 +1898,18 @@ const POLICIES = {
       { type: "h", text: "כשרות לרכישה" },
       { type: "p", text: "מינימום גיל 18 (או באישור הורה). חובת מסירת פרטים אמיתיים ומלאים." },
       { type: "h", text: "הזמנות ותשלום" },
-      { type: "p", text: "ההזמנה נחשבת מאושרת רק לאחר אישור התשלום. אישור ישלח לאימייל. מחירים בשקלים חדשים — כוללים מע\"מ במידת הצורך. תשלום דרך Tranzila." },
+      { type: "p", text: `ההזמנה נחשבת מאושרת רק לאחר אישור התשלום. אישור ישלח לאימייל. ספלים שופ פועלת כעוסק פטור מס׳ 321630279. המחירים נקובים בשקלים חדשים ואינם כוללים מע"מ, ובגין כל רכישה תופק קבלה (לא חשבונית מס). התשלום מתבצע באמצעות Tranzila.` },
       { type: "h", text: "⚠️ זכויות יוצרים ותוכן פוגעני" },
       { type: "p", text: "הלקוח מתחייב להעלות רק עיצובים שיש לו זכויות עליהם. אסור להעלות:" },
       { type: "l", items: ["תוכן פוגעני, גזעני, אלים או מיני", "לוגואים/דמויות מוגנים בזכויות יוצרים (דיסני, מארוול, NBA, אנימה וכו')", "תוכן המסית לאלימות או שנאה", "תוכן המפר חוק"] },
       { type: "p", text: "הלקוח אחראי באופן בלעדי על התוכן שמעלה. ספלים שופ שומרת על הזכות לסרב להדפיס תוכן פוגעני ולבטל את ההזמנה." },
+      { type: "h", text: "קניין רוחני של ספלים שופ" },
+      { type: "p", text: "כל העיצובים, האיורים, הדמויות (לרבות קולקציית BLOOM), הלוגו, הטקסטים והתכנים המקוריים באתר הם קניין רוחני בלעדי של ספלים שופ ומוגנים בזכויות יוצרים. אין להעתיק, לשכפל, להפיץ, למכור או לעשות שימוש מסחרי בעיצובים או בתכנים, כולם או חלקם, ללא אישור מראש ובכתב מספלים שופ." },
       { type: "h", text: "הגבלת אחריות" },
       { type: "p", text: "ספלים שופ אינה אחראית לנזקים עקיפים, שינויי גוון מינוריים בין מסך להדפסה בפועל, או כישלון אספקה כתוצאה מ-Force Majeure." },
       { type: "h", text: "סמכות שיפוט" },
       { type: "p", text: "בכל מחלוקת — הסמכות הבלעדית לבתי המשפט המוסמכים במחוז הדרום (באר שבע)." },
+      { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
     ],
     accessibility: [
       { type: "p", text: "ספלים שופ רואה חשיבות רבה במתן שירות שוויוני לכלל הלקוחות ובשיפור השירות לאנשים עם מוגבלות. אנו פועלים להנגיש את האתר כך שיתאפשר שימוש נוח לכל אדם, מתוך אמונה בשוויון הזדמנויות ובהתאם לחוק שוויון זכויות לאנשים עם מוגבלות, תשנ\"ח-1998 ולתקנותיו." },
@@ -1781,7 +1921,7 @@ const POLICIES = {
       { type: "p", text: "אנו פועלים באופן שוטף לשיפור הנגישות בכל חלקי האתר. ייתכן שחלקים מסוימים, לרבות תכנים או רכיבים של צד שלישי, טרם הונגשו במלואם. אנו מתקנים ליקויים שמתגלים בהקדם האפשרי, ונשמח לקבל דיווח על כל בעיה.", },
       { type: "h", text: "רכז הנגישות ופנייה בנושא" },
       { type: "p", text: "רכז הנגישות: ספלים שופ (גלב). בכל שאלה, בקשה או דיווח על בעיית נגישות ניתן לפנות במייל hello@sfalimshop.com או בטלפון 050-484-7874 (972-50-4847874+). נשתדל להשיב תוך 48 שעות." },
-      { type: "p", text: "עודכן לאחרונה: 29.05.2026" },
+      { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
     ],
   },
   en: {
@@ -1799,8 +1939,11 @@ const POLICIES = {
       { type: "p", text: "Refund will be processed within 7 business days via the original payment method. Replacement items shipped within 7-14 business days." },
       { type: "h", text: "5. Cancellation Fee" },
       { type: "p", text: "For legal cancellations, the business may charge 5% of the transaction or 100 ILS — whichever is lower." },
-      { type: "h", text: "6. Cancellation by Sfalim Shop" },
+      { type: "h", text: "6. Extended Cancellation for Certain Groups" },
+      { type: "p", text: "A person with a disability, a senior citizen (65+), or a new immigrant (oleh) may cancel a transaction within up to 4 months of the transaction or receipt of the product (whichever is later), subject to the conditions of the law and presentation of appropriate documentation. The exclusion for personalized/custom items applies in these cases as well." },
+      { type: "h", text: "7. Cancellation by Sfalim Shop" },
       { type: "p", text: "We reserve the right to cancel orders and refund payment in cases of stock shortage, pricing errors, suspected fraud, or offensive/copyrighted content." },
+      { type: "p", text: "Last updated: June 2, 2026" },
     ],
     shipping: [
       { type: "h", text: "Service Areas" },
@@ -1813,12 +1956,14 @@ const POLICIES = {
       { type: "p", text: "Self-pickup from Be'er Sheva can be arranged — free of charge. Call to coordinate." },
       { type: "h", text: "Shipping Delays" },
       { type: "p", text: "If a package hasn't arrived within 21 business days, please contact us — we'll arrange reshipping or full refund." },
+      { type: "p", text: "Last updated: June 2, 2026" },
     ],
     privacy: [
       { type: "h", text: "Information We Collect" },
       { type: "l", items: ["Personal: full name, email, phone, shipping address", "Order data: products, designs, notes", "Technical (automatic): IP, browser type, basic cookies"] },
       { type: "h", text: "Purpose of Collection" },
       { type: "l", items: ["Order fulfillment and delivery", "Customer communication", "Support and inquiries", "Service improvement", "Legal compliance"] },
+      { type: "p", text: "Providing your information is voluntary, but without the required details (name, address, contact) we cannot process and ship your order." },
       { type: "h", text: "What We Do NOT Do" },
       { type: "l", items: ["We will not sell your data to third parties", "No spam without explicit consent", "We do not store credit card details (payment via Tranzila — PCI-DSS compliant)"] },
       { type: "h", text: "Data Security" },
@@ -1826,10 +1971,13 @@ const POLICIES = {
       { type: "h", text: "PCI DSS Declaration — Credit Card Security" },
       { type: "p", text: "Sfalim Shop declares compliance with credit card industry security requirements and PCI DSS standards:" },
       { type: "l", items: ["The business does NOT store credit card details in any systems or manually", "Our secure payment page provider is Tranzila — certified PCI DSS Level 1, the highest security level in the industry", "Credit card details are sent directly from the customer to Tranzila via an encrypted channel (SSL/TLS)", "We do not see, store, or have access to credit card details at any stage"] },
+      { type: "h", text: "Data Storage and Processing Abroad" },
+      { type: "p", text: "Some of our services are provided by vendors that store and process data outside Israel: Supabase (database hosting — names, orders, contact details), Vercel (website hosting), and Tranzila (payment processing — an Israeli company; card details are not stored by us). By using the site and providing your details, you consent to your information being transferred to and stored with these providers, including outside Israel. We work only with providers committed to accepted encryption and protection measures, and data is transferred solely to operate the site and fulfill your order." },
       { type: "h", text: "Third-Party Sharing" },
       { type: "p", text: "Information shared only with: shipping company (delivery), Tranzila (payment), and authorities if legally required." },
       { type: "h", text: "Your Rights" },
       { type: "p", text: "You have the right to access, correct, delete, and receive your data. Email hello@sfalimshop.com to request." },
+      { type: "p", text: "Last updated: June 2, 2026" },
     ],
     terms: [
       { type: "h", text: "General" },
@@ -1837,15 +1985,18 @@ const POLICIES = {
       { type: "h", text: "Purchase Eligibility" },
       { type: "p", text: "Minimum age 18 (or with parental approval). Must provide accurate and complete information." },
       { type: "h", text: "Orders and Payment" },
-      { type: "p", text: "Orders are confirmed only after payment approval. Confirmation sent by email. Prices in Israeli Shekels (ILS) including VAT where applicable. Payment via Tranzila." },
+      { type: "p", text: "Orders are confirmed only after payment approval. Confirmation sent by email. Sfalim Shop operates as an Exempt Dealer No. 321630279. Prices are in Israeli Shekels and do not include VAT; a receipt (not a tax invoice) is issued for each purchase. Payment is processed via Tranzila." },
       { type: "h", text: "⚠️ Copyright and Offensive Content" },
       { type: "p", text: "Customer agrees to upload only designs they have rights to. Prohibited content:" },
       { type: "l", items: ["Offensive, racist, violent, or sexual content", "Copyrighted logos/characters (Disney, Marvel, NBA, anime, etc.)", "Content inciting violence or hatred", "Content violating any law"] },
       { type: "p", text: "Customer is solely responsible for uploaded content. Sfalim Shop reserves the right to refuse offensive content and cancel orders." },
+      { type: "h", text: "Sfalim Shop Intellectual Property" },
+      { type: "p", text: "All designs, illustrations, characters (including the BLOOM collection), logo, texts, and original content on the site are the exclusive intellectual property of Sfalim Shop and are protected by copyright. You may not copy, reproduce, distribute, sell, or make commercial use of the designs or content, in whole or in part, without prior written permission from Sfalim Shop." },
       { type: "h", text: "Limitation of Liability" },
       { type: "p", text: "Sfalim Shop is not responsible for indirect damages, minor color variations between screen and actual print, or delivery failures due to Force Majeure." },
       { type: "h", text: "Jurisdiction" },
       { type: "p", text: "Any dispute — exclusive jurisdiction to courts in Southern District (Be'er Sheva), Israel." },
+      { type: "p", text: "Last updated: June 2, 2026" },
     ],
     accessibility: [
       { type: "p", text: "Sfalim Shop values equal service for all customers and is committed to making its website usable by everyone, including people with disabilities, in the spirit of equal opportunity and in accordance with Israel's Equal Rights for Persons with Disabilities Law, 5758-1998, and its regulations." },
@@ -1857,7 +2008,7 @@ const POLICIES = {
       { type: "p", text: "We continuously work to improve accessibility across the entire site. Some parts, including third-party content or components, may not yet be fully accessible. We fix issues as soon as they are found and welcome reports of any problem." },
       { type: "h", text: "Accessibility Coordinator & Contact" },
       { type: "p", text: "Accessibility coordinator: Sfalim Shop (Gleb). For any question, request, or report of an accessibility problem, contact hello@sfalimshop.com or +972-50-4847874. We aim to respond within 48 hours." },
-      { type: "p", text: "Last updated: May 29, 2026" },
+      { type: "p", text: "Last updated: June 2, 2026" },
     ],
   },
   ru: {
@@ -1875,8 +2026,11 @@ const POLICIES = {
       { type: "p", text: "Возврат средств в течение 7 рабочих дней тем же способом оплаты. Замена товара — отправка нового в течение 7-14 рабочих дней." },
       { type: "h", text: "5. Комиссия за отмену" },
       { type: "p", text: "При законной отмене бизнес имеет право взимать 5% от стоимости или 100 шек. — что меньше." },
-      { type: "h", text: "6. Отмена со стороны Sfalim Shop" },
+      { type: "h", text: "6. Продлённое право отмены для отдельных групп" },
+      { type: "p", text: "Человек с инвалидностью, пожилой человек (65+) или новый репатриант (оле) может отменить сделку в течение до 4 месяцев со дня сделки или получения товара (что позже), при соблюдении условий закона и предъявлении соответствующего документа. Исключение для персонализированных товаров действует и в этих случаях." },
+      { type: "h", text: "7. Отмена со стороны Sfalim Shop" },
       { type: "p", text: "Мы оставляем за собой право отменить заказ и вернуть деньги в случаях отсутствия товара, ошибок в цене, подозрений в мошенничестве или оскорбительного/нарушающего авторские права контента." },
+      { type: "p", text: "Последнее обновление: 02.06.2026" },
     ],
     shipping: [
       { type: "h", text: "Зоны доставки" },
@@ -1889,12 +2043,14 @@ const POLICIES = {
       { type: "p", text: "Возможен самовывоз из Беэр-Шевы — бесплатно. Позвоните для согласования." },
       { type: "h", text: "Задержки доставки" },
       { type: "p", text: "Если посылка не пришла в течение 21 рабочего дня — свяжитесь с нами, решим проблему: повторная отправка или полный возврат." },
+      { type: "p", text: "Последнее обновление: 02.06.2026" },
     ],
     privacy: [
       { type: "h", text: "Какую информацию собираем" },
       { type: "l", items: ["Личные данные: имя, email, телефон, адрес доставки", "Данные заказа: товары, дизайны, заметки", "Технические (автоматически): IP, тип браузера, базовые cookies"] },
       { type: "h", text: "Цель сбора" },
       { type: "l", items: ["Выполнение заказа и доставка", "Связь с клиентом", "Поддержка и запросы", "Улучшение сервиса", "Соблюдение закона"] },
+      { type: "p", text: "Предоставление данных добровольно, но без необходимых данных (имя, адрес, контакты) мы не сможем обработать и отправить ваш заказ." },
       { type: "h", text: "Что мы НЕ делаем" },
       { type: "l", items: ["Не продаём ваши данные третьим лицам", "Не отправляем спам без согласия", "Не храним данные карт (оплата через Tranzila — стандарт PCI-DSS)"] },
       { type: "h", text: "Безопасность данных" },
@@ -1902,10 +2058,13 @@ const POLICIES = {
       { type: "h", text: "Декларация PCI DSS — безопасность карт" },
       { type: "p", text: "Sfalim Shop заявляет о соответствии требованиям безопасности кредитных карт и стандарту PCI DSS:" },
       { type: "l", items: ["Бизнес НЕ хранит данные кредитных карт в системах или вручную", "Наш поставщик безопасной страницы оплаты — Tranzila, сертифицированный PCI DSS Level 1 (высший уровень безопасности)", "Данные карты передаются напрямую от клиента в Tranzila по зашифрованному каналу (SSL/TLS)", "Мы не видим, не храним и не имеем доступа к данным карт ни на одном этапе"] },
+      { type: "h", text: "Хранение и обработка данных за рубежом" },
+      { type: "p", text: "Часть услуг сайта предоставляется поставщиками, которые хранят и обрабатывают данные за пределами Израиля: Supabase (хостинг базы данных — имена, заказы, контактные данные), Vercel (хостинг сайта) и Tranzila (обработка платежей — израильская компания; данные карты у нас не хранятся). Используя сайт и предоставляя свои данные, вы соглашаетесь на передачу и хранение вашей информации у этих поставщиков, в том числе за пределами Израиля. Мы работаем только с поставщиками, соблюдающими принятые меры шифрования и защиты; данные передаются исключительно для работы сайта и выполнения заказа." },
       { type: "h", text: "Передача третьим лицам" },
       { type: "p", text: "Данные передаются только: курьерской службе (доставка), Tranzila (оплата) и властям при законном требовании." },
       { type: "h", text: "Ваши права" },
       { type: "p", text: "Вы имеете право на доступ, исправление, удаление и получение ваших данных. Запросы на hello@sfalimshop.com." },
+      { type: "p", text: "Последнее обновление: 02.06.2026" },
     ],
     terms: [
       { type: "h", text: "Общие положения" },
@@ -1913,15 +2072,18 @@ const POLICIES = {
       { type: "h", text: "Право на покупку" },
       { type: "p", text: "Минимальный возраст 18 (или с согласия родителя). Обязательное предоставление точных и полных данных." },
       { type: "h", text: "Заказы и оплата" },
-      { type: "p", text: "Заказ подтверждается только после одобрения платежа. Подтверждение отправляется на email. Цены в израильских шекелях (ILS) с НДС при необходимости. Оплата через Tranzila." },
+      { type: "p", text: "Заказ подтверждается только после одобрения платежа. Подтверждение отправляется на email. Sfalim Shop работает как освобождённый предприниматель № 321630279. Цены указаны в израильских шекелях и не включают НДС; на каждую покупку выдаётся квитанция (не налоговая накладная). Оплата производится через Tranzila." },
       { type: "h", text: "⚠️ Авторские права и недопустимый контент" },
       { type: "p", text: "Клиент обязуется загружать только дизайны с правами. Запрещено:" },
       { type: "l", items: ["Оскорбительный, расистский, агрессивный или сексуальный контент", "Защищённые авторским правом логотипы/персонажи (Disney, Marvel, NBA, аниме и др.)", "Контент, разжигающий насилие или ненависть", "Контент, нарушающий закон"] },
       { type: "p", text: "Клиент несёт исключительную ответственность за загружаемый контент. Sfalim Shop вправе отказать в печати и отменить заказ." },
+      { type: "h", text: "Интеллектуальная собственность Sfalim Shop" },
+      { type: "p", text: "Все дизайны, иллюстрации, персонажи (включая коллекцию BLOOM), логотип, тексты и оригинальный контент на сайте являются исключительной интеллектуальной собственностью Sfalim Shop и защищены авторским правом. Запрещено копировать, воспроизводить, распространять, продавать или использовать в коммерческих целях дизайны или контент полностью или частично без предварительного письменного разрешения Sfalim Shop." },
       { type: "h", text: "Ограничение ответственности" },
       { type: "p", text: "Sfalim Shop не несёт ответственности за косвенный ущерб, незначительные отличия цвета между экраном и печатью, сбои доставки из-за форс-мажора." },
       { type: "h", text: "Подсудность" },
       { type: "p", text: "Любые споры — исключительная подсудность судов Южного округа Израиля (Беэр-Шева)." },
+      { type: "p", text: "Последнее обновление: 02.06.2026" },
     ],
     accessibility: [
       { type: "p", text: "Sfalim Shop стремится обеспечить равное обслуживание всем клиентам и сделать сайт удобным для всех, включая людей с ограниченными возможностями, исходя из принципа равных возможностей и в соответствии с Законом Израиля о равных правах для людей с инвалидностью 5758-1998 и его подзаконными актами." },
@@ -1933,13 +2095,13 @@ const POLICIES = {
       { type: "p", text: "Мы постоянно работаем над улучшением доступности на всём сайте. Некоторые части, включая контент или компоненты сторонних поставщиков, могут быть пока адаптированы не полностью. Мы устраняем выявленные недостатки в кратчайшие сроки и будем рады сообщениям о любых проблемах." },
       { type: "h", text: "Координатор по доступности и обратная связь" },
       { type: "p", text: "Координатор по доступности: Sfalim Shop (Глеб). По любым вопросам, просьбам или сообщениям о проблеме доступности обращайтесь: hello@sfalimshop.com или +972-50-4847874. Мы постараемся ответить в течение 48 часов." },
-      { type: "p", text: "Последнее обновление: 29.05.2026" },
+      { type: "p", text: "Последнее обновление: 02.06.2026" },
     ],
   },
 };
 
 // Localization helpers - translate a saved product/variant name to target language
-const PRODUCT_IDS = ['tshirt', 'oversized', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
+const PRODUCT_IDS = ['tshirt', 'oversized', 'stonewash', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
 const localizeProduct = (savedName, targetLang) => {
   if (!savedName) return savedName;
   for (const id of PRODUCT_IDS) {
@@ -1972,7 +2134,8 @@ const SHIRT_COLOR_PALETTE = BLOOM_SHIRT_COLORS.map(c => c.hex);
 const PRODUCTS = (t) => [
   { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
   { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · גזרה רגילה · הדפסת DTF", en: "100% combed cotton · regular fit · DTF print", ru: "100% хлопок · обычный крой · DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "oversized",  name: t.products.oversized, desc: { he: "כותנה כבדה 240 גרם · גזרה אוברסייז · הדפסת DTF", en: "Heavy 240gsm cotton · oversize cut · DTF print", ru: "Плотный хлопок 240 г/м² · оверсайз · DTF-печать" }, is_new: true, variants: [{ id: "s", label: "S", price: 99 }, { id: "m", label: "M", price: 99 }, { id: "l", label: "L", price: 99 }, { id: "xl", label: "XL", price: 109 }, { id: "xxl", label: "XXL", price: 109 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "oversized",  name: t.products.oversized, desc: { he: "100% כותנה סרוקה · אוברסייז", en: "100% combed cotton · oversize", ru: "100% чёсаный хлопок · оверсайз" }, is_new: true, variants: [{ id: "s", label: "S", price: 119 }, { id: "m", label: "M", price: 119 }, { id: "l", label: "L", price: 119 }, { id: "xl", label: "XL", price: 119 }, { id: "xxl", label: "XXL", price: 119 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "stonewash",  name: t.products.stonewash, desc: { he: "100% כותנה סרוקה · אוברסייז, גימור וינטג' סטון-ווש", en: "100% combed cotton · oversize, vintage stone-wash finish", ru: "100% чёсаный хлопок · оверсайз, винтажная отделка стоунвош" }, is_new: true, variants: [{ id: "s", label: "S", price: 119 }, { id: "m", label: "M", price: 119 }, { id: "l", label: "L", price: 119 }, { id: "xl", label: "XL", price: 119 }, { id: "xxl", label: "XXL", price: 119 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "dryfit",     name: t.products.dryfit,    desc: { he: "פוליאסטר נושם · מתאים לאימון · הדפסת סובלימציה", en: "Breathable polyester · sport-ready · sublimation print", ru: "Дышащий полиэстер · для спорта · сублимационная печать" }, variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "sticker",    name: t.products.sticker,   desc: { he: "מדבקת ויניל עגולה · עמידה במים ובשמש", en: "Round vinyl sticker · water- and UV-resistant", ru: "Круглый виниловый стикер · водо- и UV-устойчивый" }, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
   { id: "sticker_sq", name: t.products.sticker_sq, desc: { he: "מדבקת ויניל מרובעת · עמידה במים ובשמש", en: "Square vinyl sticker · water- and UV-resistant", ru: "Квадратный виниловый стикер · водо- и UV-устойчивый" }, is_new: true, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
@@ -1985,17 +2148,21 @@ const PRODUCTS = (t) => [
 // re-renders, localizeProduct) keep functioning.
 const CUSTOM_STICKER_IDS = ['sticker', 'sticker_sq'];
 const getCustomProducts = (t) => {
-  const all = PRODUCTS(t);
+  let all = PRODUCTS(t);
+  if (!STONEWASH_ENABLED) all = all.filter(p => p.id !== `stonewash`);
   if (CUSTOM_STICKERS_ENABLED) return all;
   return all.filter(p => !CUSTOM_STICKER_IDS.includes(p.id));
 };
 
 // Format a price range for product cards: "₪89" if min===max, otherwise "₪89–₪99".
+// The range is wrapped in Unicode LTR isolates (U+2066 … U+2069) so that inside
+// the Hebrew (RTL) layout the "₪89–₪99" run stays low→high left-to-right and the
+// en-dash isn't flipped to read "₪99–₪89". Single value needs no isolation.
 const formatPriceRange = (variants) => {
   const prices = variants.map(v => v.price);
   const min = Math.min(...prices);
   const max = Math.max(...prices);
-  return min === max ? `₪${min}` : `₪${min}–₪${max}`;
+  return min === max ? `₪${min}` : `⁦₪${min}–₪${max}⁩`;
 };
 
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
@@ -2006,6 +2173,11 @@ const PLACEMENTS = {
     { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 270 },
   ],
   oversized: [
+    { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest", ru: "Левый карман", cx: 242, cy: 145, smallOnly: true },
+    { id: "center_chest", he: "מרכז",       en: "Center",     ru: "Центр",        cx: 200, cy: 165 },
+    { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 280 },
+  ],
+  stonewash: [
     { id: "left_chest",   he: "חזה שמאל",  en: "Left Chest", ru: "Левый карман", cx: 242, cy: 145, smallOnly: true },
     { id: "center_chest", he: "מרכז",       en: "Center",     ru: "Центр",        cx: 200, cy: 165 },
     { id: "bottom",       he: "למטה",       en: "Bottom",     ru: "Низ",          cx: 200, cy: 280 },
@@ -2044,6 +2216,11 @@ const SIZE_OPTIONS = {
     { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
     { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
   ],
+  stonewash: [
+    { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
+    { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "30×30 cm" },
+  ],
   dryfit: [
     { id: "small",  px: 55,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "10×10 cm" },
     { id: "medium", px: 85,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "20×20 cm" },
@@ -2071,6 +2248,8 @@ const SIZE_OPTIONS = {
 const MOCKUP_URLS = {
   tshirt:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
   oversized:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
+  // Stone-wash reuses the Oversize mockup for now (owner will replace later).
+  stonewash:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   dryfit:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
   mug:        "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/mug.png",
   sticker:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
@@ -2414,7 +2593,7 @@ function AuthPage({ lang, onAuth }) {
             </div>
             {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
             {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
-            <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+            <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
               {loading ? "..." : t.auth.forgotPwBtn}
             </button>
           </form>
@@ -2483,7 +2662,7 @@ function AuthPage({ lang, onAuth }) {
           </div>
           {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
           {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
-          <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+          <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
             {loading ? "..." : mode === "login" ? t.auth.loginBtn : t.auth.registerBtn}
           </button>
         </form>
@@ -2611,7 +2790,7 @@ function ResetPasswordPage({ lang, setPage }) {
               <input id="reset-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
             </div>
             {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
-            <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+            <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
               {loading ? "..." : t.auth.setPw}
             </button>
           </form>
@@ -2711,7 +2890,7 @@ function AccountSettings({ lang }) {
                 <input id="account-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
               </div>
               {error && <div role="alert" style={{ color: "#f87171", fontSize: 12, marginBottom: 12, background: "rgba(248,113,113,0.1)", padding: "8px 12px", borderRadius: 6 }}>{error}</div>}
-              <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
                 {loading ? "..." : t.auth.setPw}
               </button>
             </form>
@@ -2723,7 +2902,7 @@ function AccountSettings({ lang }) {
 }
 
 // Order Tracker
-function TrackPage({ lang, user }) {
+function TrackPage({ lang, user, clearCart }) {
   const t = LANGS[lang];
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2740,6 +2919,7 @@ function TrackPage({ lang, user }) {
   const [paySoon, setPaySoon] = useState(false);
   const [payBusy, setPayBusy] = useState(null);       // order id currently paying
   const [actionBusy, setActionBusy] = useState(null); // order id currently resubmitting/cancelling
+  const [actionError, setActionError] = useState(""); // friendly inline error for pay/resubmit/cancel
   const [resubmitOpenId, setResubmitOpenId] = useState(null);
   const [resubmitFile, setResubmitFile] = useState(null); // { dataUrl, name } | null
   // A11y: focus-trap + restore for the "payments coming soon" modal.
@@ -2751,7 +2931,7 @@ function TrackPage({ lang, user }) {
   // never set it. Safe if visited directly (no order_group → friendly fallback).
   const [payReturn] = useState(() => {
     if (typeof window === `undefined`) return null;
-    const h = window.location.hash || ``;
+    const h = rawHash();
     const qi = h.indexOf(`?`);
     if (qi === -1) return null;
     const p = new URLSearchParams(h.slice(qi + 1));
@@ -2768,8 +2948,15 @@ function TrackPage({ lang, user }) {
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error || !data || data.length === 0) { setPayReturnStatus(`unknown`); return; }
-        const paid = data.some(o => o.payment_status === `succeeded` || o.payment_status === `paid` || o.status === `paid`);
-        setPayReturnStatus(paid ? `succeeded` : `processing`);
+        // Success is gated STRICTLY on payment_status === 'succeeded' (the value
+        // the Tranzila webhook writes on a confirmed charge). Never infer success
+        // from order status alone.
+        const succeeded = data.some(o => o.payment_status === `succeeded`);
+        setPayReturnStatus(succeeded ? `succeeded` : `processing`);
+        // Clear the cart ONLY on a confirmed-succeeded payment return — never on
+        // a failure or an unconfirmed/processing return. Guarded by `succeeded`
+        // above so we can't wipe a cart that wasn't actually paid for.
+        if (succeeded && typeof clearCart === `function`) clearCart();
       });
     return () => { cancelled = true; };
   }, []);
@@ -2847,8 +3034,9 @@ function TrackPage({ lang, user }) {
       if (data && data.redirect_url) { window.location.href = data.redirect_url; return; }
       throw new Error(`No redirect_url returned from create-payment`);
     } catch (e) {
+      console.error(`[pay] create-payment failed:`, e);
       setPayBusy(null);
-      alert(`Payment error: ${e.message || e}`);
+      setActionError(uiPaymentError(lang));
     }
   };
 
@@ -2886,7 +3074,8 @@ function TrackPage({ lang, user }) {
       setResubmitOpenId(null);
       setResubmitFile(null);
     } catch (e) {
-      alert(`Error: ${e.message || e}`);
+      console.error(`[resubmit] design resubmit failed:`, e);
+      setActionError(uiGenericError(lang));
     }
     setActionBusy(null);
   };
@@ -2901,7 +3090,8 @@ function TrackPage({ lang, user }) {
       if (error) throw error;
       setOrders(os => os.map(o => o.id === order.id ? { ...o, status: `cancelled` } : o));
     } catch (e) {
-      alert(`Error: ${e.message || e}`);
+      console.error(`[cancel] order cancel failed:`, e);
+      setActionError(uiGenericError(lang));
     }
     setActionBusy(null);
   };
@@ -2934,7 +3124,7 @@ function TrackPage({ lang, user }) {
             </div>
           )}
           <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#track`); } catch (_) {} setPayReturnDismissed(true); }}
-            style={{ width: `100%`, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, marginBottom: 10 }}>
+            style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, marginBottom: 10 }}>
             {lang === `he` ? `למעקב ההזמנות שלי` : lang === `ru` ? `К моим заказам` : `View my orders`}
           </button>
           <button onClick={() => { window.location.hash = ``; }}
@@ -2980,8 +3170,15 @@ function TrackPage({ lang, user }) {
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
-        <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h2>
+        <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h1>
         <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
+
+        {actionError && (
+          <div role="alert" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", color: "#f87171", fontSize: 14, marginBottom: 20, background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>
+            <span>{actionError}</span>
+            <button onClick={() => setActionError("")} style={{ background: "transparent", border: "1px solid rgba(248,113,113,0.5)", color: "#f87171", borderRadius: 8, padding: "6px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{uiRetry(lang)}</button>
+          </div>
+        )}
 
         <AccountSettings lang={lang} />
 
@@ -3044,7 +3241,7 @@ function TrackPage({ lang, user }) {
                             <div style={{ color: COLORS.success, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{t.approval.approvedTitle}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13.5, lineHeight: 1.6, marginBottom: 14 }}>{t.approval.approvedDesc}</div>
                             <button onClick={() => payForApprovedOrder(order)} disabled={payBusy === order.id}
-                              style={{ width: "100%", background: payBusy === order.id ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accent} 0%, #FF8855 100%)`, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", fontSize: 16, fontWeight: 700, cursor: payBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: payBusy === order.id ? "none" : "0 8px 24px rgba(255,107,53,0.35)" }}>
+                              style={{ width: "100%", background: payBusy === order.id ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)`, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", fontSize: 16, fontWeight: 700, cursor: payBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: payBusy === order.id ? "none" : "0 8px 24px rgba(255,107,53,0.35)" }}>
                               {payBusy === order.id ? "..." : `${t.approval.payNow} · ₪${order.total}`}
                             </button>
                           </div>
@@ -3064,13 +3261,13 @@ function TrackPage({ lang, user }) {
                                 <input type="file" accept="image/*" onChange={onResubmitFile} style={{ color: COLORS.gray, fontSize: 12, marginBottom: 10, width: "100%" }} />
                                 {resubmitFile && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}><img src={resubmitFile.dataUrl} alt="" style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 4, border: `1px solid ${COLORS.border}` }} /><span style={{ color: COLORS.success, fontSize: 12 }}>✓ {resubmitFile.name}</span></div>}
                                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                                  <button onClick={() => resubmitDesign(order)} disabled={actionBusy === order.id} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{actionBusy === order.id ? t.approval.resubmitting : t.approval.resubmitBtn}</button>
+                                  <button onClick={() => resubmitDesign(order)} disabled={actionBusy === order.id} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{actionBusy === order.id ? t.approval.resubmitting : t.approval.resubmitBtn}</button>
                                   <button onClick={() => { setResubmitOpenId(null); setResubmitFile(null); }} disabled={actionBusy === order.id} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 16px", fontSize: 13, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>✕</button>
                                 </div>
                               </div>
                             ) : (
                               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                                <button onClick={() => { setResubmitOpenId(order.id); setResubmitFile(null); }} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "11px 20px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.editResubmit}</button>
+                                <button onClick={() => { setResubmitOpenId(order.id); setResubmitFile(null); }} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "11px 20px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.editResubmit}</button>
                                 <button onClick={() => cancelApprovalOrder(order)} disabled={actionBusy === order.id} style={{ background: "transparent", color: "#f87171", border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: "11px 20px", fontSize: 13.5, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.cancelOrder}</button>
                               </div>
                             )}
@@ -3182,7 +3379,7 @@ function TrackPage({ lang, user }) {
             </div>
             <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
-            <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
+            <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
           </div>
         </div>
       , document.body) : null)}
@@ -3618,7 +3815,7 @@ function AdminPage({ lang }) {
             const active = activeSection === s.id;
             return (
               <button key={s.id} type="button" onClick={() => scrollToSection(s.id)}
-                aria-current={active ? "true" : undefined}
+                aria-current={active ? "location" : undefined}
                 style={{
                   flexShrink: 0,
                   background: active ? COLORS.accent : "transparent",
@@ -3778,13 +3975,9 @@ function AdminPage({ lang }) {
                                 <div key={it.id} style={{ background: COLORS.bg, borderRadius: 10, padding: 12, border: `1px solid ${COLORS.border}` }}>
                                   <div style={{ color: COLORS.white, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{localizeProduct(it.product, lang)} × {it.quantity}</div>
                                   <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 8 }}>{localizeVariant(it.variant, lang)} · ₪{it.total}</div>
-                                  {/* Pet-name personalization (Task 8) — printed in-house, so it
-                                      reads prominently here. Only shows when the customer supplied one. */}
-                                  {it.pet_name && (
-                                    <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,107,53,0.12)", border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: "4px 9px", marginBottom: 8, color: COLORS.accent, fontSize: 12, fontWeight: 700 }}>
-                                      <span aria-hidden="true">🐾</span>{lang === "he" ? "שם החיה" : lang === "ru" ? "Имя питомца" : "Pet name"}: {it.pet_name}
-                                    </div>
-                                  )}
+                                  {/* Pet-name personalization — printed in-house, so the name, font
+                                      and colour read prominently here. Only shows when supplied. */}
+                                  <AdminPetNameBlock order={it} lang={lang} />
                                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
                                     {(it.product_color || it.color) && <div style={{ display: "flex", alignItems: "center", gap: 5, background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.gray }}><div style={{ width: 11, height: 11, borderRadius: "50%", background: it.product_color || it.color, border: "1px solid #555", flexShrink: 0 }} />{colorName(it.product_color || it.color, lang)}</div>}
                                     {it.design_size && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 7px", fontSize: 10, color: COLORS.gray }}>~{Math.round((it.design_size / 160) * 30)} cm</div>}
@@ -3894,7 +4087,7 @@ function AdminPage({ lang }) {
             <button
               type="button"
               onClick={() => { setAddingDesign(true); setEditingDesignId(null); setDesignForm(BLANK_DESIGN); }}
-              style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
               {lang === `he` ? `+ הוסף דמות` : lang === `ru` ? `+ Добавить персонажа` : `+ Add character`}
             </button>
           </div>
@@ -4004,7 +4197,7 @@ function AdminPage({ lang }) {
             <button
               type="button"
               onClick={() => { setAddingPack(true); setEditingPackId(null); setPackForm(BLANK_PACK); }}
-              style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
               {lang === `he` ? `+ הוסף חבילה` : lang === `ru` ? `+ Добавить набор` : `+ Add pack`}
             </button>
           </div>
@@ -4127,11 +4320,7 @@ function AdminPage({ lang }) {
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{o.customer_name}</div>
                     <div style={{ color: COLORS.gray, fontSize: 12, wordBreak: `break-all` }}>{o.customer_email}{o.customer_phone ? ` · ${o.customer_phone}` : ``}</div>
                     <div style={{ color: COLORS.white, fontSize: 13, marginTop: 8 }}>{localizeProduct(o.product, lang)} · {localizeVariant(o.variant, lang)} × {o.quantity} · <span style={{ color: COLORS.accent, fontWeight: 700 }}>₪{o.total}</span></div>
-                    {o.pet_name && (
-                      <div style={{ display: `inline-flex`, alignItems: `center`, gap: 5, background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `3px 9px`, marginTop: 6, color: COLORS.accent, fontSize: 12, fontWeight: 700 }}>
-                        <span aria-hidden="true">🐾</span>{lang === `he` ? `שם החיה` : lang === `ru` ? `Имя питомца` : `Pet name`}: {o.pet_name}
-                      </div>
-                    )}
+                    <AdminPetNameBlock order={o} lang={lang} />
                     {o.notes && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6, background: COLORS.bg, padding: `7px 10px`, borderRadius: 6 }}>{o.notes}</div>}
                     <div style={{ color: COLORS.grayLight, fontSize: 11, marginTop: 6 }}>{wlDate(o.created_at)} · {timeAgo(o.created_at, lang)}</div>
                     <div style={{ display: `flex`, gap: 10, marginTop: 12, flexWrap: `wrap` }}>
@@ -4184,7 +4373,7 @@ function AdminPage({ lang }) {
                     {wlTopBreeds.map(([slug, count]) => (
                       <div key={slug} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `7px 14px` }}>
                         <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{wlBreedLabel(slug)}</span>
-                        <span style={{ background: COLORS.accent, color: `#fff`, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: `1px 8px` }}>{count}</span>
+                        <span style={{ background: COLORS.accentBtn, color: `#fff`, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: `1px 8px` }}>{count}</span>
                       </div>
                     ))}
                   </div>
@@ -4380,7 +4569,7 @@ function DesignEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadA
       </div>
       <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
         <div style={{ display: `flex`, gap: 8 }}>
-          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
           <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
         </div>
         {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
@@ -4429,7 +4618,7 @@ function PackEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadAdm
       </label>
       <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
         <div style={{ display: `flex`, gap: 8 }}>
-          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
           <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
         </div>
         {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
@@ -4499,7 +4688,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
-          {it.petName && <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, marginTop: 3 }}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
+          {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
             {it.color && (
@@ -4614,7 +4803,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // UI-ONLY: surfaces a clear retry path. Safe if visited directly.
   const [payFailed, setPayFailed] = useState(() => {
     if (typeof window === `undefined`) return false;
-    const h = window.location.hash || ``;
+    const h = rawHash();
     const qi = h.indexOf(`?`);
     if (qi === -1) return false;
     return new URLSearchParams(h.slice(qi + 1)).get(`paid`) === `0`;
@@ -4643,13 +4832,34 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [showAddrSugg, setShowAddrSugg] = useState(false);
   const [addrLoading, setAddrLoading] = useState(false);
   const addrTimerRef = useRef();
+  const addrSessionRef = useRef(null); // Places session token (one per address search)
   const [qty, setQty] = useState(1);
+  const [uploadError, setUploadError] = useState(""); // oversized/invalid custom-design upload
   const [submitting, setSubmitting] = useState(false);
   const [pendingOrderGroupId, setPendingOrderGroupId] = useState(null);
   const [pendingOrderIds, setPendingOrderIds] = useState([]);
   const [pendingTotal, setPendingTotal] = useState(0);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [showPaymentSoonModal, setShowPaymentSoonModal] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({}); // checkout inline validation
+  const [submitError, setSubmitError] = useState("");  // friendly inline error (submit/pay)
+  // Trilingual checkout validation — required + email/phone/postal format. Returns
+  // a {field: message} map; empty = valid. Values stay in `form` so nothing is lost.
+  const validateCheckout = () => {
+    const req = lang === "he" ? "שדה חובה" : lang === "ru" ? "Обязательное поле" : "Required";
+    const e = {};
+    if (!form.name.trim()) e.name = req;
+    if (!form.email.trim()) e.email = req;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = lang === "he" ? "כתובת אימייל לא תקינה" : lang === "ru" ? "Неверный email" : "Invalid email address";
+    if (!form.phoneNumber) e.phone = req;
+    else if (form.phoneNumber.length !== 7) e.phone = lang === "he" ? "מספר טלפון לא תקין (7 ספרות)" : lang === "ru" ? "Неверный номер (7 цифр)" : "Invalid phone (7 digits)";
+    if (!form.street.trim()) e.street = req;
+    if (!form.city.trim()) e.city = req;
+    if (!form.postalCode) e.postal = req;
+    else if (form.postalCode.length < 5) e.postal = lang === "he" ? "מיקוד לא תקין" : lang === "ru" ? "Неверный индекс" : "Invalid postal code";
+    return e;
+  };
+  const fieldErrStyle = { color: "#f87171", fontSize: 12, marginTop: 4, fontFamily: "'Varela Round',sans-serif" };
   // Custom-upload design approval: when the cart contains an item the customer
   // uploaded their OWN image for, checkout submits the order(s) for review and
   // does NOT start payment (the customer pays later from /track, once approved).
@@ -4676,6 +4886,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const sleeveLeftRef = useRef();
   const sleeveRightRef = useRef();
   const [leaveWarning, setLeaveWarning] = useState(false);
+  const leaveDialogRef = useDialogFocus(leaveWarning); // focus-trap + restore for the leave-order modal
   const [pendingNav, setPendingNav] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   // Below 360px the 5-step labels run out of room and clip; track this
@@ -4721,6 +4932,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [leaveWarning]);
+
+  // Escape dismisses the payment-failure return overlay (#order?paid=0).
+  useEffect(() => {
+    if (!payFailed) return;
+    const onKey = (e) => { if (e.key === "Escape") setPayFailed(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [payFailed]);
 
   // Non-passive touch listeners — re-attach when step 2 renders (mockupRef becomes available)
   useEffect(() => {
@@ -4869,6 +5088,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       uploadedImage: pendingBloomItem.designUrl,
       mockupUrl: pendingBloomItem.mockupUrl || null,
       petName: pendingBloomItem.petName || null,
+      petNameFont: pendingBloomItem.petNameFont || null,
+      petNameColor: pendingBloomItem.petNameColor || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -4936,6 +5157,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
+    if (file.size > MAX_UPLOAD_BYTES) { setUploadError(uiFileTooLarge(lang)); e.target.value = ``; return; }
+    setUploadError("");
     const reader = new FileReader();
     reader.onload = (ev) => {
       setUploadedImage(ev.target.result);
@@ -4948,6 +5171,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   const handleExtraUpload = (e, setter, isSecondFront = false) => {
     const file = e.target.files[0]; if (!file) return;
+    if (file.size > MAX_UPLOAD_BYTES) { setUploadError(uiFileTooLarge(lang)); e.target.value = ``; return; }
+    setUploadError("");
     const reader = new FileReader();
     reader.onload = (ev) => {
       setter(prev => ({ ...prev, image: ev.target.result, sameAsMain: false }));
@@ -5112,9 +5337,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // Keep ref updated so native listeners always call latest version
   touchHandlersRef.current = { start: handleTouchStart, move: handleTouchMove };
 
+  // Google Places Autocomplete (New). Israel-constrained, UI-language aware,
+  // 400ms debounce + 3-char min. Suggestions are normalised to
+  // { placeId, primary, secondary } for the listbox + selectAddress. If the key
+  // is missing or the API errors, suggestions are cleared and manual typing
+  // still works (checkout never breaks).
   const fetchAddrSuggestions = (query) => {
     if (addrTimerRef.current) clearTimeout(addrTimerRef.current);
-    if (!query || query.trim().length < 3) {
+    if (!query || query.trim().length < 3 || !GOOGLE_MAPS_KEY) {
       setAddrSuggestions([]);
       setShowAddrSugg(false);
       return;
@@ -5122,33 +5352,85 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     addrTimerRef.current = setTimeout(async () => {
       try {
         setAddrLoading(true);
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&countrycodes=il&limit=6&addressdetails=1&accept-language=${lang === "he" ? "he" : lang === "ru" ? "ru" : "en"}`;
-        const res = await fetch(url);
+        if (!addrSessionRef.current) addrSessionRef.current = newPlacesSessionToken();
+        const langCode = lang === "he" ? "he" : lang === "ru" ? "ru" : "en";
+        const res = await fetch(`https://places.googleapis.com/v1/places:autocomplete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Goog-Api-Key": GOOGLE_MAPS_KEY },
+          body: JSON.stringify({
+            input: query,
+            includedRegionCodes: ["il"],
+            languageCode: langCode,
+            sessionToken: addrSessionRef.current,
+          }),
+        });
+        if (!res.ok) throw new Error(`places autocomplete ${res.status}`);
         const data = await res.json();
-        setAddrSuggestions(Array.isArray(data) ? data : []);
-        setShowAddrSugg(true);
+        const preds = (data.suggestions || [])
+          .map((s) => s.placePrediction)
+          .filter(Boolean)
+          .map((p) => {
+            const sf = p.structuredFormat || {};
+            return {
+              placeId: p.placeId,
+              primary: (sf.mainText && sf.mainText.text) || (p.text && p.text.text) || "",
+              secondary: (sf.secondaryText && sf.secondaryText.text) || "",
+            };
+          });
+        setAddrSuggestions(preds);
+        setShowAddrSugg(preds.length > 0);
       } catch (e) {
-        console.error("Nominatim error:", e);
+        console.error("Places autocomplete error:", e);
+        setAddrSuggestions([]);
+        setShowAddrSugg(false);
       }
       setAddrLoading(false);
     }, 400);
   };
 
-  const selectAddress = (item) => {
-    const a = item.address || {};
-    const houseNumber = a.house_number ? `${a.house_number} ` : "";
-    const street = a.road || a.pedestrian || a.suburb || "";
-    const fullStreet = (street ? `${street} ${houseNumber}`.trim() : item.display_name.split(",")[0]).trim();
-    const city = a.city || a.town || a.village || a.municipality || "";
-    const postalCode = a.postcode || "";
-    setForm(p => ({ ...p, street: fullStreet, city, postalCode }));
+  // Fetch Place Details (with the active session token) for the chosen
+  // suggestion and map Israeli address components → street (route + house no.),
+  // city, postal code. The session ends here (fresh token next search). Any
+  // failure falls back to the suggestion's main text so the field is never empty.
+  const selectAddress = async (item) => {
     setShowAddrSugg(false);
     setAddrSuggestions([]);
+    if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined }));
+    if (!item || !item.placeId || !GOOGLE_MAPS_KEY) {
+      if (item && item.primary) setForm(p => ({ ...p, street: item.primary }));
+      addrSessionRef.current = null;
+      return;
+    }
+    try {
+      const langCode = lang === "he" ? "he" : lang === "ru" ? "ru" : "en";
+      const token = addrSessionRef.current ? `&sessionToken=${encodeURIComponent(addrSessionRef.current)}` : "";
+      const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(item.placeId)}?languageCode=${langCode}${token}`, {
+        headers: { "X-Goog-Api-Key": GOOGLE_MAPS_KEY, "X-Goog-FieldMask": "addressComponents,formattedAddress" },
+      });
+      if (!res.ok) throw new Error(`place details ${res.status}`);
+      const place = await res.json();
+      const comps = place.addressComponents || [];
+      const get = (type) => { const c = comps.find(x => (x.types || []).includes(type)); return c ? (c.longText || c.shortText || "") : ""; };
+      const route = get("route");
+      const houseNumber = get("street_number");
+      const city = get("locality") || get("postal_town") || get("administrative_area_level_2") || "";
+      const postalCode = get("postal_code");
+      const street = (route ? `${route}${houseNumber ? ` ${houseNumber}` : ""}` : (item.primary || (place.formattedAddress || "").split(",")[0])).trim();
+      setForm(p => ({ ...p, street: street || p.street, city: city || p.city, postalCode: postalCode || p.postalCode }));
+    } catch (e) {
+      console.error("Place details error:", e);
+      if (item.primary) setForm(p => ({ ...p, street: item.primary }));
+    }
+    addrSessionRef.current = null; // session consumed — start fresh next time
   };
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode) return;
     if (cart.length === 0) return;
+    // Inline validation — show field-level trilingual errors instead of silently
+    // doing nothing; values stay in `form`.
+    const errs = validateCheckout();
+    if (Object.keys(errs).length > 0) { setFieldErrors(errs); setSubmitError(lang === "he" ? "יש לתקן את השדות המסומנים." : lang === "ru" ? "Исправьте отмеченные поля." : "Please fix the highlighted fields."); return; }
+    setFieldErrors({}); setSubmitError("");
     setSubmitting(true);
     const phone = form.phoneNumber ? `${form.phonePrefix}-${form.phoneNumber}` : "";
     const orderGroupId = `grp-${Date.now()}`;
@@ -5249,6 +5531,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           product: itProduct.name, variant: itVariant.label, color: it.color,
           quantity: it.qty, total: itemTotal, notes: form.notes,
           pet_name: it.petName || null,
+          pet_name_font: it.petNameFont || null,
+          pet_name_color: it.petNameColor || null,
           // Custom uploads must be approved before payment. We set the status
           // explicitly (the DB default is 'not_required' and there is no
           // auto-set trigger, so relying on a default would never queue it).
@@ -5289,29 +5573,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         }
       }
 
-      // Fire order-confirmation + admin-alert emails exactly once, right after the
-      // orders insert succeeds. Non-blocking: failures are logged but never block
-      // the checkout flow. Moved out of the payment-soon modal CTA so the email
-      // sends regardless of how that modal is closed.
+      // NO email is sent here. Order emails (customer confirmation + business
+      // alert) are sent SERVER-SIDE by the Tranzila webhook only AFTER a payment
+      // is confirmed succeeded — so nothing goes out before payment. The previous
+      // pre-payment send-order-confirmation + send-admin-order-alert calls were
+      // removed; do not re-add them.
       const confirmedTotal = cartItemsTotal + shippingPrice;
-      Promise.all([
-        supabase.functions.invoke(`send-order-confirmation`, {
-          body: {
-            customerName: form.name,
-            customerEmail: form.email,
-            product: cart.map(c => c.productName).join(`, `),
-            variant: `${cart.length} items`,
-            quantity: cart.reduce((s, c) => s + c.qty, 0),
-            total: confirmedTotal,
-            orderId: orderGroupId,
-            orderGroup: orderGroupId,
-            language: lang,
-          },
-        }),
-        supabase.functions.invoke(`send-admin-order-alert`, {
-          body: { orderGroup: orderGroupId },
-        }),
-      ]).catch(emailErr => console.error(`Order email send failed:`, emailErr));
 
       // Save context for the payment step.
       setPendingOrderGroupId(orderGroupId);
@@ -5323,6 +5590,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         // Custom design(s) submitted — skip payment. The customer pays later
         // from /track once we approve. Go straight to the confirmation screen
         // (it shows the "submitted for approval" message instead of payment).
+        //
+        // Notify the business that a custom design is waiting for review. This is
+        // the ONLY pre-payment notification (the normal purchase path stays
+        // email-free until the webhook confirms payment). Fire-and-forget: a
+        // failed invoke must never block or break the customer's submission.
+        supabase.functions
+          .invoke(`notify-design-submission`, { body: { orderGroup: orderGroupId } })
+          .catch(() => {});
         setSubmittedForApproval(true);
         setCart([]);
         setStep(5);
@@ -5331,7 +5606,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         setStep(4);
       }
     } catch (e) {
-      alert(`Error: ${e.message || e}`);
+      console.error(`[checkout] order submit failed:`, e);
+      setSubmitError(uiGenericError(lang));
     }
     setSubmitting(false);
   };
@@ -5386,7 +5662,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 26, margin: "0 0 10px" }}>{lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}</h2>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{lang === "he" ? "לא חויבת. אפשר לנסות שוב — ההזמנה שלך נשמרה." : lang === "ru" ? "С вас не списали. Можно попробовать снова — ваш заказ сохранён." : "You weren't charged. You can try again — your order is saved."}</p>
             <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setStep(1); }}
-              style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", marginBottom: 10 }}>
+              style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", marginBottom: 10 }}>
               {lang === "he" ? "לנסות שוב" : lang === "ru" ? "Попробовать снова" : "Try again"}
             </button>
             <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setPage("track"); }}
@@ -5409,9 +5685,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         {/* Leave warning modal */}
         {leaveWarning && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 360, width: "100%", textAlign: "center" }}>
+            <div ref={leaveDialogRef} role="dialog" aria-modal="true" aria-labelledby="leave-warn-title" onKeyDown={(e) => { if (e.key === "Escape") setLeaveWarning(false); }} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 360, width: "100%", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-              <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+              <div id="leave-warn-title" style={{ color: COLORS.white, fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
                 {lang === "he" ? "לעזוב את ההזמנה?" : lang === "ru" ? "Покинуть заказ?" : "Leave order?"}
               </div>
               <div style={{ color: COLORS.gray, fontSize: 14, marginBottom: 24 }}>
@@ -5449,7 +5725,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <button onClick={() => {
                   if (nextChoiceIsBloom) { setShowNextChoice(false); setNextChoiceIsBloom(false); setStep(3); }
                   else if (addToCart()) { setShowNextChoice(false); setStep(3); }
-                }} style={{ background: COLORS.accent, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
+                }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
                   {lang === "he" ? "לתשלום ולסיום" : lang === "ru" ? "К оплате" : "Proceed to checkout"}
                 </button>
                 <button onClick={() => { setShowNextChoice(false); setNextChoiceIsBloom(false); }} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
@@ -5472,19 +5748,21 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + shippingPrice}
                   </div>
                 </div>
-                <button onClick={() => setStep(3)} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+                <button onClick={() => setStep(3)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
                   {lang === "he" ? "לתשלום" : lang === "ru" ? "К оплате" : "Checkout"} →
                 </button>
               </div>
             )}
-            <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h2>
+            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h1>
             <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 20 }}>{t.product.sub}</p>
             <div className="reveal" data-delay="2" style={{ marginBottom: 24 }}>
               <TrustRow lang={lang} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {products.map((p, idx) => (
-                <div key={p.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
+                <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
+                  onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); } }}
                   style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                     <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
@@ -5494,7 +5772,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                         <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
-                        {p.is_bestseller && <span style={{ background: COLORS.accent, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
+                        {p.is_bestseller && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
                         {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
                       </div>
                       <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
@@ -5511,7 +5789,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         {step === 2 && product && (
           <div>
-            <h2 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h2>
+            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h1>
             <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
@@ -5523,6 +5801,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div ref={mockupImageRef} style={{ position: "relative" }}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
+                    {product.id === "stonewash" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
                     {product.id === "sticker"    && <StickerMockup   color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
@@ -5576,9 +5855,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                                 <div />
                                 <button onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
                                 <div />
-                                <button onClick={() => nudge(-5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>←</button>
+                                <button onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
                                 <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>✛</span></div>
-                                <button onClick={() => nudge(5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>→</button>
+                                <button onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
                                 <div />
                                 <button onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
                                 <div />
@@ -5632,9 +5911,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
-                  <label style={labelStyle}>{["tshirt","oversized","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
+                  <label style={labelStyle}>{["tshirt","oversized","stonewash","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {product.variants.map(v => <button key={v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
+                    {product.variants.map(v => <button key={v.id} type="button" aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
                   </div>
                 </div>
                 <div>
@@ -5648,10 +5927,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                     {product.colors.map((c, i) => (
-                      <div key={i} onClick={() => setSelectedColor(i)}
+                      <button key={i} type="button" onClick={() => setSelectedColor(i)}
                         title={colorName(c, lang)}
                         aria-label={colorName(c, lang)}
-                        style={{ width: 28, height: 28, borderRadius: "50%", background: c, cursor: "pointer", border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
+                        aria-pressed={selectedColor === i}
+                        style={{ width: 32, height: 32, borderRadius: "50%", background: c, cursor: "pointer", padding: 0, border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
                     ))}
                   </div>
                 </div>
@@ -5661,6 +5941,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     {uploadedImage ? <><img src={uploadedImage} alt={lang === "he" ? "תצוגה מקדימה של העיצוב שהועלה" : lang === "ru" ? "Предпросмотр загруженного дизайна" : "Uploaded design preview"} style={{ width: 50, height: 50, objectFit: "contain", borderRadius: 6, marginBottom: 6 }} /><div style={{ color: COLORS.accent, fontSize: 12 }}>{t.customize.uploaded}</div><div style={{ color: COLORS.gray, fontSize: 11 }}>{t.customize.changeFile}</div></> : <><div style={{ fontSize: 24, marginBottom: 6 }}>📁</div><div style={{ color: COLORS.white, fontSize: 13 }}>{t.customize.uploadTitle}</div><div style={{ color: COLORS.gray, fontSize: 11 }}>{t.customize.uploadSub}</div></>}
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
+                  {uploadError && <div role="alert" style={{ color: "#f87171", fontSize: 12, marginTop: 8, background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "8px 12px", borderRadius: 8 }}>{uploadError}</div>}
                 </div>
                 {/* Free size control — desktop only (mobile has it below mockup) */}
                 {!isMobile && uploadedImage && (
@@ -5718,7 +5999,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 )}
                 {/* Placement removed - users drag to position */}
                 {/* Extra prints — shirts only */}
-                {["tshirt","oversized","dryfit"].includes(product.id) && (
+                {["tshirt","oversized","stonewash","dryfit"].includes(product.id) && (
                   <div>
                     <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : lang === "ru" ? "Дополнительные принты" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -5783,8 +6064,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 )}
                 {/* Notes */}
                 <div>
-                  <label style={labelStyle}>{t.form.notes}</label>
-                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <label htmlFor="order-notes-design" style={labelStyle}>{t.form.notes}</label>
+                  <textarea id="order-notes-design" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
@@ -5823,41 +6104,50 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
             {/* Form column — wider on desktop (flex 1.5 vs sidebar's 1) */}
             <div style={{ flex: isMobile ? "none" : "1.5", width: "100%", minWidth: 0 }}>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h2>
+            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h1>
+            {submitError && <div role="alert" style={{ color: "#f87171", fontSize: 14, margin: "8px 0 16px", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>{submitError}</div>}
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.form.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <div><label style={labelStyle}>{t.form.name}</label><input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder={t.form.namePh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
-              <div><label style={labelStyle}>{t.form.email}</label><input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder={t.form.emailPh} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
+              <div><label htmlFor="order-name" style={labelStyle}>{t.form.name}</label><input id="order-name" type="text" value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); if (fieldErrors.name) setFieldErrors(fe => ({ ...fe, name: undefined })); }} placeholder={t.form.namePh} aria-invalid={!!fieldErrors.name} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.name && <div role="alert" style={fieldErrStyle}>{fieldErrors.name}</div>}</div>
+              <div><label htmlFor="order-email" style={labelStyle}>{t.form.email}</label><input id="order-email" type="email" value={form.email} onChange={e => { setForm(p => ({ ...p, email: e.target.value })); if (fieldErrors.email) setFieldErrors(fe => ({ ...fe, email: undefined })); }} placeholder={t.form.emailPh} aria-invalid={!!fieldErrors.email} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.email && <div role="alert" style={fieldErrStyle}>{fieldErrors.email}</div>}</div>
               <div>
-                <label style={labelStyle}>{t.form.phone}</label>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
-                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
+                <label htmlFor="order-phone" style={labelStyle}>{`${t.form.phone} *`}</label>
+                <div role="group" aria-label={t.form.phone} style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
+                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" aria-pressed={form.phonePrefix === pf.value} onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
                 </div>
-                <input type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") }))} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-required="true" aria-invalid={!!fieldErrors.phone} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                {fieldErrors.phone && <div role="alert" style={fieldErrStyle}>{fieldErrors.phone}</div>}
               </div>
               <div style={{ position: "relative" }}>
-                <label style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
-                <input type="text" value={form.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); fetchAddrSuggestions(`${v}${form.city ? `, ${form.city}` : ", Israel"}`); }} onBlur={() => setTimeout(() => setShowAddrSugg(false), 200)} placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" />
-                {addrLoading && <div style={{ position: "absolute", insetInlineStart: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</div>}
+                <label htmlFor="order-street" style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
+                <input type="text" value={form.street} id="order-street" aria-invalid={!!fieldErrors.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined })); fetchAddrSuggestions(v); }}
+                  onKeyDown={e => { if (e.key === "Escape") setShowAddrSugg(false); }}
+                  onBlur={e => { if (e.relatedTarget && e.relatedTarget.classList && e.relatedTarget.classList.contains("addr-sugg-item")) return; setTimeout(() => setShowAddrSugg(false), 200); }}
+                  placeholder={lang === "he" ? "לדוגמה: הרצל 15" : lang === "ru" ? "Например: Герцль 15" : "e.g. Herzl 15"} style={inputStyle} autoComplete="off" role="combobox" aria-expanded={showAddrSugg && addrSuggestions.length > 0} aria-controls="addr-suggestions" aria-autocomplete="list" />
+                {addrLoading && <><span aria-hidden="true" style={{ position: "absolute", insetInlineStart: 14, top: 38, color: COLORS.gray, fontSize: 11 }}>⏳</span><span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }} role="status">{lang === "he" ? "טוען הצעות כתובת" : lang === "ru" ? "Загрузка вариантов адреса" : "Loading address suggestions"}</span></>}
                 {showAddrSugg && addrSuggestions.length > 0 && (
-                  <div style={{ position: "absolute", top: "100%", insetInlineStart: 0, insetInlineEnd: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
+                  <div id="addr-suggestions" role="listbox" aria-label={lang === "he" ? "הצעות כתובת" : lang === "ru" ? "Варианты адреса" : "Address suggestions"} style={{ position: "absolute", top: "100%", insetInlineStart: 0, insetInlineEnd: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 8, marginTop: 4, maxHeight: 240, overflowY: "auto", zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
                     {addrSuggestions.map((s, i) => (
-                      <div key={i} onMouseDown={(e) => { e.preventDefault(); selectAddress(s); }} style={{ padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                        <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.display_name.split(",").slice(0, 2).join(",")}</div>
-                        <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.display_name.split(",").slice(2).join(",").trim()}</div>
-                      </div>
+                      <button type="button" className="addr-sugg-item" role="option" aria-selected="false" key={i}
+                        onClick={() => selectAddress(s)}
+                        onKeyDown={e => { if (e.key === "Escape") { setShowAddrSugg(false); const el = document.getElementById("order-street"); if (el) el.focus(); } }}
+                        style={{ display: "block", width: "100%", textAlign: lang === "he" ? "right" : "left", background: "transparent", padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, border: "none", borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"} onFocus={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onBlur={e => e.currentTarget.style.background = "transparent"}>
+                        <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.primary}</div>
+                        {s.secondary && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.secondary}</div>}
+                      </button>
                     ))}
                   </div>
                 )}
+                {fieldErrors.street && <div role="alert" style={fieldErrStyle}>{fieldErrors.street}</div>}
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
-                  <label style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
-                  <input type="text" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <label htmlFor="order-city" style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
+                  <input id="order-city" type="text" value={form.city} onChange={e => { setForm(p => ({ ...p, city: e.target.value })); if (fieldErrors.city) setFieldErrors(fe => ({ ...fe, city: undefined })); }} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} aria-invalid={!!fieldErrors.city} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.city && <div role="alert" style={fieldErrStyle}>{fieldErrors.city}</div>}
                 </div>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
-                  <label style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
-                  <input type="text" value={form.postalCode} maxLength={7} onChange={e => setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") }))} placeholder="1234567" style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <label htmlFor="order-postal" style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
+                  <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => { setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") })); if (fieldErrors.postal) setFieldErrors(fe => ({ ...fe, postal: undefined })); }} placeholder="1234567" aria-invalid={!!fieldErrors.postal} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.postal && <div role="alert" style={fieldErrStyle}>{fieldErrors.postal}</div>}
                 </div>
               </div>
               {/* Shipping method — Locker (cheaper, pickup-point) vs Home
@@ -5865,10 +6155,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   extra_prints.shipping_method; the chosen rate feeds the
                   totals via shippingPrice (above). */}
               <div>
-                <label style={labelStyle}>
+                <label id="shipping-method-label" style={labelStyle}>
                   {lang === `he` ? `שיטת משלוח` : lang === `ru` ? `Способ доставки` : `Shipping method`}
                 </label>
-                <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
+                <div role="group" aria-labelledby="shipping-method-label" style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
                   {[
                     { id: `locker`, price: SHIPPING_LOCKER, label_he: `נקודת איסוף`, label_en: `Pickup locker`, label_ru: `Пункт выдачи`, sub_he: `מהיר וזול`, sub_en: `Fast & affordable`, sub_ru: `Быстро и дёшево` },
                     { id: `home`, price: SHIPPING_HOME, label_he: `שליח עד הבית`, label_en: `Home delivery`, label_ru: `Курьер на дом`, sub_he: `נוחות מקסימלית`, sub_en: `Door to door`, sub_ru: `Прямо к двери` },
@@ -5878,6 +6168,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <button
                         key={opt.id}
                         type="button"
+                        aria-pressed={active}
                         onClick={() => setShippingMethod(opt.id)}
                         style={{
                           flex: `1 1 160px`,
@@ -5901,13 +6192,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   })}
                 </div>
               </div>
-              <div><label style={labelStyle}>{t.form.notes}</label><textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
+              <div><label htmlFor="order-notes" style={labelStyle}>{t.form.notes}</label><textarea id="order-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{t.form.paymentSub}</div>
               </div>
             </div>
             {(() => {
+              // Only surface the "missing fields" hint once the user has started
+              // filling the form — not on first load before any interaction. The
+              // disabled submit button is the pre-interaction guide.
+              const formDirty = !!(form.name || form.email || form.phoneNumber || form.street || form.city || form.postalCode || form.notes);
               const missing = [];
               if (!form.name) missing.push(lang === "he" ? "שם" : lang === "ru" ? "Имя" : "Name");
               if (!form.email) missing.push(lang === "he" ? "אימייל" : lang === "ru" ? "Email" : "Email");
@@ -5915,7 +6210,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               if (!form.street) missing.push(lang === "he" ? "כתובת" : lang === "ru" ? "Адрес" : "Address");
               if (!form.city) missing.push(lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City");
               if (!form.postalCode) missing.push(lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code");
-              if (missing.length === 0) return null;
+              if (!formDirty || missing.length === 0) return null;
               return (
                 <div style={{ background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: "12px 14px", marginTop: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <span style={{ fontSize: 18, lineHeight: 1 }}>⚠️</span>
@@ -5955,7 +6250,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
               </div>
-              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h2>
+              <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h1>
+              {submitError && <div role="alert" style={{ color: "#f87171", fontSize: 14, margin: "10px 0", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>{submitError}</div>}
               <p style={{ color: COLORS.gray, fontSize: 15 }}>{t.payment.subtitle}</p>
             </div>
 
@@ -6060,7 +6356,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   // Supabase client returns 503 errors as FunctionsHttpError;
                   // we want to land back on the existing "coming soon" UX
                   // (which is graceful, since the order rows are already
-                  // saved and emails already sent) instead of an alert.
+                  // saved; no email is sent until payment is confirmed) instead
+                  // of an alert.
                   if (error) {
                     const code = String(error.message || ``).toLowerCase();
                     if (code.includes(`payments_disabled`) || code.includes(`503`)) {
@@ -6076,14 +6373,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   }
                   throw new Error(`No redirect_url returned from create-payment`);
                 } catch (e) {
+                  console.error(`[pay] create-payment failed:`, e);
                   setPaymentProcessing(false);
-                  alert(`Payment error: ${e.message || e}`);
+                  setSubmitError(uiPaymentError(lang));
                 }
               }}
               disabled={paymentProcessing}
               style={{
                 width: "100%",
-                background: paymentProcessing ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accent} 0%, #FF8855 100%)`,
+                background: paymentProcessing ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)`,
                 color: "#fff",
                 border: "none",
                 borderRadius: 12,
@@ -6158,7 +6456,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     setSelectedProduct(null);
                     setUploadedImage(null);
                   } catch (e) {
-                    alert(`Error: ${e.message || e}`);
+                    console.error(`[cancel-order] failed:`, e);
+                    setSubmitError(uiGenericError(lang));
                   }
                   setPaymentProcessing(false);
                 }}
@@ -6194,7 +6493,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                   <button
                     onClick={dismissPaymentSoonModal}
-                    style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}
+                    style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}
                   >
                     {t.payment.soonBtn}
                   </button>
@@ -6207,7 +6506,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         {step === 5 && (
           <div style={{ textAlign: "center", padding: "20px 0 60px" }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 88, height: 88, borderRadius: "50%", background: submittedForApproval ? "rgba(255,107,53,0.12)" : "rgba(34,197,94,0.12)", border: `2px solid ${submittedForApproval ? COLORS.accent : "#22c55e"}`, marginBottom: 24, fontSize: 44 }}>{submittedForApproval ? "🎨" : "✓"}</div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{submittedForApproval ? t.approval.submittedTitle : t.confirm.title}</h2>
+            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{submittedForApproval ? t.approval.submittedTitle : t.confirm.title}</h1>
             <p style={{ color: COLORS.gray, fontSize: 15, marginBottom: 24 }}>{t.confirm.subtitle}</p>
 
             {submittedForApproval && (
@@ -6275,7 +6574,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             )}
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
+              {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
               <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" }); setQty(1); setPendingOrderGroupId(null); setPendingOrderIds([]); setPendingTotal(0); setSubmittedForApproval(false); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
             </div>
           </div>
@@ -6290,6 +6589,21 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 // ============ COOKIE CONSENT — premium, Hebrew-first, brand-matching ============
 function CookieConsent({ lang, onAccept, onReject }) {
   const isRTL = lang === "he";
+  // On phones the floating, side-inset card sat mid-air over the hero's lower
+  // content (and on top of the two corner FABs). Pin it flush to the bottom edge
+  // as a full-width bar there (rounded top corners only) so it reads as a clear
+  // bottom consent bar and stops overlapping hero content.
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
+  // A11y: move focus to the banner when it appears so keyboard users find it,
+  // and let Escape dismiss it (treated as "decline" / essential-only).
+  const regionRef = useRef(null);
+  useEffect(() => { regionRef.current && regionRef.current.focus(); }, []);
+  const onKeyDown = (e) => { if (e.key === "Escape") { e.stopPropagation(); onReject(); } };
   const t = {
     he: {
       title: "פרטיות",
@@ -6317,19 +6631,20 @@ function CookieConsent({ lang, onAccept, onReject }) {
   };
 
   return (
-    <div role="dialog" aria-label="Cookie consent" style={{
+    <div ref={regionRef} tabIndex={-1} onKeyDown={onKeyDown} role="region" aria-label={lang === "he" ? "הסכמת קובצי Cookie" : lang === "ru" ? "Согласие на использование cookie" : "Cookie consent"} style={{
+      outline: "none",
       position: "fixed",
-      bottom: 16,
-      left: 16,
-      right: 16,
-      maxWidth: 720,
-      margin: "0 auto",
+      bottom: isMobile ? 0 : 16,
+      left: isMobile ? 0 : 16,
+      right: isMobile ? 0 : 16,
+      maxWidth: isMobile ? "none" : 720,
+      margin: isMobile ? 0 : "0 auto",
       background: "rgba(15,15,15,0.96)",
       backdropFilter: "blur(20px)",
       WebkitBackdropFilter: "blur(20px)",
       border: "1px solid rgba(255,107,53,0.25)",
-      borderRadius: 16,
-      padding: "20px 24px",
+      borderRadius: isMobile ? "16px 16px 0 0" : 16,
+      padding: isMobile ? "18px 18px calc(18px + env(safe-area-inset-bottom))" : "20px 24px",
       boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,107,53,0.08)",
       zIndex: 9999,
       direction: isRTL ? "rtl" : "ltr",
@@ -6339,8 +6654,11 @@ function CookieConsent({ lang, onAccept, onReject }) {
         <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF6B35", boxShadow: "0 0 12px rgba(255,107,53,0.6)" }}></span>
         <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: "italic", letterSpacing: "0.5px" }}>{t.title}</div>
       </div>
-      <p style={{ color: "#bbb", fontFamily: "'Varela Round',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 16, marginTop: 0 }}>
+      <p style={{ color: "#bbb", fontFamily: "'Varela Round',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 10, marginTop: 0 }}>
         {t.body}
+      </p>
+      <p style={{ marginTop: 0, marginBottom: 16 }}>
+        <a href="#policies/privacy" style={{ color: "#FF6B35", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, textDecoration: "underline" }}>{t.more}</a>
       </p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: isRTL ? "flex-start" : "flex-end" }}>
         <button onClick={onReject} style={{
@@ -6782,6 +7100,74 @@ function TrustRow({ lang }) {
   );
 }
 
+// ============ EVENT / GROUP ORDERS — WhatsApp-led inquiry section ============
+// Home-page section promoting custom shirts for events. NOT a checkout — the CTA
+// opens WhatsApp (same WHATSAPP_NUMBER as the floating button) with a prefilled
+// message so the customer becomes a lead and the shop replies with a quote. No
+// pricing/cart/order changes. On-brand (dark + burnt-orange), feather-style line
+// icons matching TrustRow, trilingual + RTL.
+function EventOrdersSection({ lang }) {
+  const isRTL = lang === `he`;
+  const dir = isRTL ? `rtl` : `ltr`;
+  const eyebrow = lang === `he` ? `הזמנות קבוצתיות` : lang === `ru` ? `Групповые заказы` : `Group orders`;
+  const heading = lang === `he` ? `חולצות מותאמות לאירועים` : lang === `ru` ? `Футболки на заказ для мероприятий` : `Custom shirts for events`;
+  const copy = lang === `he`
+    ? `מסיבות רווקים/רווקות, חתונות, ימי הולדת ואירועי צוות/חברה — עיצובים אישיים, שמות ומחיר מיוחד לכמות (5 חולצות ומעלה), עם מבחר צבעים רחב יותר להזמנות קבוצתיות. ייצור מקומי בבאר שבע עם זמן אספקה מהיר לתאריך האירוע שלכם.`
+    : lang === `ru`
+    ? `Девичники/мальчишники, свадьбы, дни рождения и корпоративы — персональный дизайн, имена и специальные цены на количество (от 5 футболок), с расширенным выбором цветов для групповых заказов. Местное производство в Беэр-Шеве с быстрым сроком к дате вашего мероприятия.`
+    : `Bachelor/ette parties, weddings, birthdays, and team/company events — personalized designs, names, and special pricing for quantity (5+ shirts), with a wider color range for group orders. Local production in Be'er Sheva with fast turnaround for your event date.`;
+  const ctaLabel = lang === `he` ? `דברו איתנו בוואטסאפ` : lang === `ru` ? `Напишите нам в WhatsApp` : `Chat with us on WhatsApp`;
+  const prefill = lang === `he`
+    ? `היי! אני מעוניין/ת בהזמנה קבוצתית לחולצות לאירוע`
+    : lang === `ru`
+    ? `Здравствуйте! Меня интересует групповой заказ футболок для мероприятия`
+    : `Hi! I'm interested in a group order of shirts for an event`;
+  const waValid = /^\d{6,15}$/.test(WHATSAPP_NUMBER || ``);
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(prefill)}`;
+
+  // Feather-style line icons — same shape as TrustRow (24-grid, stroke, no fill).
+  const iconProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  const chips = [
+    { key: `bachelor`, label: lang === `he` ? `מסיבת רווקות/רווקים` : lang === `ru` ? `Девичник·мальчишник` : `Bachelor/ette party`,
+      icon: <svg {...iconProps}><path d="M6 3h12l-6 8z" /><line x1="12" y1="11" x2="12" y2="20" /><line x1="8" y1="20" x2="16" y2="20" /></svg> },
+    { key: `wedding`, label: lang === `he` ? `חתונה` : lang === `ru` ? `Свадьба` : `Wedding`,
+      icon: <svg {...iconProps}><circle cx="9" cy="14" r="6" /><circle cx="15" cy="14" r="6" /><path d="M9 4l3 3 3-3" /></svg> },
+    { key: `birthday`, label: lang === `he` ? `יום הולדת` : lang === `ru` ? `День рождения` : `Birthday`,
+      icon: <svg {...iconProps}><path d="M4 21h16v-7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2z" /><path d="M4 16h16" /><line x1="8" y1="9" x2="8" y2="6" /><line x1="12" y1="9" x2="12" y2="6" /><line x1="16" y1="9" x2="16" y2="6" /></svg> },
+    { key: `team`, label: lang === `he` ? `גיבוש צוות` : lang === `ru` ? `Корпоратив` : `Team event`,
+      icon: <svg {...iconProps}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
+  ];
+
+  return (
+    <section aria-labelledby="event-orders-title" dir={dir} style={{ background: COLORS.bg, padding: `8px 24px 72px` }}>
+      <div style={{ maxWidth: 860, margin: `0 auto`, background: `linear-gradient(180deg, rgba(255,107,53,0.08) 0%, rgba(255,107,53,0.03) 100%)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 20, padding: isRTL ? `40px 28px` : `40px 28px`, textAlign: `center` }}>
+        <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Varela Round',sans-serif` }}>{eyebrow}</span>
+        <h2 id="event-orders-title" style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 900, fontSize: `clamp(28px,5vw,42px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 16px` }}>{heading}</h2>
+        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 15.5, lineHeight: 1.7, maxWidth: 640, margin: `0 auto 26px` }}>{copy}</p>
+
+        <ul role="list" style={{ listStyle: `none`, margin: `0 0 30px`, padding: 0, display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 10 }}>
+          {chips.map((c) => (
+            <li key={c.key} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, padding: `9px 15px`, borderRadius: 999, border: `1px solid rgba(255,107,53,0.25)`, background: `rgba(255,107,53,0.06)`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13.5, fontWeight: 500, whiteSpace: `nowrap` }}>
+              <span style={{ display: `inline-flex`, color: COLORS.accent, flexShrink: 0 }}>{c.icon}</span>
+              <span>{c.label}</span>
+            </li>
+          ))}
+        </ul>
+
+        {waValid && (
+          <a href={href} target="_blank" rel="noopener noreferrer" aria-label={ctaLabel}
+            style={{ display: `inline-flex`, alignItems: `center`, gap: 10, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, textDecoration: `none`, transition: `background 0.2s, box-shadow 0.3s`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)` }}
+            onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accentBtn; }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.892c0 2.096.549 4.142 1.595 5.945L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.582 0 11.94-5.335 11.944-11.893a11.821 11.821 0 0 0-3.487-8.46z" /></svg>
+            <span>{ctaLabel}</span>
+          </a>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // Star rating row — small Playfair-styled stars. role="img" gives screen readers the rating.
 function ReviewStars({ rating, label }) {
   const full = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
@@ -6926,7 +7312,7 @@ function ProductBadges({ product, lang }) {
   return (
     <div style={{ position: "absolute", top: 10, insetInlineStart: 10, display: "flex", flexDirection: "column", gap: 6, zIndex: 3, pointerEvents: "none" }}>
       {showBest && (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accent, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21.02 7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
@@ -6972,14 +7358,14 @@ function Hero({ setPage, lang }) {
       </h1>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Varela Round',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
       <span className="reveal" data-delay="3" style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-        <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accent, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentHover} onMouseOut={e => e.target.style.background = COLORS.accent}>{t.hero.cta}</MagneticButton>
+        <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentBtnHover} onMouseOut={e => e.target.style.background = COLORS.accentBtn}>{t.hero.cta}</MagneticButton>
         <button onClick={() => setPage("pets")} style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", letterSpacing: "0.3px", transition: "background 0.2s, color 0.2s" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
         >{t.hero.ctaSecondary} →</button>
         <a href="/quiz" style={{ display: "inline-flex", alignItems: "center", background: COLORS.accentDim, color: COLORS.accent, border: `1px solid rgba(255,107,53,0.4)`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", textDecoration: "none", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, color 0.2s" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
-          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentDim; e.currentTarget.style.color = COLORS.accent; }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtnDim; e.currentTarget.style.color = COLORS.accent; }}
         >{t.quiz.hero_cta}</a>
       </span>
       <div className="reveal" data-delay="4" style={{ marginTop: isMobile ? 48 : 64, width: "100%", maxWidth: 720, padding: "0 8px", boxSizing: "border-box" }}>
@@ -6988,7 +7374,11 @@ function Hero({ setPage, lang }) {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 900 ? 900 : vw >= 600 ? 560 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
-          <div key={p.id} onClick={() => setPage("order")} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
+          <div key={p.id} onClick={() => setPage("order")}
+            role="button" tabIndex={0}
+            aria-label={lang === "he" ? `להזמנה: ${p.name}` : lang === "ru" ? `Заказать: ${p.name}` : `Order: ${p.name}`}
+            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPage("order"); } }}
+            className="reveal" data-delay={String(Math.min(idx + 1, 6))}
             style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
@@ -7046,7 +7436,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
       {cartCount > 0 && (
-        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${lang === "he" ? "פריטים בסל" : lang === "ru" ? "товаров в корзине" : "items in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${lang === "he" ? "פריטים בסל" : lang === "ru" ? "товаров в корзине" : "items in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
       )}
     </button>
   );
@@ -7064,7 +7454,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
       {favCount > 0 && (
-        <span role="status" aria-live="polite" aria-label={`${favCount} ${lang === "he" ? "מועדפים" : lang === "ru" ? "в избранном" : "favorites"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accent, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{favCount}</span>
+        <span role="status" aria-live="polite" aria-label={`${favCount} ${lang === "he" ? "מועדפים" : lang === "ru" ? "в избранном" : "favorites"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{favCount}</span>
       )}
     </button>
   );
@@ -7101,9 +7491,9 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
             onMouseOver={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; } }}
             onMouseOut={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; } }}
           >{t.nav.pets}</button>
-          <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
+          <div role="group" aria-label={lang === "he" ? "שפה" : lang === "ru" ? "Язык" : "Language"} style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
             {Object.keys(LANGS).map(l => (
-              <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "5px 10px" : "5px 12px", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+              <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "8px 12px" : "9px 14px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
             ))}
           </div>
         </div>
@@ -7121,7 +7511,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
         {["home", "order", "pets", "about"].map(p => (
-          <button key={p} onClick={() => setPage(p)} style={{
+          <button key={p} onClick={() => setPage(p)} aria-current={page === p ? "page" : undefined} style={{
             background: page === p ? COLORS.accentDim : "transparent",
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
             color: page === p ? COLORS.accent : COLORS.gray,
@@ -7136,7 +7526,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           onMouseOut={e => { if(page !== p) { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav[p]}</button>
         ))}
-        <button onClick={() => goToBlog && goToBlog()} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+        <button onClick={() => goToBlog && goToBlog()} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "blog") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
           onMouseOut={e => { if(page !== "blog") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
         >{t.navBlog}</button>
@@ -7145,25 +7535,22 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           onMouseOut={e => { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}
         >{t.quiz.nav}</a>
         {user && (
-          <button onClick={() => setPage("track")} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+          <button onClick={() => setPage("track")} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "track") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
           onMouseOut={e => { if(page !== "track") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav.track}</button>
         )}
         {isAdmin && (
-          <button onClick={() => setPage("admin")} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>{t.nav.admin}</button>
+          <button onClick={() => setPage("admin")} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>{t.nav.admin}</button>
         )}
       </div>}
 
-      {/* Lang + Hamburger - MOBILE RIGHT */}
+      {/* Hamburger - MOBILE RIGHT. The language switcher is NOT inlined here: it
+          lives inside the dropdown menu below (it was duplicated, and the extra
+          ~125px box pushed the hamburger off-screen on phones). */}
       {isMobile && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         {favButton}
         {cartButton}
-        <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
-          {Object.keys(LANGS).map(l => (
-            <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
-          ))}
-        </div>
         <button onClick={() => setMobileMenu(m => !m)} aria-expanded={mobileMenu} aria-controls="mobile-nav-menu" aria-label={lang === "he" ? "תפריט" : lang === "ru" ? "Меню" : "Menu"} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
       </div>}
 
@@ -7178,14 +7565,14 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.gray; }}
           >{t.nav.logout}</button>
         ) : (
-          <button onClick={() => setPage("auth")} style={{ background: COLORS.accent, border: "none", color: "#fff", padding: "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", boxShadow: "0 0 20px rgba(255,107,53,0.3)" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.boxShadow = "0 0 30px rgba(255,107,53,0.5)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-          onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,107,53,0.3)"; e.currentTarget.style.transform = "translateY(0)"; }}
+          <button onClick={() => setPage("auth")} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", boxShadow: "0 0 20px rgba(255,107,53,0.3)" }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.boxShadow = "0 0 30px rgba(255,107,53,0.5)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,107,53,0.3)"; e.currentTarget.style.transform = "translateY(0)"; }}
           >{t.nav.login}</button>
         )}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accent : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "9px 13px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>}
@@ -7195,20 +7582,20 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     {mobileMenu && (
       <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
         {["home", "order", "pets", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
-        <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
-        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
-        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
+        <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
+        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
+        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
         {user
           ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
-          : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accent, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
+          : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
         }
         <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
           onClick={() => setMobileMenu(false)}
           style={{ background: "transparent", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%", boxSizing: "border-box", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all 0.2s" }}
-          onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
@@ -7219,7 +7606,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         </a>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accent : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accentBtn : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>
@@ -7231,7 +7618,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 // Main App
 
 // ============ ACCESSIBILITY ============
-function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
+function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduceMotion }) {
   const [open, setOpen] = useState(false);
   const [fontSize, setFontSize] = useState(100);
   const [highContrast, setHighContrast] = useState(false);
@@ -7275,13 +7662,13 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
   // A11y: focus the panel when open; restore focus to the toggle on close.
   const a11yPanelRef = useDialogFocus(open);
 
-  // Cart drawer slides in from inline-end (right in LTR, left in RTL). Anchor
-  // the a11y button to inline-start so the two never share the same edge.
-  // On mobile the cart is full-width, so just hide the button while it's open.
-  // Early-return MUST sit after every hook call above — otherwise toggling
-  // cartOpen on mobile changes how many hooks React sees per render and the
-  // component crashes (Rules of Hooks).
-  if (cartOpen && isMobile) return null;
+  // Hide the FAB while ANY drawer/modal is open (cart, PetModal, lightbox, …)
+  // so it never overlaps or sits over an open overlay. `overlayOpen` already
+  // covers the cart (which locks body scroll); the legacy `cartOpen && isMobile`
+  // is kept as a belt-and-suspenders fallback. Settings effects above keep
+  // running while hidden (returning null does NOT unmount). This early-return
+  // MUST sit after every hook call above (Rules of Hooks).
+  if (overlayOpen || (cartOpen && isMobile)) return null;
 
   const t = {
     he: { title: 'נגישות', textSize: 'גודל טקסט', contrast: 'ניגודיות גבוהה', motion: 'הפחת אנימציות', reset: 'איפוס', close: 'סגור' },
@@ -7296,7 +7683,8 @@ function AccessibilityMenu({ lang, cartOpen, reduceMotion, setReduceMotion }) {
       {/* Accessibility button — fixed at the bottom inline-start corner so it
           always sits on the opposite side from the cart drawer. */}
       <button
-        aria-label="Accessibility menu"
+        aria-label={t.title}
+        aria-expanded={open}
         onClick={() => setOpen(!open)}
         style={{
           position: 'fixed', bottom: 24, insetInlineStart: 24, zIndex: 9998,
@@ -7565,19 +7953,19 @@ function CartToast({ message, lang, onClose, onViewCart, actionLabel, onAction }
       <span style={{ flex: 1, fontSize: 14, lineHeight: 1.35 }}>{message}</span>
       {showButton && (
         <button onClick={buttonHandler} type="button" style={{
-          background: COLORS.accent, border: "none", color: "#fff",
+          background: COLORS.accentBtn, border: "none", color: "#fff",
           padding: isMobile ? "10px 14px" : "8px 14px",
           borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 700,
           fontFamily: "'Varela Round',sans-serif", flexShrink: 0,
           minHeight: isMobile ? 40 : "auto", touchAction: "manipulation",
           transition: "background 0.2s",
         }}
-        onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
-        onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
+        onMouseOver={e => e.currentTarget.style.background = COLORS.accentBtnHover}
+        onMouseOut={e => e.currentTarget.style.background = COLORS.accentBtn}
         >{buttonLabel}</button>
       )}
       {!isMobile && (
-        <button onClick={onClose} type="button" aria-label="dismiss" style={{
+        <button onClick={onClose} type="button" aria-label={lang === "he" ? "סגירה" : lang === "ru" ? "Закрыть" : "Dismiss"} style={{
           background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer",
           fontSize: 18, lineHeight: 1, padding: 4, flexShrink: 0,
         }}>×</button>
@@ -7723,7 +8111,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
-                    {it.petName && <div style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, marginTop: 4 }}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
+                    {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
                       {it.color && (
@@ -7785,13 +8173,13 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
             {/* Trust strip — supports the buying decision right by the checkout CTA */}
             <div style={{ marginBottom: 15 }}><TrustStrip lang={lang} /></div>
             <button onClick={onCheckout} style={{
-              width: "100%", background: COLORS.accent, color: "#fff", border: "none",
+              width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none",
               borderRadius: 12, padding: isMobile ? "16px" : "15px", fontSize: 16, fontWeight: 700, cursor: "pointer",
               fontFamily: "'Varela Round',sans-serif", boxShadow: "0 6px 20px rgba(255,107,53,0.35)",
               transition: "background 0.2s", touchAction: "manipulation",
             }}
-            onMouseOver={e => e.currentTarget.style.background = COLORS.accentHover}
-            onMouseOut={e => e.currentTarget.style.background = COLORS.accent}
+            onMouseOver={e => e.currentTarget.style.background = COLORS.accentBtnHover}
+            onMouseOut={e => e.currentTarget.style.background = COLORS.accentBtn}
             >{tr.checkout}</button>
           </div>
         )}
@@ -7807,6 +8195,33 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
   // Portal the drawer to <body> so a filtered #root (high-contrast) can't become
   // its containing block and push the fixed drawer off-screen.
   return typeof document !== `undefined` ? createPortal(__drawer, document.body) : __drawer;
+}
+
+// 404 — shown for any non-empty hash route that matches no known page. Trilingual,
+// RTL-aware, offers a way back home + into the BLOOM gallery.
+function NotFoundPage({ lang, setPage }) {
+  const isRTL = lang === `he`;
+  const title = lang === `he` ? `הדף לא נמצא` : lang === `ru` ? `Страница не найдена` : `Page not found`;
+  const body = lang === `he`
+    ? `לא הצלחנו למצוא את העמוד שחיפשתם. ייתכן שהקישור שגוי או שהדף הוסר.`
+    : lang === `ru`
+      ? `Мы не нашли запрашиваемую страницу. Возможно, ссылка неверна или страница удалена.`
+      : `We couldn't find the page you were looking for. The link may be broken or the page may have moved.`;
+  const homeBtn = lang === `he` ? `חזרה לדף הבית` : lang === `ru` ? `На главную` : `Back home`;
+  const petsBtn = lang === `he` ? `לאוסף BLOOM` : lang === `ru` ? `Коллекция BLOOM` : `Browse BLOOM`;
+  return (
+    <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `70vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+      <div style={{ textAlign: `center`, padding: `60px 24px`, maxWidth: 560 }}>
+        <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `5rem`, color: COLORS.accent, lineHeight: 1, marginBottom: 12 }}>404</div>
+        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 700, fontSize: `1.8rem`, color: COLORS.white, margin: `0 0 12px` }}>{title}</h1>
+        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 16, lineHeight: 1.6, margin: `0 0 28px` }}>{body}</p>
+        <div style={{ display: `flex`, gap: 12, justifyContent: `center`, flexWrap: `wrap` }}>
+          <button type="button" onClick={() => setPage(`home`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{homeBtn}</button>
+          <button type="button" onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{petsBtn}</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
@@ -7828,9 +8243,18 @@ export default function App() {
     // #blog) so the canonical #/blog/<slug> share/OG/sitemap URLs resolve too.
     // Existing routes (#pets, #order, #policies/...) have no leading slash and
     // are unaffected.
-    const hash = window.location.hash.replace('#', '').replace(/^\//, '');
+    const hash = rawHash().replace('#', '').replace(/^\//, '');
     const root = hash.split('/')[0].split('?')[0];
-    return VALID_PAGES.includes(root) ? root : 'home';
+    // Empty hash = home. A non-empty hash that matches no known route gets a
+    // real 404 page (was silently falling back to 'home', which masked broken
+    // links). Scroll/anchor hashes all use known roots (pets/policies/...), so
+    // they're unaffected.
+    if (root === '') return 'home';
+    // Supabase auth callbacks can drop tokens straight into the hash
+    // (#access_token=...&type=recovery in implicit flow, or an OAuth error). Never
+    // 404 those — fall back to home and let the SDK consume + clean the URL.
+    if (/(access_token|refresh_token|provider_token|error_code|error_description)=/.test(hash)) return 'home';
+    return VALID_PAGES.includes(root) ? root : 'not-found';
   };
 
   const getPageFromHash = getPageFromURL;
@@ -7893,7 +8317,16 @@ export default function App() {
       // Persistence is a nice-to-have; the in-memory cart still works.
     }
   }, [cart]);
+  // Wipe the cart completely — in-memory state AND the localStorage mirror.
+  // Called ONLY on a confirmed-succeeded payment return (see TrackPage), so
+  // purchased items don't linger after checkout. setCart([]) already triggers the
+  // effect above to remove the key; we also remove it directly to be certain.
+  const clearCart = () => {
+    setCart([]);
+    try { window.localStorage.removeItem(CART_STORAGE_KEY); } catch (_) {}
+  };
   const [cartOpen, setCartOpen] = useState(false);
+  const overlayOpen = useOverlayOpen(); // any drawer/modal open → hide banner + FABs
   // True once the user has explicitly closed the cart drawer (or proceeded to
   // checkout from it). The /order auto-open effect respects this flag so the
   // drawer doesn't reopen behind the user's back. Re-opening the cart from
@@ -7904,6 +8337,21 @@ export default function App() {
   // Lifted from AccessibilityMenu so the background animation components
   // (ParticlesBackground, CursorGlow) can be skipped entirely when on.
   const [reduceMotion, setReduceMotion] = useState(false);
+
+  // SPA focus management + route announcement (a11y). On a client-side route
+  // change we move keyboard focus into <main> and announce the new page to
+  // screen readers (complements the existing <title> update). The first render
+  // is skipped so we don't yank focus on initial load.
+  const mainRef = useRef(null);
+  const isFirstRoute = useRef(true);
+  const [routeAnnounce, setRouteAnnounce] = useState(``);
+  useEffect(() => {
+    if (isFirstRoute.current) { isFirstRoute.current = false; return; }
+    const el = mainRef.current;
+    if (el) { try { el.focus({ preventScroll: true }); } catch (_) {} }
+    // Announce after the title effect has run for this route.
+    try { setRouteAnnounce(``); const id = requestAnimationFrame(() => setRouteAnnounce(document.title || ``)); return () => cancelAnimationFrame(id); } catch (_) {}
+  }, [page, blogSlug, breedSlug]);
 
   // Centralised open/close helpers — every caller that touches cartOpen
   // should go through these so userClosedCart stays accurate.
@@ -8001,6 +8449,8 @@ export default function App() {
       uploadedImage: item.designUrl,
       mockupUrl: item.mockupUrl || null,
       petName: item.petName || null,
+      petNameFont: item.petNameFont || null,
+      petNameColor: item.petNameColor || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -8298,7 +8748,8 @@ export default function App() {
     if (page !== "blog" && page !== "breed" && page !== "faq") {
       const title = langTitles[page] || langTitles.home;
       document.title = title;
-      setGenericSeo(lang, title);
+      const viewDesc = (VIEW_SEO_DESC[lang] || VIEW_SEO_DESC.he)[page];
+      setGenericSeo(lang, title, viewDesc);
     }
     // Update html lang+dir to match current selection
     document.documentElement.lang = lang;
@@ -8410,6 +8861,15 @@ export default function App() {
         :focus { outline: none; }
         :focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
         input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
+        /* WCAG 2.4.1 — skip to content. Off-screen until focused, then pinned top-center. */
+        .skip-link { position: fixed; top: -100px; inset-inline-start: 50%; transform: translateX(-50%); z-index: 10000; background: #C0501A; color: #fff; padding: 12px 22px; border-radius: 0 0 10px 10px; font-family: 'Varela Round', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: top 0.15s ease; }
+        .skip-link:focus { top: 0; outline: 2px solid #fff; outline-offset: 2px; }
+        /* iOS Safari auto-zooms when a focused input's font-size is < 16px. The
+           form inputs use 13–14px; force >=16px on small screens so no field
+           triggers the zoom. Desktop keeps its original sizing (media-scoped). */
+        @media (max-width: 768px) {
+          input, textarea, select { font-size: 16px !important; }
+        }
 
         /* === Premium Animations === */
 
@@ -8572,10 +9032,18 @@ export default function App() {
         }
         return (
           <>
-            <AccessibilityMenu lang={lang} cartOpen={cartOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
-            <WhatsAppFab lang={lang} />
-            <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><Reviews lang={lang} /></>}
+            {/* Skip-to-content — first focusable element; visually hidden until
+                focused (see .skip-link CSS), jumps keyboard users straight to <main>. */}
+            <a href="#main" className="skip-link">{lang === "he" ? "דלג לתוכן" : lang === "ru" ? "Перейти к содержимому" : "Skip to content"}</a>
+            {/* Polite route announcer for screen readers on SPA navigation. */}
+            <div aria-live="polite" role="status" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap", border: 0 }}>{routeAnnounce}</div>
+            <AccessibilityMenu lang={lang} cartOpen={cartOpen} overlayOpen={overlayOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
+            {!overlayOpen && <WhatsAppFab lang={lang} />}
+            <header>
+              <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
+            </header>
+            <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
@@ -8583,13 +9051,14 @@ export default function App() {
               ? <BlogPost slug={blogSlug} lang={lang} goToBlog={goToBlog} setPage={setPage} onShareToast={showToast} />
               : <BlogIndex lang={lang} goToBlog={goToBlog} />)}
             {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
-            {page === "track" && <TrackPage lang={lang} user={user} />}
+            {page === "track" && <TrackPage lang={lang} user={user} clearCart={clearCart} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
             {page === "admin" && !isAdmin && <Hero setPage={setPage} lang={lang} />}
             {page === "faq" && <FaqPage lang={lang} />}
             {page === "policies" && <PoliciesPage lang={lang} />}
             {page === "reset-password" && <ResetPasswordPage lang={lang} setPage={setPage} />}
+            {page === "not-found" && <NotFoundPage lang={lang} setPage={setPage} />}
             {MUG_STUDIO_ENABLED && page === "mug-studio" && (
               <Suspense fallback={
                 <div style={{
@@ -8613,7 +9082,15 @@ export default function App() {
                 <MugStudio lang={lang} setPage={setPage} onAddToCart={addMugStudioToCart} />
               </Suspense>
             )}
+            </main>
             <Footer lang={lang} setPage={setPage} />
+            {/* Spacer so the fixed cookie banner floats over empty space below the
+                footer instead of covering a page's bottom CTA (e.g. the breed-page
+                "Add to cart"). Only present while the banner is shown; removed on
+                consent. aria-hidden — purely a layout cushion. */}
+            {showCookieBanner && cookieConsent === null && (
+              <div aria-hidden="true" style={{ height: 200 }} />
+            )}
             <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} />
             {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
                 top-corner pill on desktop. Action button opens the cart drawer. */}
@@ -8626,12 +9103,12 @@ export default function App() {
               onAction={cartToastAction ? () => { setCartToast(null); setCartToastAction(null); cartToastAction.handler(); } : undefined}
             />}
             <style>{`
-              @keyframes cartToastInDesktop { from { opacity: 0; transform: translateX(${lang === "he" ? "100%" : "-100%"}); } to { opacity: 1; transform: translateX(0); } }
+              @keyframes cartToastInDesktop { from { opacity: 0; transform: translateX(${lang === "he" ? "-100%" : "100%"}); } to { opacity: 1; transform: translateX(0); } }
               @keyframes cartToastInMobile { from { opacity: 0; transform: translateY(120%); } to { opacity: 1; transform: translateY(0); } }
               @keyframes cartBadgeBump { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
               .cart-badge-bump { animation: cartBadgeBump 0.35s cubic-bezier(.2,.6,.2,1); }
             `}</style>
-            {showCookieBanner && cookieConsent === null && (
+            {showCookieBanner && cookieConsent === null && !overlayOpen && (
               <CookieConsent
                 lang={lang}
                 onAccept={() => { localStorage.setItem("sxp_cookie_consent", "accepted"); setCookieConsent("accepted"); setShowCookieBanner(false); }}
@@ -8834,9 +9311,9 @@ function WaitlistForm({ lang, source, breedInterest = null, autoFocus = false })
           onFocus={(ev) => { ev.target.style.borderColor = COLORS.accent; }}
           onBlur={(ev) => { ev.target.style.borderColor = COLORS.border; }}
         />
-        <button type="submit" disabled={busy} style={{ flexShrink: 0, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: busy ? `wait` : `pointer`, opacity: busy ? 0.7 : 1, transition: `background 0.2s` }}
-          onMouseOver={(ev) => { if (!busy) ev.currentTarget.style.background = COLORS.accentHover; }}
-          onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accent; }}>
+        <button type="submit" disabled={busy} style={{ flexShrink: 0, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: busy ? `wait` : `pointer`, opacity: busy ? 0.7 : 1, transition: `background 0.2s` }}
+          onMouseOver={(ev) => { if (!busy) ev.currentTarget.style.background = COLORS.accentBtnHover; }}
+          onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accentBtn; }}>
           {busy ? w.submitting : w.submit}
         </button>
       </div>
@@ -8878,9 +9355,9 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
           {ctaText}
         </div>
       )}
-      <button type="button" onClick={() => setOpen(true)} style={{ width: variant === `breed` ? `100%` : `auto`, background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 32px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 28px rgba(255,107,53,0.35)`, transition: `background 0.2s, transform 0.2s` }}
-        onMouseOver={(ev) => { ev.currentTarget.style.background = COLORS.accentHover; ev.currentTarget.style.transform = `translateY(-2px)`; }}
-        onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accent; ev.currentTarget.style.transform = `translateY(0)`; }}>
+      <button type="button" onClick={() => setOpen(true)} style={{ width: variant === `breed` ? `100%` : `auto`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 32px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 28px rgba(255,107,53,0.35)`, transition: `background 0.2s, transform 0.2s` }}
+        onMouseOver={(ev) => { ev.currentTarget.style.background = COLORS.accentBtnHover; ev.currentTarget.style.transform = `translateY(-2px)`; }}
+        onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accentBtn; ev.currentTarget.style.transform = `translateY(0)`; }}>
         {w.joinBtn}
       </button>
     </div>
@@ -8895,6 +9372,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
   const [designs, setDesigns] = useState([]);
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [selected, setSelected] = useState(null); // currently opened character in modal
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
   // Browse filters. species: `all`|`dog`|`cat`. query: substring matched
@@ -8919,6 +9398,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
   // doesn't block the grid — packs are an add-on offering, not the main UI.
   useEffect(() => {
     (async () => {
+      setLoadError(false); setLoading(true);
       try {
         const [designsRes, packsRes] = await Promise.all([
           supabase
@@ -8941,11 +9421,12 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         }
       } catch (err) {
         console.error("Failed to load BLOOM collection:", err);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [reloadKey]);
 
   // Latest published blog posts for the "from our blog" stripe (Slice 3). Only
   // shown when there are 3+; a fetch failure or <3 simply hides it.
@@ -9054,7 +9535,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
     const applyHash = () => {
       // Tolerate a leading slash ("#/pets..." as well as "#pets...") so deep
       // links from the blog / other tabs resolve the same as in-app navigation.
-      const hash = (window.location.hash || "").replace("#", "").replace(/^\//, "");
+      const hash = rawHash().replace("#", "").replace(/^\//, "");
       const path = hash.split("?")[0];
       const parts = path.split("/");
       if (parts[0] !== "pets") return;
@@ -9162,9 +9643,11 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       madeToOrder: "נוצר בהזמנה",
       dispatchTime: "זמן ייצור 3-5 ימי עסקים",
       petNameTitle: "התאמה אישית",
-      petNameLabel: "שם החיה (לא חובה)",
+      petNameLabel: "שם חיית המחמד (אופציונלי)",
       petNamePlaceholder: "למשל: רקסי",
-      petNameHelper: "נדפיס את השם על המוצר בדיוק כפי שתכתבו",
+      petNameHelper: "גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.",
+      petNameFontLabel: "גופן",
+      petNameColorLabel: "צבע",
     },
     en: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -9209,7 +9692,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       petNameTitle: "Personalization",
       petNameLabel: "Pet name (optional)",
       petNamePlaceholder: "e.g. Rex",
-      petNameHelper: "We'll print the name on your product exactly as typed",
+      petNameHelper: "Print size is matched to the product — for special requests, add a note at checkout.",
+      petNameFontLabel: "Font",
+      petNameColorLabel: "Color",
     },
     ru: {
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
@@ -9254,7 +9739,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       petNameTitle: "Персонализация",
       petNameLabel: "Имя питомца (необязательно)",
       petNamePlaceholder: "напр. Рекс",
-      petNameHelper: "Напечатаем имя на товаре ровно так, как вы введёте",
+      petNameHelper: "Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.",
+      petNameFontLabel: "Шрифт",
+      petNameColorLabel: "Цвет",
     },
   }[lang] || {};
 
@@ -9331,7 +9818,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
               <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 20 : 24, marginBottom: 6 }}>{quizT.banner_title}</div>
               <div style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: isMobile ? 13 : 15, lineHeight: 1.5 }}>{quizT.banner_sub}</div>
             </div>
-            <span style={{ flexShrink: 0, background: COLORS.accent, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
+            <span style={{ flexShrink: 0, background: COLORS.accentBtn, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
           </div>
         </a>
       </section>
@@ -9461,14 +9948,18 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           </div>
         )}
 
-        {loading && (
+        {loadError && (
+          <LoadError lang={lang} onRetry={() => setReloadKey((k) => k + 1)} />
+        )}
+
+        {loading && !loadError && (
           <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Varela Round',sans-serif" }}>
             <div style={{ display: "inline-block", width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: "50%", animation: "petsSpin 0.8s linear infinite", marginBottom: 16 }} />
             <div>{t.loading}</div>
           </div>
         )}
 
-        {!loading && designs.length === 0 && (
+        {!loading && !loadError && designs.length === 0 && (
           <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 20 }}>
             {t.empty}
           </div>
@@ -9521,7 +10012,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                           type="button"
                           onClick={() => onAddStickerPack(pack)}
                           style={{
-                            background: COLORS.accent,
+                            background: COLORS.accentBtn,
                             color: `#fff`,
                             border: `none`,
                             borderRadius: 8,
@@ -9532,8 +10023,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                             cursor: `pointer`,
                             transition: `background 0.2s`,
                           }}
-                          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; }}
-                          onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}>
+                          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
                           {t.packAddToCart}
                         </button>
                       </div>
@@ -9587,7 +10078,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           </div>
         ) : (
         <button onClick={() => setPage("order")} style={{
-          background: COLORS.accent,
+          background: COLORS.accentBtn,
           border: "none",
           color: "#fff",
           padding: isMobile ? "14px 28px" : "16px 36px",
@@ -9600,8 +10091,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           boxShadow: "0 8px 28px rgba(255,107,53,0.35)",
           transition: "all 0.25s cubic-bezier(.2,.6,.2,1)",
         }}
-        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 36px rgba(255,107,53,0.5)"; }}
-        onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,107,53,0.35)"; }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 36px rgba(255,107,53,0.5)"; }}
+        onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,107,53,0.35)"; }}
         >{t.ctaBtn}</button>
         )}
       </section>
@@ -9663,7 +10154,7 @@ function PetBadges({ design, lang }) {
           display: "inline-flex",
           alignItems: "center",
           gap: 4,
-          background: COLORS.accent,
+          background: COLORS.accentBtn,
           color: "#fff",
           fontFamily: "'Varela Round',sans-serif",
           fontSize: 10,
@@ -9798,14 +10289,8 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
           margin: 0,
           letterSpacing: "-0.01em",
         }}>{name}</h3>
-        <div style={{
-          color: COLORS.gray,
-          fontFamily: "'IBM Plex Mono','Courier New',monospace",
-          fontSize: 10,
-          letterSpacing: "1.5px",
-          textTransform: "uppercase",
-          marginTop: 4,
-        }}>{animal}</div>
+        {/* Species (dog/cat) intentionally not shown on the card. The species
+            field stays in the data for the gallery filter — display only. */}
         <div style={{
           color: COLORS.accent,
           fontFamily: "'Playfair Display',serif",
@@ -9840,7 +10325,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
-  const [petName, setPetName] = useState(``); // optional personalization (Task 8)
+  const [petName, setPetName] = useState(``); // optional personalization (free)
+  const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
+  const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
   // Slice 3: if a published blog post links to this breed, surface a "read more
   // about the breed" link at the bottom of the modal.
   const [breedPost, setBreedPost] = useState(null);
@@ -9919,9 +10406,16 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
     : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
 
-  // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
-  // Folded into the price passed to onOrderBloom so it threads into the cart line.
-  const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
+  // Personalization: +₪20 per item when (and only when) a pet name is entered,
+  // folded into the price passed to onOrderBloom so it threads into the cart line.
+  // The name + chosen font/color also ride the cart line into the order.
+  const petTrim = petName.trim();
+  const petSurcharge = petTrim ? PET_NAME_SURCHARGE : 0;
+  const personalization = {
+    petName: petTrim || null,
+    petNameFont: petTrim ? petNameFont : null,
+    petNameColor: petTrim ? petNameColor : null,
+  };
 
   // Add this BLOOM character to the order cart with its design already fixed.
   // Shirt carries the chosen type, size and color; mug/sticker keep defaults.
@@ -9945,7 +10439,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         mockupUrl,
         characterName: name,
         shirtColor: selectedColor,
-        petName: petName.trim() || null,
+        ...personalization,
       });
       return;
     }
@@ -9963,7 +10457,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       mockupUrl,
       characterName: name,
       shirtColor: null,
-      petName: petName.trim() || null,
+      ...personalization,
     });
   };
 
@@ -10043,7 +10537,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           zIndex: 10,
           transition: "all 0.2s",
         }}
-        onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.borderColor = COLORS.accent; }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.borderColor = COLORS.accent; }}
         onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; e.currentTarget.style.borderColor = COLORS.border; }}
         aria-label={t.modalClose}
         >×</button>
@@ -10075,7 +10569,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           transition: "all 0.2s",
           touchAction: "manipulation",
         }}
-        onMouseOver={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.borderColor = COLORS.accent; }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.borderColor = COLORS.accent; }}
         onMouseOut={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; e.currentTarget.style.borderColor = COLORS.border; }}
         aria-label={t.shareBtn || `Share`}
         title={t.shareBtn || `Share`}
@@ -10092,14 +10586,18 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 0, alignItems: "start" }}>
           {/* Image — shared in-place view carousel (panel = the modal's dark
               image panel). Flips THIS breed's views (portrait/white/black/mug);
-              it no longer browses breeds. Same component the breed page uses. */}
-          <BloomImageCarousel
-            design={design} lang={lang} isMobile={isMobile}
-            previewProduct={previewProduct} setPreviewProduct={setPreviewProduct}
-            selectedColor={selectedColor} setSelectedColor={setSelectedColor}
-            zoomed={zoomed} setZoomed={setZoomed}
-            panel
-          />
+              it no longer browses breeds. Same component the breed page uses.
+              The live pet-name preview sits directly under it. */}
+          <div>
+            <BloomImageCarousel
+              design={design} lang={lang} isMobile={isMobile}
+              previewProduct={previewProduct} setPreviewProduct={setPreviewProduct}
+              selectedColor={selectedColor} setSelectedColor={setSelectedColor}
+              zoomed={zoomed} setZoomed={setZoomed}
+              panel
+            />
+            <PetNamePreview name={petName} font={petNameFont} color={petNameColor} />
+          </div>
 
           {/* Info */}
           <div style={{ padding: isMobile ? "28px 24px" : "40px 36px", display: "flex", flexDirection: "column" }}>
@@ -10118,14 +10616,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               letterSpacing: "-0.02em",
             }}>{name}</h2>
 
-            <div style={{
-              color: COLORS.gray,
-              fontFamily: "'IBM Plex Mono','Courier New',monospace",
-              fontSize: 11,
-              letterSpacing: "2px",
-              textTransform: "uppercase",
-              marginBottom: 12,
-            }}>{animal}</div>
+            {/* Species (dog/cat) intentionally not shown — display only; the
+                species field stays in the data for the gallery filter. */}
 
             <div style={{
               color: COLORS.accent,
@@ -10175,7 +10667,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 on the product; it rides the cart line into the order and shows
                 in the admin order view. Empty → omitted. Shared shape with
                 BreedPage. */}
-            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} />
+            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} />
 
             {/* Shirt color/type/size — shown only when the shirt product is
                 selected. Shared with BreedPage via <BloomShirtOptions>. */}
@@ -10202,9 +10694,9 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <button
                 onClick={() => handleOrder(previewProduct)}
                 disabled={!design.design_url}
-                onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentHover; }}
-                onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
-                style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}
+                onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+                style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}
               >
                 🛒 {lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
               </button>
@@ -10231,7 +10723,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 type="button"
                 onClick={() => goToBlog(breedPost.slug)}
                 style={{ marginTop: 4, marginBottom: 8, background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 18px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, transition: `background 0.2s, color 0.2s` }}
-                onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.color = `#fff`; }}
+                onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = `#fff`; }}
                 onMouseOut={(e) => { e.currentTarget.style.background = `transparent`; e.currentTarget.style.color = COLORS.accent; }}>
                 {(LANGS[lang] || LANGS.he).blogReadMoreBreed}
               </button>
@@ -10259,6 +10751,7 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
     <button
       onClick={onClick}
       disabled={disabled}
+      aria-pressed={selected}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -10423,37 +10916,134 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
   );
 }
 
-// ============ PET NAME INPUT — optional personalization (Task 8) ============
-// Shared by PetModal and BreedPage. Optional, max 40 chars, strips angle
-// brackets (defence-in-depth; React already escapes on render). Empty value =
-// no personalization. Reads t.petNameLabel / t.petNamePlaceholder / t.petNameHelper.
-function PetNameInput({ lang, t, value, onChange }) {
+// ============ PET NAME INPUT — live personalization (free) ============
+// Shared by PetModal and BreedPage (customizable products only). The name is
+// ALWAYS-visible + optional, max 20 chars, strips angle brackets. FREE — no
+// price effect. Progressive disclosure: the FONT + COLOR pickers appear only
+// once a non-empty (trimmed) name is typed; clearing the name hides them and
+// resets font/color to defaults. The live preview lives separately (under the
+// design image) via <PetNamePreview>. Reads t.petName* labels.
+function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }) {
   const isRTL = lang === `he`;
+  const show = (value || ``).trim().length > 0;
+  const handleName = (raw) => {
+    const next = raw.replace(/[<>]/g, ``).slice(0, 20);
+    onChange(next);
+    // Cleared → hide pickers AND clear the stored font/color (back to defaults).
+    if (!next.trim()) { onFont && onFont(PET_NAME_FONT_DEFAULT); onColor && onColor(PET_NAME_COLOR_DEFAULT); }
+  };
+  const pickerLabelStyle = { display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 10, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 };
   return (
     <div style={{ marginBottom: 20, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 12, padding: `15px 16px 17px` }}>
-      {/* Premium personalization block — visually distinct from the plain
-          product options. 🐾 heading + the +₪20 surcharge pill. */}
       <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10, marginBottom: 12 }}>
         <span style={{ display: `inline-flex`, alignItems: `center`, gap: 8 }}>
-          <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>🐾</span>
+          <span aria-hidden="true" style={{ display: `inline-flex`, color: COLORS.accent }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9L12 3z" /></svg>
+          </span>
           <span style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 700 }}>{t.petNameTitle}</span>
         </span>
-        <span style={{ background: COLORS.accent, color: `#fff`, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
+        <span style={{ background: COLORS.accentBtn, color: `#fff`, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
       </div>
       <label htmlFor="bloom-pet-name" style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
       <input
         id="bloom-pet-name"
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value.replace(/[<>]/g, ``).slice(0, 40))}
+        onChange={(e) => handleName(e.target.value)}
         placeholder={t.petNamePlaceholder}
-        maxLength={40}
+        maxLength={20}
         dir={isRTL ? `rtl` : `ltr`}
         style={{ width: `100%`, boxSizing: `border-box`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px 14px`, color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: `none`, transition: `border-color 0.2s` }}
         onFocus={(e) => { e.currentTarget.style.borderColor = COLORS.accent; }}
         onBlur={(e) => { e.currentTarget.style.borderColor = COLORS.border; }}
       />
-      {t.petNameHelper && <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif", marginTop: 6 }}>{t.petNameHelper}</div>}
+      {t.petNameHelper && <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif", marginTop: 6, lineHeight: 1.5 }}>{t.petNameHelper}</div>}
+
+      {/* Progressive disclosure — only after a name is typed. */}
+      {show && (
+        <>
+          <div role="group" aria-label={t.petNameFontLabel} style={{ marginTop: 16 }}>
+            <span style={pickerLabelStyle}>{t.petNameFontLabel}</span>
+            <div style={{ display: `flex`, flexWrap: `wrap`, gap: 8 }}>
+              {PET_NAME_FONTS.map((f) => {
+                const active = font === f;
+                return (
+                  <button key={f} type="button" onClick={() => onFont && onFont(f)} aria-pressed={active}
+                    style={{ fontFamily: `'${f}', sans-serif`, fontSize: 15, lineHeight: 1, padding: `9px 12px`, borderRadius: 8, cursor: `pointer`,
+                      background: active ? `rgba(255,107,53,0.18)` : COLORS.bg,
+                      border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+                      color: active ? COLORS.accent : COLORS.white, transition: `border-color 0.15s, color 0.15s, background 0.15s` }}>
+                    {f}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div role="group" aria-label={t.petNameColorLabel} style={{ marginTop: 16 }}>
+            <span style={pickerLabelStyle}>{t.petNameColorLabel}</span>
+            <div style={{ display: `flex`, flexWrap: `wrap`, gap: 10 }}>
+              {PET_NAME_COLORS.map((c) => {
+                const active = color === c;
+                return (
+                  <button key={c} type="button" onClick={() => onColor && onColor(c)} aria-pressed={active} aria-label={petColorName(c, lang)} title={petColorName(c, lang)}
+                    style={{ width: 30, height: 30, borderRadius: `50%`, background: c, cursor: `pointer`, padding: 0,
+                      border: active ? `2px solid ${COLORS.white}` : `1px solid #555`,
+                      boxShadow: active ? `0 0 0 2px ${COLORS.accent}` : `none`, transition: `box-shadow 0.15s` }} />
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============ PET NAME LIVE PREVIEW ============
+// Shown UNDER the design image while the customer types. Renders the typed name
+// large, in the chosen font + color, on a light-orange rounded background. Only
+// appears when a name is present. Hebrew text → RTL, Latin → LTR.
+function PetNamePreview({ name, font, color }) {
+  const v = (name || ``).trim();
+  if (!v) return null;
+  return (
+    <div style={{ marginTop: 14, background: `rgba(255,107,53,0.12)`, borderRadius: 14, padding: `18px 16px`, textAlign: `center` }}>
+      <div dir={hasHebrew(v) ? `rtl` : `ltr`} style={{
+        fontFamily: `'${font || PET_NAME_FONT_DEFAULT}', sans-serif`,
+        color: color || PET_NAME_COLOR_DEFAULT,
+        fontSize: `clamp(32px, 8vw, 48px)`,
+        fontWeight: 700, lineHeight: 1.15, wordBreak: `break-word`,
+      }}>{v}</div>
+    </div>
+  );
+}
+
+// ============ ADMIN — pet-name personalization block ============
+// Shown in the admin order view whenever an order/line has a pet_name. Makes the
+// print-ready personalization obvious: the name rendered in its chosen font +
+// color, plus the font name and the colour hex + swatch. Renders nothing when
+// there is no pet_name (no empty block). `order` = an order row (has pet_name /
+// pet_name_font / pet_name_color).
+function AdminPetNameBlock({ order, lang }) {
+  if (!order || !order.pet_name) return null;
+  const font = order.pet_name_font || PET_NAME_FONT_DEFAULT;
+  const color = order.pet_name_color || PET_NAME_COLOR_DEFAULT;
+  const label = lang === `he` ? `התאמה אישית · שם להדפסה` : lang === `ru` ? `Персонализация · имя для печати` : `Personalization · name to print`;
+  const fontLbl = lang === `he` ? `גופן` : lang === `ru` ? `Шрифт` : `Font`;
+  const colorLbl = lang === `he` ? `צבע` : lang === `ru` ? `Цвет` : `Color`;
+  return (
+    <div style={{ marginTop: 8, marginBottom: 8, background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 12px` }}>
+      <div style={{ color: COLORS.accent, fontSize: 10.5, fontWeight: 700, textTransform: `uppercase`, letterSpacing: `0.12em`, marginBottom: 8, display: `inline-flex`, alignItems: `center`, gap: 5 }}>
+        <span aria-hidden="true" style={{ display: `inline-flex` }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9L12 3z" /></svg></span>{label}
+      </div>
+      <div dir={hasHebrew(order.pet_name) ? `rtl` : `ltr`} style={{ fontFamily: `'${font}', sans-serif`, color, fontSize: 26, fontWeight: 700, lineHeight: 1.2, wordBreak: `break-word`, marginBottom: 8 }}>{order.pet_name}</div>
+      <div style={{ display: `flex`, flexWrap: `wrap`, gap: 14, alignItems: `center`, color: COLORS.gray, fontSize: 11 }}>
+        <span>{fontLbl}: <span style={{ color: COLORS.white, fontWeight: 600 }}>{font}</span></span>
+        <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6 }}>{colorLbl}:
+          <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: `50%`, background: color, border: `1px solid #555`, display: `inline-block` }} />
+          <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'IBM Plex Mono','Courier New',monospace" }}>{color}</span>
+        </span>
+      </div>
     </div>
   );
 }
@@ -10468,7 +11058,7 @@ function BreedStoryCard({ design, lang }) {
   return (
     <div style={{ marginBottom: 24, padding: `16px 18px`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 12, textAlign: isRTL ? `right` : `left` }}>
       <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 8, display: `flex`, alignItems: `center`, gap: 6 }}>
-        <span aria-hidden="true">🐾</span>
+        <span aria-hidden="true" style={{ display: `inline-flex` }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="5.5" cy="12" rx="1.7" ry="2.3" /><ellipse cx="9.5" cy="8.5" rx="1.8" ry="2.5" /><ellipse cx="14.5" cy="8.5" rx="1.8" ry="2.5" /><ellipse cx="18.5" cy="12" rx="1.7" ry="2.3" /><path d="M12 12.5c-2.8 0-4.8 2.1-4.8 4.3 0 1.8 1.8 2.7 4.8 2.7s4.8-.9 4.8-2.7c0-2.2-2-4.3-4.8-4.3z" /></svg></span>
         <span>{lang === `he` ? `על הגזע` : lang === `ru` ? `О породе` : `About the breed`}</span>
       </div>
       <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{design[`breed_origin_${lang}`]}</p>
@@ -10505,12 +11095,15 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {BLOOM_SHIRT_COLORS.map((c) => (
-            <div
+            <button
               key={c.id}
+              type="button"
               onClick={() => { setSelectedColor(c); if (onColorPreview) onColorPreview(); }}
               title={c[lang] || c.en}
+              aria-label={c[lang] || c.en}
+              aria-pressed={selectedColor.id === c.id}
               style={{
-                width: 30, height: 30, borderRadius: "50%", background: c.hex, cursor: "pointer",
+                width: 32, height: 32, borderRadius: "50%", background: c.hex, cursor: "pointer", padding: 0,
                 border: `3px solid ${selectedColor.id === c.id ? COLORS.accent : "transparent"}`,
                 boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
                 transition: "transform 0.15s, border-color 0.15s",
@@ -10530,10 +11123,12 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
           {BLOOM_SHIRT_TYPES.map((st) => (
             <button
               key={st.id}
+              type="button"
+              aria-pressed={shirtType === st.id}
               onClick={() => setShirtType(st.id)}
               style={{
                 flex: 1,
-                background: shirtType === st.id ? COLORS.accent : COLORS.bg,
+                background: shirtType === st.id ? COLORS.accentBtn : COLORS.bg,
                 border: `1px solid ${shirtType === st.id ? COLORS.accent : COLORS.border}`,
                 color: shirtType === st.id ? "#fff" : COLORS.white,
                 borderRadius: 8, padding: "10px 12px", cursor: "pointer",
@@ -10554,10 +11149,12 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
           {BLOOM_SHIRT_SIZES.map((sz) => (
             <button
               key={sz}
+              type="button"
+              aria-pressed={shirtSize === sz}
               onClick={() => setShirtSize(sz)}
               style={{
                 minWidth: 46,
-                background: shirtSize === sz ? COLORS.accent : COLORS.bg,
+                background: shirtSize === sz ? COLORS.accentBtn : COLORS.bg,
                 border: `1px solid ${shirtSize === sz ? COLORS.accent : COLORS.border}`,
                 color: shirtSize === sz ? "#fff" : COLORS.white,
                 borderRadius: 8, padding: "8px 12px", cursor: "pointer",
@@ -10706,18 +11303,22 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   // Buy state — mirrors PetModal so the hero image reacts to the selection.
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState(`basic`);
   const [shirtSize, setShirtSize] = useState(`m`);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
-  const [petName, setPetName] = useState(``); // optional personalization (Task 8)
+  const [petName, setPetName] = useState(``); // optional personalization (free)
+  const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
+  const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
   const [zoomed, setZoomed] = useState(false); // full-screen enlarge (shared <BloomImageCarousel>)
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם החיה (לא חובה)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `נדפיס את השם על המוצר בדיוק כפי שתכתבו`, railTitle: `כל אוסף BLOOM` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `We'll print the name on your product exactly as typed`, railTitle: `The whole BLOOM family` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Напечатаем имя на товаре ровно так, как вы введёте`, railTitle: `Вся коллекция BLOOM` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `Print size is matched to the product — for special requests, add a note at checkout.`, petNameFontLabel: `Font`, petNameColorLabel: `Color`, railTitle: `The whole BLOOM family` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.`, petNameFontLabel: `Шрифт`, petNameColorLabel: `Цвет`, railTitle: `Вся коллекция BLOOM` },
   }[lang] || {};
 
   useEffect(() => {
@@ -10742,7 +11343,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true); setNotFound(false); setDesign(null); setRelated([]);
+    setLoading(true); setNotFound(false); setLoadError(false); setDesign(null); setRelated([]);
     setPreviewProduct(null); setSelectedColor(BLOOM_SHIRT_COLORS[0]); setShirtType(`basic`); setShirtSize(`m`); setPetName(``);
     window.scrollTo(0, 0);
     if (!slug) { setNotFound(true); setLoading(false); return; }
@@ -10751,7 +11352,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
         .from(`pet_designs`).select(`*`)
         .eq(`slug`, slug).eq(`is_active`, true).maybeSingle();
       if (cancelled) return;
-      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      // Distinguish a load failure (show retry) from a genuinely missing breed
+      // (show not-found).
+      if (error) { console.error(`[breed] load failed:`, error); setLoadError(true); setLoading(false); return; }
+      if (!data) { setNotFound(true); setLoading(false); return; }
       setDesign(data); setLoading(false);
       // Full active roster (all 70 — dogs + cats) for the bottom marquee rail.
       const { data: rel } = await supabase
@@ -10762,7 +11366,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       if (!cancelled && rel) setRelated(rel);
     })();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   // Full per-breed SEO — title + description + Open Graph + Twitter card +
   // Product JSON-LD + canonical/hreflang, set on navigation via the same
@@ -10786,7 +11390,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       `${name} בסגנון BLOOM — דיוקן חיה מאויר על חולצות, ספלים ומדבקות איכותיים.`;
     const desc = `${base}${origin ? ` ${origin}` : (tagline ? ` ${tagline}` : ``)}`.slice(0, 300);
     const img = design.mockup_url || design.mockup_shirt_url || design.design_url || ``;
-    const url = `${SEO_ORIGIN}/#/breed/${design.slug}`;
+    const url = `${SEO_ORIGIN}/breed/${design.slug}`;
     document.title = title;
     setMeta(`description`, desc);
     setMeta(`og:title`, name, `property`);
@@ -10794,6 +11398,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     if (img) setMeta(`og:image`, img, `property`);
     setMeta(`og:type`, `product`, `property`);
     setMeta(`og:url`, url, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, name);
     setMeta(`twitter:description`, desc);
@@ -10801,6 +11406,12 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     setCanonical(url);
     setHreflang(url);
     removeJsonLd(`blog-article-ld`); // never both at once
+    // Price span across this breed's purchasable products (shirt + mug), so the
+    // Product rich result can show a price. Pet-name (+₪20) is an optional add-on
+    // and intentionally excluded from the base offer range.
+    const offerPrices = [design.price_shirt_basic, design.price_shirt_oversized, design.price_shirt, design.price_mug]
+      .map((p) => Number(p))
+      .filter((p) => Number.isFinite(p) && p > 0);
     const ld = {
       "@context": `https://schema.org`,
       "@type": `Product`,
@@ -10811,6 +11422,13 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       "brand": { "@type": `Brand`, "name": `BLOOM / Sfalim Shop` },
       "category": design.species === `cat` ? `Cat portrait apparel & gifts` : `Dog portrait apparel & gifts`,
       "url": url,
+      "offers": offerPrices.length ? {
+        "@type": `AggregateOffer`,
+        "priceCurrency": `ILS`,
+        "lowPrice": Math.min(...offerPrices),
+        "highPrice": Math.max(...offerPrices),
+        "availability": `https://schema.org/InStock`,
+      } : undefined,
     };
     injectJsonLd(ld, `breed-product-ld`);
   }, [design, lang]);
@@ -10823,11 +11441,18 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       </div>
     );
   }
+  if (loadError) {
+    return (
+      <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, direction: isRTL ? `rtl` : `ltr` }}>
+        <LoadError lang={lang} onRetry={() => setReloadKey(k => k + 1)} />
+      </div>
+    );
+  }
   if (notFound || !design) {
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
         <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{tt.notFound}</div>
-        <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
+        <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
       </div>
     );
   }
@@ -10841,8 +11466,16 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     ? (Number(design.price_shirt_oversized) || Number(design.price_shirt) || 0)
     : (Number(design.price_shirt_basic) || Number(design.price_shirt) || 0);
 
-  // Personalization surcharge: +₪20 per item when a pet name is entered (FIX 3).
-  const petSurcharge = petName.trim() ? PET_NAME_SURCHARGE : 0;
+  // Personalization: +₪20 per item when (and only when) a pet name is entered,
+  // folded into the price passed to onOrderBloom so it threads into the cart line.
+  // The name + chosen font/color also ride the cart line into the order.
+  const petTrim = petName.trim();
+  const petSurcharge = petTrim ? PET_NAME_SURCHARGE : 0;
+  const personalization = {
+    petName: petTrim || null,
+    petNameFont: petTrim ? petNameFont : null,
+    petNameColor: petTrim ? petNameColor : null,
+  };
 
   // Add this BLOOM character to the shared cart. Identical payload shape to
   // PetModal.handleOrder — the cart logic itself lives in addBloomToCart.
@@ -10856,10 +11489,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       ) :
       (design.mockup_url || design.design_url);
     if (kind === `shirt`) {
-      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, petName: petName.trim() || null });
+      onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, ...personalization });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, petName: petName.trim() || null });
+    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, ...personalization });
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -10902,6 +11535,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
               selectedColor={selectedColor} setSelectedColor={setSelectedColor}
               zoomed={zoomed} setZoomed={setZoomed}
             />
+            {/* Live pet-name preview, directly under the design image. */}
+            <PetNamePreview name={petName} font={petNameFont} color={petNameColor} />
           </div>
 
           {/* Info */}
@@ -10923,7 +11558,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
 
             <h1 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 900, fontSize: isMobile ? "2.6rem" : "3.6rem", color: COLORS.white, margin: "0 0 4px 0", lineHeight: 1, letterSpacing: "-0.02em" }}>{name}</h1>
 
-            {animal && <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", marginBottom: 12 }}>{animal}</div>}
+            {/* Species (dog/cat) intentionally not shown — display only; the
+                species field stays in the data for the gallery filter. */}
             {tagline && <div style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 400, fontSize: isMobile ? 18 : 22, marginBottom: 24 }}>— {tagline}</div>}
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
@@ -10941,7 +11577,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>{tt.available}</div>
                 {/* Optional pet-name personalization (Task 8) — same component
                     and cart path as the modal. */}
-                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} />
+                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} />
                 {previewProduct === `shirt` && (
                   <BloomShirtOptions
                     lang={lang}
@@ -10959,9 +11595,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                   <button
                     onClick={() => handleOrder(previewProduct)}
                     disabled={!design.design_url}
-                    onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentHover; }}
-                    onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; }}
-                    style={{ width: "100%", background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
+                    onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                    onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+                    style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", marginBottom: 16, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
                     🛒 {tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
                   </button>
                 )}
@@ -11025,7 +11661,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
     <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: 24, zIndex: 10, direction: lang === "he" ? "rtl" : "ltr" }}>
       <div style={{ position: "absolute", top: 20, insetInlineEnd: 20, display: "flex", gap: 8 }}>
         {["he", "en", "ru"].map(l => (
-          <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? "#FF6B35" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+          <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? "#C0501A" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
             {l.toUpperCase()}
           </button>
         ))}
@@ -11039,9 +11675,9 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
         <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 28 }}>{m.back}</p>
         {/* Public entry into the pre-launch BLOOM "Find Your Breed" preview. */}
         <div style={{ marginBottom: 24 }}>
-          <button onClick={() => setPage("pets")} style={{ background: COLORS.accent, color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", boxShadow: "0 8px 28px rgba(255,107,53,0.35)", transition: "background 0.2s, transform 0.2s" }}
-            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
-            onMouseOut={e => { e.currentTarget.style.background = COLORS.accent; e.currentTarget.style.transform = "translateY(0)"; }}>
+          <button onClick={() => setPage("pets")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", boxShadow: "0 8px 28px rgba(255,107,53,0.35)", transition: "background 0.2s, transform 0.2s" }}
+            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.transform = "translateY(0)"; }}>
             {m.explore}
           </button>
         </div>
@@ -11067,15 +11703,15 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
         <a href="/privacy" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "פרטיות" : lang === "ru" ? "Конфиденциальность" : "Privacy Policy"}
         </a>
-        <span style={{ color: "#444" }}>·</span>
+        <span style={{ color: "#808080" }}>·</span>
         <a href="/terms" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "תקנון" : lang === "ru" ? "Условия" : "Terms of Service"}
         </a>
-        <span style={{ color: "#444" }}>·</span>
+        <span style={{ color: "#808080" }}>·</span>
         <a href="/accessibility" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "נגישות" : lang === "ru" ? "Доступность" : "Accessibility"}
         </a>
-        <span style={{ color: "#444" }}>·</span>
+        <span style={{ color: "#808080" }}>·</span>
         <a href="mailto:hello@sfalimshop.com" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "צור קשר" : lang === "ru" ? "Контакты" : "Contact"}
         </a>
@@ -11095,7 +11731,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
                 placeholder={m.pwPlaceholder}
                 aria-label={m.pwPlaceholder}
                 style={{ background: "#181818", border: `1px solid ${pwErr ? "#a33" : "#333"}`, borderRadius: 8, color: "#ddd", padding: "8px 12px", fontSize: 13, fontFamily: "'Varela Round',sans-serif", width: 170, outline: "none" }} />
-              <button onClick={submitStaff} style={{ background: COLORS.accent, border: "none", borderRadius: 8, color: "#fff", padding: "8px 14px", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer" }}>{m.pwGo}</button>
+              <button onClick={submitStaff} style={{ background: COLORS.accentBtn, border: "none", borderRadius: 8, color: "#fff", padding: "8px 14px", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer" }}>{m.pwGo}</button>
             </div>
             {pwErr && <span style={{ color: "#e06a5a", fontSize: 11 }}>{m.pwErr}</span>}
           </div>
@@ -11116,7 +11752,7 @@ function PoliciesPage({ lang }) {
   const sectionFromURL = (() => {
     if (typeof window === "undefined") return "refund";
     if (PATH_TO_SECTION[window.location.pathname]) return PATH_TO_SECTION[window.location.pathname];
-    return (window.location.hash.split("?")[0].replace("#", "") || "").split("/")[1] || "refund";
+    return (rawHash().split("?")[0].replace("#", "") || "").split("/")[1] || "refund";
   })();
   const [activeSection, setActiveSection] = useState(sectionFromURL);
   const content = POLICIES[lang] || POLICIES.he;
@@ -11124,7 +11760,7 @@ function PoliciesPage({ lang }) {
 
   useEffect(() => {
     const onHashChange = () => {
-      const s = (window.location.hash.replace("#", "") || "").split("/")[1] || "refund";
+      const s = (rawHash().replace("#", "") || "").split("/")[1] || "refund";
       setActiveSection(s);
     };
     window.addEventListener("hashchange", onHashChange);
@@ -11145,15 +11781,32 @@ function PoliciesPage({ lang }) {
         {BUSINESS_INFO.name[lang]}
       </p>
 
-      <div className="reveal" data-delay="2" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
-        {POLICY_SECTIONS.map(s => (
-          <button key={s.id} onClick={() => goSection(s.id)} style={{ background: activeSection === s.id ? "#FF6B35" : "#1a1a1a", color: activeSection === s.id ? "#fff" : "#999", border: `1px solid ${activeSection === s.id ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
+      <div className="reveal" data-delay="2" role="tablist" aria-label={lang === "he" ? "מדיניות ותקנון" : lang === "ru" ? "Политики" : "Policies"} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
+        {POLICY_SECTIONS.map(s => {
+          const active = activeSection === s.id;
+          return (
+          <button key={s.id} id={`policy-tab-${s.id}`} role="tab" aria-selected={active} aria-controls="policy-panel" tabIndex={active ? 0 : -1}
+            onClick={() => goSection(s.id)}
+            onKeyDown={(e) => {
+              const ids = POLICY_SECTIONS.map(x => x.id);
+              const i = ids.indexOf(s.id);
+              const fwd = lang === "he" ? ["ArrowLeft", "ArrowDown"] : ["ArrowRight", "ArrowDown"];
+              const back = lang === "he" ? ["ArrowRight", "ArrowUp"] : ["ArrowLeft", "ArrowUp"];
+              let n = -1;
+              if (fwd.includes(e.key)) n = (i + 1) % ids.length;
+              else if (back.includes(e.key)) n = (i - 1 + ids.length) % ids.length;
+              else if (e.key === "Home") n = 0;
+              else if (e.key === "End") n = ids.length - 1;
+              if (n >= 0) { e.preventDefault(); goSection(ids[n]); const el = document.getElementById(`policy-tab-${ids[n]}`); if (el) el.focus(); }
+            }}
+            style={{ background: active ? "#FF6B35" : "#1a1a1a", color: active ? "#fff" : "#a0a0a0", border: `1px solid ${active ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
             {s.title[lang]}
           </button>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="reveal" data-delay="3" style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
+      <div className="reveal" data-delay="3" id="policy-panel" role="tabpanel" tabIndex={0} aria-labelledby={`policy-tab-${activeSection}`} style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
         <h2 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
           {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
         </h2>
@@ -11212,7 +11865,7 @@ function Footer({ lang, setPage }) {
             <div>
               <a href={`mailto:${BUSINESS_INFO.email}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.email}</a>
             </div>
-            <div style={{ marginTop: 12, color: "#b0b0b0", fontSize: 11, letterSpacing: "0.03em" }}>{lang === "he" ? "ח.פ." : lang === "ru" ? "Бизнес-ID" : "Business ID"} {BUSINESS_INFO.vatId} {lang === "he" ? "(עוסק פטור)" : lang === "ru" ? "(освобождённый предприниматель)" : "(Exempt Dealer)"}</div>
+            <div style={{ marginTop: 12, color: "#b0b0b0", fontSize: 11, letterSpacing: "0.03em" }}>{lang === "he" ? "עוסק פטור מס׳" : lang === "ru" ? "Освобождённый предприниматель №" : "Exempt Dealer No."} {BUSINESS_INFO.vatId}</div>
           </div>
         </div>
         <div className="reveal" data-delay="2">
@@ -11246,7 +11899,7 @@ function Footer({ lang, setPage }) {
           </a>
         </div>
       </div>
-      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#444", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
+      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#a0a0a0", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
         © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
       </div>
     </footer>
@@ -11322,9 +11975,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `מאיזה חומר המוצרים? ההדפסה מחזיקה בכביסה?`, en: `What are the products made of? Will the print survive washing?`, ru: `Из чего сделаны товары? Сохранится ли печать после стирки?` },
         a: {
-          he: `הספלים קרמיים והחולצות מכותנה איכותית. כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
-          en: `The mugs are ceramic and the shirts are quality cotton. To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
-          ru: `Кружки керамические, а футболки — из качественного хлопка. Чтобы печать держалась долго: кружку рекомендуется мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
+          he: `הספלים קרמיים. רוב החולצות (טי בייסיק, אוברסייז, סטון ווש) הן 100% כותנה סרוקה, והדרייפיט הוא פוליאסטר טכני נושם (לא כותנה). כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
+          en: `The mugs are ceramic. Most shirts (Tee Basic, Oversize, Stone-wash) are 100% combed cotton, while the Dri-FIT is a breathable technical polyester (not cotton). To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
+          ru: `Кружки керамические. Большинство футболок (Tee Basic, Oversize, Stone-wash) — 100% чёсаный хлопок, а Dri-FIT — дышащий технический полиэстер (не хлопок). Чтобы печать держалась долго: кружку мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
         },
       },
       {
@@ -11333,6 +11986,14 @@ const FAQ_GROUPS = [
           he: `מגוון מידות מ-S ועד XXL.`,
           en: `A range of sizes from S to XXL.`,
           ru: `Размеры в диапазоне от S до XXL.`,
+        },
+      },
+      {
+        q: { he: `מאיזה בד החולצות שלכם?`, en: `What fabric are your shirts made of?`, ru: `Из какой ткани ваши футболки?` },
+        a: {
+          he: `רוב החולצות שלנו עשויות 100% כותנה סרוקה — סיב איכותי ונעים. טי בייסיק — גזרה קלאסית; אוברסייז — גזרה רחבה; סטון ווש — אוברסייז עם גימור כביסת סטון-ווש למראה דהוי/וינטג'. חולצת הדרייפיט שונה: בד פוליאסטר טכני נושם שמנדף זיעה, מתאים לפעילות וספורט. מילון: כותנה סרוקה = כותנה שעברה סירוק להסרת סיבים קצרים (חלקה, חזקה ונעימה יותר); סטון ווש = כביסה שמרככת ונותנת מראה וינטג' דהוי; דרייפיט = בד טכני נושם שמנדף זיעה, שונה מכותנה.`,
+          en: `Most of our shirts are 100% combed cotton — a soft, high-quality fiber. Tee Basic — classic fit; Oversize — relaxed fit; Stone-wash — oversize with a stone-wash finish for a faded vintage look. The Dri-FIT shirt is different: a breathable technical polyester that wicks sweat, made for activity and sport. Glossary: Combed cotton = cotton brushed to remove short fibers (smoother, stronger, softer); Stone-wash = a wash that softens the fabric and gives a faded vintage look; Dri-FIT = a breathable technical fabric that wicks sweat, different from cotton.`,
+          ru: `Большинство наших футболок — 100% чёсаный хлопок, мягкое качественное волокно. Tee Basic — классический крой; Oversize — свободный крой; Stone-wash — оверсайз с отделкой стоунвош для выцветшего винтажного вида. Футболка Dri-FIT отличается: дышащий технический полиэстер, отводит влагу, для активности и спорта. Словарь: чёсаный хлопок = хлопок без коротких волокон (глаже, прочнее, мягче); стоунвош = стирка для мягкости и винтажного вида; Dri-FIT = дышащая техническая ткань, отводит влагу, отличается от хлопка.`,
         },
       },
     ],
@@ -11379,6 +12040,14 @@ const FAQ_GROUPS = [
           he: `האתר זמין בעברית, אנגלית ורוסית.`,
           en: `The site is available in Hebrew, English, and Russian.`,
           ru: `Сайт доступен на иврите, английском и русском.`,
+        },
+      },
+      {
+        q: { he: `אתם עושים הזמנות קבוצתיות לאירועים?`, en: `Do you do group orders for events?`, ru: `Делаете ли вы групповые заказы для мероприятий?` },
+        a: {
+          he: `כן! אנחנו מתמחים בחולצות מותאמות לאירועים — מסיבות רווקים/רווקות, חתונות, ימי הולדת, גיבושים וצוותים. אפשר עיצוב אישי, שמות, ומחיר מיוחד להזמנות כמות (5 חולצות ומעלה), עם מבחר צבעים רחב יותר. כתבו לנו בוואטסאפ ונכין לכם הצעת מחיר אישית.`,
+          en: `Yes! We specialize in custom shirts for events — bachelor/ette parties, weddings, birthdays, and team/company events. Personalized designs, names, and special pricing for quantity orders (5+ shirts), with a wider color range. Message us on WhatsApp for a personal quote.`,
+          ru: `Да! Мы делаем футболки на заказ для мероприятий — девичники/мальчишники, свадьбы, дни рождения, корпоративы. Персональный дизайн, имена и специальные цены на количество (от 5 футболок), с расширенным выбором цветов. Напишите нам в WhatsApp — подготовим индивидуальное предложение.`,
         },
       },
     ],
@@ -11439,13 +12108,14 @@ function FaqPage({ lang }) {
     if (typeof document === `undefined`) return;
     const docTitle = lang === `he` ? `שאלות נפוצות | ספלים שופ` : lang === `ru` ? `Частые вопросы | Sfalim Shop` : `FAQ | Sfalim Shop`;
     const desc = FAQ_SEO_DESC[lang] || FAQ_SEO_DESC.he;
-    const url = `${SEO_ORIGIN}/#faq`;
+    const url = `${SEO_ORIGIN}/faq`;
     document.title = docTitle;
     setMeta(`description`, desc);
     setMeta(`og:title`, pageTitle, `property`);
     setMeta(`og:description`, desc, `property`);
     setMeta(`og:type`, `website`, `property`);
     setMeta(`og:url`, url, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary`);
     setMeta(`twitter:title`, pageTitle);
     setMeta(`twitter:description`, desc);
@@ -11519,7 +12189,7 @@ function formatBlogDate(iso, lang) {
 // useState initializer + popstate handler can call it.
 function parseBlogSlugFromHash() {
   if (typeof window === `undefined`) return null;
-  const h = window.location.hash.replace(`#`, ``).replace(/^\//, ``);
+  const h = rawHash().replace(`#`, ``).replace(/^\//, ``);
   const path = h.split(`?`)[0];
   const parts = path.split(`/`);
   if (parts[0] !== `blog`) return null;
@@ -11530,7 +12200,7 @@ function parseBlogSlugFromHash() {
 // ?slug= form is also tolerated for symmetry with the /pets deep links.
 function parseBreedSlugFromHash() {
   if (typeof window === `undefined`) return null;
-  const h = window.location.hash.replace(`#`, ``).replace(/^\//, ``);
+  const h = rawHash().replace(`#`, ``).replace(/^\//, ``);
   const path = h.split(`?`)[0];
   const parts = path.split(`/`);
   if (parts[0] !== `breed`) return null;
@@ -11552,6 +12222,12 @@ function setMeta(name, content, attr) {
   let el = document.head.querySelector(`meta[${a}="${name}"]`);
   if (!el) { el = document.createElement(`meta`); el.setAttribute(a, name); document.head.appendChild(el); }
   el.setAttribute(`content`, String(content));
+}
+
+// Map a UI language to its Open Graph locale code (og:locale). Used so EN/RU
+// shares advertise the correct locale instead of the static he_IL from index.html.
+function ogLocale(lang) {
+  return lang === `en` ? `en_US` : lang === `ru` ? `ru_RU` : `he_IL`;
 }
 
 // Create or update a JSON-LD <script> by id (idempotent).
@@ -11604,18 +12280,43 @@ const GENERIC_SEO_DESC = {
   ru: `Индивидуальная печать — футболки, кружки и стикеры с вашим дизайном, плюс коллекция портретов BLOOM для 70 пород собак и кошек.`,
 };
 
+// Per-view meta descriptions (trilingual) for the main non-breed/blog/faq views,
+// so each route gets its own description + OG instead of the single generic one.
+// Falls back to GENERIC_SEO_DESC for any view not listed (home/admin/policies).
+const VIEW_SEO_DESC = {
+  he: {
+    order: `עצבו מוצר משלכם — העלו תמונה, בחרו חולצה/ספל/מדבקה, צבע ומידה, ואנחנו מדפיסים בישראל ושולחים עד הבית.`,
+    pets: `אוסף BLOOM — 70 דיוקנאות מאוירים של כלבים וחתולים על חולצות, ספלים ומדבקות. מצאו את הגזע שלכם.`,
+    about: `הסיפור של ספלים שופ — הדפסה מקומית בבאר שבע, באהבה ובדיוק, עם משלוח לכל הארץ.`,
+    track: `מעקב אחר ההזמנה שלכם בספלים שופ.`,
+  },
+  en: {
+    order: `Design your own — upload a photo, pick a shirt/mug/sticker, colour and size; printed in Israel and shipped to your door.`,
+    pets: `The BLOOM collection — 70 hand-illustrated dog & cat portraits on shirts, mugs and stickers. Find your breed.`,
+    about: `The Sfalim Shop story — printed locally in Be'er Sheva with care, shipped anywhere in Israel.`,
+    track: `Track your Sfalim Shop order.`,
+  },
+  ru: {
+    order: `Создайте свой товар — загрузите фото, выберите футболку/кружку/стикер, цвет и размер; печатаем в Израиле с доставкой на дом.`,
+    pets: `Коллекция BLOOM — 70 рисованных портретов собак и кошек на футболках, кружках и стикерах. Найдите свою породу.`,
+    about: `История Sfalim Shop — печатаем в Беэр-Шеве с любовью, доставка по всему Израилю.`,
+    track: `Отслеживание вашего заказа в Sfalim Shop.`,
+  },
+};
+
 // Restore the generic site title/description/OG/Twitter/canonical/hreflang and
 // drop any per-page JSON-LD. Called for every route that isn't a breed page or
 // a blog page (those own their SEO in their components). `title` is the
 // already-resolved per-route document title.
-function setGenericSeo(lang, title) {
-  const desc = GENERIC_SEO_DESC[lang] || GENERIC_SEO_DESC.he;
+function setGenericSeo(lang, title, descOverride) {
+  const desc = descOverride || GENERIC_SEO_DESC[lang] || GENERIC_SEO_DESC.he;
   setMeta(`description`, desc);
   setMeta(`og:title`, title, `property`);
   setMeta(`og:description`, desc, `property`);
   setMeta(`og:type`, `website`, `property`);
   setMeta(`og:url`, `${SEO_ORIGIN}/`, `property`);
   setMeta(`og:image`, SITE_OG_IMAGE, `property`);
+  setMeta(`og:locale`, ogLocale(lang), `property`);
   setMeta(`twitter:card`, `summary_large_image`);
   setMeta(`twitter:title`, title);
   setMeta(`twitter:description`, desc);
@@ -11700,9 +12401,11 @@ function BlogIndex({ lang, goToBlog }) {
   const [posts, setPosts] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [category, setCategory] = useState(`all`);
   const readPageNum = () => {
-    const m = (typeof window !== `undefined` ? window.location.hash : ``).match(/[?&]page=(\d+)/);
+    const m = rawHash().match(/[?&]page=(\d+)/);
     return m ? Math.max(1, parseInt(m[1], 10)) : 1;
   };
   const [pageNum, setPageNum] = useState(readPageNum);
@@ -11715,13 +12418,14 @@ function BlogIndex({ lang, goToBlog }) {
 
   // Page-level SEO for the index.
   useEffect(() => {
-    const indexUrl = `${SEO_ORIGIN}/#/blog`;
+    const indexUrl = `${SEO_ORIGIN}/blog`;
     document.title = `${t.blogHeroTitle} — Sfalim Shop`;
     setMeta(`description`, t.blogHeroSubtitle);
     setMeta(`og:title`, t.blogHeroTitle, `property`);
     setMeta(`og:description`, t.blogHeroSubtitle, `property`);
     setMeta(`og:type`, `website`, `property`);
     setMeta(`og:url`, indexUrl, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, t.blogHeroTitle);
     setMeta(`twitter:description`, t.blogHeroSubtitle);
@@ -11735,6 +12439,7 @@ function BlogIndex({ lang, goToBlog }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setLoadError(false);
     (async () => {
       const offset = (pageNum - 1) * BLOG_PAGE_SIZE;
       let q = supabase
@@ -11746,12 +12451,12 @@ function BlogIndex({ lang, goToBlog }) {
       if (category !== `all`) q = q.eq(`category`, category);
       const { data, count: c, error } = await q;
       if (cancelled) return;
-      if (error) { console.error(`Failed to load blog posts:`, error); setPosts([]); setCount(0); }
+      if (error) { console.error(`Failed to load blog posts:`, error); setPosts([]); setCount(0); setLoadError(true); }
       else { setPosts(data || []); setCount(c || 0); }
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [category, pageNum]);
+  }, [category, pageNum, reloadKey]);
 
   const totalPages = Math.max(1, Math.ceil(count / BLOG_PAGE_SIZE));
   const gotoPageNum = (n) => {
@@ -11789,7 +12494,9 @@ function BlogIndex({ lang, goToBlog }) {
 
       {/* Grid */}
       <section style={{ position: `relative`, zIndex: 1, maxWidth: 1200, margin: `0 auto`, padding: isMobile ? `0 16px 80px` : `0 40px 120px` }}>
-        {loading ? (
+        {loadError ? (
+          <LoadError lang={lang} onRetry={() => setReloadKey((k) => k + 1)} />
+        ) : loading ? (
           <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif` }}>
             <div style={{ display: `inline-block`, width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `blogSpin 0.8s linear infinite` }} />
           </div>
@@ -11827,6 +12534,8 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -11837,14 +12546,16 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true); setNotFound(false); setPet(null); setRelated([]);
+    setLoading(true); setNotFound(false); setLoadError(false); setPet(null); setRelated([]);
     window.scrollTo(0, 0);
     (async () => {
       const { data, error } = await supabase
         .from(`blog_posts`).select(`*`)
-        .eq(`slug`, slug).eq(`status`, `published`).single();
+        .eq(`slug`, slug).eq(`status`, `published`).maybeSingle();
       if (cancelled) return;
-      if (error || !data) { setNotFound(true); setPost(null); setLoading(false); return; }
+      // A real fetch error → retry; a missing/unpublished post → not-found.
+      if (error) { console.error(`[blog] load failed:`, error); setLoadError(true); setPost(null); setLoading(false); return; }
+      if (!data) { setNotFound(true); setPost(null); setLoading(false); return; }
       setPost(data);
       setLoading(false);
       // No view-count RPC call (intentional).
@@ -11863,7 +12574,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
       if (!cancelled && rel) setRelated(rel);
     })();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   // SEO meta + OG + JSON-LD Article — language-aware with Hebrew fallback so
   // nothing renders blank. There are NO seo_*_ru columns, so RU falls back to
@@ -11880,7 +12591,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
        post.seo_description_he) || post.excerpt_he || ``;
     const ogTitle = post[`title_${lang}`] || post.title_he || ``;
     const ogDesc = post[`excerpt_${lang}`] || post.excerpt_he || ``;
-    const postUrl = `${SEO_ORIGIN}/#/blog/${post.slug}`;
+    const postUrl = `${SEO_ORIGIN}/blog/${post.slug}`;
     document.title = `${seoTitle} — Sfalim Shop`;
     setMeta(`description`, seoDesc);
     setMeta(`og:title`, ogTitle, `property`);
@@ -11888,6 +12599,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     setMeta(`og:image`, post.cover_image_url, `property`);
     setMeta(`og:type`, `article`, `property`);
     setMeta(`og:url`, postUrl, `property`);
+    setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, ogTitle);
     setMeta(`twitter:description`, ogDesc);
@@ -11916,11 +12628,18 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
       </div>
     );
   }
+  if (loadError) {
+    return (
+      <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, direction: isRTL ? `rtl` : `ltr` }}>
+        <LoadError lang={lang} onRetry={() => setReloadKey(k => k + 1)} />
+      </div>
+    );
+  }
   if (notFound || !post) {
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
         <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{t.blogNotFound}</div>
-        <button onClick={() => goToBlog()} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
+        <button onClick={() => goToBlog()} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
       </div>
     );
   }
@@ -12144,7 +12863,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
           <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>{loading ? (lang === `he` ? `טוען...` : `Loading...`) : `${posts.length} ${lang === `he` ? `פוסטים` : `posts`}`}</p>
         </div>
         {!editing && (
-          <button onClick={startNew} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `+ פוסט חדש` : `+ New post`}</button>
+          <button onClick={startNew} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `+ פוסט חדש` : `+ New post`}</button>
         )}
       </div>
 
@@ -12205,7 +12924,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
 
           <div style={{ display: `flex`, gap: 10, marginTop: 18, flexWrap: `wrap` }}>
             <button onClick={() => save(false)} disabled={busy} style={{ background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `שמור טיוטה` : `Save draft`)}</button>
-            <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accent, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
+            <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
             <button onClick={() => setShowPreview((s) => !s)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `תצוגה מקדימה` : `Preview`}</button>
             <button onClick={cancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `ביטול` : `Cancel`}</button>
             <style>{`.blog-body h2{font-family:'Playfair Display',serif;font-style:italic;color:#fff;font-size:1.5rem;margin:20px 0 10px} .blog-body p{margin:0 0 14px} .blog-body a{color:#FF6B35} .blog-body img{max-width:100%;height:auto;border-radius:10px}`}</style>

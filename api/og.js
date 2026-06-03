@@ -77,7 +77,7 @@ async function lookupDesign(handle) {
   const anonKey = process.env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
 
   const safeHandle = encodeURIComponent(String(handle || ``).toLowerCase());
-  const select = `id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,mockup_url,design_url`;
+  const select = `id,slug,name_he,name_en,name_ru,animal_he,animal_en,animal_ru,tagline_he,tagline_en,tagline_ru,mockup_url,design_url,price_shirt_basic,price_shirt_oversized,price_shirt,price_mug`;
   const endpoint = `${url}/rest/v1/pet_designs?slug=eq.${safeHandle}&is_active=eq.true&select=${select}&limit=1`;
   try {
     const res = await fetch(endpoint, {
@@ -112,11 +112,21 @@ function pickDescription(d) {
   return `${name} · BLOOM Collection של ספלים שופ`;
 }
 
-function buildCrawlerHtml(d, handle) {
+// Inline JSON-LD safely: JSON.stringify does NOT escape `<`, so a stray
+// `</script>` in DB text could break out of the tag — neutralise it.
+function jsonLdScript(obj) {
+  const json = JSON.stringify(obj).replace(/</g, `\\u003c`);
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
+// Per-breed crawler HTML, used by BOTH /breed/<slug> and the legacy /p/<slug>
+// character-share path. Canonical is the breed real path so /p shares
+// consolidate onto /breed. Carries Product JSON-LD.
+function buildBreedHtml(d, handle) {
   const name = pickName(d);
   const description = pickDescription(d);
   const image = d.mockup_url || d.design_url || DEFAULT_OG_IMAGE;
-  const canonical = `${SITE_ORIGIN}/p/${encodeURIComponent(handle)}`;
+  const canonical = `${SITE_ORIGIN}/breed/${encodeURIComponent(handle)}`;
   const robots = MAINTENANCE ? `noindex, nofollow` : `index, follow`;
 
   const title = escapeHtml(`${name} · BLOOM · ספלים שופ`);
@@ -125,6 +135,32 @@ function buildCrawlerHtml(d, handle) {
   const canonicalAttr = escapeHtml(canonical);
   const nameAttr = escapeHtml(name);
   const robotsAttr = escapeHtml(robots);
+
+  // Price span across this breed's purchasable products (shirt + mug) so the
+  // Product rich result can show a price. Pet-name (+₪20) is an optional add-on,
+  // excluded from the base offer range. Mirrors the runtime BreedPage JSON-LD.
+  const offerPrices = [d.price_shirt_basic, d.price_shirt_oversized, d.price_shirt, d.price_mug]
+    .map((p) => Number(p))
+    .filter((p) => Number.isFinite(p) && p > 0);
+
+  const ld = jsonLdScript({
+    "@context": `https://schema.org`,
+    "@type": `Product`,
+    name,
+    image: [image],
+    description,
+    brand: { "@type": `Brand`, name: `BLOOM / Sfalim Shop` },
+    url: canonical,
+    ...(offerPrices.length ? {
+      offers: {
+        "@type": `AggregateOffer`,
+        priceCurrency: `ILS`,
+        lowPrice: Math.min(...offerPrices),
+        highPrice: Math.max(...offerPrices),
+        availability: `https://schema.org/InStock`,
+      },
+    } : {}),
+  });
 
   return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -148,6 +184,83 @@ function buildCrawlerHtml(d, handle) {
 <meta name="twitter:title" content="${nameAttr}" />
 <meta name="twitter:description" content="${descAttr}" />
 <meta name="twitter:image" content="${imageAttr}" />
+${ld}
+</head>
+<body></body>
+</html>`;
+}
+
+// ---- Blog post crawler HTML (/blog/<slug>) ----
+async function lookupBlogPost(handle) {
+  const url = process.env.SUPABASE_URL || FALLBACK_SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
+  const safe = encodeURIComponent(String(handle || ``).toLowerCase());
+  const select = `slug,title_he,title_en,title_ru,excerpt_he,excerpt_en,excerpt_ru,seo_title_he,seo_description_he,cover_image_url,cover_image_alt_he,published_at,updated_at,category`;
+  const endpoint = `${url}/rest/v1/blog_posts?slug=eq.${safe}&status=eq.published&select=${select}&limit=1`;
+  try {
+    const res = await fetch(endpoint, { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } });
+    if (!res.ok) { console.log(`[og] blog non-ok status=${res.status} handle=${handle}`); return null; }
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    return rows[0];
+  } catch (err) {
+    console.error(`[og] blog_posts fetch failed:`, err);
+    return null;
+  }
+}
+
+function buildBlogHtml(p, handle) {
+  const title = p.title_he || p.title_en || `BLOOM`;
+  const seoTitle = p.seo_title_he || title;
+  const description = p.seo_description_he || p.excerpt_he || p.excerpt_en || `${title} · בלוג ספלים שופ`;
+  const image = p.cover_image_url || DEFAULT_OG_IMAGE;
+  const canonical = `${SITE_ORIGIN}/blog/${encodeURIComponent(handle)}`;
+  const robots = MAINTENANCE ? `noindex, nofollow` : `index, follow`;
+
+  const titleAttr = escapeHtml(`${seoTitle} — Sfalim Shop`);
+  const ogTitleAttr = escapeHtml(title);
+  const descAttr = escapeHtml(description);
+  const imageAttr = escapeHtml(image);
+  const canonicalAttr = escapeHtml(canonical);
+  const robotsAttr = escapeHtml(robots);
+
+  const ld = jsonLdScript({
+    "@context": `https://schema.org`,
+    "@type": `Article`,
+    headline: title,
+    image: [image],
+    description,
+    datePublished: p.published_at || undefined,
+    dateModified: p.updated_at || p.published_at || undefined,
+    author: { "@type": `Organization`, name: `Sfalim Shop` },
+    publisher: { "@type": `Organization`, name: `Sfalim Shop`, logo: { "@type": `ImageObject`, url: `${SITE_ORIGIN}/logo.jpg` } },
+    mainEntityOfPage: canonical,
+    url: canonical,
+  });
+
+  return `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>${titleAttr}</title>
+<meta name="description" content="${descAttr}" />
+<meta name="robots" content="${robotsAttr}" />
+<link rel="canonical" href="${canonicalAttr}" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="ספלים שופ" />
+<meta property="og:url" content="${canonicalAttr}" />
+<meta property="og:title" content="${ogTitleAttr}" />
+<meta property="og:description" content="${descAttr}" />
+<meta property="og:image" content="${imageAttr}" />
+<meta property="og:image:secure_url" content="${imageAttr}" />
+<meta property="og:image:alt" content="${ogTitleAttr}" />
+<meta property="og:locale" content="he_IL" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="${canonicalAttr}" />
+<meta name="twitter:title" content="${ogTitleAttr}" />
+<meta name="twitter:description" content="${descAttr}" />
+<meta name="twitter:image" content="${imageAttr}" />
+${ld}
 </head>
 <body></body>
 </html>`;
@@ -176,6 +289,14 @@ module.exports = async function handler(req, res) {
   }
   handle = String(handle || ``).toLowerCase();
 
+  // type = breed | blog | (default) character. Set by the vercel.json rewrites
+  // (/breed/:slug → ?type=breed, /blog/:slug → ?type=blog). /p/<slug> sends no
+  // type — the legacy character-share path.
+  let type = ``;
+  if (req.query && typeof req.query.type === `string`) type = req.query.type;
+  if (!type && req.url) { try { type = new URL(req.url, `https://x.invalid`).searchParams.get(`type`) || ``; } catch (_) {} }
+  type = String(type || ``).toLowerCase();
+
   const ua = (req.headers && (req.headers[`user-agent`] || req.headers[`User-Agent`])) || ``;
   const crawler = isCrawler(ua);
 
@@ -192,35 +313,43 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const design = await lookupDesign(handle);
-
-  if (!design) {
-    console.log(`[og] branch=notfound handle=${handle}`);
+  const redirectHome = () => {
     res.statusCode = 302;
     res.setHeader(`Location`, `/`);
     res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
-    return;
-  }
-
-  if (!crawler) {
-    console.log(`[og] branch=human handle=${handle} → /#pets/${handle}`);
+  };
+  const redirectHuman = (target) => {
     res.statusCode = 302;
-    res.setHeader(`Location`, `/#pets/${encodeURIComponent(handle)}`);
+    res.setHeader(`Location`, target);
     res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
-    return;
+  };
+  // DO NOT add a public Cache-Control on the crawler 200: Vercel's edge cache is
+  // keyed by URL alone, so caching a crawler-branch 200 would poison subsequent
+  // non-crawler requests (they'd get HTML instead of a 302). Run every time.
+  const serveHtml = (html) => {
+    res.statusCode = 200;
+    res.setHeader(`Content-Type`, `text/html; charset=utf-8`);
+    res.setHeader(`Cache-Control`, `private, no-store`);
+    res.end(html);
+  };
+  const enc = encodeURIComponent(handle);
+
+  if (type === `blog`) {
+    const post = await lookupBlogPost(handle);
+    if (!post) { console.log(`[og] branch=notfound type=blog handle=${handle}`); return redirectHome(); }
+    if (!crawler) { console.log(`[og] branch=human type=blog handle=${handle} → /#/blog/${handle}`); return redirectHuman(`/#/blog/${enc}`); }
+    console.log(`[og] branch=crawler type=blog handle=${handle}`);
+    return serveHtml(buildBlogHtml(post, handle));
   }
 
-  console.log(`[og] branch=crawler handle=${handle} name=${pickName(design)}`);
-  const html = buildCrawlerHtml(design, handle);
-  res.statusCode = 200;
-  res.setHeader(`Content-Type`, `text/html; charset=utf-8`);
-  // DO NOT add a public Cache-Control here. Vercel's edge cache is keyed by
-  // URL alone, so caching a crawler-branch 200 poisons subsequent non-crawler
-  // requests at the same URL (they get the cached HTML instead of being
-  // routed back through the function for a 302). The function is cheap and
-  // BLOOM is 12 rows; just run it every time.
-  res.setHeader(`Cache-Control`, `private, no-store`);
-  res.end(html);
+  // type=breed (real /breed/<slug> page) OR no type (legacy /p/<slug> character
+  // share) — both resolve a pet_designs row. They differ only in where humans land.
+  const design = await lookupDesign(handle);
+  if (!design) { console.log(`[og] branch=notfound type=${type || `pet`} handle=${handle}`); return redirectHome(); }
+  const humanTarget = type === `breed` ? `/#/breed/${enc}` : `/#pets/${enc}`;
+  if (!crawler) { console.log(`[og] branch=human type=${type || `pet`} handle=${handle} → ${humanTarget}`); return redirectHuman(humanTarget); }
+  console.log(`[og] branch=crawler type=${type || `pet`} handle=${handle} name=${pickName(design)}`);
+  return serveHtml(buildBreedHtml(design, handle));
 };
