@@ -66,7 +66,6 @@ function buildTranzilaUrl(opts: {
     ["currency", "1"],
     ["cred_type", "1"],
     ["tranmode", "A"],
-    ["myid", opts.orderGroup],
     ["u71", opts.orderGroup],
     ["pdesc", opts.description],
     ["contact", opts.customerName],

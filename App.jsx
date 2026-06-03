@@ -1407,11 +1407,11 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         aria-label={lang === `he` ? `בחר דמות` : lang === `ru` ? `Выбрать персонажа` : `Choose character`}
         style={{
           display: `flex`,
-          flexWrap: `wrap`,
+          flexWrap: `nowrap`,
           justifyContent: `center`,
-          gap: 10,
+          gap: 2,
           marginTop: 28,
-          maxWidth: 360,
+          maxWidth: `100%`,
           direction: `ltr`,
         }}>
         {designs.map((d, idx) => {
@@ -1432,6 +1432,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 width: isActive ? 36 : 24,
                 height: 24,
                 minHeight: 24,
+                flexShrink: 0,
                 display: `inline-flex`,
                 alignItems: `center`,
                 justifyContent: `center`,
@@ -7715,70 +7716,115 @@ function AboutPage({ lang, setPage }) {
   const showConnector = vw >= 920;
   const t = {
     he: {
-      badge: 'באר שבע, בירת הנגב',
-      title: 'אנחנו Sfalim Shop',
-      subtitle: 'מקצועיות ושירות אדיב — מ-2023',
-      story: 'Sfalim Shop נולד מתוך אהבה לעיצוב ויצירה. מאז 2023 אנחנו מביאים לחיים כל עיצוב — על חולצות, ספלים ומדבקות — עם רמת גימור מקצועית שתרגישו בה.',
-      techTitle: 'הטכנולוגיות שלנו',
+      badge: `באר שבע, בירת הנגב`,
+      hero: `איפה שאהבת חיות פוגשת אמנות 🌸`,
+      subtitle: `מקצועיות ושירות אדיב — מ-2022`,
+      storyParas: [
+        `Sfalim Shop נולד מתוך אהבה ליצירה. כבר קרוב ל-4 שנים אני עוסק בעיצוב והדפסה על חולצות וספלים — התחלתי בקטן, ועם הזמן למדתי, חקרתי, והתאהבתי יותר ויותר ביכולת לקחת רעיון ולהפוך אותו למשהו מוחשי. לאורך הדרך עיצבתי מתנות אישיות, מוצרים לאירועים, ומיתוג לספורטאים — ותמיד חלמתי על מקום משלי שבו אוכל להביא את החזון שלי לעולם.`,
+        `לפני כשנה עלה הרעיון של BLOOM: בעלי חיים מעוצבים בלבוש פרחוני מרהיב, עם תכשיטים, בסגנון שלא ראיתם. הרעיון התבשל, התפתח, וקם לחיים בעבודה קשה סביב השעון — קולקציה עצומה של כלבים וחתולים, שכל אחד מהם הוא יצירת אמנות בפני עצמה.`,
+        `אני אוהב בעלי חיים בכל ליבי — בבית שלי שני חתולים מאומצים, ויש לי חמלה גדולה לכל חיה. BLOOM הוא הדרך שלי לחבר בין האהבה הזו ליצירה: לתת לאנשים חיוך כשהם רואים עיצוב מיוחד, ובמיוחד כשהם מוצאים חיה שמזכירה את שלהם.`,
+        `וזו רק ההתחלה. החזון גדול — קולקציות חדשות בדרך, והרעיון ממשיך להתפתח. אני גם חולם לאפשר בקרוב עיצוב אישי של חיית המחמד שלכם בסגנון BLOOM — כלב, חתול, או כל חבר אחר. אין שמחה גדולה יותר מלדעת שבעל חיה נושא עליו עיצוב ייחודי של החבר הכי טוב שלו, וגאה להראות אותו לעולם.`,
+      ],
+      whyTitle: `✨ למה ספלים שופ?`,
+      why: [
+        `🎨 עיצובים מקוריים — כל עיצובי BLOOM נוצרים על ידי, ולא תמצאו אותם בשום מקום אחר`,
+        `🖨️ איכות שאני עומד מאחוריה — הדפסה איכותית על חולצות וספלים שנשארים יפים לאורך זמן`,
+        `💛 יחס אישי — מאחורי ספלים שופ עומד אדם אחד שאוהב חיות ויצירה, ואכפת לו מכל הזמנה`,
+        `🚚 משלוח לכל הארץ — מבאר שבע, ישר אליכם`,
+      ],
+      techTitle: `הטכנולוגיות שלנו`,
       tech: [
-        { name: 'Sublimation', desc: 'הדפסה לחולצות פוליאסטר וספלים עם צבעים עמוקים ועמידים', num: '01' },
-        { name: 'DTF', desc: 'הדפסה ישירה על בד — מתאים לכל סוג בד בפירוט מדהים', num: '02' },
-        { name: 'Vinyl', desc: 'חיתוך ויניל לעיצובים חדים וברורים עם עמידות גבוהה', num: '03' },
+        { name: `Sublimation`, desc: `הדפסה לחולצות פוליאסטר וספלים עם צבעים עמוקים ועמידים`, num: `01` },
+        { name: `DTF`, desc: `הדפסה ישירה על בד — מתאים לכל סוג בד בפירוט מדהים`, num: `02` },
+        { name: `Vinyl`, desc: `חיתוך ויניל לעיצובים חדים וברורים עם עמידות גבוהה`, num: `03` },
       ],
-      processTitle: 'איך זה עובד?',
+      processTitle: `איך זה עובד?`,
       process: [
-        { step: '01', title: 'בחר מוצר', desc: 'חולצה, ספל או מדבקה' },
-        { step: '02', title: 'העלה עיצוב', desc: 'תמונה, לוגו, או כל קובץ' },
-        { step: '03', title: 'מקם ושלח', desc: 'צפה בתצוגה מקדימה ושלח הזמנה' },
-        { step: '04', title: 'קבל אצלך', desc: 'נייצר ונשלח אליך' },
+        { step: `01`, title: `בחירה`, desc: `בחרו דמות מאוסף BLOOM או העלו עיצוב משלכם` },
+        { step: `02`, title: `תצוגה מקדימה`, desc: `מקמו ובדקו איך העיצוב ייראה על המוצר` },
+        { step: `03`, title: `אישור עיצוב`, desc: `לעיצובים אישיים — מאשרים איתכם את האמנות לפני התשלום` },
+        { step: `04`, title: `תשלום מאובטח`, desc: `תשלום בכרטיס אשראי דרך Tranzila` },
+        { step: `05`, title: `ייצור ומשלוח`, desc: `נייצר באהבה ונשלח אליכם` },
       ],
-      contactTitle: 'יצירת קשר',
-      location: 'באר שבע, ישראל',
-      cta: 'התחל להזמין',
+      processNote: `* שלב אישור העיצוב חל על עיצובים אישיים שאתם מעלים. דמויות BLOOM מוכנות — הזמנה ישירה, ללא שלב אישור.`,
+      contactTitle: `יצירת קשר`,
+      location: `באר שבע, ישראל`,
+      closing: `זה ספלים שופ — אהבה, יצירה, וחיות מחמד שלובשות פנטזיה. 🌸`,
+      ctaBloom: `גלו את קולקציית BLOOM`,
     },
     en: {
-      badge: 'Beer Sheva, Capital of the Negev',
-      title: "We're Sfalim Shop",
-      subtitle: 'Professionalism & friendly service — since 2023',
-      story: 'Sfalim Shop was born from a love of design and creativity. Since 2023, we bring every design to life — on t-shirts, mugs and stickers — with professional quality you can feel.',
-      techTitle: 'Our Technologies',
+      badge: `Beer Sheva, Capital of the Negev`,
+      hero: `Where Animal Love Meets Art 🌸`,
+      subtitle: `Professionalism & friendly service — since 2022`,
+      storyParas: [
+        `Sfalim Shop was born out of a love for creating. For nearly 4 years I've worked in designing and printing on shirts and mugs — I started small, and over time I learned, explored, and fell more and more in love with the ability to take an idea and turn it into something real. Along the way I designed personal gifts, products for events, and branding for athletes — and I always dreamed of a place of my own where I could bring my vision to the world.`,
+        `About a year ago, the idea of BLOOM came to life: animals styled in stunning floral outfits with jewelry, in a style you've never seen. The idea grew, developed, and came alive through hard work around the clock — a huge collection of dogs and cats, each one a work of art in its own right.`,
+        `I love animals with all my heart — at home I have two adopted cats, and I have deep compassion for every animal. BLOOM is my way of connecting that love with creation: to give people a smile when they see a special design, and especially when they find an animal that reminds them of their own.`,
+        `And this is just the beginning. The vision is big — new collections on the way, and the idea keeps evolving. I also dream of soon offering a personalized design of your own pet in the BLOOM style — dog, cat, or any other friend. There's no greater joy than knowing a pet owner is wearing a unique design of their best friend, proud to show it to the world.`,
+      ],
+      whyTitle: `✨ Why Sfalim Shop?`,
+      why: [
+        `🎨 Original designs — every BLOOM design is created by me, found nowhere else`,
+        `🖨️ Quality I stand behind — premium printing on shirts and mugs that stay beautiful over time`,
+        `💛 A personal touch — behind Sfalim Shop is one person who loves animals and creating, and cares about every order`,
+        `🚚 Shipping across Israel — from Be'er Sheva, straight to you`,
+      ],
+      techTitle: `Our Technologies`,
       tech: [
-        { name: 'Sublimation', desc: 'Printing on polyester shirts and mugs with deep, durable colors', num: '01' },
-        { name: 'DTF', desc: 'Direct to film printing on any fabric type with stunning detail', num: '02' },
-        { name: 'Vinyl', desc: 'Vinyl cutting for sharp, clear designs with high durability', num: '03' },
+        { name: `Sublimation`, desc: `Printing on polyester shirts and mugs with deep, durable colors`, num: `01` },
+        { name: `DTF`, desc: `Direct to film printing on any fabric type with stunning detail`, num: `02` },
+        { name: `Vinyl`, desc: `Vinyl cutting for sharp, clear designs with high durability`, num: `03` },
       ],
-      processTitle: 'How it works',
+      processTitle: `How it works`,
       process: [
-        { step: '01', title: 'Choose product', desc: 'T-shirt, mug or sticker' },
-        { step: '02', title: 'Upload design', desc: 'Image, logo or any file' },
-        { step: '03', title: 'Place & send', desc: 'Preview and submit order' },
-        { step: '04', title: 'Receive it', desc: "We'll create and ship to you" },
+        { step: `01`, title: `Choose`, desc: `Pick a BLOOM character or upload your own design` },
+        { step: `02`, title: `Preview`, desc: `Position it and see how it looks on the product` },
+        { step: `03`, title: `Design approval`, desc: `For custom designs — we approve the artwork with you before payment` },
+        { step: `04`, title: `Secure payment`, desc: `Pay by credit card via Tranzila` },
+        { step: `05`, title: `Make & ship`, desc: `We craft it with care and ship to you` },
       ],
-      contactTitle: 'Contact Us',
-      location: 'Beer Sheva, Israel',
-      cta: 'Start Ordering',
+      processNote: `* The design-approval step applies to custom designs you upload. Ready-made BLOOM characters are ordered directly, with no approval step.`,
+      contactTitle: `Contact Us`,
+      location: `Beer Sheva, Israel`,
+      closing: `Sfalim Shop — love, art, and pets dressed in fantasy. 🌸`,
+      ctaBloom: `Explore the BLOOM Collection`,
     },
     ru: {
-      badge: 'Беэр-Шева, столица Негева',
-      title: 'Мы — Sfalim Shop',
-      subtitle: 'Профессионализм и дружелюбный сервис — с 2023',
-      story: 'Sfalim Shop родился из любви к дизайну и творчеству. С 2023 года мы воплощаем любой дизайн в жизнь — на футболках, кружках и стикерах — с профессиональным качеством.',
-      techTitle: 'Наши технологии',
+      badge: `Беэр-Шева, столица Негева`,
+      hero: `Где любовь к животным встречается с искусством 🌸`,
+      subtitle: `Профессионализм и дружелюбный сервис — с 2022`,
+      storyParas: [
+        `Sfalim Shop родился из любви к творчеству. Уже почти 4 года я занимаюсь дизайном и печатью на футболках и кружках — начинал с малого, со временем учился, исследовал и всё больше влюблялся в способность взять идею и превратить её во что-то реальное. На этом пути я создавал персональные подарки, продукцию для мероприятий и брендинг для спортсменов — и всегда мечтал о собственном месте, где смогу принести своё видение миру.`,
+        `Около года назад родилась идея BLOOM: животные в потрясающих цветочных нарядах с украшениями, в стиле, которого вы ещё не видели. Идея росла, развивалась и ожила благодаря упорной работе круглые сутки — огромная коллекция собак и кошек, каждая из которых — произведение искусства.`,
+        `Я люблю животных всем сердцем — дома у меня две кошки из приюта, и я испытываю глубокое сострадание к каждому животному. BLOOM — это мой способ соединить эту любовь с творчеством: подарить людям улыбку, когда они видят особый дизайн, особенно когда находят животное, похожее на их собственное.`,
+        `И это только начало. Видение большое — новые коллекции в пути, и идея продолжает развиваться. Я также мечтаю вскоре предложить персональный дизайн вашего питомца в стиле BLOOM — собаки, кошки или любого другого друга. Нет большей радости, чем знать, что владелец носит уникальный дизайн своего лучшего друга и гордо показывает его миру.`,
+      ],
+      whyTitle: `✨ Почему Sfalim Shop?`,
+      why: [
+        `🎨 Оригинальные дизайны — каждый дизайн BLOOM создан мной, его нет больше нигде`,
+        `🖨️ Качество, за которое я ручаюсь — premium-печать на футболках и кружках, которая остаётся красивой надолго`,
+        `💛 Личный подход — за Sfalim Shop стоит один человек, любящий животных и творчество, которому важен каждый заказ`,
+        `🚚 Доставка по всему Израилю — из Беэр-Шевы прямо к вам`,
+      ],
+      techTitle: `Наши технологии`,
       tech: [
-        { name: 'Sublimation', desc: 'Печать на полиэстер и кружках с яркими стойкими цветами', num: '01' },
-        { name: 'DTF', desc: 'Прямая печать на любой ткани с потрясающей детализацией', num: '02' },
-        { name: 'Vinyl', desc: 'Виниловая резка для четких дизайнов с высокой прочностью', num: '03' },
+        { name: `Sublimation`, desc: `Печать на полиэстер и кружках с яркими стойкими цветами`, num: `01` },
+        { name: `DTF`, desc: `Прямая печать на любой ткани с потрясающей детализацией`, num: `02` },
+        { name: `Vinyl`, desc: `Виниловая резка для четких дизайнов с высокой прочностью`, num: `03` },
       ],
-      processTitle: 'Как это работает',
+      processTitle: `Как это работает`,
       process: [
-        { step: '01', title: 'Выбрать товар', desc: 'Футболка, кружка или стикер' },
-        { step: '02', title: 'Загрузить дизайн', desc: 'Фото, логотип или любой файл' },
-        { step: '03', title: 'Разместить и отправить', desc: 'Просмотр и оформление заказа' },
-        { step: '04', title: 'Получить', desc: 'Создадим и доставим вам' },
+        { step: `01`, title: `Выбор`, desc: `Выберите персонажа BLOOM или загрузите свой дизайн` },
+        { step: `02`, title: `Предпросмотр`, desc: `Разместите и посмотрите, как это выглядит на товаре` },
+        { step: `03`, title: `Утверждение дизайна`, desc: `Для своих дизайнов — согласуем макет с вами до оплаты` },
+        { step: `04`, title: `Безопасная оплата`, desc: `Оплата картой через Tranzila` },
+        { step: `05`, title: `Изготовление и доставка`, desc: `Сделаем с любовью и отправим вам` },
       ],
-      contactTitle: 'Связаться с нами',
-      location: 'Беэр-Шева, Израиль',
-      cta: 'Начать заказ',
+      processNote: `* Шаг утверждения дизайна применяется к загруженным вами дизайнам. Готовые персонажи BLOOM заказываются напрямую, без этого шага.`,
+      contactTitle: `Связаться с нами`,
+      location: `Беэр-Шева, Израиль`,
+      closing: `Sfalim Shop — любовь, искусство и питомцы, одетые в фантазию. 🌸`,
+      ctaBloom: `Открыть коллекцию BLOOM`,
     },
   }[lang] || {};
 
@@ -7792,18 +7838,39 @@ function AboutPage({ lang, setPage }) {
         <div className="reveal" style={{ display: 'inline-block', background: 'rgba(255,107,53,0.15)', border: '1px solid rgba(255,107,53,0.3)', borderRadius: 100, padding: '6px 18px', marginBottom: 24, color: '#FF6B35', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           {t.badge}
         </div>
-        <h1 className="reveal" data-delay="1" style={{ color: '#fff', fontSize: 'clamp(36px,6vw,72px)', fontWeight: 900, marginBottom: 16, fontFamily: "'Playfair Display',serif", letterSpacing: '-1px' }}>{t.title}</h1>
-        <p className="reveal" data-delay="2" style={{ color: '#FF6B35', fontSize: 18, marginBottom: 32 }}>{t.subtitle}</p>
-        <p className="reveal" data-delay="3" style={{ color: '#888', fontSize: 17, maxWidth: 580, margin: '0 auto', lineHeight: 1.8 }}>{t.story}</p>
+        <h1 className="reveal" data-delay="1" style={{ color: '#fff', fontSize: 'clamp(32px,5.5vw,60px)', fontWeight: 900, marginBottom: 16, fontFamily: "'Playfair Display',serif", letterSpacing: '-1px', lineHeight: 1.15 }}>{t.hero}</h1>
+        <p className="reveal" data-delay="2" style={{ color: '#FF6B35', fontSize: 18 }}>{t.subtitle}</p>
       </div>
 
-      {/* Technologies */}
-      <div style={{ background: '#111', borderTop: '1px solid #1e1e1e', borderBottom: '1px solid #1e1e1e', padding: '60px 24px' }}>
+      {/* Story — the owner's first-person story, readable column. */}
+      <div style={{ padding: '8px 24px 8px' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          {t.storyParas?.map((p, i) => (
+            <p key={i} className="reveal" data-delay={String(Math.min(i + 1, 4))} style={{ color: '#cfcfcf', fontSize: 16.5, lineHeight: 1.9, marginBottom: 20, textAlign: isRTL ? 'right' : 'left' }}>{p}</p>
+          ))}
+        </div>
+      </div>
+
+      {/* Why us — benefit cards */}
+      <div style={{ background: '#111', borderTop: '1px solid #1e1e1e', borderBottom: '1px solid #1e1e1e', padding: '60px 24px', marginTop: 32 }}>
+        <div style={{ ...sectionStyle }}>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 36, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.whyTitle}</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: vw >= 700 ? '1fr 1fr' : '1fr', gap: 16, maxWidth: 760, margin: '0 auto' }}>
+            {t.why?.map((w, i) => (
+              <div key={i} className="reveal" data-delay={String(i + 1)} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '22px 24px', color: '#cfcfcf', fontSize: 15, lineHeight: 1.7, textAlign: isRTL ? 'right' : 'left' }}>{w}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Technologies — plain (black) section: it sits between the two #111
+          bands (why-us, contact) so the page reads as an alternating rhythm. */}
+      <div style={{ background: '#0f0f0f', padding: '60px 24px' }}>
         <div style={{ ...sectionStyle }}>
           <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 40, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.techTitle}</h2>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.tech?.map((tech, i) => (
-              <div key={i} className="reveal" data-delay={String(i + 1)} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '32px 32px 28px', flex: '1 1 220px', maxWidth: 280, transition: 'border-color 0.3s, transform 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)', position: 'relative' }}
+              <div key={i} className="reveal" data-delay={String(i + 1)} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '28px 24px 24px', flex: '1 1 220px', maxWidth: 280, transition: 'border-color 0.3s, transform 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)', position: 'relative' }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = '#FF6B35'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontStyle: 'italic', fontSize: 38, color: '#FF6B35', opacity: 0.85, lineHeight: 1, marginBottom: 14, letterSpacing: '-0.5px' }}>{tech.num}</div>
@@ -7822,7 +7889,7 @@ function AboutPage({ lang, setPage }) {
           <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 48, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.processTitle}</h2>
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.process?.map((step, i) => (
-              <div key={i} className="reveal" data-delay={String(i + 1)} style={{ flex: '1 1 180px', textAlign: 'center', padding: '0 20px', position: 'relative' }}>
+              <div key={i} className="reveal" data-delay={String(i + 1)} style={{ flex: '1 1 150px', textAlign: 'center', padding: '0 12px', position: 'relative' }}>
                 {i < (t.process.length - 1) && showConnector && <div style={{ position: 'absolute', top: 24, [isRTL ? 'right' : 'left']: '60%', [isRTL ? 'left' : 'right']: '-10%', height: 1, background: `linear-gradient(to ${isRTL ? 'left' : 'right'}, #FF6B35, #2a2a2a)`, opacity: 0.4 }} />}
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,107,53,0.15)', border: '2px solid #FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#FF6B35', fontWeight: 800, fontSize: 14 }}>{step.step}</div>
                 <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>{step.title}</div>
@@ -7830,6 +7897,7 @@ function AboutPage({ lang, setPage }) {
               </div>
             ))}
           </div>
+          {t.processNote && <p className="reveal" style={{ color: '#777', fontSize: 12.5, lineHeight: 1.7, textAlign: 'center', maxWidth: 620, margin: '32px auto 0', fontStyle: 'italic' }}>{t.processNote}</p>}
         </div>
       </div>
 
@@ -7837,13 +7905,15 @@ function AboutPage({ lang, setPage }) {
       <div style={{ background: '#111', borderTop: '1px solid #1e1e1e', padding: '60px 24px' }}>
         <div style={{ ...sectionStyle, textAlign: 'center' }}>
           <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 32, fontFamily: "'Playfair Display',serif" }}>{t.contactTitle}</h2>
-          <div className="reveal" data-delay="1" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
+          <div className="reveal" data-delay="1" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 36 }}>
             <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>{t.location}</div>
             <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>hello@sfalimshop.com</div>
           </div>
-          <span className="reveal" data-delay="2">
-            <MagneticButton onClick={() => setPage('order')} style={{ background: '#FF6B35', color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'box-shadow 0.3s' }}>
-              {t.cta} →
+          {/* Closing line + primary CTA → the BLOOM collection (#pets route). */}
+          <p className="reveal" data-delay="2" style={{ color: '#cfcfcf', fontSize: 17, lineHeight: 1.8, maxWidth: 600, margin: '0 auto 28px' }}>{t.closing}</p>
+          <span className="reveal" data-delay="3">
+            <MagneticButton onClick={() => setPage('pets')} style={{ background: '#FF6B35', color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'box-shadow 0.3s' }}>
+              {t.ctaBloom} →
             </MagneticButton>
           </span>
         </div>
