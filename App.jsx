@@ -205,13 +205,13 @@ function TrustStrip({ lang }) {
   const secure = lang === `he` ? `תשלום מאובטח` : lang === `ru` ? `Безопасная оплата` : `Secure payment`;
   const item = (icon, text) => (
     <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6, color: COLORS.gray, fontSize: 12, fontFamily: `'Varela Round',sans-serif` }}>
-      <span aria-hidden="true" style={{ fontSize: 14 }}>{icon}</span><span>{text}</span>
+      <AboutIcon name={icon} size={15} color={COLORS.gray} /><span>{text}</span>
     </span>
   );
   return (
     <div style={{ display: `flex`, flexWrap: `wrap`, gap: `8px 18px`, justifyContent: `center`, alignItems: `center`, padding: `10px 14px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8, direction: isRTL ? `rtl` : `ltr` }}>
-      {item(`🚚`, ships)}
-      {PAYMENTS_ENABLED && item(`🔒`, secure)}
+      {item(`truck`, ships)}
+      {PAYMENTS_ENABLED && item(`lock`, secure)}
     </div>
   );
 }
@@ -529,6 +529,10 @@ const FLOATING_CARD_CSS = `
   border: none;
   border-radius: 10px;
   padding: 10px 18px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 14px;
   font-weight: 700;
   color: #ffffff;
@@ -1013,7 +1017,11 @@ const BloomCardLite = React.memo(function BloomCardLite({
             color: COLORS.white,
             border: `none`,
             borderRadius: 999,
-            padding: `10px 18px`,
+            padding: `12px 20px`,
+            minHeight: 44,
+            display: `inline-flex`,
+            alignItems: `center`,
+            justifyContent: `center`,
             fontFamily: `'Varela Round',sans-serif`,
             fontSize: 13,
             fontWeight: 700,
@@ -1197,7 +1205,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     ru: `Звезда · BLOOM`,
   };
   const buttonByLang = {
-    he: `BLOOM →`,
+    he: `BLOOM ←`,
     en: `BLOOM →`,
     ru: `BLOOM →`,
   };
@@ -4676,7 +4684,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
-          {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
+          {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={13} color={it.petNameColor || COLORS.accent} /><span>{it.petName} (+₪{PET_NAME_SURCHARGE})</span></div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
             {it.color && (
@@ -4741,7 +4749,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
           background: "transparent", border: "none", color: COLORS.white, cursor: "pointer",
           fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600, padding: 0,
         }}>
-          <span>{`${tr.title} · ${itemCount} ${tr.items}`}</span>
+          <span>{`${tr.title} · ${itemCount} ${itemsWord(itemCount, lang)}`}</span>
           <span style={{ color: COLORS.accent, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}>
             {`₪${total}`}
             <span style={{ fontSize: 11 }}>{open ? "▲" : "▼"}</span>
@@ -5725,7 +5733,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <div style={{ background: "rgba(255,107,53,0.1)", border: `2px solid ${COLORS.accent}`, borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                 <div>
                   <div style={{ color: COLORS.accent, fontSize: 14, fontWeight: 700, letterSpacing: "0.05em" }}>
-                    {lang === "he" ? `${cart.length} פריטים בסל` : lang === "ru" ? `${cart.length} товаров в корзине` : `${cart.length} items in cart`}
+                    {lang === "he" ? `${cart.length} ${itemsWord(cart.length, lang)} בסל` : lang === "ru" ? `${cart.length} ${itemsWord(cart.length, lang)} в корзине` : `${cart.length} ${itemsWord(cart.length, lang)} in cart`}
                   </div>
                   <div style={{ color: COLORS.white, fontSize: 13, marginTop: 2 }}>
                     {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + shippingPrice}
@@ -6218,7 +6226,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "22px 22px 20px", marginBottom: 18 }}>
               <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${COLORS.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span>{t.payment.summary}</span>
-                <span style={{ color: COLORS.gray, fontSize: 12, fontWeight: 400 }}>{cart.length} {lang === "he" ? "פריטים" : lang === "ru" ? "товаров" : "items"}</span>
+                <span style={{ color: COLORS.gray, fontSize: 12, fontWeight: 400 }}>{cart.length} {itemsWord(cart.length, lang)}</span>
               </div>
               {cart.map((it) => (
                 <div key={it.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
@@ -7378,7 +7386,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
   // Cart icon with item-count badge — reused in the desktop and mobile nav.
   const cartButton = (
     <button onClick={onCartClick} aria-label={lang === "he" ? "סל קניות" : lang === "ru" ? "Корзина" : "Cart"}
-      style={{ position: "relative", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.2s" }}
+      style={{ position: "relative", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.2s" }}
       onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
       onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -7387,7 +7395,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
       {cartCount > 0 && (
-        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${lang === "he" ? "פריטים בסל" : lang === "ru" ? "товаров в корзине" : "items in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${itemsWord(cartCount, lang)} ${lang === "he" ? "בסל" : lang === "ru" ? "в корзине" : "in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
       )}
     </button>
   );
@@ -7398,7 +7406,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
   const favButton = (
     <button onClick={() => { try { window.location.hash = `/pets?fav=1`; } catch (_) {} }}
       aria-label={lang === "he" ? "המועדפים שלי" : lang === "ru" ? "Избранное" : "Favorites"}
-      style={{ position: "relative", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.2s" }}
+      style={{ position: "relative", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.2s" }}
       onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
       onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -7413,7 +7421,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
   // Instagram icon link — square button, matches the cart button's style.
   const instagramButton = (
     <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
-      style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0, transition: "all 0.2s" }}
+      style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0, transition: "all 0.2s" }}
       onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
       onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -7502,7 +7510,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
       {isMobile && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         {favButton}
         {cartButton}
-        <button onClick={() => setMobileMenu(m => !m)} aria-expanded={mobileMenu} aria-controls="mobile-nav-menu" aria-label={lang === "he" ? "תפריט" : lang === "ru" ? "Меню" : "Menu"} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
+        <button onClick={() => setMobileMenu(m => !m)} aria-expanded={mobileMenu} aria-controls="mobile-nav-menu" aria-label={lang === "he" ? "תפריט" : lang === "ru" ? "Меню" : "Menu"} style={{ background: mobileMenu ? COLORS.accentDim : "transparent", border: `1px solid ${mobileMenu ? COLORS.accent : COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: "8px 14px", minWidth: 44, minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 22, lineHeight: 1, transition: "all 0.2s" }}>{mobileMenu ? "✕" : "☰"}</button>
       </div>}
 
       {/* Auth + Lang - RIGHT (desktop only) */}
@@ -7702,6 +7710,19 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
   return typeof document !== `undefined` ? createPortal(widget, document.body) : widget;
 }
 
+// Correct "items" word for a given count + language (he: פריט/פריטים,
+// en: item/items, ru: товар/товара/товаров with the Slavic plural rule).
+function itemsWord(n, lang) {
+  if (lang === `he`) return n === 1 ? `פריט` : `פריטים`;
+  if (lang === `ru`) {
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return `товар`;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return `товара`;
+    return `товаров`;
+  }
+  return n === 1 ? `item` : `items`;
+}
+
 // ============ ABOUT PAGE ============
 // On-brand line-icons (lucide paths, inline SVG — matches the site's existing
 // inline-<svg> convention; no icon-library dependency). `size` accepts a number
@@ -7721,6 +7742,10 @@ function AboutIcon({ name, size = 20, color = '#FF6B35', strokeWidth = 1.75, sty
     case 'printer': return (<svg {...c}><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" /><rect x="6" y="14" width="12" height="8" rx="1" /></svg>);
     case 'heart': return (<svg {...c}><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" /></svg>);
     case 'truck': return (<svg {...c}><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" /><path d="M15 18H9" /><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" /><circle cx="17" cy="18" r="2" /><circle cx="7" cy="18" r="2" /></svg>);
+    case 'pawprint': return (<svg {...c}><circle cx="11" cy="4" r="2" /><circle cx="18" cy="8" r="2" /><circle cx="20" cy="16" r="2" /><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z" /></svg>);
+    case 'dog': return (<svg {...c}><path d="M11.25 16.25h1.5L12 17z" /><path d="M16 14v.5" /><path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444a11.702 11.702 0 0 0-.493-3.309" /><path d="M8 14v.5" /><path d="M8.5 8.5c-.384 1.05-1.083 2.028-2.344 2.5-1.931.722-3.576-.297-3.656-1-.113-.994 1.177-6.53 4-7 1.923-.321 3.651.845 3.651 2.235A7.497 7.497 0 0 1 14 5.277c0-1.39 1.844-2.598 3.767-2.277 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.855-1.45-2.239-2.5" /></svg>);
+    case 'cat': return (<svg {...c}><path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z" /><path d="M8 14v.5" /><path d="M16 14v.5" /><path d="M11.25 16.25h1.5L12 17l-.75-.75Z" /></svg>);
+    case 'lock': return (<svg {...c}><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>);
     default: return null;
   }
 }
@@ -8156,7 +8181,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
-                    {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}>🐾 {it.petName} (+₪{PET_NAME_SURCHARGE})</div>}
+                    {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={14} color={it.petNameColor || COLORS.accent} /><span>{it.petName} (+₪{PET_NAME_SURCHARGE})</span></div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
                       {it.color && (
@@ -8313,7 +8338,14 @@ export default function App() {
   // blogSlug — the router is popstate/state-driven, so navigating between
   // breeds needs an explicit state change to re-render + re-fetch.
   const [breedSlug, setBreedSlug] = useState(parseBreedSlugFromHash);
-  const [lang, setLang] = useState("he");
+  const [lang, setLang] = useState(() => {
+    if (typeof window === "undefined") return "he";
+    try {
+      const saved = window.localStorage.getItem("sf_lang");
+      if (saved === "he" || saved === "en" || saved === "ru") return saved;
+    } catch (_) {}
+    return "he";
+  });
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   // 🔐 Staff maintenance bypass. A plain ?staff=1 no longer bypasses on its own —
@@ -8799,6 +8831,8 @@ export default function App() {
     // Update html lang+dir to match current selection
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+    // Persist the chosen language so it survives a reload / return visit.
+    try { window.localStorage.setItem("sf_lang", lang); } catch (_) {}
   }, [page, lang]);
 
   // ============ ANALYTICS LOADER — fires only after cookie consent ============
@@ -9903,9 +9937,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           <div style={{ display: "flex", flexDirection: isMobile ? `column` : `row`, alignItems: isMobile ? `stretch` : `center`, gap: 12, marginBottom: 32, flexWrap: "wrap", position: `sticky`, top: 72, zIndex: 40, background: `rgba(15,15,15,0.92)`, backdropFilter: `blur(12px)`, WebkitBackdropFilter: `blur(12px)`, paddingTop: 16, paddingBottom: 16, borderBottom: `1px solid ${COLORS.border}` }}>
             <div role="tablist" aria-label={t.collectionEyebrow} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {[
-                { id: `all`, emoji: `🐾`, label: t.tabAll, count: designs.length },
-                { id: `dog`, emoji: `🐶`, label: t.tabDogs, count: designs.filter(d => d.species === `dog`).length },
-                { id: `cat`, emoji: `🐱`, label: t.tabCats, count: designs.filter(d => d.species === `cat`).length },
+                { id: `all`, icon: `pawprint`, label: t.tabAll, count: designs.length },
+                { id: `dog`, icon: `dog`, label: t.tabDogs, count: designs.filter(d => d.species === `dog`).length },
+                { id: `cat`, icon: `cat`, label: t.tabCats, count: designs.filter(d => d.species === `cat`).length },
               ].map(tab => {
                 const active = speciesFilter === tab.id;
                 return (
@@ -9931,7 +9965,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                       alignItems: `center`,
                       gap: 6,
                     }}>
-                    <span style={{ fontSize: 18 }} aria-hidden="true">{tab.emoji}</span>
+                    <AboutIcon name={tab.icon} size={18} color={active ? `#fff` : COLORS.gray} />
                     <span>{tab.label}</span>
                     <span style={{ opacity: 0.7, marginInlineStart: 2 }}>{tab.count}</span>
                   </button>
@@ -10279,6 +10313,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
         background: "transparent",
         border: `1px solid ${hovered ? COLORS.accent : "rgba(255,255,255,0.06)"}`,
         borderRadius: 14,
+        minWidth: 0,
         overflow: "hidden",
         clipPath,
         transition: "clip-path 0.4s cubic-bezier(.2,.6,.2,1), transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.35s cubic-bezier(.2,.6,.2,1), border-color 0.35s",
@@ -10333,6 +10368,8 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
           color: COLORS.white,
           margin: 0,
           letterSpacing: "-0.01em",
+          overflowWrap: "anywhere",
+          wordBreak: "break-word",
         }}>{name}</h3>
         {/* Species (dog/cat) intentionally not shown on the card. The species
             field stays in the data for the gallery filter — display only. */}
