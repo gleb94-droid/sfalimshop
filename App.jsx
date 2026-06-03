@@ -1493,16 +1493,9 @@ const COLORS = {
   white: "#ffffff", gray: "#888888", grayLight: "#8a8a8a", success: "#4ade80",
 };
 
-// Legacy flat shipping fee. Kept for any code path that hasn't been moved
-// onto the Locker/Home selector yet (defensive — every active path now uses
-// the per-method constants below).
-const SHIPPING_PRICE = 30;
-// Locker (delivery point pickup) is the cheaper, faster default. Home is
-// door-to-door courier. shippingMethod state in OrderPage chooses between
-// them; orders.extra_prints.shipping_method records the customer's choice.
-const SHIPPING_LOCKER = 20;
-const SHIPPING_HOME = 35;
-const SHIPPING_RATES = { locker: SHIPPING_LOCKER, home: SHIPPING_HOME };
+// Single flat shipping rate — ₪35 on every order (no locker/home/pickup split).
+// Used everywhere: cart drawer, checkout summary, order total, stored order.
+const SHIPPING_PRICE = 35;
 // Live pet-name personalization for customizable products (mugs + shirts only;
 // never stickers/packs). The typed name is printed on the product. It is OPTIONAL
 // and FREE — it does NOT affect price. Font + color pickers appear only after a
@@ -1688,7 +1681,7 @@ const LANGS = {
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה →', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון →', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו →', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
-    trust: { shipping: "משלוח ₪30", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
+    trust: { shipping: "משלוח ₪35", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
@@ -1732,7 +1725,7 @@ const LANGS = {
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
-    trust: { shipping: "Shipping ₪30", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
+    trust: { shipping: "Shipping ₪35", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
     reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
@@ -1776,7 +1769,7 @@ const LANGS = {
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
-    trust: { shipping: "Доставка ₪30", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
+    trust: { shipping: "Доставка ₪35", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
     reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
@@ -1864,9 +1857,7 @@ const POLICIES = {
       { type: "h", text: "זמני אספקה" },
       { type: "l", items: ["3-10 ימי עסקים לרוב היעדים", "עד 14 ימי עסקים בעת עומס או הדפסה מיוחדת", "מועד האספקה מתחיל מיום אישור התשלום", "ימי שישי, שבת וחגים אינם נחשבים ימי עסקים"] },
       { type: "h", text: "דמי משלוח" },
-      { type: "p", text: "30₪ — תעריף אחיד למרבית האזורים. אזורים מרוחקים (ערבה, הר חרמון, יישובי קו עימות) — ייתכן חיוב נוסף שיתואם מראש." },
-      { type: "h", text: "איסוף עצמי" },
-      { type: "p", text: "ניתן לתאם איסוף עצמי מבאר שבע — ללא עלות. צרו קשר טלפונית לתיאום." },
+      { type: "p", text: "₪35 — תעריף אחיד לכל הזמנה, לכל אזורי ישראל." },
       { type: "h", text: "התעכבות במשלוח" },
       { type: "p", text: "אם החבילה לא הגיעה תוך 21 ימי עסקים, אנא צרו קשר ונדאג לפתרון — משלוח חוזר או החזר כספי מלא." },
       { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
@@ -1951,9 +1942,7 @@ const POLICIES = {
       { type: "h", text: "Delivery Times" },
       { type: "l", items: ["3-10 business days for most destinations", "Up to 14 business days during high demand or special prints", "Delivery time begins from payment confirmation date", "Friday, Saturday, and holidays do not count as business days"] },
       { type: "h", text: "Shipping Fees" },
-      { type: "p", text: "30 ILS — flat rate for most areas. Remote areas (Arava, Mt. Hermon, border areas) may incur additional fees by prior arrangement." },
-      { type: "h", text: "Self-Pickup" },
-      { type: "p", text: "Self-pickup from Be'er Sheva can be arranged — free of charge. Call to coordinate." },
+      { type: "p", text: "₪35 — a single flat rate per order, anywhere in Israel." },
       { type: "h", text: "Shipping Delays" },
       { type: "p", text: "If a package hasn't arrived within 21 business days, please contact us — we'll arrange reshipping or full refund." },
       { type: "p", text: "Last updated: June 2, 2026" },
@@ -2038,9 +2027,7 @@ const POLICIES = {
       { type: "h", text: "Сроки доставки" },
       { type: "l", items: ["3-10 рабочих дней для большинства направлений", "До 14 рабочих дней при высокой нагрузке или спец. печати", "Срок начинается с момента подтверждения оплаты", "Пятница, суббота и праздники не считаются рабочими"] },
       { type: "h", text: "Стоимость доставки" },
-      { type: "p", text: "30 шек. — единый тариф для большинства зон. Удалённые зоны (Арава, Хермон, приграничные) — возможна доплата по согласованию." },
-      { type: "h", text: "Самовывоз" },
-      { type: "p", text: "Возможен самовывоз из Беэр-Шевы — бесплатно. Позвоните для согласования." },
+      { type: "p", text: "₪35 — единый тариф за заказ, по всему Израилю." },
       { type: "h", text: "Задержки доставки" },
       { type: "p", text: "Если посылка не пришла в течение 21 рабочего дня — свяжитесь с нами, решим проблему: повторная отправка или полный возврат." },
       { type: "p", text: "Последнее обновление: 02.06.2026" },
@@ -4867,12 +4854,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [submittedForApproval, setSubmittedForApproval] = useState(false);
   // A11y: focus-trap + restore for the "payments coming soon" modal.
   const paySoonRef = useDialogFocus(showPaymentSoonModal);
-  // Shipping method (Locker / Home). Locker is the cheaper default — most
-  // Israeli customers prefer pickup-point delivery. The chosen price feeds
-  // into total math + the per-line shipping row in the order insert, and
-  // the method itself is stored on each row's extra_prints.shipping_method.
-  const [shippingMethod, setShippingMethod] = useState(`locker`);
-  const shippingPrice = SHIPPING_RATES[shippingMethod] ?? SHIPPING_LOCKER;
+  // Single flat shipping rate (₪35) on every order — no method selector.
+  // Feeds total math + the per-line shipping row in the order insert.
+  const shippingPrice = SHIPPING_PRICE;
   const [backPrint, setBackPrint] = useState(false);
   const BACK_PRINT_PRICE = 39;
   const SECOND_FRONT_PRICE = 20;
@@ -5469,7 +5453,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             product_color: null,
             language: lang,
             back_print: false,
-            extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: shippingMethod },
+            extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: `flat` },
             order_group: orderGroupId,
           };
           if (user) {
@@ -5554,11 +5538,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           sleeve_left_url: it.sleeveLeft.enabled ? (it.sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
           sleeve_right_url: it.sleeveRight.enabled ? (it.sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
           order_group: orderGroupId,
-          // Shipping method on every row so the admin can route the package
-          // correctly (locker drop-off vs courier door-to-door). The total
-          // already reflects the chosen rate; this just records the customer
-          // choice. Stored on extra_prints (jsonb) to avoid a schema change.
-          extra_prints: { shipping_method: shippingMethod },
+          // Flat shipping on every row (₪35). Stored on extra_prints (jsonb)
+          // so the admin sees the method; no per-method choice anymore.
+          extra_prints: { shipping_method: `flat` },
         };
 
         if (user) {
@@ -6150,47 +6132,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => { setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") })); if (fieldErrors.postal) setFieldErrors(fe => ({ ...fe, postal: undefined })); }} placeholder="1234567" aria-invalid={!!fieldErrors.postal} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.postal && <div role="alert" style={fieldErrStyle}>{fieldErrors.postal}</div>}
                 </div>
               </div>
-              {/* Shipping method — Locker (cheaper, pickup-point) vs Home
-                  (door-to-door courier). Persisted onto every order row via
-                  extra_prints.shipping_method; the chosen rate feeds the
-                  totals via shippingPrice (above). */}
-              <div>
-                <label id="shipping-method-label" style={labelStyle}>
-                  {lang === `he` ? `שיטת משלוח` : lang === `ru` ? `Способ доставки` : `Shipping method`}
-                </label>
-                <div role="group" aria-labelledby="shipping-method-label" style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
-                  {[
-                    { id: `locker`, price: SHIPPING_LOCKER, label_he: `נקודת איסוף`, label_en: `Pickup locker`, label_ru: `Пункт выдачи`, sub_he: `מהיר וזול`, sub_en: `Fast & affordable`, sub_ru: `Быстро и дёшево` },
-                    { id: `home`, price: SHIPPING_HOME, label_he: `שליח עד הבית`, label_en: `Home delivery`, label_ru: `Курьер на дом`, sub_he: `נוחות מקסימלית`, sub_en: `Door to door`, sub_ru: `Прямо к двери` },
-                  ].map(opt => {
-                    const active = shippingMethod === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => setShippingMethod(opt.id)}
-                        style={{
-                          flex: `1 1 160px`,
-                          background: active ? `rgba(255,107,53,0.1)` : COLORS.bgCard,
-                          border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
-                          color: COLORS.white,
-                          borderRadius: 10,
-                          padding: `12px 14px`,
-                          textAlign: `start`,
-                          cursor: `pointer`,
-                          fontFamily: `'Varela Round',sans-serif`,
-                          transition: `border-color 0.2s, background 0.2s`,
-                        }}>
-                        <div style={{ display: `flex`, justifyContent: `space-between`, alignItems: `center`, gap: 8 }}>
-                          <span style={{ fontWeight: 700, fontSize: 14 }}>{opt[`label_${lang}`] || opt.label_en}</span>
-                          <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14 }}>{`₪${opt.price}`}</span>
-                        </div>
-                        <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{opt[`sub_${lang}`] || opt.sub_en}</div>
-                      </button>
-                    );
-                  })}
+              {/* Flat shipping — single ₪35 rate on every order (no method
+                  selector). Shown as a static info row; the cost is added to
+                  the totals via shippingPrice. */}
+              <div role="group" aria-label={lang === `he` ? `משלוח` : lang === `ru` ? `Доставка` : `Shipping`} style={{ display: `flex`, justifyContent: `space-between`, alignItems: `center`, gap: 10, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `12px 14px` }}>
+                <div>
+                  <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14 }}>{lang === `he` ? `משלוח` : lang === `ru` ? `Доставка` : `Shipping`}</div>
+                  <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{lang === `he` ? `תעריף אחיד לכל הארץ` : lang === `ru` ? `Единый тариф по всей стране` : `Flat rate, anywhere in Israel`}</div>
                 </div>
+                <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14 }}>{`₪${SHIPPING_PRICE}`}</span>
               </div>
               <div><label htmlFor="order-notes" style={labelStyle}>{t.form.notes}</label><textarea id="order-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
@@ -11929,11 +11879,11 @@ const FAQ_GROUPS = [
         },
       },
       {
-        q: { he: `כמה עולה המשלוח? יש איסוף עצמי?`, en: `How much is shipping? Is local pickup available?`, ru: `Сколько стоит доставка? Есть ли самовывоз?` },
+        q: { he: `כמה עולה המשלוח?`, en: `How much is shipping?`, ru: `Сколько стоит доставка?` },
         a: {
-          he: `אנחנו שולחים לכל הארץ עם UPS. לתושבי באר שבע — משלוח חינם לרגל הפתיחה! ניתן גם לתאם איסוף עצמי מבאר שבע, חינם, בתיאום מראש. עלות המשלוח לשאר הארץ מתעדכנת בקופה.`,
-          en: `We ship throughout Israel with UPS. For Be'er Sheva residents — free shipping to celebrate our opening! You can also arrange free local pickup in Be'er Sheva, by prior coordination. Shipping cost for the rest of the country is shown at checkout.`,
-          ru: `Мы доставляем по всему Израилю службой UPS. Для жителей Беэр-Шевы — бесплатная доставка в честь открытия! Также можно договориться о бесплатном самовывозе в Беэр-Шеве по предварительной координации. Стоимость доставки в остальные районы страны указывается на кассе.`,
+          he: `אנחנו שולחים לכל הארץ עם UPS. דמי משלוח: ₪35 — תעריף אחיד לכל הזמנה, נוסף בקופה.`,
+          en: `We ship throughout Israel with UPS. Shipping is a flat ₪35 per order, added at checkout.`,
+          ru: `Мы доставляем по всему Израилю службой UPS. Доставка — единый тариф ₪35 за заказ, добавляется на кассе.`,
         },
       },
     ],
