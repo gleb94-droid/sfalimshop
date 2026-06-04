@@ -269,6 +269,10 @@ const FLOATING_CARD_CSS = `
   --card-radius: 30px;
   --brand-orange: #f97316;
   --brand-orange-hover: #fb8a3c;
+  /* Action orange = darker fill ONLY for buttons carrying white text (WCAG AA:
+     #C0501A on #fff = 4.77:1). The bright --brand-orange stays for text/accents. */
+  --brand-orange-action: #C0501A;
+  --brand-orange-action-hover: #A8461A;
   perspective: 500px;
   transform: translate3d(0, 0, 0.1px);
   position: relative;
@@ -536,13 +540,13 @@ const FLOATING_CARD_CSS = `
   font-size: 14px;
   font-weight: 700;
   color: #ffffff;
-  background-color: var(--brand-orange);
+  background-color: var(--brand-orange-action);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 14px rgba(249, 115, 22, 0.45);
 }
 .fpc-contact-btn:hover {
-  background-color: var(--brand-orange-hover);
+  background-color: var(--brand-orange-action-hover);
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(249, 115, 22, 0.6);
 }
@@ -3836,7 +3840,7 @@ function AdminPage({ lang }) {
                 aria-current={active ? "location" : undefined}
                 style={{
                   flexShrink: 0,
-                  background: active ? COLORS.accent : "transparent",
+                  background: active ? COLORS.accentBtn : "transparent",
                   color: active ? "#fff" : COLORS.gray,
                   border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
                   borderRadius: 999, padding: "8px 18px",
@@ -4175,7 +4179,7 @@ function AdminPage({ lang }) {
                             setAddingDesign(false);
                             setDesignForm({ ...BLANK_DESIGN, ...d, breed_aliases: d.breed_aliases || `` });
                           }}
-                          style={{ background: isEditing ? COLORS.accent : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
+                          style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
                           {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
                         </button>
                       </div>
@@ -4263,7 +4267,7 @@ function AdminPage({ lang }) {
                           setAddingPack(false);
                           setPackForm({ ...BLANK_PACK, ...p, item_slugs: (p.item_slugs || []).join(`, `) });
                         }}
-                        style={{ background: isEditing ? COLORS.accent : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
+                        style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
                         {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
                       </button>
                     </div>
@@ -5689,7 +5693,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         <div style={{ display: "flex", marginBottom: 40 }}>
           {t.steps.map((s, i) => (
             <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: step >= i + 1 ? COLORS.accent : COLORS.bgCard, border: `2px solid ${step >= i + 1 ? COLORS.accent : COLORS.border}`, color: step >= i + 1 ? "#fff" : COLORS.gray, fontSize: 13, fontWeight: 600 }}>{step > i + 1 ? "✓" : i + 1}</div>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: step >= i + 1 ? COLORS.accentBtn : COLORS.bgCard, border: `2px solid ${step >= i + 1 ? COLORS.accent : COLORS.border}`, color: step >= i + 1 ? "#fff" : COLORS.gray, fontSize: 13, fontWeight: 600 }}>{step > i + 1 ? "✓" : i + 1}</div>
               {!isVeryNarrow && <div style={{ fontSize: isMobile ? 10 : 11, color: step === i + 1 ? COLORS.accent : COLORS.gray, marginTop: 6, textAlign: "center", lineHeight: 1.25 }}>{s}</div>}
             </div>
           ))}
@@ -5796,7 +5800,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               ))}
             </div>
-            <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accent : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>{t.product.continue}</button>
+            <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>{t.product.continue}</button>
           </div>
         )}
 
@@ -5843,10 +5847,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     {/* Design selector — shown when two designs exist */}
                     {uploadedImage && secondFront.enabled && secondFront.image && (
                       <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
-                        <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'main' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                        <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${activeDesign === 'main' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                           {lang === "he" ? "עיצוב ראשי" : "Main Design"}
                         </button>
-                        <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accent : COLORS.bgCard, border: `1px solid ${activeDesign === 'second' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                        <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${activeDesign === 'second' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
                           {lang === "he" ? "עיצוב שני" : "2nd Design"}
                         </button>
                       </div>
@@ -5882,7 +5886,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         <div style={{ display: "flex", gap: 6 }}>
                           {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => (
                             <button key={sz.id} onClick={() => handleSelectSize(sz.id)}
-                              style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accent : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", textAlign: "center" }}>
+                              style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", textAlign: "center" }}>
                               <div style={{ fontWeight: 700, fontSize: 12 }}>{sz.label[lang] || sz.label.en}</div>
                               <div style={{ fontSize: 10, opacity: 0.8 }}>{sz.cm}</div>
                             </button>
@@ -6680,8 +6684,8 @@ function CookieConsent({ lang, onAccept, onReject }) {
         onMouseOut={e => { e.currentTarget.style.color = "#888"; e.currentTarget.style.borderColor = "#333"; }}
         >{t.reject}</button>
         <button onClick={onAccept} style={{
-          background: "#FF6B35",
-          border: "1px solid #FF6B35",
+          background: COLORS.accentBtn,
+          border: `1px solid ${COLORS.accentBtn}`,
           color: "#fff",
           padding: "10px 22px",
           borderRadius: 8,
@@ -8007,7 +8011,7 @@ function AboutPage({ lang, setPage }) {
           {/* Closing line + primary CTA → the BLOOM collection (#pets route). */}
           <p className="reveal" data-delay="2" style={{ color: '#cfcfcf', fontSize: 17, lineHeight: 1.8, maxWidth: 600, margin: '0 auto 28px' }}>{t.closing} <AboutIcon name="flower2" size="1.05em" strokeWidth={1.6} color="#FF6B35" style={{ display: 'inline-block', verticalAlign: '-0.15em' }} /></p>
           <span className="reveal" data-delay="3">
-            <MagneticButton onClick={() => setPage('pets')} style={{ background: '#FF6B35', color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'box-shadow 0.3s' }}>
+            <MagneticButton onClick={() => setPage('pets')} style={{ background: COLORS.accentBtn, color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'box-shadow 0.3s' }}>
               {t.ctaBloom} {isRTL ? `←` : `→`}
             </MagneticButton>
           </span>
@@ -10003,7 +10007,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                     aria-selected={active}
                     onClick={() => setSpeciesFilter(tab.id)}
                     style={{
-                      background: active ? COLORS.accent : `transparent`,
+                      background: active ? COLORS.accentBtn : `transparent`,
                       color: active ? `#fff` : COLORS.gray,
                       border: `${active ? 2 : 1}px solid ${active ? COLORS.accent : COLORS.border}`,
                       borderRadius: 999,
@@ -10031,7 +10035,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                 onClick={() => setFavOnly(v => !v)}
                 title={t.favTab}
                 style={{
-                  background: favOnly ? COLORS.accent : `transparent`,
+                  background: favOnly ? COLORS.accentBtn : `transparent`,
                   color: favOnly ? `#fff` : COLORS.gray,
                   border: `${favOnly ? 2 : 1}px solid ${favOnly ? COLORS.accent : COLORS.border}`,
                   borderRadius: 999, padding: `12px 20px`, fontSize: 15, fontWeight: 700,
@@ -11948,7 +11952,7 @@ function PoliciesPage({ lang }) {
               else if (e.key === "End") n = ids.length - 1;
               if (n >= 0) { e.preventDefault(); goSection(ids[n]); const el = document.getElementById(`policy-tab-${ids[n]}`); if (el) el.focus(); }
             }}
-            style={{ background: active ? "#FF6B35" : "#1a1a1a", color: active ? "#fff" : "#a0a0a0", border: `1px solid ${active ? "#FF6B35" : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
+            style={{ background: active ? COLORS.accentBtn : "#1a1a1a", color: active ? "#fff" : "#a0a0a0", border: `1px solid ${active ? COLORS.accentBtn : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
             {s.title[lang]}
           </button>
           );
@@ -12635,7 +12639,7 @@ function BlogIndex({ lang, goToBlog }) {
             const active = category === c.id;
             return (
               <button key={c.id} type="button" role="tab" aria-selected={active} onClick={() => changeCategory(c.id)}
-                style={{ background: active ? COLORS.accent : `transparent`, color: active ? `#fff` : COLORS.gray, border: `${active ? 2 : 1}px solid ${active ? COLORS.accent : COLORS.border}`, borderRadius: 999, padding: `9px 20px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, transition: `all 0.2s` }}>{c.label}</button>
+                style={{ background: active ? COLORS.accentBtn : `transparent`, color: active ? `#fff` : COLORS.gray, border: `${active ? 2 : 1}px solid ${active ? COLORS.accent : COLORS.border}`, borderRadius: 999, padding: `9px 20px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, transition: `all 0.2s` }}>{c.label}</button>
             );
           })}
         </div>
