@@ -1666,6 +1666,39 @@ const ORDER_STAGES = [
   { key: "delivered", en: "Delivered",          he: "נמסר",              ru: "Доставлен",          dot: "#28C878" },
 ];
 
+// Payment states (orders.payment_status). Admin-only, read-only display.
+// Each has a trilingual label + a colour; the badge always shows TEXT (never
+// colour-only) so it stays accessible. `check:true` appends a ✓ for "paid".
+const PAYMENT_STATES = {
+  succeeded:  { he: "שולם",          en: "Paid",             ru: "Оплачено",       color: "#28C878", check: true },
+  processing: { he: "בעיבוד",        en: "Processing",       ru: "Обработка",      color: "#3B82F6" },
+  pending:    { he: "ממתין לתשלום",   en: "Awaiting payment", ru: "Ожидает оплаты", color: "#F59E0B" },
+  failed:     { he: "תשלום נכשל",     en: "Payment failed",   ru: "Ошибка оплаты",  color: "#ef4444" },
+  refunded:   { he: "הוחזר",          en: "Refunded",         ru: "Возврат",        color: "#a78bfa" },
+  cancelled:  { he: "מבוטל",          en: "Cancelled",        ru: "Отменён",        color: "#6B7280" },
+  idle:       { he: "טרם שולם",       en: "Unpaid",           ru: "Не оплачено",    color: "#6B7280" },
+};
+
+// Read-only payment badge for the admin orders list + detail. Colour + text,
+// never colour alone. `size` "sm" for the card, "md" for the detail panel.
+function PaymentBadge({ status, lang, size = "sm" }) {
+  const st = PAYMENT_STATES[status] || PAYMENT_STATES.idle;
+  const label = `${st[lang] || st.en}${st.check ? " ✓" : ""}`;
+  const sm = size === "sm";
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      background: `${st.color}1f`, border: `1px solid ${st.color}`, color: st.color,
+      borderRadius: 999, padding: sm ? "2px 9px" : "4px 12px",
+      fontSize: sm ? 11 : 12.5, fontWeight: 700, lineHeight: 1.25,
+      fontFamily: "'Varela Round',sans-serif", whiteSpace: "nowrap",
+    }}>
+      <span style={{ width: 7, height: 7, borderRadius: "50%", background: st.color, flexShrink: 0 }} />
+      {label}
+    </span>
+  );
+}
+
 
 // Time helpers
 const timeAgo = (dateStr, lang) => {
@@ -3416,6 +3449,8 @@ function AdminPage({ lang }) {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [search, setSearch] = useState("");
+  const [sortMode, setSortMode] = useState("newest");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   // BLOOM characters — manage the is_bestseller / is_new flags from here.
   const [petDesigns, setPetDesigns] = useState([]);
@@ -3811,6 +3846,59 @@ function AdminPage({ lang }) {
     fetchOrders();
   };
 
+  // ── Order search (client-side over loaded orders) ────────────────────
+  // Matches customer name / email / phone / order_group / order id.
+  const orderMatchesSearch = (o) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return [o.customer_name, o.customer_email, o.customer_phone, o.order_group, o.id]
+      .some(v => (v ?? ``).toString().toLowerCase().includes(q));
+  };
+
+  // ── Dashboard summary — signal metrics only (no charts/vanity totals) ──
+  // Orders are grouped by order_group so a multi-item cart counts once. The
+  // webhook writes the SAME group-total amount_paid to every row in a group,
+  // so revenue is summed once per group (never per item) to avoid multiplying.
+  const startOfToday = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); })();
+  const startOfWeek = Date.now() - 7 * 24 * 60 * 60 * 1000; // rolling 7 days
+  const startOfMonth = (() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime(); })();
+  const metricGroups = (() => {
+    const m = {};
+    for (const o of orders) {
+      const k = o.order_group || `single-${o.id}`;
+      const created = new Date(o.created_at).getTime();
+      if (!m[k]) {
+        m[k] = {
+          created,
+          paymentStatus: o.payment_status,
+          status: o.status,
+          approval: o.design_approval_status,
+          amountPaid: Number(o.amount_paid) || 0,
+          paidAt: o.paid_at ? new Date(o.paid_at).getTime() : null,
+        };
+      } else if (created < m[k].created) {
+        m[k].created = created;
+      }
+    }
+    return Object.values(m);
+  })();
+  const revenueSince = (since) => metricGroups
+    .filter(g => g.paymentStatus === `succeeded` && g.paidAt && g.paidAt >= since)
+    .reduce((s, g) => s + g.amountPaid, 0);
+  const fmtMoney = (n) => `₪${Math.round(n).toLocaleString(`en-US`)}`;
+  const needsActionCount = metricGroups.filter(g =>
+    g.approval === `pending` ||
+    (g.paymentStatus === `succeeded` && ![`shipped`, `delivered`].includes(g.status))
+  ).length;
+  const summaryCards = [
+    { he: `הזמנות היום`, en: `Orders today`, ru: `Заказы сегодня`, value: String(metricGroups.filter(g => g.created >= startOfToday).length) },
+    { he: `הזמנות השבוע`, en: `Orders (7d)`, ru: `Заказы (7д)`, value: String(metricGroups.filter(g => g.created >= startOfWeek).length) },
+    { he: `הכנסות היום`, en: `Revenue today`, ru: `Выручка сегодня`, value: fmtMoney(revenueSince(startOfToday)) },
+    { he: `הכנסות השבוע`, en: `Revenue (7d)`, ru: `Выручка (7д)`, value: fmtMoney(revenueSince(startOfWeek)) },
+    { he: `הכנסות החודש`, en: `Revenue (month)`, ru: `Выручка (мес.)`, value: fmtMoney(revenueSince(startOfMonth)) },
+    { he: `דרוש טיפול`, en: `Needs action`, ru: `Требует действий`, value: String(needsActionCount), alert: needsActionCount > 0 },
+  ];
+
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 24px" }}>
@@ -3869,6 +3957,44 @@ function AdminPage({ lang }) {
           </div>
         </div>
 
+        {/* Dashboard summary — at-a-glance signal metrics (no charts). Numbers
+            are LTR-isolated so ₪/digits never flip inside the RTL admin. */}
+        {!loading && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
+            {summaryCards.map((c, i) => (
+              <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${c.alert ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "14px 16px", textAlign: "start" }}>
+                <div style={{ color: c.alert ? COLORS.accent : COLORS.white, fontWeight: 800, fontSize: 22, fontFamily: "'Varela Round',sans-serif" }}>
+                  <span dir="ltr" style={{ unicodeBidi: "isolate", display: "inline-block" }}>{c.value}</span>
+                </div>
+                <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{c[lang] || c.en}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Search + sort toolbar */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ position: "relative", flex: "1 1 240px", minWidth: 0 }}>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={lang === "he" ? "חיפוש לפי שם, אימייל, טלפון או מס׳ הזמנה" : lang === "ru" ? "Поиск: имя, email, телефон или № заказа" : "Search name, email, phone or order #"}
+              aria-label={lang === "he" ? "חיפוש הזמנות" : lang === "ru" ? "Поиск заказов" : "Search orders"}
+              style={{ width: "100%", boxSizing: "border-box", background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 10, padding: search ? "10px 36px 10px 14px" : "10px 14px", fontSize: 14, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}
+            />
+            {search && (
+              <button onClick={() => setSearch("")} aria-label={lang === "he" ? "נקה חיפוש" : lang === "ru" ? "Очистить" : "Clear search"}
+                style={{ position: "absolute", insetInlineEnd: 8, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 4 }}>✕</button>
+            )}
+          </div>
+          <select value={sortMode} onChange={e => setSortMode(e.target.value)}
+            aria-label={lang === "he" ? "מיון" : lang === "ru" ? "Сортировка" : "Sort"}
+            style={{ flexShrink: 0, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 10, padding: "10px 14px", fontSize: 13, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", direction: t.dir }}>
+            <option value="newest">{lang === "he" ? "החדשות ביותר" : lang === "ru" ? "Сначала новые" : "Newest first"}</option>
+            <option value="oldest">{lang === "he" ? "הישנות ביותר" : lang === "ru" ? "Сначала старые" : "Oldest first"}</option>
+          </select>
+        </div>
+
         {/* Filter buttons */}
         <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
           {["all", ...ORDER_STAGES.map(s => s.key)].map(key => {
@@ -3915,16 +4041,16 @@ function AdminPage({ lang }) {
         )}
 
         {loading ? <div style={{ color: COLORS.gray, textAlign: "center", padding: 40 }}>Loading...</div> :
-          (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).length === 0 ? (
+          (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).filter(orderMatchesSearch).length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
               <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
               <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
-              <div style={{ fontSize: 16, color: "#888" }}>{t.admin.noOrders}</div>
+              <div style={{ fontSize: 16, color: "#888" }}>{search.trim() ? (lang === "he" ? "לא נמצאו הזמנות לחיפוש" : lang === "ru" ? "Заказы не найдены" : "No orders match your search") : t.admin.noOrders}</div>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {(() => {
-                const filtered = filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus);
+                const filtered = (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).filter(orderMatchesSearch);
                 // Group orders by order_group (or treat individual orders as their own group)
                 const groupsMap = {};
                 for (const o of filtered) {
@@ -3932,7 +4058,9 @@ function AdminPage({ lang }) {
                   if (!groupsMap[key]) groupsMap[key] = [];
                   groupsMap[key].push(o);
                 }
-                const groups = Object.values(groupsMap).sort((a, b) => new Date(b[0].created_at) - new Date(a[0].created_at));
+                const groups = Object.values(groupsMap).sort((a, b) => sortMode === "oldest"
+                  ? new Date(a[0].created_at) - new Date(b[0].created_at)
+                  : new Date(b[0].created_at) - new Date(a[0].created_at));
                 return groups.map(group => {
                   const order = group[0]; // primary order — has customer info + first item
                   const groupTotal = group.reduce((sum, o) => sum + (o.total || 0), 0);
@@ -3953,7 +4081,8 @@ function AdminPage({ lang }) {
                         </div>
                         <div style={{ textAlign: "end" }}>
                           <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{groupTotal}</div>
-                          <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 4, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 6px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
+                          <div style={{ marginTop: 6 }}><PaymentBadge status={order.payment_status} lang={lang} /></div>
+                          <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 6px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
                           <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
                           {order.completed_at && <div style={{ color: COLORS.success, fontSize: 11, marginTop: 2 }}>✓ {timeBetween(order.created_at, order.completed_at, lang)}</div>}
                         </div>
@@ -3987,6 +4116,26 @@ function AdminPage({ lang }) {
                                     <div style={{ color: COLORS.white, fontSize: 13 }}>{o.customer_message}</div>
                                   </div>
                                 ))}
+                              </div>
+                            )}
+                          </div>
+                          {/* Payment (read-only) — surfaced from the order's payment columns */}
+                          <div style={{ flex: 1, minWidth: 200 }}>
+                            <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{lang === "he" ? "תשלום" : lang === "ru" ? "Оплата" : "Payment"}</div>
+                            <PaymentBadge status={order.payment_status} lang={lang} size="md" />
+                            {order.amount_paid != null && order.payment_status === "succeeded" && (
+                              <div style={{ color: COLORS.white, fontSize: 14, marginTop: 8 }}>
+                                {lang === "he" ? "שולם: " : lang === "ru" ? "Оплачено: " : "Paid: "}<span dir="ltr" style={{ unicodeBidi: "isolate" }}>₪{order.amount_paid}</span>
+                              </div>
+                            )}
+                            {order.paid_at && (
+                              <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>
+                                <span dir="ltr" style={{ unicodeBidi: "isolate" }}>{new Date(order.paid_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                              </div>
+                            )}
+                            {order.tranzila_transaction_id && (
+                              <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>
+                                {lang === "he" ? "עסקה " : lang === "ru" ? "Транзакция " : "Txn "}<span dir="ltr" style={{ unicodeBidi: "isolate" }}>#{order.tranzila_transaction_id}</span>
                               </div>
                             )}
                           </div>
