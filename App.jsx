@@ -3538,6 +3538,16 @@ function AdminPage({ lang }) {
   // (USING is_admin()) already exists, so this reads under the admin session.
   const [waitlist, setWaitlist] = useState([]);
   const [waitlistLoading, setWaitlistLoading] = useState(true);
+  // ── Testimonials manager — admin CRUD over the public `testimonials` table.
+  // Active rows flow straight into the home-page <Reviews> section.
+  const BLANK_TESTIMONIAL = { author_name: ``, author_city: ``, author_avatar: ``, rating: 5, body_he: ``, body_en: ``, body_ru: ``, product: ``, sort_order: 0, is_active: true };
+  const [testimonials, setTestimonials] = useState([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+  const [editingTestimonialId, setEditingTestimonialId] = useState(null);
+  const [addingTestimonial, setAddingTestimonial] = useState(false);
+  const [testimonialForm, setTestimonialForm] = useState(BLANK_TESTIMONIAL);
+  const [testimonialErrors, setTestimonialErrors] = useState({});
+  const [deleteTestimonialConfirm, setDeleteTestimonialConfirm] = useState(null);
   // Surface a banner if any admin fetch fails (instead of a silent blank/empty).
   const [fetchError, setFetchError] = useState(false);
 
@@ -3547,6 +3557,7 @@ function AdminPage({ lang }) {
     fetchPetDesigns();
     fetchStickerPacks();
     fetchWaitlist();
+    fetchTestimonials();
     const sub = supabase.channel("orders-changes").on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders).subscribe();
     return () => sub.unsubscribe();
   }, []);
@@ -3773,6 +3784,95 @@ function AdminPage({ lang }) {
     }
   };
 
+  // ── Testimonials CRUD ───────────────────────────────────────────────
+  const fetchTestimonials = async () => {
+    try {
+      const { data, error } = await supabase
+        .from(`testimonials`)
+        .select(`*`)
+        .order(`sort_order`, { ascending: true })
+        .order(`created_at`, { ascending: false });
+      if (error) throw error;
+      setTestimonials(data || []);
+    } catch (e) {
+      console.error(`Admin fetchTestimonials failed:`, e);
+      setFetchError(true);
+    } finally {
+      setTestimonialsLoading(false);
+    }
+  };
+
+  // Insert (existingId === null) or update. Validates required fields + rating
+  // range; returns false + sets inline errors on invalid input.
+  const saveTestimonial = async (formValues, existingId) => {
+    const req = lang === `he` ? `שדה חובה` : lang === `ru` ? `Обязательное поле` : `Required`;
+    const errs = {};
+    if (!formValues.author_name?.trim()) errs.author_name = req;
+    if (!formValues.body_he?.trim()) errs.body_he = req;
+    const rating = Number(formValues.rating);
+    if (!(rating >= 1 && rating <= 5)) errs.rating = lang === `he` ? `דירוג 1–5` : lang === `ru` ? `Оценка 1–5` : `Rating 1–5`;
+    if (Object.keys(errs).length) { setTestimonialErrors(errs); return false; }
+    setTestimonialErrors({});
+    setCatalogBusy(true);
+    try {
+      const row = {
+        author_name: formValues.author_name.trim(),
+        author_city: formValues.author_city?.trim() || null,
+        author_avatar: formValues.author_avatar?.trim() || null,
+        rating,
+        body_he: formValues.body_he.trim(),
+        body_en: formValues.body_en?.trim() || null,
+        body_ru: formValues.body_ru?.trim() || null,
+        product: formValues.product?.trim() || null,
+        sort_order: Number(formValues.sort_order) || 0,
+        is_active: !!formValues.is_active,
+      };
+      if (existingId) {
+        const { error } = await supabase.from(`testimonials`).update(row).eq(`id`, existingId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from(`testimonials`).insert(row);
+        if (error) throw error;
+      }
+      await fetchTestimonials();
+      setEditingTestimonialId(null);
+      setAddingTestimonial(false);
+      return true;
+    } catch (e) {
+      console.error(`Save testimonial failed:`, e);
+      alert(`Save failed: ${e.message || e}`);
+      return false;
+    } finally {
+      setCatalogBusy(false);
+    }
+  };
+
+  // Optimistic show/hide toggle. Reverts on DB error.
+  const toggleTestimonialActive = async (id, value) => {
+    setTestimonials(prev => prev.map(r => r.id === id ? { ...r, is_active: value } : r));
+    const { error } = await supabase.from(`testimonials`).update({ is_active: value }).eq(`id`, id);
+    if (error) {
+      console.error(`Toggle testimonial active failed:`, error);
+      setTestimonials(prev => prev.map(r => r.id === id ? { ...r, is_active: !value } : r));
+    }
+  };
+
+  const deleteTestimonial = async (id) => {
+    setCatalogBusy(true);
+    try {
+      const { error } = await supabase.from(`testimonials`).delete().eq(`id`, id);
+      if (error) throw error;
+      await fetchTestimonials();
+      if (editingTestimonialId === id) setEditingTestimonialId(null);
+    } catch (e) {
+      console.error(`Delete testimonial failed:`, e);
+      alert(`Delete failed: ${e.message || e}`);
+    } finally {
+      setDeleteTestimonialConfirm(null);
+      setCatalogBusy(false);
+    }
+  };
+
   const deleteOrder = async (orderIdOrIds) => {
     const ids = Array.isArray(orderIdOrIds) ? orderIdOrIds : [orderIdOrIds];
     for (const orderId of ids) {
@@ -3825,6 +3925,7 @@ function AdminPage({ lang }) {
     { id: `admin-blog`, label: t.navBlog || `Blog` },
     { id: `admin-approvals`, label: lang === `he` ? `אישור עיצובים` : lang === `ru` ? `Одобрение дизайнов` : `Design approvals` },
     { id: `admin-waitlist`, label: lang === `he` ? `רשימת המתנה` : lang === `ru` ? `Лист ожидания` : `Waitlist` },
+    { id: `admin-testimonials`, label: lang === `he` ? `ביקורות` : lang === `ru` ? `Отзывы` : `Reviews` },
   ];
   const [activeSection, setActiveSection] = useState(`admin-orders`);
   const suppressSpy = useRef(false); // ignore scroll-spy while a click-scroll animates
@@ -4644,6 +4745,97 @@ function AdminPage({ lang }) {
             </>
           )}
         </div>
+
+        {/* ===== Testimonials manager — CRUD over the public `testimonials` table ===== */}
+        <div id="admin-testimonials" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
+            <div>
+              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+                {lang === `he` ? `ביקורות` : lang === `ru` ? `Отзывы` : `Reviews`}
+              </h2>
+              <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
+                {testimonialsLoading
+                  ? (lang === `he` ? `טוען...` : lang === `ru` ? `Загрузка...` : `Loading...`)
+                  : (lang === `he` ? `${testimonials.length} ביקורות · ${testimonials.filter(r => r.is_active).length} מוצגות באתר` : lang === `ru` ? `${testimonials.length} отзывов · ${testimonials.filter(r => r.is_active).length} показаны` : `${testimonials.length} reviews · ${testimonials.filter(r => r.is_active).length} live`)}
+              </p>
+            </div>
+            <button type="button" onClick={() => { setAddingTestimonial(true); setEditingTestimonialId(null); setTestimonialForm(BLANK_TESTIMONIAL); setTestimonialErrors({}); }}
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              {lang === `he` ? `+ הוסף ביקורת` : lang === `ru` ? `+ Добавить отзыв` : `+ Add review`}
+            </button>
+          </div>
+
+          {addingTestimonial && (
+            <TestimonialEditor form={testimonialForm} setForm={setTestimonialForm} busy={catalogBusy} errors={testimonialErrors}
+              onSave={() => saveTestimonial(testimonialForm, null)}
+              onCancel={() => { setAddingTestimonial(false); setTestimonialForm(BLANK_TESTIMONIAL); setTestimonialErrors({}); }}
+              onDelete={null} lang={lang} />
+          )}
+
+          {!testimonialsLoading && testimonials.length === 0 && !addingTestimonial && (
+            <div style={{ textAlign: `center`, padding: `40px 16px`, color: COLORS.gray }}>
+              <div style={{ fontSize: 30, marginBottom: 10, color: COLORS.accent }}>★</div>
+              <div style={{ fontSize: 14, lineHeight: 1.6, maxWidth: 440, margin: `0 auto` }}>
+                {lang === `he` ? `אין עדיין ביקורות — הוסיפו את הראשונה, או בקשו מלקוחות שקיבלו הזמנה.` : lang === `ru` ? `Отзывов пока нет — добавьте первый или попросите клиентов, получивших заказ.` : `No reviews yet — add the first one, or ask customers who received an order.`}
+              </div>
+            </div>
+          )}
+
+          {testimonials.length > 0 && (
+            <div style={{ display: `flex`, flexDirection: `column`, gap: 8 }}>
+              {testimonials.map((r) => {
+                const isEditing = editingTestimonialId === r.id;
+                const raw = r.body_he || r.body_en || r.body_ru || ``;
+                const snippet = raw.slice(0, 80);
+                return (
+                  <div key={r.id}>
+                    <div style={{ background: COLORS.bgCard, border: `1px solid ${isEditing ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, display: `flex`, alignItems: `center`, gap: 12, flexWrap: `wrap`, opacity: r.is_active ? 1 : 0.6 }}>
+                      <div style={{ flex: 1, minWidth: 160 }}>
+                        <div style={{ display: `flex`, alignItems: `center`, gap: 10, flexWrap: `wrap` }}>
+                          <ReviewStars rating={r.rating} label={lang === `he` ? `דירוג` : lang === `ru` ? `Оценка` : `Rating`} />
+                          <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>{r.author_name}</span>
+                          {(r.author_city || r.product) && <span style={{ color: COLORS.gray, fontSize: 11 }}>{[r.author_city, r.product].filter(Boolean).join(` · `)}</span>}
+                        </div>
+                        <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>“{snippet}{raw.length > 80 ? `…` : ``}”</div>
+                      </div>
+                      <button type="button" onClick={() => toggleTestimonialActive(r.id, !r.is_active)} aria-pressed={!!r.is_active}
+                        style={{ background: r.is_active ? `rgba(40,200,120,0.12)` : `#111`, border: `1px solid ${r.is_active ? COLORS.success : COLORS.border}`, color: r.is_active ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700, minHeight: 36 }}>
+                        {r.is_active ? (lang === `he` ? `מוצג ✓` : lang === `ru` ? `Показан ✓` : `Live ✓`) : (lang === `he` ? `מוסתר` : lang === `ru` ? `Скрыт` : `Hidden`)}
+                      </button>
+                      <button type="button" onClick={() => { if (isEditing) { setEditingTestimonialId(null); return; } setEditingTestimonialId(r.id); setAddingTestimonial(false); setTestimonialErrors({}); setTestimonialForm({ ...BLANK_TESTIMONIAL, ...r }); }}
+                        style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700, minHeight: 36 }}>
+                        {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
+                      </button>
+                      <button type="button" onClick={() => setDeleteTestimonialConfirm(r.id)} aria-label={lang === `he` ? `מחק ביקורת` : lang === `ru` ? `Удалить отзыв` : `Delete review`}
+                        style={{ background: `transparent`, border: `1px solid ${COLORS.border}`, color: `#ef4444`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontSize: 14, fontWeight: 700, minHeight: 36 }}>×</button>
+                    </div>
+                    {isEditing && (
+                      <TestimonialEditor form={testimonialForm} setForm={setTestimonialForm} busy={catalogBusy} errors={testimonialErrors}
+                        onSave={() => saveTestimonial(testimonialForm, r.id)}
+                        onCancel={() => { setEditingTestimonialId(null); setTestimonialErrors({}); }}
+                        onDelete={() => setDeleteTestimonialConfirm(r.id)} lang={lang} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Delete confirmation modal — mirrors the orders delete dialog */}
+          {deleteTestimonialConfirm && (
+            <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", direction: t.dir }}>
+              <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 400, width: "90%", textAlign: "center" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: "50%", background: "rgba(239,68,68,0.12)", border: "2px solid #ef4444", marginBottom: 16, color: "#ef4444", fontSize: 28, fontWeight: 700 }}>!</div>
+                <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{lang === "he" ? "למחוק את הביקורת?" : lang === "ru" ? "Удалить отзыв?" : "Delete this review?"}</div>
+                <div style={{ color: COLORS.gray, fontSize: 14, marginBottom: 24 }}>{lang === "he" ? "לא ניתן לשחזר פעולה זו" : lang === "ru" ? "Это действие нельзя отменить" : "This action cannot be undone"}</div>
+                <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                  <button onClick={() => setDeleteTestimonialConfirm(null)} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}</button>
+                  <button onClick={() => deleteTestimonial(deleteTestimonialConfirm)} disabled={catalogBusy} style={{ background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "10px 24px", cursor: catalogBusy ? "wait" : "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>{lang === "he" ? "מחק" : lang === "ru" ? "Удалить" : "Delete"}</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -4709,6 +4901,63 @@ function AdminImageRow({ label, value, onChange, bucket, prefix, uploadAdminImag
           {uploading ? `…` : `Upload`}
         </button>
         {value && <img src={value} alt="" style={{ width: 32, height: 32, borderRadius: 4, objectFit: `cover`, border: `1px solid ${COLORS.border}` }} />}
+      </div>
+    </div>
+  );
+}
+
+// Testimonials add/edit form. Mirrors PackEditor's shape (form + setForm owned
+// by AdminPage). Star picker for rating; he body required; en/ru optional.
+function TestimonialEditor({ form, setForm, busy, errors = {}, onSave, onCancel, onDelete, lang }) {
+  const set = (k) => (v) => setForm(prev => ({ ...prev, [k]: v }));
+  const L = {
+    he: { name: `שם הלקוח *`, city: `עיר`, rating: `דירוג *`, bodyHe: `הביקורת (עברית) *`, bodyEn: `English (אופציונלי)`, bodyRu: `Русский (אופציונלי)`, product: `מוצר`, avatar: `תמונת פרופיל — קישור (אופציונלי)`, sort: `סדר`, active: `מוצג באתר`, live: `מוצג באתר ✓`, hidden: `מוסתר`, save: `שמור`, cancel: `ביטול`, del: `מחק` },
+    en: { name: `Customer name *`, city: `City`, rating: `Rating *`, bodyHe: `Review (Hebrew) *`, bodyEn: `English (optional)`, bodyRu: `Русский (optional)`, product: `Product`, avatar: `Avatar URL (optional)`, sort: `Sort`, active: `Live on site`, live: `Live ✓`, hidden: `Hidden`, save: `Save`, cancel: `Cancel`, del: `Delete` },
+    ru: { name: `Имя клиента *`, city: `Город`, rating: `Оценка *`, bodyHe: `Отзыв (иврит) *`, bodyEn: `English (необяз.)`, bodyRu: `Русский (необяз.)`, product: `Товар`, avatar: `Аватар URL (необяз.)`, sort: `Порядок`, active: `Показан`, live: `Показан ✓`, hidden: `Скрыт`, save: `Сохранить`, cancel: `Отмена`, del: `Удалить` },
+  }[lang] || {};
+  const errStyle = { color: `#f87171`, fontSize: 11, marginTop: 4, fontFamily: `'Varela Round',sans-serif` };
+  const taStyle = { width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: `8px 10px`, fontSize: 13, fontFamily: `'Varela Round',sans-serif`, boxSizing: `border-box`, outline: `none`, resize: `vertical` };
+  return (
+    <div style={{ background: COLORS.bg, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: 18, marginTop: 10, marginBottom: 10, display: `flex`, flexDirection: `column`, gap: 14 }}>
+      <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 12 }}>
+        <div><AdminFieldLabel>{L.name}</AdminFieldLabel><AdminInput value={form.author_name} onChange={set(`author_name`)} dir={lang === `he` ? `rtl` : `ltr`} />{errors.author_name && <div style={errStyle}>{errors.author_name}</div>}</div>
+        <div><AdminFieldLabel>{L.city}</AdminFieldLabel><AdminInput value={form.author_city} onChange={set(`author_city`)} placeholder={lang === `he` ? `תל אביב` : `Tel Aviv`} dir={lang === `he` ? `rtl` : `ltr`} /></div>
+        <div><AdminFieldLabel>{L.product}</AdminFieldLabel><AdminInput value={form.product} onChange={set(`product`)} placeholder={lang === `he` ? `ספל BLOOM` : `BLOOM mug`} dir={lang === `he` ? `rtl` : `ltr`} /></div>
+      </div>
+
+      <div>
+        <AdminFieldLabel>{L.rating}</AdminFieldLabel>
+        <div role="group" aria-label={L.rating} style={{ display: `flex`, gap: 4 }}>
+          {[1, 2, 3, 4, 5].map(n => (
+            <button key={n} type="button" aria-label={`${n}/5`} aria-pressed={Number(form.rating) >= n} onClick={() => set(`rating`)(n)}
+              style={{ background: `transparent`, border: `none`, cursor: `pointer`, fontSize: 26, lineHeight: 1, color: COLORS.accent, opacity: Number(form.rating) >= n ? 1 : 0.28, padding: 4, minWidth: 44, minHeight: 44 }}>★</button>
+          ))}
+        </div>
+        {errors.rating && <div style={errStyle}>{errors.rating}</div>}
+      </div>
+
+      <div><AdminFieldLabel>{L.bodyHe}</AdminFieldLabel><textarea value={form.body_he ?? ``} onChange={(e) => set(`body_he`)(e.target.value)} dir="rtl" rows={3} style={taStyle} />{errors.body_he && <div style={errStyle}>{errors.body_he}</div>}</div>
+      <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(220px, 1fr))`, gap: 12 }}>
+        <div><AdminFieldLabel>{L.bodyEn}</AdminFieldLabel><textarea value={form.body_en ?? ``} onChange={(e) => set(`body_en`)(e.target.value)} dir="ltr" rows={3} style={taStyle} /></div>
+        <div><AdminFieldLabel>{L.bodyRu}</AdminFieldLabel><textarea value={form.body_ru ?? ``} onChange={(e) => set(`body_ru`)(e.target.value)} dir="ltr" rows={3} style={taStyle} /></div>
+      </div>
+
+      <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 12, alignItems: `end` }}>
+        <div><AdminFieldLabel>{L.avatar}</AdminFieldLabel><AdminInput value={form.author_avatar} onChange={set(`author_avatar`)} placeholder="https://..." dir="ltr" /></div>
+        <div><AdminFieldLabel>{L.sort}</AdminFieldLabel><AdminInput type="number" value={form.sort_order} onChange={set(`sort_order`)} /></div>
+        <div>
+          <AdminFieldLabel>{L.active}</AdminFieldLabel>
+          <button type="button" onClick={() => set(`is_active`)(!form.is_active)} aria-pressed={!!form.is_active}
+            style={{ width: `100%`, background: form.is_active ? `rgba(40,200,120,0.12)` : `#111`, border: `1px solid ${form.is_active ? COLORS.success : COLORS.border}`, color: form.is_active ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `8px 10px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 700, minHeight: 40 }}>
+            {form.is_active ? L.live : L.hidden}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: `flex`, gap: 10, flexWrap: `wrap`, marginTop: 4 }}>
+        <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 20px`, fontWeight: 700, fontSize: 13, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, minHeight: 44 }}>{busy ? `…` : L.save}</button>
+        <button type="button" onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 20px`, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, minHeight: 44 }}>{L.cancel}</button>
+        {onDelete && <button type="button" onClick={onDelete} style={{ background: `transparent`, color: `#ef4444`, border: `1px solid rgba(239,68,68,0.5)`, borderRadius: 8, padding: `10px 20px`, fontSize: 13, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, minHeight: 44, marginInlineStart: `auto` }}>{L.del}</button>}
       </div>
     </div>
   );
