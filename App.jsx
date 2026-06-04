@@ -8190,7 +8190,10 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
   const [open, setOpen] = useState(false);
   const [fontSize, setFontSize] = useState(() => {
     const v = readA11y().fontSize;
-    return typeof v === `number` && v >= 80 && v <= 140 ? v : 100;
+    // Whole-page zoom levels: 100 / 110 / 120 / 130. Clamp any stored value
+    // (including legacy 80–140 from the old root-font-size approach) into range.
+    if (typeof v === `number` && v >= 100) return Math.min(130, Math.round(v / 10) * 10);
+    return 100;
   });
   const [highContrast, setHighContrast] = useState(() => readA11y().highContrast === true);
   const [highlightLinks, setHighlightLinks] = useState(() => readA11y().highlightLinks === true);
@@ -8202,7 +8205,17 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
   }, []);
 
   useEffect(() => {
-    document.documentElement.style.fontSize = `${fontSize}%`;
+    // The app's font sizes are hardcoded in px (inline styles), so a root
+    // font-size change does nothing for them. `zoom` is the one mechanism that
+    // enlarges px text site-wide AND reflows the layout (transform:scale would
+    // overlap/clip and break position:fixed). Applied to <html> so it also
+    // covers overlays portaled to <body> (PetModal, cart, lightbox) + the page.
+    const el = (typeof document !== `undefined` && document.documentElement) || null;
+    if (el) {
+      el.style.fontSize = ``; // clear any legacy root font-size from the old approach
+      const scale = fontSize / 100;
+      el.style.zoom = scale === 1 ? `` : String(scale);
+    }
     writeA11y({ fontSize });
   }, [fontSize]);
 
@@ -8318,9 +8331,9 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
           <div style={{ marginBottom: 16 }}>
             <div style={{ color: '#888', fontSize: 11, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t.textSize}</div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button aria-label={lang === 'he' ? 'הקטן טקסט' : lang === 'ru' ? 'Уменьшить текст' : 'Decrease text size'} onClick={() => setFontSize(f => Math.max(80, f - 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>−</button>
+              <button aria-label={lang === 'he' ? 'הקטן טקסט' : lang === 'ru' ? 'Уменьшить текст' : 'Decrease text size'} onClick={() => setFontSize(f => Math.max(100, f - 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>−</button>
               <div style={{ flex: 1, textAlign: 'center', color: '#FF6B35', fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{fontSize}%</div>
-              <button aria-label={lang === 'he' ? 'הגדל טקסט' : lang === 'ru' ? 'Увеличить текст' : 'Increase text size'} onClick={() => setFontSize(f => Math.min(140, f + 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>+</button>
+              <button aria-label={lang === 'he' ? 'הגדל טקסט' : lang === 'ru' ? 'Увеличить текст' : 'Increase text size'} onClick={() => setFontSize(f => Math.min(130, f + 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>+</button>
             </div>
           </div>
 
