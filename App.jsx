@@ -1506,9 +1506,57 @@ const COLORS = {
   white: "#ffffff", gray: "#888888", grayLight: "#8a8a8a", success: "#4ade80",
 };
 
-// Single flat shipping rate — ₪35 on every order (no locker/home/pickup split).
-// Used everywhere: cart drawer, checkout summary, order total, stored order.
+// Legacy flat rate — kept as a numeric fallback only. The live checkout uses
+// the per-method prices in SHIPPING_OPTIONS below (do NOT delete this).
 const SHIPPING_PRICE = 35;
+
+// ── Delivery methods (orders.delivery_method) ───────────────────────────────
+// Three customer-chosen options. Prices live here so they're trivial to tweak.
+// personal_beersheva carries NO shipping fee. The amount charged is always the
+// SUM of orders.total (shipping is folded into the first row), so changing a
+// price here flows straight through to the Tranzila charge.
+const SHIPPING_OPTIONS = { personal_beersheva: 0, ups_home: 55, ups_point: 27 };
+const DELIVERY_METHODS = [
+  { id: `personal_beersheva`, icon: `heart`,
+    title: { he: `מסירה אישית · באר שבע`, en: `Personal handoff · Be'er Sheva`, ru: `Личная передача · Беэр-Шева` },
+    note: {
+      he: `מסירה אישית ללא עלות — באר שבע בלבד. נתאם איתך מקום ושעה מראש בוואטסאפ.`,
+      en: `Personal handoff · no shipping fee — Be'er Sheva only. We'll arrange place & time in advance on WhatsApp.`,
+      ru: `Личная передача · без платы за доставку — только Беэр-Шева. Место и время согласуем заранее в WhatsApp.`,
+    } },
+  { id: `ups_home`, icon: `truck`,
+    title: { he: `משלוח עד הבית · כל הארץ`, en: `Home delivery · nationwide`, ru: `Доставка до двери · по стране` },
+    note: {
+      he: `שליח UPS עד הבית, בכל רחבי הארץ.`,
+      en: `UPS courier to your door, anywhere in Israel.`,
+      ru: `Курьер UPS до двери, по всей стране.`,
+    } },
+  { id: `ups_point`, icon: `mappin`,
+    title: { he: `איסוף מנקודת חלוקה`, en: `Pickup point`, ru: `Пункт выдачи` },
+    note: {
+      he: `איסוף מנקודת חלוקה של UPS הקרובה אליך.`,
+      en: `Collect from your nearest UPS pickup point.`,
+      ru: `Заберите в ближайшем пункте выдачи UPS.`,
+    } },
+];
+const DELIVERY_BY_ID = Object.fromEntries(DELIVERY_METHODS.map(m => [m.id, m]));
+// Price chip on the selector card (never the word "free"/"חינם").
+const deliveryPriceLabel = (id, lng) => SHIPPING_OPTIONS[id] === 0
+  ? (lng === `he` ? `ללא עלות` : lng === `ru` ? `Без платы` : `No fee`)
+  : `₪${SHIPPING_OPTIONS[id]}`;
+// Shipping line in the order/payment summary.
+const shippingLineLabel = (id, lng) => SHIPPING_OPTIONS[id] === 0
+  ? (lng === `he` ? `מסירה אישית · ללא עלות משלוח` : lng === `ru` ? `Личная передача · без платы` : `Personal handoff · no shipping fee`)
+  : `₪${SHIPPING_OPTIONS[id]}`;
+
+// Small lucide-style icons for the three delivery methods (kept local so the
+// selector + admin can share them without touching AboutIcon).
+function DeliveryIcon({ name, size = 22, color = `currentColor` }) {
+  const common = { width: size, height: size, viewBox: `0 0 24 24`, fill: `none`, stroke: color, strokeWidth: 2, strokeLinecap: `round`, strokeLinejoin: `round` };
+  if (name === `heart`) return (<svg {...common}><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z" /></svg>);
+  if (name === `truck`) return (<svg {...common}><path d="M14 18V6a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h1" /><path d="M14 9h4l3 3v5a1 1 0 0 1-1 1h-1" /><circle cx="6.5" cy="18.5" r="2" /><circle cx="17.5" cy="18.5" r="2" /></svg>);
+  return (<svg {...common}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" /><circle cx="12" cy="10" r="3" /></svg>);
+}
 // Live pet-name personalization for customizable products (mugs + shirts only;
 // never stickers/packs). The typed name is printed on the product. It is OPTIONAL
 // and FREE — it does NOT affect price. Font + color pickers appear only after a
@@ -1727,7 +1775,7 @@ const LANGS = {
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה →', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון →', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו →', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
-    trust: { shipping: "משלוח ₪35", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
+    trust: { shipping: "משלוח מ-₪27", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
@@ -1771,7 +1819,7 @@ const LANGS = {
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
-    trust: { shipping: "Shipping ₪35", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
+    trust: { shipping: "Shipping from ₪27", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
     reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
@@ -1815,7 +1863,7 @@ const LANGS = {
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
-    trust: { shipping: "Доставка ₪35", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
+    trust: { shipping: "Доставка от ₪27", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
     reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
@@ -4077,6 +4125,16 @@ function AdminPage({ lang }) {
                           <div style={{ minWidth: 0 }}>
                             <div style={{ color: COLORS.white, fontWeight: 600 }}>{order.customer_name}{isMulti ? <span style={{ color: COLORS.accent, fontSize: 12, marginInline: 8, background: "rgba(255,107,53,0.15)", padding: "2px 10px", borderRadius: 10, letterSpacing: "0.05em" }}>{group.length} {lang === "he" ? "פריטים" : lang === "ru" ? "тов." : "items"}</span> : null}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13 }}>{isMulti ? group.map(o => `${localizeProduct(o.product, lang)} ×${o.quantity}`).join(" · ") : `${localizeProduct(order.product, lang)} · ${localizeVariant(order.variant, lang)} · ×${order.quantity}`}</div>
+                            {order.delivery_method && (() => {
+                              const dm = DELIVERY_BY_ID[order.delivery_method];
+                              const personal = order.delivery_method === "personal_beersheva";
+                              return (
+                                <div style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 4, color: personal ? "#25D366" : COLORS.grayLight, fontSize: 11.5 }}>
+                                  <span aria-hidden="true" style={{ flexShrink: 0 }}><DeliveryIcon name={dm?.icon || "truck"} size={13} /></span>
+                                  <span>{dm ? (dm.title[lang] || dm.title.en) : order.delivery_method}</span>
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
                         <div style={{ textAlign: "end" }}>
@@ -4098,6 +4156,17 @@ function AdminPage({ lang }) {
                             <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{order.customer_email}</div>
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{order.customer_phone}</div>}
                             {(order.customer_street || order.customer_city) && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{[order.customer_street, order.customer_city, order.customer_postal_code].filter(Boolean).join(", ")}</div>}
+                            {order.delivery_method && (() => {
+                              const dm = DELIVERY_BY_ID[order.delivery_method];
+                              const personal = order.delivery_method === "personal_beersheva";
+                              return (
+                                <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 8, marginBottom: 4 }}>
+                                  <span aria-hidden="true" style={{ flexShrink: 0, color: personal ? "#25D366" : COLORS.accent }}><DeliveryIcon name={dm?.icon || "truck"} size={16} /></span>
+                                  <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{dm ? (dm.title[lang] || dm.title.en) : order.delivery_method}</span>
+                                  {personal && <span style={{ color: "#25D366", fontSize: 11 }}>· {lang === "he" ? "תאמו בוואטסאפ (אין כתובת)" : lang === "ru" ? "WhatsApp (без адреса)" : "coordinate on WhatsApp (no address)"}</span>}
+                                </div>
+                              );
+                            })()}
                             {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>{order.notes}</div>}
                             {group.some(o => o.customer_message) && (
                               <div style={{ marginTop: 8 }}>
@@ -4802,15 +4871,15 @@ function PackEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadAdm
 // ============ ORDER SUMMARY — sticky sidebar on desktop, collapsible top bar on mobile ============
 // Lives inside step 3 of the OrderPage so the customer always sees what
 // they're about to pay for, with inline qty/remove controls.
-function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPrice }) {
+function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPrice, deliveryMethod }) {
   const isRTL = lang === "he";
   // Falls back to the legacy flat rate if the parent hasn't passed a chosen
   // method yet (defensive — every OrderPage caller now provides it).
   const effectiveShipping = Number.isFinite(shippingPrice) ? shippingPrice : SHIPPING_PRICE;
   const TR = {
-    he: { title: "ההזמנה שלך", items: "פריטים", subtotal: "סכום ביניים", shipping: "משלוח", free: "חינם", total: "סה״כ", empty: "הסל ריק", expand: "הצג סיכום", collapse: "הסתר סיכום", inc: "הוסף", dec: "הפחת", remove: "הסר" },
-    en: { title: "Your order", items: "items", subtotal: "Subtotal", shipping: "Shipping", free: "Free", total: "Total", empty: "Cart is empty", expand: "Show summary", collapse: "Hide summary", inc: "Increase", dec: "Decrease", remove: "Remove" },
-    ru: { title: "Ваш заказ", items: "товаров", subtotal: "Подытог", shipping: "Доставка", free: "Бесплатно", total: "Итого", empty: "Корзина пуста", expand: "Показать", collapse: "Скрыть", inc: "Увеличить", dec: "Уменьшить", remove: "Удалить" },
+    he: { title: "ההזמנה שלך", items: "פריטים", subtotal: "סכום ביניים", shipping: "משלוח", choose: "בחרו אופן מסירה", total: "סה״כ", empty: "הסל ריק", expand: "הצג סיכום", collapse: "הסתר סיכום", inc: "הוסף", dec: "הפחת", remove: "הסר" },
+    en: { title: "Your order", items: "items", subtotal: "Subtotal", shipping: "Shipping", choose: "Choose a method", total: "Total", empty: "Cart is empty", expand: "Show summary", collapse: "Hide summary", inc: "Increase", dec: "Decrease", remove: "Remove" },
+    ru: { title: "Ваш заказ", items: "товаров", subtotal: "Подытог", shipping: "Доставка", choose: "Выберите способ", total: "Итого", empty: "Корзина пуста", expand: "Показать", collapse: "Скрыть", inc: "Увеличить", dec: "Уменьшить", remove: "Удалить" },
   };
   const tr = TR[lang] || TR.he;
 
@@ -4897,7 +4966,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         <span>{tr.subtotal}</span><span style={{ color: COLORS.white }}>{`₪${subtotal}`}</span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: COLORS.gray }}>
-        <span>{tr.shipping}</span><span style={{ color: COLORS.white }}>{shipping === 0 ? tr.free : `₪${shipping}`}</span>
+        <span>{tr.shipping}</span><span style={{ color: COLORS.white, textAlign: isRTL ? "left" : "right" }}>{!deliveryMethod ? tr.choose : shippingLineLabel(deliveryMethod, lang)}</span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${COLORS.border}`, color: COLORS.accent, fontWeight: 700, fontSize: 17, fontFamily: "'Playfair Display',serif" }}>
         <span>{tr.total}</span><span>{`₪${total}`}</span>
@@ -5019,15 +5088,19 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const validateCheckout = () => {
     const req = lang === "he" ? "שדה חובה" : lang === "ru" ? "Обязательное поле" : "Required";
     const e = {};
+    if (!deliveryMethod) e.delivery = lang === "he" ? "בחרו אופן מסירה" : lang === "ru" ? "Выберите способ получения" : "Choose a delivery method";
     if (!form.name.trim()) e.name = req;
     if (!form.email.trim()) e.email = req;
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = lang === "he" ? "כתובת אימייל לא תקינה" : lang === "ru" ? "Неверный email" : "Invalid email address";
     if (!form.phoneNumber) e.phone = req;
     else if (form.phoneNumber.length !== 7) e.phone = lang === "he" ? "מספר טלפון לא תקין (7 ספרות)" : lang === "ru" ? "Неверный номер (7 цифр)" : "Invalid phone (7 digits)";
-    if (!form.street.trim()) e.street = req;
-    if (!form.city.trim()) e.city = req;
-    if (!form.postalCode) e.postal = req;
-    else if (form.postalCode.length < 5) e.postal = lang === "he" ? "מיקוד לא תקין" : lang === "ru" ? "Неверный индекс" : "Invalid postal code";
+    // Address only required for the UPS methods (not personal handoff).
+    if (addressRequired) {
+      if (!form.street.trim()) e.street = req;
+      if (!form.city.trim()) e.city = req;
+      if (!form.postalCode) e.postal = req;
+      else if (form.postalCode.length < 5) e.postal = lang === "he" ? "מיקוד לא תקין" : lang === "ru" ? "Неверный индекс" : "Invalid postal code";
+    }
     return e;
   };
   const fieldErrStyle = { color: "#f87171", fontSize: 12, marginTop: 4, fontFamily: "'Varela Round',sans-serif" };
@@ -5038,9 +5111,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [submittedForApproval, setSubmittedForApproval] = useState(false);
   // A11y: focus-trap + restore for the "payments coming soon" modal.
   const paySoonRef = useDialogFocus(showPaymentSoonModal);
-  // Single flat shipping rate (₪35) on every order — no method selector.
-  // Feeds total math + the per-line shipping row in the order insert.
-  const shippingPrice = SHIPPING_PRICE;
+  // Delivery method — customer chooses one of three at checkout (no silent
+  // default in the UI: starts null and an explicit pick is required). The
+  // chosen method drives the shipping price, which field set is required, and
+  // is persisted to orders.delivery_method.
+  const [deliveryMethod, setDeliveryMethod] = useState(null);
+  const shippingPrice = deliveryMethod ? SHIPPING_OPTIONS[deliveryMethod] : 0;
+  // Address is required for the two UPS methods, NOT for personal handoff
+  // (coordinated privately on WhatsApp — no address collected).
+  const addressRequired = deliveryMethod !== `personal_beersheva`;
   const [backPrint, setBackPrint] = useState(false);
   const BACK_PRINT_PRICE = 39;
   const SECOND_FRONT_PRICE = 20;
@@ -5322,6 +5401,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     + (sleeveRight.enabled ? SLEEVE_PRICE : 0) : 0;
   const hasOrderInProgress = cart.length > 0 || (step === 2 && variant);
   const total = (cartItemsTotal + currentItemTotal) + (hasOrderInProgress ? shippingPrice : 0);
+  // Single source of truth for "can submit the checkout form". A delivery
+  // method must be chosen; address is only needed for the UPS methods.
+  const baseFieldsComplete = !!(form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7);
+  const addressComplete = !addressRequired || !!(form.street && form.city && form.postalCode);
+  const checkoutReady = !!deliveryMethod && baseFieldsComplete && addressComplete;
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0]; if (!file) return;
@@ -5605,6 +5689,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
     try {
       const createdOrderIds = [];
+      // Personal handoff collects NO address (coordinated on WhatsApp); the UPS
+      // methods carry the form address. delivery_method is stored on every row.
+      const addr = deliveryMethod === `personal_beersheva`
+        ? { customer_street: null, customer_city: null, customer_postal_code: null }
+        : { customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode };
       // Does this checkout contain a customer-uploaded custom design? If so the
       // whole group waits for design approval before payment (you can't pay for
       // half a cart). BLOOM / pet-name items carry an https design URL; only a
@@ -5621,7 +5710,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           const packItemTotal = it.itemPrice + (i === 0 ? shippingPrice : 0);
           const packRow = {
             customer_name: form.name, customer_email: form.email, customer_phone: phone,
-            customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
+            ...addr,
+            delivery_method: deliveryMethod,
             product: it.productName,
             variant: it.variantLabel || it.variantId || `pack`,
             color: null,
@@ -5637,7 +5727,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             product_color: null,
             language: lang,
             back_print: false,
-            extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: `flat` },
+            extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: deliveryMethod },
             order_group: orderGroupId,
           };
           if (user) {
@@ -5695,7 +5785,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         const orderRow = {
           customer_name: form.name, customer_email: form.email, customer_phone: phone,
-          customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode,
+          ...addr,
+          delivery_method: deliveryMethod,
           product: itProduct.name, variant: itVariant.label, color: it.color,
           quantity: it.qty, total: itemTotal, notes: form.notes,
           pet_name: it.petName || null,
@@ -5722,9 +5813,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           sleeve_left_url: it.sleeveLeft.enabled ? (it.sleeveLeft.sameAsMain ? design_url : sleeve_left_url) : null,
           sleeve_right_url: it.sleeveRight.enabled ? (it.sleeveRight.sameAsMain ? design_url : sleeve_right_url) : null,
           order_group: orderGroupId,
-          // Flat shipping on every row (₪35). Stored on extra_prints (jsonb)
-          // so the admin sees the method; no per-method choice anymore.
-          extra_prints: { shipping_method: `flat` },
+          // Shipping (folded into the first row's total above) + the chosen
+          // delivery method, mirrored onto extra_prints (jsonb) for the admin.
+          extra_prints: { shipping_method: deliveryMethod },
         };
 
         if (user) {
@@ -6266,7 +6357,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             alignItems: "stretch",
           }}>
             {/* Mobile: collapsible summary at the very top of the form column */}
-            {isMobile && <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={true} shippingPrice={shippingPrice} />}
+            {isMobile && <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={true} shippingPrice={shippingPrice} deliveryMethod={deliveryMethod} />}
 
             {/* Form column — wider on desktop (flex 1.5 vs sidebar's 1) */}
             <div style={{ flex: isMobile ? "none" : "1.5", width: "100%", minWidth: 0 }}>
@@ -6284,6 +6375,33 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-required="true" aria-invalid={!!fieldErrors.phone} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 {fieldErrors.phone && <div role="alert" style={fieldErrStyle}>{fieldErrors.phone}</div>}
               </div>
+
+              {/* ── Delivery method — choose one, BEFORE the address fields ── */}
+              <div role="radiogroup" aria-label={lang === "he" ? "אופן מסירה" : lang === "ru" ? "Способ получения" : "Delivery method"}>
+                <label style={labelStyle}>{lang === "he" ? "אופן מסירה *" : lang === "ru" ? "Способ получения *" : "Delivery method *"}</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {DELIVERY_METHODS.map(m => {
+                    const sel = deliveryMethod === m.id;
+                    return (
+                      <button key={m.id} type="button" role="radio" aria-checked={sel}
+                        onClick={() => { setDeliveryMethod(m.id); if (fieldErrors.delivery) setFieldErrors(fe => ({ ...fe, delivery: undefined })); }}
+                        style={{ display: "flex", alignItems: "center", gap: 12, textAlign: "start", width: "100%", minHeight: 44, padding: "12px 14px", borderRadius: 12, cursor: "pointer", background: sel ? "rgba(192,80,26,0.12)" : COLORS.bgCard, border: `1.5px solid ${sel ? COLORS.accent : COLORS.border}`, transition: "all 0.15s", fontFamily: "'Varela Round',sans-serif" }}>
+                        <span aria-hidden="true" style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", background: sel ? "rgba(192,80,26,0.18)" : COLORS.bg, color: sel ? COLORS.accent : COLORS.gray }}>
+                          <DeliveryIcon name={m.icon} size={22} />
+                        </span>
+                        <span style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ display: "block", color: COLORS.white, fontWeight: 700, fontSize: 14 }}>{m.title[lang] || m.title.en}</span>
+                          <span style={{ display: "block", color: COLORS.gray, fontSize: 11.5, marginTop: 2, lineHeight: 1.4 }}>{m.note[lang] || m.note.en}</span>
+                        </span>
+                        <span dir="ltr" style={{ flexShrink: 0, color: sel ? COLORS.accent : COLORS.grayLight, fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", unicodeBidi: "isolate" }}>{deliveryPriceLabel(m.id, lang)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {fieldErrors.delivery && <div role="alert" style={fieldErrStyle}>{fieldErrors.delivery}</div>}
+              </div>
+
+              {addressRequired && (<>
               <div style={{ position: "relative" }}>
                 <label htmlFor="order-street" style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
                 <input type="text" value={form.street} id="order-street" aria-invalid={!!fieldErrors.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined })); fetchAddrSuggestions(v); }}
@@ -6316,16 +6434,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => { setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") })); if (fieldErrors.postal) setFieldErrors(fe => ({ ...fe, postal: undefined })); }} placeholder="1234567" aria-invalid={!!fieldErrors.postal} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.postal && <div role="alert" style={fieldErrStyle}>{fieldErrors.postal}</div>}
                 </div>
               </div>
-              {/* Flat shipping — single ₪35 rate on every order (no method
-                  selector). Shown as a static info row; the cost is added to
-                  the totals via shippingPrice. */}
-              <div role="group" aria-label={lang === `he` ? `משלוח` : lang === `ru` ? `Доставка` : `Shipping`} style={{ display: `flex`, justifyContent: `space-between`, alignItems: `center`, gap: 10, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `12px 14px` }}>
-                <div>
-                  <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14 }}>{lang === `he` ? `משלוח` : lang === `ru` ? `Доставка` : `Shipping`}</div>
-                  <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{lang === `he` ? `תעריף אחיד לכל הארץ` : lang === `ru` ? `Единый тариф по всей стране` : `Flat rate, anywhere in Israel`}</div>
+              </>)}
+              {!addressRequired && (
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, background: "rgba(37,211,102,0.08)", border: "1px solid rgba(37,211,102,0.35)", borderRadius: 10, padding: "12px 14px" }}>
+                  <span aria-hidden="true" style={{ flexShrink: 0, color: "#25D366", marginTop: 1 }}><DeliveryIcon name="heart" size={18} color="#25D366" /></span>
+                  <div style={{ color: COLORS.white, fontSize: 12.5, lineHeight: 1.6 }}>{lang === "he" ? "מסירה אישית בבאר שבע — נתאם איתך מקום ושעה מראש בוואטסאפ. אין צורך בכתובת." : lang === "ru" ? "Личная передача в Беэр-Шеве — место и время согласуем заранее в WhatsApp. Адрес не нужен." : "Personal handoff in Be'er Sheva — we'll arrange place & time in advance on WhatsApp. No address needed."}</div>
                 </div>
-                <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14 }}>{`₪${SHIPPING_PRICE}`}</span>
-              </div>
+              )}
               <div><label htmlFor="order-notes" style={labelStyle}>{t.form.notes}</label><textarea id="order-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
@@ -6336,14 +6451,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               // Only surface the "missing fields" hint once the user has started
               // filling the form — not on first load before any interaction. The
               // disabled submit button is the pre-interaction guide.
-              const formDirty = !!(form.name || form.email || form.phoneNumber || form.street || form.city || form.postalCode || form.notes);
+              const formDirty = !!(deliveryMethod || form.name || form.email || form.phoneNumber || form.street || form.city || form.postalCode || form.notes);
               const missing = [];
+              if (!deliveryMethod) missing.push(lang === "he" ? "אופן מסירה" : lang === "ru" ? "Способ получения" : "Delivery method");
               if (!form.name) missing.push(lang === "he" ? "שם" : lang === "ru" ? "Имя" : "Name");
               if (!form.email) missing.push(lang === "he" ? "אימייל" : lang === "ru" ? "Email" : "Email");
               if (!form.phoneNumber || form.phoneNumber.length !== 7) missing.push(lang === "he" ? "טלפון (7 ספרות)" : lang === "ru" ? "Телефон (7 цифр)" : "Phone (7 digits)");
-              if (!form.street) missing.push(lang === "he" ? "כתובת" : lang === "ru" ? "Адрес" : "Address");
-              if (!form.city) missing.push(lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City");
-              if (!form.postalCode) missing.push(lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code");
+              if (addressRequired && !form.street) missing.push(lang === "he" ? "כתובת" : lang === "ru" ? "Адрес" : "Address");
+              if (addressRequired && !form.city) missing.push(lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City");
+              if (addressRequired && !form.postalCode) missing.push(lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code");
               if (!formDirty || missing.length === 0) return null;
               return (
                 <div style={{ background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: "12px 14px", marginTop: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -6359,7 +6475,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             })()}
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
               <button onClick={() => setStep(product ? 2 : 1)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
-              <button onClick={handleSubmit} disabled={!form.name || !form.email || !form.phoneNumber || form.phoneNumber.length !== 7 || !form.street || !form.city || !form.postalCode || submitting} style={{ flex: 1, background: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? COLORS.accent : COLORS.bgCard, color: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: (form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7 && form.street && form.city && form.postalCode) ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
+              <button onClick={handleSubmit} disabled={!checkoutReady || submitting} style={{ flex: 1, background: checkoutReady ? COLORS.accent : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
                 {submitting ? "..." : `${t.form.place} · ₪${total}`}
               </button>
             </div>
@@ -6368,7 +6484,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             {/* Desktop sticky summary column */}
             {!isMobile && (
               <div style={{ flex: "1", width: "100%", minWidth: 280, maxWidth: 360 }}>
-                <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={false} shippingPrice={shippingPrice} />
+                <OrderSummary lang={lang} cart={cart} setCart={setCart} updateCartQty={updateCartQty} isMobile={false} shippingPrice={shippingPrice} deliveryMethod={deliveryMethod} />
               </div>
             )}
           </div>
@@ -6423,9 +6539,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <span>{t.payment.subtotal}</span>
                   <span>₪{cartItemsTotal}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 12 }}>
-                  <span>{t.payment.shipping}</span>
-                  <span>₪{shippingPrice}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 12, gap: 12 }}>
+                  <span style={{ flexShrink: 0 }}>{t.payment.shipping}</span>
+                  <span style={{ textAlign: lang === "he" ? "left" : "right" }}>{deliveryMethod ? shippingLineLabel(deliveryMethod, lang) : `₪${shippingPrice}`}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: `1px solid ${COLORS.border}` }}>
                   <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{t.payment.total}</span>
@@ -6434,14 +6550,19 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
             </div>
 
-            {/* Delivery address */}
+            {/* Delivery method + (for UPS) shipping address */}
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "18px 22px", marginBottom: 24 }}>
-              <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8, fontWeight: 600 }}>{t.payment.deliveryTo}</div>
+              <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8, fontWeight: 600 }}>{addressRequired ? t.payment.deliveryTo : (lang === "he" ? "אופן מסירה" : lang === "ru" ? "Способ получения" : "Delivery")}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                <span aria-hidden="true" style={{ color: COLORS.accent, flexShrink: 0 }}><DeliveryIcon name={DELIVERY_BY_ID[deliveryMethod]?.icon || "truck"} size={20} /></span>
+                <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 14 }}>{DELIVERY_BY_ID[deliveryMethod] ? (DELIVERY_BY_ID[deliveryMethod].title[lang] || DELIVERY_BY_ID[deliveryMethod].title.en) : ""}</span>
+              </div>
               <div style={{ color: COLORS.white, fontSize: 14, lineHeight: 1.7 }}>
                 <div style={{ fontWeight: 600 }}>{form.name}</div>
-                <div style={{ color: "#ccc" }}>{form.street}, {form.city} {form.postalCode}</div>
+                {addressRequired && <div style={{ color: "#ccc" }}>{form.street}, {form.city} {form.postalCode}</div>}
                 <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>{form.phonePrefix}-{form.phoneNumber}</div>
                 <div style={{ color: COLORS.gray, fontSize: 13 }}>{form.email}</div>
+                {!addressRequired && <div style={{ color: "#25D366", fontSize: 12.5, marginTop: 8, lineHeight: 1.6 }}>{lang === "he" ? "נתאם איתך מסירה אישית בוואטסאפ · באר שבע" : lang === "ru" ? "Согласуем личную передачу в WhatsApp · Беэр-Шева" : "We'll coordinate the handoff on WhatsApp · Be'er Sheva"}</div>}
               </div>
             </div>
 
@@ -6678,9 +6799,23 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
             )}
 
-            <p style={{ color: COLORS.gray, fontSize: 15, maxWidth: 460, margin: "0 auto 36px", lineHeight: 1.7 }}>
+            <p style={{ color: COLORS.gray, fontSize: 15, maxWidth: 460, margin: "0 auto 24px", lineHeight: 1.7 }}>
               {t.confirm.thanksLine.replace("{name}", form.name)} <span style={{ color: COLORS.accent, fontWeight: 600 }}>{form.email}</span>
             </p>
+
+            {/* Delivery-method reflection — reassures the customer how they'll get the order */}
+            {deliveryMethod && (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: deliveryMethod === "personal_beersheva" ? "rgba(37,211,102,0.1)" : "rgba(255,107,53,0.08)", border: `1px solid ${deliveryMethod === "personal_beersheva" ? "rgba(37,211,102,0.4)" : "rgba(255,107,53,0.3)"}`, borderRadius: 12, padding: "12px 18px", maxWidth: 460, margin: "0 auto 36px", textAlign: "start" }}>
+                <span aria-hidden="true" style={{ flexShrink: 0, color: deliveryMethod === "personal_beersheva" ? "#25D366" : COLORS.accent }}><DeliveryIcon name={DELIVERY_BY_ID[deliveryMethod]?.icon || "truck"} size={20} /></span>
+                <span style={{ color: COLORS.white, fontSize: 13.5, lineHeight: 1.6 }}>
+                  {deliveryMethod === "personal_beersheva"
+                    ? (lang === "he" ? "נתאם איתך מסירה אישית בוואטסאפ · באר שבע" : lang === "ru" ? "Согласуем личную передачу в WhatsApp · Беэр-Шева" : "We'll coordinate a personal handoff on WhatsApp · Be'er Sheva")
+                    : deliveryMethod === "ups_point"
+                      ? (lang === "he" ? "נשלח לנקודת חלוקה של UPS — תקבל הודעה כשתהיה מוכנה לאיסוף" : lang === "ru" ? "Отправим в пункт выдачи UPS — сообщим, когда можно забрать" : "We'll ship to your UPS pickup point — you'll be notified when it's ready")
+                      : (lang === "he" ? "משלוח עד הבית עם שליח UPS — מספר מעקב יישלח באימייל" : lang === "ru" ? "Доставка курьером UPS до двери — трек-номер придёт на email" : "Home delivery by UPS courier — tracking number sent by email")}
+                </span>
+              </div>
+            )}
 
             {/* What's next - timeline */}
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: "24px 22px", marginBottom: 28, textAlign: "start", maxWidth: 520, margin: "0 auto 28px" }}>
@@ -8356,15 +8491,16 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
   const cartDialogRef = useDialogFocus(open);
 
   const TR = {
-    he: { title: "סל הקניות", empty: "הסל ריק", emptySub: "הוסיפו מוצרים כדי להתחיל", subtotal: "סכום ביניים", shipping: "משלוח", total: "סה״כ", checkout: "מעבר לתשלום מאובטח", remove: "הסר", close: "סגירה", guestNote: "תשלום כאורח · ללא צורך בהרשמה", trustReceipt: "תשלום מאובטח דרך Tranzila · קבלה תישלח למייל" },
-    en: { title: "Your cart", empty: "Your cart is empty", emptySub: "Add products to get started", subtotal: "Subtotal", shipping: "Shipping", total: "Total", checkout: "Secure checkout", remove: "Remove", close: "Close", guestNote: "Guest checkout · no account needed", trustReceipt: "Secure payment via Tranzila · receipt emailed" },
-    ru: { title: "Корзина", empty: "Корзина пуста", emptySub: "Добавьте товары, чтобы начать", subtotal: "Подытог", shipping: "Доставка", total: "Итого", checkout: "Безопасная оплата", remove: "Удалить", close: "Закрыть", guestNote: "Оплата как гость · без регистрации", trustReceipt: "Безопасная оплата через Tranzila · чек на почту" },
+    he: { title: "סל הקניות", empty: "הסל ריק", emptySub: "הוסיפו מוצרים כדי להתחיל", subtotal: "סכום ביניים", shipping: "משלוח", shipAtCheckout: "נקבע בקופה", total: "סה״כ", checkout: "מעבר לתשלום מאובטח", remove: "הסר", close: "סגירה", guestNote: "תשלום כאורח · ללא צורך בהרשמה", trustReceipt: "תשלום מאובטח דרך Tranzila · קבלה תישלח למייל" },
+    en: { title: "Your cart", empty: "Your cart is empty", emptySub: "Add products to get started", subtotal: "Subtotal", shipping: "Shipping", shipAtCheckout: "At checkout", total: "Total", checkout: "Secure checkout", remove: "Remove", close: "Close", guestNote: "Guest checkout · no account needed", trustReceipt: "Secure payment via Tranzila · receipt emailed" },
+    ru: { title: "Корзина", empty: "Корзина пуста", emptySub: "Добавьте товары, чтобы начать", subtotal: "Подытог", shipping: "Доставка", shipAtCheckout: "При оформлении", total: "Итого", checkout: "Безопасная оплата", remove: "Удалить", close: "Закрыть", guestNote: "Оплата как гость · без регистрации", trustReceipt: "Безопасная оплата через Tranzila · чек на почту" },
   };
   const tr = TR[lang] || TR.en;
 
   const subtotal = cart.reduce((s, it) => s + it.itemPrice, 0);
-  const shipping = cart.length > 0 ? SHIPPING_PRICE : 0;
-  const total = subtotal + shipping;
+  // Shipping is chosen per delivery method at checkout, so the cart drawer no
+  // longer asserts a flat rate — it shows "at checkout" and totals the items.
+  const total = subtotal;
 
   // Compact list of any print extras carried by a custom item.
   const extrasFor = (it) => [
@@ -8488,7 +8624,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               <span>{tr.subtotal}</span><span>{`₪${subtotal}`}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 11 }}>
-              <span>{tr.shipping}</span><span>{`₪${shipping}`}</span>
+              <span>{tr.shipping}</span><span>{tr.shipAtCheckout}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 11, borderTop: `1px solid ${COLORS.border}`, marginBottom: 15 }}>
               <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{tr.total}</span>
