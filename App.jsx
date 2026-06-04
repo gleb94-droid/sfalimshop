@@ -958,7 +958,9 @@ const BloomCardLite = React.memo(function BloomCardLite({
         display: `flex`,
         flexDirection: `column`,
         gap: 12,
-        boxShadow: `0 8px 24px rgba(0,0,0,0.35)`,
+        // Warm orange glow behind the card (mobile parity with the desktop
+        // FloatingProductCard's holographic halo) + the base depth shadow.
+        boxShadow: `0 10px 30px rgba(0,0,0,0.4), 0 0 52px 2px rgba(255,107,53,0.42)`,
       }}>
       {/* BLOOM images are 1414×2000 (≈0.707 w/h, 5:7 portrait) with the orange
           frame baked into the artwork. Match the container to that native ratio
@@ -8226,18 +8228,22 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
   }, [fontSize]);
 
   useEffect(() => {
-    // High-contrast uses a CSS `filter`, and a `filter` makes the element it's
-    // set on the containing block for ALL position:fixed descendants. Setting it
-    // on <body> therefore re-anchored the fixed a11y button/panel to the (tall)
-    // body box, dropping them to the page bottom. Apply it to #root instead —
-    // and the a11y widget is portaled to <body> (a sibling of #root, unfiltered)
-    // below — so the widget keeps its viewport-fixed position while the whole app
-    // inside #root still gets the contrast boost.
-    const target = (typeof document !== `undefined` && (document.getElementById(`root`) || document.documentElement)) || null;
-    if (!target) return;
-    target.style.filter = highContrast ? `contrast(1.4) brightness(1.1)` : `none`;
+    // High-contrast uses a CSS `filter`. A `filter` makes the element it's set on
+    // the containing block for ALL position:fixed descendants, so it must NOT go
+    // on <body> (that would strand the viewport-fixed FABs). Instead we toggle the
+    // `sf-hc` class on <body>; the global stylesheet's
+    //   body.sf-hc #root, body.sf-hc [data-sf-zoom] { filter: ... }
+    // rule applies the boost to BOTH the page (#root) and the body-portaled
+    // overlays (PetModal / cart / lightbox — which carry data-sf-zoom). The old
+    // inline-filter-on-#root approach missed those overlays, so toggling contrast
+    // while a card was open left the card itself un-boosted. The class-driven rule
+    // also covers overlays opened AFTER contrast is already on. The a11y widget +
+    // FABs carry no data-sf-zoom, stay unfiltered, and remain viewport-fixed.
+    const body = (typeof document !== `undefined` && document.body) || null;
+    if (!body) return;
+    body.classList.toggle(`sf-hc`, highContrast);
     writeA11y({ highContrast });
-    return () => { if (target) target.style.filter = `none`; };
+    return () => { if (body) body.classList.remove(`sf-hc`); };
   }, [highContrast]);
 
   // Highlight links — inject a <style> that underlines + outlines every link
@@ -9021,8 +9027,12 @@ export default function App() {
   // staff must enter VITE_STAFF_PASSWORD on the maintenance page, which sets a
   // sessionStorage flag (sf_staff). This state mirrors that flag so a refresh
   // within the same tab session keeps staff in. Session-scoped on purpose.
+  // import.meta.env.DEV is true ONLY under `vite dev` (local) — it is compiled
+  // to false in the production build, so this auto-bypass can never reach the
+  // live site. Lets the local dev/preview see the real site past the gate.
   const [staffUnlocked, setStaffUnlocked] = useState(() =>
-    typeof window !== "undefined" && window.sessionStorage.getItem("sf_staff") === "1");
+    (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.DEV) ||
+    (typeof window !== "undefined" && window.sessionStorage.getItem("sf_staff") === "1"));
   const [pendingBloomItem, setPendingBloomItem] = useState(null);
 
   // Always open at the very top on load/refresh. The browser otherwise
@@ -9611,6 +9621,13 @@ export default function App() {
            bottom / behind open modals. The FABs sit OUTSIDE these subtrees, so they
            stay viewport-fixed at native size. */
         #root, [data-sf-zoom] { zoom: var(--sf-a11y-zoom, 1); }
+        /* A11y high-contrast: same reach as zoom above — the filter must hit the
+           page (#root) AND the body-portaled overlays ([data-sf-zoom]: PetModal/
+           cart/lightbox), driven by the sf-hc class the menu toggles on body.
+           A class-driven CSS rule (not an inline filter on #root) means an overlay
+           opened AFTER contrast is turned on still gets boosted. NOT on body
+           itself: a filter there would strand the viewport-fixed FABs. */
+        body.sf-hc #root, body.sf-hc [data-sf-zoom] { filter: contrast(1.4) brightness(1.1); }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
         /* WCAG 2.4.7 — visible keyboard focus. Mouse clicks suppressed via :focus-visible. */
