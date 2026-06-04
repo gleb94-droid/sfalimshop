@@ -4264,7 +4264,9 @@ function AdminPage({ lang }) {
                                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 8, marginBottom: 4 }}>
                                   <span aria-hidden="true" style={{ flexShrink: 0, color: personal ? "#25D366" : COLORS.accent }}><DeliveryIcon name={dm?.icon || "truck"} size={16} /></span>
                                   <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{dm ? (dm.title[lang] || dm.title.en) : order.delivery_method}</span>
-                                  {personal && <span style={{ color: "#25D366", fontSize: 11 }}>· {lang === "he" ? "תאמו בוואטסאפ (אין כתובת)" : lang === "ru" ? "WhatsApp (без адреса)" : "coordinate on WhatsApp (no address)"}</span>}
+                                  {personal && <span style={{ color: "#25D366", fontSize: 11 }}>· {(order.customer_street || order.customer_city)
+                                    ? (lang === "he" ? "תאמו בוואטסאפ — מסירה לכתובת/איסוף" : lang === "ru" ? "WhatsApp — доставка/самовывоз" : "WhatsApp — deliver/pickup")
+                                    : (lang === "he" ? "תאמו בוואטסאפ (אין כתובת)" : lang === "ru" ? "WhatsApp (без адреса)" : "coordinate on WhatsApp (no address)")}</span>}
                                 </div>
                               );
                             })()}
@@ -5940,9 +5942,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       const createdOrderIds = [];
       // Personal handoff collects NO address (coordinated on WhatsApp); the UPS
       // methods carry the form address. delivery_method is stored on every row.
-      const addr = deliveryMethod === `personal_beersheva`
-        ? { customer_street: null, customer_city: null, customer_postal_code: null }
-        : { customer_street: form.street, customer_city: form.city, customer_postal_code: form.postalCode };
+      // Save whatever address was entered, for any method. Personal handoff may
+      // leave it blank (pickup) — empty fields become null so the admin shows
+      // "no address + coordinate on WhatsApp" for that order.
+      const addr = {
+        customer_street: form.street.trim() || null,
+        customer_city: form.city.trim() || null,
+        customer_postal_code: form.postalCode.trim() || null,
+      };
       // Does this checkout contain a customer-uploaded custom design? If so the
       // whole group waits for design approval before payment (you can't pay for
       // half a cart). BLOOM / pet-name items carry an https design URL; only a
@@ -6650,9 +6657,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {fieldErrors.delivery && <div role="alert" style={fieldErrStyle}>{fieldErrors.delivery}</div>}
               </div>
 
-              {addressRequired && (<>
+              {!addressRequired && (
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, background: "rgba(37,211,102,0.08)", border: "1px solid rgba(37,211,102,0.35)", borderRadius: 10, padding: "12px 14px" }}>
+                  <span aria-hidden="true" style={{ flexShrink: 0, color: "#25D366", marginTop: 1 }}><DeliveryIcon name="heart" size={18} color="#25D366" /></span>
+                  <div style={{ color: COLORS.white, fontSize: 12.5, lineHeight: 1.6 }}>{lang === "he" ? "מסירה אישית בבאר שבע — נתאם בוואטסאפ מסירה לכתובת שלך או איסוף. אפשר להשאיר כתובת אם תרצו שנמסור אליכם, או להשאיר ריק." : lang === "ru" ? "Личная передача в Беэр-Шеве — в WhatsApp согласуем доставку по вашему адресу или самовывоз. Укажите адрес, если хотите доставку, или оставьте пустым." : "Personal handoff in Be'er Sheva — on WhatsApp we'll arrange delivery to your address or pickup. Add an address if you'd like it delivered, or leave it blank."}</div>
+                </div>
+              )}
               <div style={{ position: "relative" }}>
-                <label htmlFor="order-street" style={labelStyle}>{lang === "he" ? "כתובת מלאה — רחוב ומספר" : lang === "ru" ? "Адрес — улица и номер" : "Address — Street & number"}</label>
+                <label htmlFor="order-street" style={labelStyle}>{lang === "he" ? (addressRequired ? "כתובת מלאה — רחוב ומספר" : "כתובת למסירה (אופציונלי) — רחוב ומספר") : lang === "ru" ? (addressRequired ? "Адрес — улица и номер" : "Адрес доставки (необяз.) — улица и номер") : (addressRequired ? "Address — Street & number" : "Delivery address (optional) — Street & number")}</label>
                 <input type="text" value={form.street} id="order-street" aria-invalid={!!fieldErrors.street} onChange={e => { const v = e.target.value; setForm(p => ({ ...p, street: v })); if (fieldErrors.street) setFieldErrors(fe => ({ ...fe, street: undefined })); fetchAddrSuggestions(v); }}
                   onKeyDown={e => { if (e.key === "Escape") setShowAddrSugg(false); }}
                   onBlur={e => { if (e.relatedTarget && e.relatedTarget.classList && e.relatedTarget.classList.contains("addr-sugg-item")) return; setTimeout(() => setShowAddrSugg(false), 200); }}
@@ -6683,13 +6695,6 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => { setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") })); if (fieldErrors.postal) setFieldErrors(fe => ({ ...fe, postal: undefined })); }} placeholder="1234567" aria-invalid={!!fieldErrors.postal} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.postal && <div role="alert" style={fieldErrStyle}>{fieldErrors.postal}</div>}
                 </div>
               </div>
-              </>)}
-              {!addressRequired && (
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, background: "rgba(37,211,102,0.08)", border: "1px solid rgba(37,211,102,0.35)", borderRadius: 10, padding: "12px 14px" }}>
-                  <span aria-hidden="true" style={{ flexShrink: 0, color: "#25D366", marginTop: 1 }}><DeliveryIcon name="heart" size={18} color="#25D366" /></span>
-                  <div style={{ color: COLORS.white, fontSize: 12.5, lineHeight: 1.6 }}>{lang === "he" ? "מסירה אישית בבאר שבע — נתאם איתך מקום ושעה מראש בוואטסאפ. אין צורך בכתובת." : lang === "ru" ? "Личная передача в Беэр-Шеве — место и время согласуем заранее в WhatsApp. Адрес не нужен." : "Personal handoff in Be'er Sheva — we'll arrange place & time in advance on WhatsApp. No address needed."}</div>
-                </div>
-              )}
               <div><label htmlFor="order-notes" style={labelStyle}>{t.form.notes}</label><textarea id="order-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
@@ -6808,10 +6813,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
               <div style={{ color: COLORS.white, fontSize: 14, lineHeight: 1.7 }}>
                 <div style={{ fontWeight: 600 }}>{form.name}</div>
-                {addressRequired && <div style={{ color: "#ccc" }}>{form.street}, {form.city} {form.postalCode}</div>}
+                {(form.street || form.city) && <div style={{ color: "#ccc" }}>{[form.street, form.city, form.postalCode].filter(Boolean).join(", ")}</div>}
                 <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 2 }}>{form.phonePrefix}-{form.phoneNumber}</div>
                 <div style={{ color: COLORS.gray, fontSize: 13 }}>{form.email}</div>
-                {!addressRequired && <div style={{ color: "#25D366", fontSize: 12.5, marginTop: 8, lineHeight: 1.6 }}>{lang === "he" ? "נתאם איתך מסירה אישית בוואטסאפ · באר שבע" : lang === "ru" ? "Согласуем личную передачу в WhatsApp · Беэр-Шева" : "We'll coordinate the handoff on WhatsApp · Be'er Sheva"}</div>}
+                {!addressRequired && <div style={{ color: "#25D366", fontSize: 12.5, marginTop: 8, lineHeight: 1.6 }}>{lang === "he" ? "נתאם בוואטסאפ מסירה לכתובת או איסוף · באר שבע" : lang === "ru" ? "В WhatsApp согласуем доставку по адресу или самовывоз · Беэр-Шева" : "We'll arrange WhatsApp delivery or pickup · Be'er Sheva"}</div>}
               </div>
             </div>
 
