@@ -17,14 +17,13 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ---
 
-## 📌 CURRENT STATE (as of 2026-06-03) — read this first
+## 📌 CURRENT STATE (as of 2026-06-04) — read this first
 
 > Source of truth. Where older notes (changelog below) conflict, this wins.
 
 ### 🚀 Production / branch state
-- **`main` is merged + deployed to production**, live on Vercel **behind the maintenance gate**. All 3 launch flags still ON.
+- **`main` = `launch-prep` = `25406b5`, deployed to production** behind the maintenance gate. All 3 launch flags still ON. **Nothing pending merge** (all of today's work is live behind the gate).
 - **Staff** (`?staff=1` + `VITE_STAFF_PASSWORD`, set in Vercel Prod+Preview; build-time var → redeploy to change; unset = gate stays closed) see the full live site.
-- ⚠️ **`launch-prep` has commits NOT yet merged to `main`** (see *Pending merge*).
 
 ### 💳 Payments — LIVE & verified on production
 - Verified end-to-end: real **₪36 test orders succeeded** (tx `376598`, `376992`); webhook **query-back enforced**; orders marked paid; thank-you page renders.
@@ -33,22 +32,38 @@ Every project agent should read this file before acting. It is the **shared brai
 ### ⚠️ REPO SYNC TODO (next code session — important)
 `create-payment` v10/v11 were deployed **directly to Supabase**, not from the repo. The repo `supabase/functions/create-payment/index.ts` already has the pay-return URL change but **must also REMOVE the `myid` line** so the repo matches the deployed v11. (Context: `myid` mapped to the ID field on Tranzila's hosted page and left it stuck right; the order group is carried by **`u71`** only, which the webhook reads. Removing `myid` fixed the empty-ID-field + centered page. `api/pay-return.js` — Vercel serverless, GET+POST, 302 to the SPA hash route — fixes the post-payment 405.)
 
-### ⏳ Pending merge to `main` (only on `launch-prep`, NOT in production yet)
-- **Enriched About page** (hero "Where animal love meets art", first-person story, "Why us" 4-benefit block, CTA → BLOOM collection; trilingual; alternating section backgrounds).
-- **Single-line carousel pagination dots.**
-- **"How it works" → 5 steps**, incl. the **design-approval step scoped to custom/personalized orders only** (with a clarifying note).
+### 🚚 Delivery model — **3 methods chosen at checkout** (replaced flat ₪35; LIVE)
+- Stored in **`orders.delivery_method`** (text, default `'ups_home'`, CHECK in `['personal_beersheva','ups_home','ups_point']`). Prices in **`SHIPPING_OPTIONS = {personal_beersheva:0, ups_home:55, ups_point:27}`**.
+  1. **`personal_beersheva` → ₪0** ("מסירה אישית · באר שבע"). Address **OPTIONAL** (deliver-or-pickup, coordinated via WhatsApp). Owner address **NEVER shown publicly**. No word "חינם" — uses **"ללא עלות משלוח"**.
+  2. **`ups_home` → ₪55** (UPS door-to-door; address required).
+  3. **`ups_point` → ₪27** (UPS pickup point; address required).
+- **UPS account opened** — real prices ₪27/₪55 confirmed, stay as-is. Tranzila amount recomputed server-side from `SUM(orders.total)` (shipping folded into the first row) — **verified correct for all 3 methods**.
+- `SHIPPING_PRICE = 35` kept **ONLY** as an internal numeric fallback in `OrderSummary` (~line 5129) — **no longer customer-facing**. All stale "₪35" text removed (product strip, FAQ, shipping policy → "משלוח מ-₪27 · או מסירה אישית בבאר שבע"); `grep ₪35` → 0 customer-facing.
+- **Owner TODO before launch:** test the 3 totals in checkout via `?staff=1` — one test order per method, confirm Tranzila charge = product-only / +₪55 / +₪27.
 
-When going public: **merge `launch-prep` → `main`**, then flip the launch flags.
+### 🛠️ Admin additions (LIVE)
+- **A1** (`131f809`): **payment status** on order card/detail (7 states via `PaymentBadge`, read-only — `amount_paid`/`paid_at`/`tranzila_transaction_id`); **order search+sort** (name/email/phone/order#); **dashboard summary** (orders today/7d, revenue today/7d/month from `succeeded` `amount_paid` **deduped by `order_group`**, needs-action count).
+- **Testimonials manager** (`4ccba8e`): full CRUD over the existing `testimonials` table (no DB change). Public `Reviews` on home already exists (`is_active=true`, hides at 0 rows, injects AggregateRating JSON-LD).
+- **A2 deferred (post-launch):** general needs-action queue, per-order manager notes, status timeline.
+
+### ♿ Accessibility (LIVE)
+- **Font-size control rewritten:** was root-font-size (only scaled `em` text); now **CSS `zoom` via `--sf-a11y-zoom` var on `#root` + `[data-sf-zoom]` overlays** (PetModal/cart/lightbox). Levels **100/110/120/130%**. FABs portaled to `<body>` stay viewport-fixed; removed the FAB overlay-self-hide so it stays visible/tappable over PetModal under zoom (`6499fbe` + `2e6853c`). **Lesson reaffirmed:** `zoom` (like `filter`/`transform`) makes its element a containing block for `position:fixed` descendants — keep fixed FABs OUTSIDE the zoomed subtree.
+- **PENDING (agent-memory note):** full overflow sweep 360/390/414 × he/en/ru × every zoom level when browser MCP returns; **cap max to 120%** if any level overflows (esp. cart panel `width:100%` at 130%).
+
+When going public: nothing to merge — **just flip the 3 launch flags.**
 
 ### 🔔 Launch gates (all 3 still ON → flip at launch)
 - `MAINTENANCE_MODE` (App.jsx, ~line 1509, find by name) `true` → **`false`**
 - `index.html` noindex ×3 (robots/googlebot/bingbot, lines ~49–51) → **`index, follow`**
 - `api/og.js` MAINTENANCE (~line 26) `true` → **`false`**
-- **Keep unchanged:** `PAYMENTS_ENABLED=true`, `SHIPPING_PRICE=35`, `STONEWASH_ENABLED=false`, `MUG_STUDIO_ENABLED=false`. `WHATSAPP_NUMBER` live ✓.
+- **Keep unchanged:** `PAYMENTS_ENABLED=true`, `STONEWASH_ENABLED=false`, `MUG_STUDIO_ENABLED=false`. `SHIPPING_PRICE=35` kept (internal fallback only — see Delivery model). `WHATSAPP_NUMBER` live ✓. **Launch = flip the 3 flags only (no merge needed; `main`=`launch-prep`).**
 
 ### 🧷 Owner-side / non-blocking (owner's choice before public launch)
 - **Receipt (קבלה, exempt-dealer, 0% VAT) auto-emailed via Interspace/Tranzila + logo on receipt.** Owner configured the Tranzila doc settings (auto-send + logo `Invoice_logo_fxpsfalimshop.png` + sender `hello@sfalimshop.com`) and sent Interspace the activation answers (doc type=receipt, numbering starts ~1001 pending accountant, no retro, auto-email on). Interspace said ~1 day to activate. **Receipt did NOT arrive on the test order yet — pending their activation.** Accountant wants a monthly receipts report (owner pulls from Tranzila directly).
-- **Shipping carrier decision (owner researching).** Owner does NOT want Israel Post or lockers — wants **private door-to-door**. Options found: **GetPackage** (no minimum/contract, from ₪65 or a special ~₪30 tier to confirm), **ZigZag** (no monthly minimum, nationwide incl. Eilat), **Deal Delivery** (from ₪49), **UPS/SHIP** (door-to-door if self-deposit at Be'er Sheva branch; do NOT order the ₪118 pickup). Reality: true private door-to-door at low volume is ~₪49–65, so **the flat ₪35 may not cover it** — owner to confirm a real price and decide pricing. **No code change made.**
+- **Shipping carrier — DECIDED ✅.** Owner **opened a UPS account**; real prices confirmed: **₪27 pickup-point / ₪55 door-to-door**. Now live as the 3-method checkout (see Delivery model). Personal handoff in Be'er Sheva = ₪0.
+- **Inventory = POD (parked, no code).** Owner prints himself + holds blanks → **no inventory table in DB, none planned.** Owner doing a manual blank-stock count (sizes/cuts/colors) to decide reorder.
+- **Flock brand signature (researched, parked — not a launch blocker).** SEF VelCut Evo flock + Metalflex outline; cat/dog + paw "lockup" themed to design; recommended on-demand combo (no MOQ); 3D silicone rejected (MOQ 500–1000). Supplier question list ready — owner to call supplier.
+- **SEO migration deferred** to post-launch.
 - Real **Stone-wash photo** (product stays hidden behind `STONEWASH_ENABLED=false` until shot; re-enable = flip to `true` **and** restore its Product row in the `index.html` ItemList).
 - **Accountant:** refund the test charges (`374782`/`374798`/`374836` ₪3 batch, plus the new ₪36 prod tests); confirm turnover + receipt settings.
 - **Lawyer:** policy review when revenue justifies (self-prepared good-faith drafts; cross-border basis + custom-vs-stock cancellation classification).
@@ -65,7 +80,8 @@ Past dated "STATE AS OF" snapshots, compressed. Each line = a shipped milestone;
 - **2026-05-31** — Payment-integrity holes FIXED + live on prod (mirrored to repo): `trg_protect_order_payment_fields` trigger freezes payment fields + enforces design-approval transitions; `create-payment` recomputes charge server-side from `SUM(orders.total)`; `tranzila-webhook` Layer-2 amount verify. Custom-design approval workflow LIVE. Blog: 4 trilingual published posts (in DB `blog_posts`, gated behind maintenance until launch). Full per-page SEO (breed + blog JSON-LD, canonical, hreflang) + `generate-sitemap`. `www.sfalimshop.com` unified everywhere.
 - **2026-06-01** — A11y pass (IS 5568 / WCAG 2.1 AA): keyboard ops, `useDialogFocus`, contrast bumps. Quiz a11y widget (`public/quiz/index.html`). High-contrast containing-block fix (portal fixed overlays to `<body>` — **lesson:** a CSS `filter`/`transform`/`perspective` makes its element the containing block for `position:fixed` descendants). Payment-return route handlers (`#track?paid=1`, `#order?paid=0` — read-only, webhook owns `payment_status`). Admin fetch error handling. Cancelled-order timeline fix. Favorites feature (client-only `localStorage` `sf_favorites`). WhatsApp FAB (gated by `WHATSAPP_NUMBER`) + cart trust strip. Migration `restrict_customer_order_status_to_cancel` (customer may only set status `cancelled`).
 - **2026-06-02** — Payments fully live & secured behind maintenance for staff testing; `tranzila-webhook` v12, all order emails fire **post-payment only** from the webhook. New `notify-design-submission` edge fn (admin alert on custom-design submit). Pet-name personalization: font picker (Heebo/Assistant/Secular One/Suez One/Rubik) + 7 color swatches + live preview; new `orders` cols `pet_name_font`/`pet_name_color`; admin `AdminPetNameBlock`. Shirt products: new "Oversize Stone-wash" @₪119 flat, Oversize→₪119 flat, removed "240g" wording; fabric facts (Tee Basic/Oversize/Stone-wash = 100% combed cotton, Dri-FIT = polyester, mugs = ceramic). **Pre-launch audit COMPLETE** (a11y WCAG 2.1 AA, SEO Option B = 80 real crawlable URLs, UX/QA, legal text strengthened — privacy abroad-disclosure, exempt-dealer/no-VAT/receipt terms, refund protected-groups clause). Deep re-audit fixed the **mobile nav hamburger off-screen** blocker (removed duplicated inline lang switcher); card display: name centered, species label hidden from cards (gallery filter still works). All 10 edge functions ACTIVE on prod. **`launch-prep` tagged technically LAUNCH-READY.**
-- **2026-06-03** — Post-payment 405 fixed (`api/pay-return.js`, `create-payment` v10); `myid` removed (`create-payment` v11) — fixed Tranzila ID-field + right-stuck page. Google Places autocomplete working (key was on old "Places API" not "Places API (New)"). Shipping → single flat ₪35 everywhere (merged to main). About page enriched + carousel dots single line + 5-step "how it works" (on `launch-prep`, pending merge). **← see CURRENT STATE above.**
+- **2026-06-03** — Post-payment 405 fixed (`api/pay-return.js`, `create-payment` v10); `myid` removed (`create-payment` v11) — fixed Tranzila ID-field + right-stuck page. Google Places autocomplete working (key was on old "Places API" not "Places API (New)"). Shipping → single flat ₪35 everywhere (merged to main). About page enriched + carousel dots single line + 5-step "how it works".
+- **2026-06-04** — All merged to `main` (fast-forward, behind gate). Commit trail: `131f809` admin A1 (payment status + search/sort + dashboard) · `9a23390` **3 delivery methods** (personal BS ₪0 / UPS home ₪55 / UPS point ₪27) · `4ccba8e` testimonials manager · `404a102` personal-BS optional address (deliver-or-pickup) · `6499fbe` a11y font-size = site-wide `zoom` · `2e6853c` a11y FAB-under-zoom fix · `25406b5` stale-₪35 text fix. **`main` HEAD = `25406b5`.** Flat ₪35 → 3-method delivery; flock/POD/SEO parked (owner-side). **← see CURRENT STATE above.**
 
 ---
 
