@@ -1839,7 +1839,7 @@ const POLICY_SECTIONS = [
   { id: "shipping",      title: { he: "משלוחים",          en: "Shipping",                ru: "Доставка" } },
   { id: "privacy",       title: { he: "פרטיות",           en: "Privacy",                 ru: "Конфиденциальность" } },
   { id: "terms",         title: { he: "תקנון",            en: "Terms of Service",        ru: "Условия использования" } },
-  { id: "accessibility", title: { he: "נגישות",            en: "Accessibility",           ru: "Доступность" } },
+  { id: "accessibility", title: { he: "הצהרת נגישות",       en: "Accessibility",           ru: "Доступность" } },
 ];
 
 const POLICIES = {
@@ -1921,7 +1921,7 @@ const POLICIES = {
       { type: "h", text: "רמת ההנגשה והתקן" },
       { type: "p", text: "האתר הונגש בהתאם לתקן הישראלי ת\"י 5568 לנגישות תכנים באינטרנט, המבוסס על הנחיות WCAG 2.1 ברמת AA." },
       { type: "h", text: "התאמות הנגישות שיושמו באתר" },
-      { type: "l", items: ["תפריט נגישות במסך — הגדלת טקסט, ניגודיות גבוהה והפחתת אנימציות", "ניווט מקלדת מלא (Tab, Enter, Esc) עם סימון מיקוד (focus) ברור וגלוי", "כיבוד העדפת מערכת ההפעלה להפחתת תנועה (reduced motion)", "תפקידים ותוויות ARIA לתמיכה בקוראי מסך (NVDA, JAWS, VoiceOver)", "טקסט חלופי (alt) לתמונות", "מבנה HTML סמנטי ותוויות (label) לשדות טופס", "ניגודיות צבעים העומדת ברמת AA", "תמיכה מלאה בכיווניות מימין-לשמאל (RTL) ובתצוגה מותאמת למובייל", "תמיכה ב-3 שפות: עברית, אנגלית ורוסית"] },
+      { type: "l", items: ["תפריט נגישות במסך — הגדלת טקסט, ניגודיות גבוהה, הפחתת אנימציות והדגשת קישורים", "ניווט מקלדת מלא (Tab, Enter, Esc) עם סימון מיקוד (focus) ברור וגלוי", "כיבוד העדפת מערכת ההפעלה להפחתת תנועה (reduced motion)", "תפקידים ותוויות ARIA לתמיכה בקוראי מסך (NVDA, JAWS, VoiceOver)", "טקסט חלופי (alt) לתמונות", "מבנה HTML סמנטי ותוויות (label) לשדות טופס", "ניגודיות צבעים העומדת ברמת AA", "תמיכה מלאה בכיווניות מימין-לשמאל (RTL) ובתצוגה מותאמת למובייל", "תמיכה ב-3 שפות: עברית, אנגלית ורוסית"] },
       { type: "h", text: "מגבלות ידועות" },
       { type: "p", text: "אנו פועלים באופן שוטף לשיפור הנגישות בכל חלקי האתר. ייתכן שחלקים מסוימים, לרבות תכנים או רכיבים של צד שלישי, טרם הונגשו במלואם. אנו מתקנים ליקויים שמתגלים בהקדם האפשרי, ונשמח לקבל דיווח על כל בעיה.", },
       { type: "h", text: "רכז הנגישות ופנייה בנושא" },
@@ -2007,7 +2007,7 @@ const POLICIES = {
       { type: "h", text: "Accessibility Level & Standard" },
       { type: "p", text: "This site was made accessible in accordance with Israeli Standard IS 5568 for web content accessibility, which is based on the WCAG 2.1 guidelines at Level AA." },
       { type: "h", text: "Accessibility Measures Implemented" },
-      { type: "l", items: ["On-screen accessibility menu — enlarge text, high contrast, and reduce animations", "Full keyboard navigation (Tab, Enter, Esc) with a clearly visible focus indicator", "Respects the operating system's reduced-motion preference", "ARIA roles and labels for screen reader support (NVDA, JAWS, VoiceOver)", "Alt text on images", "Semantic HTML structure and labels for form fields", "Color contrast meeting Level AA", "Full right-to-left (RTL) support and a responsive mobile layout", "3-language support: Hebrew, English, and Russian"] },
+      { type: "l", items: ["On-screen accessibility menu — enlarge text, high contrast, reduce animations, and highlight links", "Full keyboard navigation (Tab, Enter, Esc) with a clearly visible focus indicator", "Respects the operating system's reduced-motion preference", "ARIA roles and labels for screen reader support (NVDA, JAWS, VoiceOver)", "Alt text on images", "Semantic HTML structure and labels for form fields", "Color contrast meeting Level AA", "Full right-to-left (RTL) support and a responsive mobile layout", "3-language support: Hebrew, English, and Russian"] },
       { type: "h", text: "Known Limitations" },
       { type: "p", text: "We continuously work to improve accessibility across the entire site. Some parts, including third-party content or components, may not yet be fully accessible. We fix issues as soon as they are found and welcome reports of any problem." },
       { type: "h", text: "Accessibility Coordinator & Contact" },
@@ -2093,7 +2093,7 @@ const POLICIES = {
       { type: "h", text: "Уровень доступности и стандарт" },
       { type: "p", text: "Сайт адаптирован в соответствии с израильским стандартом IS 5568 по доступности веб-контента, основанным на рекомендациях WCAG 2.1 уровня AA." },
       { type: "h", text: "Реализованные меры доступности" },
-      { type: "l", items: ["Экранное меню доступности — увеличение текста, высокий контраст и уменьшение анимаций", "Полная навигация с клавиатуры (Tab, Enter, Esc) с чётким видимым индикатором фокуса", "Учитывает системную настройку уменьшения движения (reduced motion)", "Роли и метки ARIA для поддержки скринридеров (NVDA, JAWS, VoiceOver)", "Alt-текст для изображений", "Семантическая HTML-структура и метки (label) для полей форм", "Цветовой контраст уровня AA", "Полная поддержка письма справа налево (RTL) и адаптивная мобильная вёрстка", "Поддержка 3 языков: иврит, английский и русский"] },
+      { type: "l", items: ["Экранное меню доступности — увеличение текста, высокий контраст, уменьшение анимаций и выделение ссылок", "Полная навигация с клавиатуры (Tab, Enter, Esc) с чётким видимым индикатором фокуса", "Учитывает системную настройку уменьшения движения (reduced motion)", "Роли и метки ARIA для поддержки скринридеров (NVDA, JAWS, VoiceOver)", "Alt-текст для изображений", "Семантическая HTML-структура и метки (label) для полей форм", "Цветовой контраст уровня AA", "Полная поддержка письма справа налево (RTL) и адаптивная мобильная вёрстка", "Поддержка 3 языков: иврит, английский и русский"] },
       { type: "h", text: "Известные ограничения" },
       { type: "p", text: "Мы постоянно работаем над улучшением доступности на всём сайте. Некоторые части, включая контент или компоненты сторонних поставщиков, могут быть пока адаптированы не полностью. Мы устраняем выявленные недостатки в кратчайшие сроки и будем рады сообщениям о любых проблемах." },
       { type: "h", text: "Координатор по доступности и обратная связь" },
@@ -7625,10 +7625,37 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 // Main App
 
 // ============ ACCESSIBILITY ============
+// ── Accessibility settings persistence ──────────────────────────────
+// All a11y-menu choices (text size, high contrast, reduced animations,
+// highlight links) are stored under ONE localStorage key as a JSON blob,
+// then re-applied on the next load so a user's choices survive a refresh
+// or a return visit. Reads/writes are wrapped in try/catch so a blocked
+// or full localStorage can never crash the app.
+const A11Y_KEY = `sf_a11y`;
+function readA11y() {
+  if (typeof localStorage === `undefined`) return {};
+  try {
+    const v = JSON.parse(localStorage.getItem(A11Y_KEY) || `{}`);
+    return v && typeof v === `object` ? v : {};
+  } catch (_) {
+    return {};
+  }
+}
+function writeA11y(patch) {
+  if (typeof localStorage === `undefined`) return;
+  try {
+    localStorage.setItem(A11Y_KEY, JSON.stringify({ ...readA11y(), ...patch }));
+  } catch (_) {}
+}
+
 function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduceMotion }) {
   const [open, setOpen] = useState(false);
-  const [fontSize, setFontSize] = useState(100);
-  const [highContrast, setHighContrast] = useState(false);
+  const [fontSize, setFontSize] = useState(() => {
+    const v = readA11y().fontSize;
+    return typeof v === `number` && v >= 80 && v <= 140 ? v : 100;
+  });
+  const [highContrast, setHighContrast] = useState(() => readA11y().highContrast === true);
+  const [highlightLinks, setHighlightLinks] = useState(() => readA11y().highlightLinks === true);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth <= 768);
@@ -7638,6 +7665,7 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}%`;
+    writeA11y({ fontSize });
   }, [fontSize]);
 
   useEffect(() => {
@@ -7651,8 +7679,31 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
     const target = (typeof document !== `undefined` && (document.getElementById(`root`) || document.documentElement)) || null;
     if (!target) return;
     target.style.filter = highContrast ? `contrast(1.4) brightness(1.1)` : `none`;
+    writeA11y({ highContrast });
     return () => { if (target) target.style.filter = `none`; };
   }, [highContrast]);
+
+  // Highlight links — inject a <style> that underlines + outlines every link
+  // so they stand out from body text. Removed cleanly when toggled off.
+  useEffect(() => {
+    const id = `a11y-highlight-links-style`;
+    if (highlightLinks) {
+      const style = document.getElementById(id) || document.createElement(`style`);
+      style.id = id;
+      style.textContent = `a { text-decoration: underline !important; text-underline-offset: 3px; text-decoration-thickness: 2px; outline: 1px dotted currentColor; outline-offset: 2px; }`;
+      document.head.appendChild(style);
+    } else {
+      const style = document.getElementById(id);
+      if (style) style.remove();
+    }
+    writeA11y({ highlightLinks });
+  }, [highlightLinks]);
+
+  // Persist the reduced-animations choice (state itself lives in App so the
+  // background components can read it; we just mirror it to localStorage here).
+  useEffect(() => {
+    writeA11y({ reduceMotion });
+  }, [reduceMotion]);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -7678,10 +7729,10 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
   if (overlayOpen || (cartOpen && isMobile)) return null;
 
   const t = {
-    he: { title: 'נגישות', textSize: 'גודל טקסט', contrast: 'ניגודיות גבוהה', motion: 'הפחת אנימציות', reset: 'איפוס', close: 'סגור' },
-    en: { title: 'Accessibility', textSize: 'Text Size', contrast: 'High Contrast', motion: 'Reduce Motion', reset: 'Reset', close: 'Close' },
-    ru: { title: 'Доступность', textSize: 'Размер текста', contrast: 'Высокий контраст', motion: 'Без анимации', reset: 'Сбросить', close: 'Закрыть' },
-  }[lang] || { title: 'Accessibility', textSize: 'Text Size', contrast: 'High Contrast', motion: 'Reduce Motion', reset: 'Reset', close: 'Close' };
+    he: { title: 'נגישות', textSize: 'גודל טקסט', contrast: 'ניגודיות גבוהה', motion: 'הפחת אנימציות', links: 'הדגשת קישורים', reset: 'איפוס', close: 'סגור' },
+    en: { title: 'Accessibility', textSize: 'Text Size', contrast: 'High Contrast', motion: 'Reduce Motion', links: 'Highlight Links', reset: 'Reset', close: 'Close' },
+    ru: { title: 'Доступность', textSize: 'Размер текста', contrast: 'Высокий контраст', motion: 'Без анимации', links: 'Выделять ссылки', reset: 'Сбросить', close: 'Закрыть' },
+  }[lang] || { title: 'Accessibility', textSize: 'Text Size', contrast: 'High Contrast', motion: 'Reduce Motion', links: 'Highlight Links', reset: 'Reset', close: 'Close' };
 
   const btnBase = { width: '100%', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textAlign: 'start', transition: 'all 0.2s', marginBottom: 8 };
 
@@ -7745,8 +7796,13 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
             {t.motion} <span>{reduceMotion ? '✓' : '○'}</span>
           </button>
 
+          {/* Highlight links */}
+          <button onClick={() => setHighlightLinks(!highlightLinks)} style={{ ...btnBase, background: highlightLinks ? 'rgba(255,107,53,0.15)' : '#111', border: `1px solid ${highlightLinks ? '#FF6B35' : '#2a2a2a'}`, color: highlightLinks ? '#FF6B35' : '#888', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {t.links} <span>{highlightLinks ? '✓' : '○'}</span>
+          </button>
+
           {/* Reset */}
-          <button onClick={() => { setFontSize(100); setHighContrast(false); setReduceMotion(false); }} style={{ ...btnBase, background: 'transparent', border: '1px solid #2a2a2a', color: '#8a8a8a', textAlign: 'center', marginBottom: 0 }}>
+          <button onClick={() => { setFontSize(100); setHighContrast(false); setReduceMotion(false); setHighlightLinks(false); }} style={{ ...btnBase, background: 'transparent', border: '1px solid #2a2a2a', color: '#8a8a8a', textAlign: 'center', marginBottom: 0 }}>
             {t.reset}
           </button>
         </div>
@@ -8467,7 +8523,7 @@ export default function App() {
   const [pendingCheckout, setPendingCheckout] = useState(false);
   // Lifted from AccessibilityMenu so the background animation components
   // (ParticlesBackground, CursorGlow) can be skipped entirely when on.
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(() => readA11y().reduceMotion === true);
 
   // SPA focus management + route announcement (a11y). On a client-side route
   // change we move keyboard focus into <main> and announce the new page to
@@ -11862,7 +11918,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
         </a>
         <span style={{ color: "#808080" }}>·</span>
         <a href="/accessibility" style={{ color: "#888", textDecoration: "none" }}>
-          {lang === "he" ? "נגישות" : lang === "ru" ? "Доступность" : "Accessibility"}
+          {lang === "he" ? "הצהרת נגישות" : lang === "ru" ? "Доступность" : "Accessibility"}
         </a>
         <span style={{ color: "#808080" }}>·</span>
         <a href="mailto:hello@sfalimshop.com" style={{ color: "#888", textDecoration: "none" }}>
