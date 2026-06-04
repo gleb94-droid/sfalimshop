@@ -2271,6 +2271,16 @@ const transformImage = (url, { width, quality = 75 } = {}) => {
   return `${base}${sep}width=${width}&quality=${quality}&resize=contain`;
 };
 
+// srcSetFor — build a responsive `srcSet` string from a Supabase public URL,
+// one transformed candidate per width (e.g. [350, 600] -> "<350w-url> 350w,
+// <600w-url> 600w"). Returns undefined for non-transformable URLs so the <img>
+// simply falls back to its plain `src`. Pair with a `sizes` attribute so the
+// browser fetches the smallest candidate that still covers the displayed box.
+const srcSetFor = (url, widths, quality = 75) => {
+  if (typeof url !== `string` || !url.includes(`/storage/v1/object/public/`)) return undefined;
+  return widths.map((w) => `${transformImage(url, { width: w, quality })} ${w}w`).join(`, `);
+};
+
 // SmartImage — drop-in replacement for <img> on product images served from
 // Supabase Storage. The first cold-cache fetch occasionally fails and shows
 // a broken-image glyph until the user refreshes. SmartImage retries up to
@@ -2280,7 +2290,7 @@ const transformImage = (url, { width, quality = 75 } = {}) => {
 // that data:/blob:/relative URLs are left untouched. If all retries fail,
 // renders a plain placeholder div instead of an <img> so the browser never
 // paints the broken-image glyph.
-function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
+function SmartImage({ src, alt, style, onError, onLoad, srcSet, ...rest }) {
   const [attempt, setAttempt] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -2311,6 +2321,14 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
     : (attempt === 0 || !isRemote)
       ? src
       : `${src}${src.includes("?") ? "&" : "?"}retry=${attempt}`;
+  // Mirror the retry cache-buster onto every srcSet candidate — otherwise a
+  // cold-cache failure would keep re-fetching the same (failing) responsive URL,
+  // since srcSet wins over src when a `sizes` match exists.
+  const finalSrcSet = !srcSet
+    ? undefined
+    : (attempt === 0 || !isRemote)
+      ? srcSet
+      : srcSet.replace(/(https?:\/\/[^\s,]+)/g, (u) => `${u}${u.includes("?") ? "&" : "?"}retry=${attempt}`);
 
   const handleError = (e) => {
     if (attempt < MAX_RETRIES) {
@@ -2349,6 +2367,7 @@ function SmartImage({ src, alt, style, onError, onLoad, ...rest }) {
       {...rest}
       ref={imgRef}
       src={finalSrc}
+      srcSet={finalSrcSet}
       alt={alt}
       style={imgStyle}
       onError={handleError}
@@ -10318,7 +10337,9 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
   // the raw design transparent PNG if neither shipped for this row yet.
   // Grid thumbnail: serve a resized transform (~2× the ~300px card for retina).
   // The full-res original is used in PetModal's large preview (untouched).
-  const imgSrc = transformImage(design.mockup_shirt_url || design.mockup_url || design.design_url, { width: 600 });
+  const rawImg = design.mockup_shirt_url || design.mockup_url || design.design_url;
+  const imgSrc = transformImage(rawImg, { width: 600 });
+  const imgSrcSet = srcSetFor(rawImg, [350, 600]);
   const fallbackBg = design.mockup_bg || "#1a1a1a";
 
   // Editorial corner-cut on hover (desktop only — no hover on touch)
@@ -10363,8 +10384,11 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
       }}>
         <SmartImage
           src={imgSrc}
+          srcSet={imgSrcSet}
+          sizes={isMobile ? "45vw" : "300px"}
           alt={name}
           loading="lazy"
+          decoding="async"
           style={{
             width: "100%",
             height: "100%",
@@ -10897,9 +10921,14 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
 // (shirt/mug) have no baked frame and show cleanly too. Centred by the caller;
 // badges hug the image. ONE component so the modal + breed page never drift.
 function BloomHeroImage({ src, alt, design, lang, isMobile }) {
+  // This is the LCP image on the breed page / modal. Serve a resized WebP (the
+  // hero only renders ~270–325px wide) via the Supabase render endpoint, with a
+  // small srcSet for retina, and hint the browser to fetch it first (eager +
+  // high priority). Slightly higher quality (80) since it's the largest on-screen
+  // image. resize=contain keeps the framed portrait un-cropped.
   return (
     <span style={{ position: `relative`, display: `inline-block`, lineHeight: 0, maxWidth: `100%` }}>
-      <SmartImage src={src} alt={alt} style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `min(50vh, 380px)` : `min(55vh, 460px)`, objectFit: `contain` }} />
+      <SmartImage src={transformImage(src, { width: 800, quality: 80 })} srcSet={srcSetFor(src, [500, 800, 1000], 80)} sizes={isMobile ? `min(50vw, 280px)` : `340px`} alt={alt} fetchpriority="high" decoding="async" style={{ display: `block`, width: `auto`, height: `auto`, maxWidth: `100%`, maxHeight: isMobile ? `min(50vh, 380px)` : `min(55vh, 460px)`, objectFit: `contain` }} />
       {design && <PetBadges design={design} lang={lang} />}
     </span>
   );
@@ -11394,7 +11423,7 @@ function BloomCharacterRail({ characters, lang, goToBreed, isMobile, heading }) 
               onMouseOut={e => { e.currentTarget.style.transform = `translateY(0)`; }}>
               {/* pointerEvents:none so drags glide over the images to the scroller. */}
               <div style={{ width: `100%`, aspectRatio: `1414 / 2000`, pointerEvents: `none` }}>
-                <SmartImage src={img} alt={nm} loading="lazy" decoding="async" draggable={false} style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }} />
+                <SmartImage src={transformImage(img, { width: 300 })} srcSet={srcSetFor(img, [200, 400])} sizes={isMobile ? `118px` : `150px`} alt={nm} loading="lazy" decoding="async" draggable={false} style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }} />
               </div>
               <div style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 4px 0`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap`, pointerEvents: `none` }}>{nm}</div>
             </button>
