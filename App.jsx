@@ -3204,7 +3204,7 @@ function TrackPage({ lang, user, clearCart }) {
           orders.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
               <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
-              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#777", marginBottom: 8 }}>—</div>
+              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
               <div style={{ fontSize: 16, color: "#888" }}>{t.track.noOrders}</div>
             </div>
           ) : (
@@ -3914,7 +3914,7 @@ function AdminPage({ lang }) {
           (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
               <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
-              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#777", marginBottom: 8 }}>—</div>
+              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
               <div style={{ fontSize: 16, color: "#888" }}>{t.admin.noOrders}</div>
             </div>
           ) : (
@@ -5778,7 +5778,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); } }}
                   style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
-                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#555", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
+                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
                     <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 120 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     </div>
@@ -7992,7 +7992,7 @@ function AboutPage({ lang, setPage }) {
               </div>
             ))}
           </div>
-          {t.processNote && <p className="reveal" style={{ color: '#777', fontSize: 12.5, lineHeight: 1.7, textAlign: 'center', maxWidth: 620, margin: '32px auto 0', fontStyle: 'italic' }}>{t.processNote}</p>}
+          {t.processNote && <p className="reveal" style={{ color: '#8a8a8a', fontSize: 12.5, lineHeight: 1.7, textAlign: 'center', maxWidth: 620, margin: '32px auto 0', fontStyle: 'italic' }}>{t.processNote}</p>}
         </div>
       </div>
 
