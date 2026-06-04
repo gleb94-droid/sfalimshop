@@ -8210,11 +8210,17 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
     // enlarges px text site-wide AND reflows the layout (transform:scale would
     // overlap/clip and break position:fixed). Applied to <html> so it also
     // covers overlays portaled to <body> (PetModal, cart, lightbox) + the page.
-    const el = (typeof document !== `undefined` && document.documentElement) || null;
-    if (el) {
-      el.style.fontSize = ``; // clear any legacy root font-size from the old approach
-      const scale = fontSize / 100;
-      el.style.zoom = scale === 1 ? `` : String(scale);
+    const de = (typeof document !== `undefined` && document.documentElement) || null;
+    if (de) {
+      // Scale via a CSS variable consumed by `#root` + `[data-sf-zoom]` overlays
+      // (see the global stylesheet) — NOT by zooming <html>/<body>. Zooming the
+      // root makes it a containing block for position:fixed, which strands the
+      // body-portaled FABs (a11y + WhatsApp) at the page bottom / behind modals.
+      // Driving #root + overlays keeps text scaling everywhere while the FABs,
+      // which live outside those subtrees, stay viewport-fixed and tappable.
+      de.style.setProperty(`--sf-a11y-zoom`, String(fontSize / 100));
+      de.style.zoom = ``;     // undo the previous <html>-zoom approach (the bug)
+      de.style.fontSize = ``; // undo the even-older root font-size approach
     }
     writeA11y({ fontSize });
   }, [fontSize]);
@@ -8271,13 +8277,14 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
   // A11y: focus the panel when open; restore focus to the toggle on close.
   const a11yPanelRef = useDialogFocus(open);
 
-  // Hide the FAB while ANY drawer/modal is open (cart, PetModal, lightbox, …)
-  // so it never overlaps or sits over an open overlay. `overlayOpen` already
-  // covers the cart (which locks body scroll); the legacy `cartOpen && isMobile`
-  // is kept as a belt-and-suspenders fallback. Settings effects above keep
-  // running while hidden (returning null does NOT unmount). This early-return
-  // MUST sit after every hook call above (Rules of Hooks).
-  if (overlayOpen || (cartOpen && isMobile)) return null;
+  // The FAB now stays visible at ALL times — INCLUDING over open overlays
+  // (PetModal, cart, lightbox) so the user can still adjust text size / contrast
+  // while a character card or the cart is open. It is portaled to <body> OUTSIDE
+  // the zoomed #root / [data-sf-zoom] subtrees, so it stays viewport-fixed at
+  // native size, and its z-index (9998) sits above every overlay (≤1101) → always
+  // tappable. (Previously it self-hid on `overlayOpen`, which — together with the
+  // <html> zoom that stranded fixed elements — made it vanish behind the PetModal
+  // on mobile. `overlayOpen`/`cartOpen` are no longer used to hide it.)
 
   const t = {
     he: { title: 'נגישות', textSize: 'גודל טקסט', contrast: 'ניגודיות גבוהה', motion: 'הפחת אנימציות', links: 'הדגשת קישורים', reset: 'איפוס', close: 'סגור' },
@@ -8789,7 +8796,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
       }} />
 
       {/* Panel */}
-      <div ref={cartDialogRef} role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" style={{
+      <div ref={cartDialogRef} data-sf-zoom role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" style={{
         position: "fixed", top: 0, bottom: 0,
         insetInlineEnd: 0,
         zIndex: 1101,
@@ -9596,6 +9603,14 @@ export default function App() {
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0f0f0f; }
+        /* A11y font-size: scale the page (#root) + body-portaled CONTENT overlays
+           (PetModal/cart/lightbox carry data-sf-zoom) using the CSS zoom property,
+           driven by the --sf-a11y-zoom variable the menu sets on :root. Deliberately
+           NOT on html/body: zoom there makes it a containing block for position:fixed
+           descendants, which would strand the FABs (portaled to body) at the page
+           bottom / behind open modals. The FABs sit OUTSIDE these subtrees, so they
+           stay viewport-fixed at native size. */
+        #root, [data-sf-zoom] { zoom: var(--sf-a11y-zoom, 1); }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
         /* WCAG 2.4.7 — visible keyboard focus. Mouse clicks suppressed via :focus-visible. */
@@ -11236,6 +11251,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
 
   const __overlay = (
     <div
+      data-sf-zoom
       onClick={onClose}
       style={{
         position: "fixed",
@@ -11660,6 +11676,7 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
 
       {zoomed && (typeof document !== `undefined` ? createPortal(
         <div onClick={() => setZoomed(false)} role="dialog" aria-modal="true"
+          data-sf-zoom
           ref={zoomDialogRef}
           onKeyDown={(e) => { if (e.key === `Escape`) setZoomed(false); }}
           aria-label={lang === `he` ? `תמונה מוגדלת` : lang === `ru` ? `Увеличенное изображение` : `Zoomed image`}
