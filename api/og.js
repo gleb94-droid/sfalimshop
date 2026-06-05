@@ -233,7 +233,7 @@ function buildBlogHtml(p, handle) {
     datePublished: p.published_at || undefined,
     dateModified: p.updated_at || p.published_at || undefined,
     author: { "@type": `Organization`, name: `Sfalim Shop` },
-    publisher: { "@type": `Organization`, name: `Sfalim Shop`, logo: { "@type": `ImageObject`, url: `${SITE_ORIGIN}/logo.jpg` } },
+    publisher: { "@type": `Organization`, name: `Sfalim Shop`, logo: { "@type": `ImageObject`, url: `${SITE_ORIGIN}/exports/logo-mark-500.png` } },
     mainEntityOfPage: canonical,
     url: canonical,
   });

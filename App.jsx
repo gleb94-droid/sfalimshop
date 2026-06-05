@@ -13163,7 +13163,7 @@ function FaqPage({ lang }) {
 // ============================================================================
 
 const BLOG_CATEGORY_IDS = ['breeds', 'gifts', 'culture', 'stories'];
-const BLOG_LOGO_URL = `https://www.sfalimshop.com/logo.jpg`; // existing asset (Nav uses /logo.jpg)
+const BLOG_LOGO_URL = `https://www.sfalimshop.com/exports/logo-mark-500.png`; // square brand mark (500x500) for structured-data/blog publisher logo
 
 function blogCategoryLabel(lang, cat) {
   const t = LANGS[lang] || LANGS.he;
