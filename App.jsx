@@ -1598,6 +1598,83 @@ const BLOOM_SHIRT_COLORS = [
   { id: `black`, hex: `#1a1a1a`, he: `שחור`, en: `Black`, ru: `Чёрный` },
 ];
 
+// ============ Full custom-shirt colour library ============
+// Master list of every shirt colour the supplier offers; each PRODUCT picks its
+// own subset by id (via colorHexes below). Trilingual names; colorName() resolves
+// a hex back to a readable name for the cart / order summary. Custom orders are
+// supplier-on-demand, so the full range is shown and confirmed per order.
+const SHIRT_COLORS = {
+  white:       { hex: `#ffffff`, he: `לבן`,        en: `White`,        ru: `Белый` },
+  black:       { hex: `#1a1a1a`, he: `שחור`,       en: `Black`,        ru: `Чёрный` },
+  gray:        { hex: `#9ca3af`, he: `אפור`,       en: `Gray`,         ru: `Серый` },
+  navy:        { hex: `#1e3a5f`, he: `נייבי`,      en: `Navy`,         ru: `Тёмно-синий` },
+  royal:       { hex: `#2563eb`, he: `כחול רויאל`, en: `Royal Blue`,   ru: `Синий роял` },
+  azure:       { hex: `#7dd3fc`, he: `תכלת`,       en: `Azure`,        ru: `Голубой` },
+  lightAzure:  { hex: `#bae6fd`, he: `תכלת בהיר`,  en: `Light Azure`,  ru: `Светло-голубой` },
+  turquoise:   { hex: `#14b8a6`, he: `טורקיז`,     en: `Turquoise`,    ru: `Бирюзовый` },
+  red:         { hex: `#dc2626`, he: `אדום`,       en: `Red`,          ru: `Красный` },
+  wine:        { hex: `#7f1d1d`, he: `יין/בורדו`,  en: `Burgundy`,     ru: `Бордовый` },
+  orange:      { hex: `#f97316`, he: `כתום`,       en: `Orange`,       ru: `Оранжевый` },
+  yellow:      { hex: `#facc15`, he: `צהוב`,       en: `Yellow`,       ru: `Жёлтый` },
+  lightYellow: { hex: `#fde68a`, he: `צהוב בהיר`,  en: `Light Yellow`, ru: `Светло-жёлтый` },
+  mustard:     { hex: `#a16207`, he: `חרדל`,       en: `Mustard`,      ru: `Горчичный` },
+  lime:        { hex: `#84cc16`, he: `ירוק ליים`,  en: `Lime`,         ru: `Лаймовый` },
+  green:       { hex: `#22c55e`, he: `ירוק`,       en: `Green`,        ru: `Зелёный` },
+  medGreen:    { hex: `#15803d`, he: `ירוק בינוני`,en: `Medium Green`, ru: `Средне-зелёный` },
+  darkGreen:   { hex: `#166534`, he: `ירוק כהה`,   en: `Dark Green`,   ru: `Тёмно-зелёный` },
+  lightGreen:  { hex: `#86efac`, he: `ירוק בהיר`,  en: `Light Green`,  ru: `Светло-зелёный` },
+  olive:       { hex: `#556b2f`, he: `ירוק זית`,   en: `Olive`,        ru: `Оливковый` },
+  sage:        { hex: `#9caf88`, he: `ירוק מרווה`, en: `Sage`,         ru: `Шалфейный` },
+  neonGreen:   { hex: `#39ff14`, he: `ירוק ניאון`, en: `Neon Green`,   ru: `Неоновый зелёный` },
+  mint:        { hex: `#6ee7b7`, he: `מנטה`,       en: `Mint`,         ru: `Мятный` },
+  lightMint:   { hex: `#a7f3d0`, he: `מנטה בהיר`,  en: `Light Mint`,   ru: `Светло-мятный` },
+  khaki:       { hex: `#b8a878`, he: `חאקי/טאן`,   en: `Khaki`,        ru: `Хаки` },
+  sand:        { hex: `#e3d5b8`, he: `חול`,        en: `Sand`,         ru: `Песочный` },
+  beige:       { hex: `#d9c7a8`, he: `בז'`,        en: `Beige`,        ru: `Бежевый` },
+  cream:       { hex: `#f5ecd7`, he: `קרם`,        en: `Cream`,        ru: `Кремовый` },
+  taupe:       { hex: `#8b7d6b`, he: `חום-טאופ`,   en: `Taupe`,        ru: `Таупе` },
+  brown:       { hex: `#6b4423`, he: `חום`,        en: `Brown`,        ru: `Коричневый` },
+  purple:      { hex: `#7c3aed`, he: `סגול`,       en: `Purple`,       ru: `Фиолетовый` },
+  lilac:       { hex: `#c4b5fd`, he: `לילך`,       en: `Lilac`,        ru: `Сиреневый` },
+  magenta:     { hex: `#db2777`, he: `מג'נטה`,     en: `Magenta`,      ru: `Маджента` },
+  pink:        { hex: `#f9a8d4`, he: `ורוד`,       en: `Pink`,         ru: `Розовый` },
+  babyPink:    { hex: `#fbcfe8`, he: `ורוד בייבי`, en: `Baby Pink`,    ru: `Бэби-розовый` },
+  smokyPink:   { hex: `#d8a7a1`, he: `ורוד מעושן`, en: `Smoky Pink`,   ru: `Дымчато-розовый` },
+};
+// Build a product's colour swatch list (array of hex) from a list of SHIRT_COLORS ids.
+const colorHexes = (ids) => ids.map(id => (SHIRT_COLORS[id] || {}).hex).filter(Boolean);
+
+// ============ Fabric guide ============
+// Educational "Our Fabrics" content (how it's made + why it's great), shown as a
+// collapsible section in the order flow. Trilingual he/en/ru.
+const FABRIC_GUIDE = [
+  {
+    name: { he: "כותנה סרוקה (100%)", en: "Combed Cotton (100%)", ru: "Чёсаный хлопок (100%)" },
+    make: { he: "סיבי הכותנה עוברים 'סירוק' — מסרקים מכניים מסירים סיבים קצרים וקשרים ומשאירים רק סיבים ארוכים וישרים לחוט חלק וצפוף.", en: "The fibres are 'combed' — machines remove short fibres and knots, leaving only long, straight fibres for a smooth, dense yarn.", ru: "Волокна «причёсывают» — машины убирают короткие волокна и узелки, оставляя длинные ровные волокна для гладкой плотной пряжи." },
+    good: { he: "רכה ונושמת, מראה נקי ואחיד, וכמעט ללא פלומה — משטח חלק להדפסת DTF חדה.", en: "Soft and breathable, a clean even look, almost no lint — a smooth surface for a crisp DTF print.", ru: "Мягкий и дышащий, чистый ровный вид, почти без ворса — гладкая поверхность для чёткой DTF-печати." },
+  },
+  {
+    name: { he: "תערובת כותנה-פוליאסטר (84/16)", en: "Cotton-Polyester Blend (84/16)", ru: "Хлопок-полиэстер (84/16)" },
+    make: { he: "חוטי כותנה ופוליאסטר נארגים יחד לבד אחד שמשלב את התכונות של שני החומרים.", en: "Cotton and polyester threads are woven together into one fabric that combines the best of both.", ru: "Нити хлопка и полиэстера сплетаются в одну ткань, объединяя свойства обоих материалов." },
+    good: { he: "שומר על הצורה, מתכווץ ומתקמט פחות, מתייבש מהר ועמיד — עם רוב רכות הכותנה.", en: "Holds its shape, shrinks and wrinkles less, dries fast and lasts — with most of cotton's softness.", ru: "Держит форму, меньше садится и мнётся, быстро сохнет и долговечен — с мягкостью хлопка." },
+  },
+  {
+    name: { he: "כותנה-לייקרה (95/5)", en: "Cotton-Lycra (95/5)", ru: "Хлопок-лайкра (95/5)" },
+    make: { he: "לחוט הכותנה משולב חוט אלסטן (לייקרה) גמיש שמעניק לבד יכולת מתיחה.", en: "An elastic elastane (lycra) thread is blended into the cotton, giving the fabric stretch.", ru: "В хлопковую пряжу вплетается эластичная нить эластана (лайкры), придавая ткани растяжимость." },
+    good: { he: "נמתח וחוזר לצורתו, גזרה צמודה ומחמיאה שלא מתעוותת, ונוחות תנועה גבוהה.", en: "Stretches and springs back, a flattering fitted cut that won't deform, and great freedom of movement.", ru: "Тянется и возвращается в форму, приталенный крой не деформируется, высокая свобода движения." },
+  },
+  {
+    name: { he: "פוליאסטר (100%) — דרייפיט", en: "Polyester (100%) — Dri-Fit", ru: "Полиэстер (100%) — Dri-Fit" },
+    make: { he: "סיב סינתטי (PET) הנארג כך שמעביר לחות אל פני הבד ומאפשר ייבוש מהיר.", en: "A synthetic fibre (PET) woven to wick moisture to the surface for fast drying.", ru: "Синтетическое волокно (PET), сплетённое так, что отводит влагу на поверхность для быстрого высыхания." },
+    good: { he: "קל מאוד, מנדף זיעה, מתייבש מהר ולא מתכווץ. מצוין לסובלימציה — הצבע נטמע בסיב.", en: "Very light, wicks sweat, dries fast and doesn't shrink. Great for sublimation — the colour fuses into the fibre.", ru: "Очень лёгкий, отводит пот, быстро сохнет и не садится. Отлично для сублимации — цвет впитывается в волокно." },
+  },
+  {
+    name: { he: "גימור סטון-ווש", en: "Stone-Wash Finish", ru: "Отделка стоунвош" },
+    make: { he: "לא בד אלא תהליך גימור: בד הכותנה נכבס עם אבני פומיס ששוחקות מעט את פני השטח.", en: "Not a fabric but a finish: the cotton is washed with pumice stones that lightly abrade the surface.", ru: "Это не ткань, а отделка: хлопок стирают с пемзой, слегка обрабатывая поверхность." },
+    good: { he: "מרכך את הבד עוד לפני הלבישה, יוצר מראה וינטג' עם גוונים עמוקים, ומפחית כיווץ.", en: "Softens the fabric before you even wear it, creates a vintage look with deep tones, and reduces shrinkage.", ru: "Смягчает ткань ещё до носки, создаёт винтажный вид с глубокими тонами и уменьшает усадку." },
+  },
+];
+
 // Shared BLOOM shirt option sets — used by both PetModal and BreedPage so the
 // shirt type/size picker stays identical in the quick-look modal and the full
 // breed page. productId maps the shirt type to its OrderPage product; sizes
@@ -1611,7 +1688,8 @@ const BLOOM_SHIRT_SIZES = [`s`, `m`, `l`, `xl`, `xxl`];
 // Resolve a saved hex colour to a readable name (falls back to the hex itself).
 const colorName = (hex, lang) => {
   if (!hex) return "";
-  const c = BLOOM_SHIRT_COLORS.find(x => x.hex.toLowerCase() === String(hex).toLowerCase());
+  const all = [...BLOOM_SHIRT_COLORS, ...Object.values(SHIRT_COLORS)];
+  const c = all.find(x => x.hex.toLowerCase() === String(hex).toLowerCase());
   return c ? (c[lang] || c.en) : hex;
 };
 
@@ -1652,7 +1730,7 @@ const CUSTOM_STICKERS_ENABLED = false;
 // exists (it currently reuses the Oversize mockup, so the two look identical).
 // The product + all its wiring stay in place; flip this to TRUE to show it in
 // the order-wizard grid again (also re-add it to the index.html ItemList JSON-LD).
-const STONEWASH_ENABLED = false;
+const STONEWASH_ENABLED = true;
 
 // Friendly, trilingual user-facing error text. The raw error is logged to the
 // console for debugging — never surfaced to the customer (no raw e.message).
@@ -1811,7 +1889,7 @@ const LANGS = {
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך", guestTitle: "מעקב אחר ההזמנה שלך", guestDesc: "לא צריך סיסמה — נשלח לך למייל קישור מאובטח לצפייה בהזמנות שלך.", guestBtn: "שלח לי קישור" },
     approval: { submittedTitle: "העיצוב נשלח לאישור", submittedDesc: "העיצוב שלך נשלח לאישור — נעדכן אותך במייל ברגע שהוא יאושר, ואז תוכל לשלם. ההזמנה נשמרה.", underReview: "העיצוב בבדיקה", underReviewDesc: "שלחנו את העיצוב שלך לאישור. נעדכן אותך במייל ברגע שהוא יאושר — ואז אפשר יהיה לשלם.", approvedTitle: "העיצוב אושר! 🎉", approvedDesc: "אפשר להשלים את התשלום וההזמנה תיכנס להפקה.", payNow: "שלם עכשיו", changesTitle: "נדרשים שינויים בעיצוב", reviewNote: "הערה מהצוות שלנו", editResubmit: "ערוך ושלח מחדש", uploadNew: "העלה עיצוב חדש (לא חובה)", resubmitBtn: "שלח מחדש לאישור", resubmitting: "שולח...", resubmitted: "נשלח מחדש — העיצוב בבדיקה שוב", cancelOrder: "בטל הזמנה", cancelConfirm: "לבטל את ההזמנה הזו?", cancelled: "ההזמנה בוטלה" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
-    products: { tshirt: "חולצת טי בייסיק", oversized: "חולצת אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
+    products: { tshirt: "חולצת טי בייסיק", lycra: "חולצת לייקרה", oversized: "חולצת אוברסייז", look: "חולצת לוק אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
     bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} →` },
   },
@@ -1855,7 +1933,7 @@ const LANGS = {
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
     approval: { submittedTitle: "Your design was submitted for approval", submittedDesc: "Your design was submitted for approval — we'll email you once it's approved, then you can pay. Your order is saved.", underReview: "Design under review", underReviewDesc: "We've sent your design for approval. We'll email you the moment it's approved — then you can pay.", approvedTitle: "Design approved! 🎉", approvedDesc: "Complete payment and your order goes into production.", payNow: "Pay now", changesTitle: "Changes requested", reviewNote: "Note from our team", editResubmit: "Edit & resubmit", uploadNew: "Upload a new design (optional)", resubmitBtn: "Resubmit for approval", resubmitting: "Submitting...", resubmitted: "Resubmitted — under review again", cancelOrder: "Cancel order", cancelConfirm: "Cancel this order?", cancelled: "Order cancelled" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
-    products: { tshirt: "Basic T-Shirt", oversized: "Oversize T-Shirt", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
+    products: { tshirt: "Basic T-Shirt", lycra: "Lycra Fitted Tee", oversized: "Oversize T-Shirt", look: "Look Oversize", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
     variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
     bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close", seeAll: (n) => `See all ${n} →` },
   },
@@ -1899,7 +1977,7 @@ const LANGS = {
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
     approval: { submittedTitle: "Ваш дизайн отправлен на одобрение", submittedDesc: "Ваш дизайн отправлен на одобрение — мы сообщим по email, как только он будет одобрен, тогда можно оплатить. Заказ сохранён.", underReview: "Дизайн на проверке", underReviewDesc: "Мы отправили ваш дизайн на одобрение. Сообщим по email, как только он будет одобрен — тогда можно оплатить.", approvedTitle: "Дизайн одобрен! 🎉", approvedDesc: "Завершите оплату, и заказ отправится в производство.", payNow: "Оплатить", changesTitle: "Требуются изменения", reviewNote: "Комментарий нашей команды", editResubmit: "Изменить и отправить снова", uploadNew: "Загрузить новый дизайн (необязательно)", resubmitBtn: "Отправить на одобрение снова", resubmitting: "Отправка...", resubmitted: "Отправлено повторно — снова на проверке", cancelOrder: "Отменить заказ", cancelConfirm: "Отменить этот заказ?", cancelled: "Заказ отменён" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
-    products: { tshirt: "Базовая футболка", oversized: "Оверсайз футболка", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
+    products: { tshirt: "Базовая футболка", lycra: "Футболка Лайкра", oversized: "Оверсайз футболка", look: "Оверсайз «Look»", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
     variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
     bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть", seeAll: (n) => `Смотреть все ${n} →` },
   },
@@ -2219,10 +2297,12 @@ const SHIRT_COLOR_PALETTE = BLOOM_SHIRT_COLORS.map(c => c.hex);
 
 const PRODUCTS = (t) => [
   { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
-  { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · גזרה רגילה · הדפסת DTF", en: "100% combed cotton · regular fit · DTF print", ru: "100% хлопок · обычный крой · DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 89 }, { id: "m", label: "M", price: 89 }, { id: "l", label: "L", price: 89 }, { id: "xl", label: "XL", price: 99 }, { id: "xxl", label: "XXL", price: 99 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "oversized",  name: t.products.oversized, desc: { he: "100% כותנה סרוקה · אוברסייז", en: "100% combed cotton · oversize", ru: "100% чёсаный хлопок · оверсайз" }, is_new: true, variants: [{ id: "s", label: "S", price: 119 }, { id: "m", label: "M", price: 119 }, { id: "l", label: "L", price: 119 }, { id: "xl", label: "XL", price: 119 }, { id: "xxl", label: "XXL", price: 119 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "stonewash",  name: t.products.stonewash, desc: { he: "100% כותנה סרוקה · אוברסייז, גימור וינטג' סטון-ווש", en: "100% combed cotton · oversize, vintage stone-wash finish", ru: "100% чёсаный хлопок · оверсайз, винтажная отделка стоунвош" }, is_new: true, variants: [{ id: "s", label: "S", price: 119 }, { id: "m", label: "M", price: 119 }, { id: "l", label: "L", price: 119 }, { id: "xl", label: "XL", price: 119 }, { id: "xxl", label: "XXL", price: 119 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
-  { id: "dryfit",     name: t.products.dryfit,    desc: { he: "פוליאסטר נושם · מתאים לאימון · הדפסת סובלימציה", en: "Breathable polyester · sport-ready · sublimation print", ru: "Дышащий полиэстер · для спорта · сублимационная печать" }, variants: [{ id: "s", label: "S", price: 95 }, { id: "m", label: "M", price: 95 }, { id: "l", label: "L", price: 95 }, { id: "xl", label: "XL", price: 105 }, { id: "xxl", label: "XXL", price: 105 }], colors: SHIRT_COLOR_PALETTE, printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · רכה ונושמת · גזרה רגילה · הדפסת DTF חדה", en: "100% combed cotton · soft & breathable · regular fit · crisp DTF print", ru: "100% чёсаный хлопок · мягкий и дышащий · обычный крой · чёткая DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black","gray","navy","royal","azure","turquoise","red","wine","orange","yellow","green","darkGreen","sage","beige","brown","purple","pink"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "lycra",      name: t.products.lycra,     desc: { he: "95% כותנה / 5% לייקרה · גזרה צמודה שחוזרת לצורתה · נוחות תנועה", en: "95% cotton / 5% lycra · figure-hugging fit that springs back · move-friendly", ru: "95% хлопок / 5% лайкра · приталенный крой, держит форму · свобода движения" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "oversized",  name: t.products.oversized, desc: { he: "100% כותנה סרוקה · גזרת אוברסייז · בד חלק להדפסה חדה", en: "100% combed cotton · oversize fit · smooth fabric for a crisp print", ru: "100% чёсаный хлопок · оверсайз · гладкая ткань для чёткой печати" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black","gray","navy","turquoise","azure","lilac","olive","taupe","beige","cream"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "look",       name: t.products.look,      desc: { he: "84% כותנה / 16% פוליאסטר · אוברסייז · שומר על הצורה, פחות קמטים", en: "84% cotton / 16% polyester · oversize · keeps its shape, fewer wrinkles", ru: "84% хлопок / 16% полиэстер · оверсайз · держит форму, меньше мнётся" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black","gray","navy","lilac","olive","cream"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "stonewash",  name: t.products.stonewash, desc: { he: "100% כותנה סרוקה · גימור סטון-ווש · מראה וינטג' רך ועמוק", en: "100% combed cotton · stone-wash finish · soft, deep vintage look", ru: "100% чёсаный хлопок · отделка стоунвош · мягкий, глубокий винтажный вид" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["black","navy","brown","wine","darkGreen","sage","khaki","cream"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
+  { id: "dryfit",     name: t.products.dryfit,    desc: { he: "100% פוליאסטר נושם · מנדף זיעה · מתאים לאימון · הדפסת סובלימציה", en: "100% breathable polyester · moisture-wicking · sport-ready · sublimation print", ru: "100% дышащий полиэстер · отводит влагу · для спорта · сублимация" }, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black","gray","navy","royal","azure","turquoise","red","wine","orange","yellow","darkGreen","sage","neonGreen","purple","pink","sand"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "sticker",    name: t.products.sticker,   desc: { he: "מדבקת ויניל עגולה · עמידה במים ובשמש", en: "Round vinyl sticker · water- and UV-resistant", ru: "Круглый виниловый стикер · водо- и UV-устойчивый" }, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
   { id: "sticker_sq", name: t.products.sticker_sq, desc: { he: "מדבקת ויניל מרובעת · עמידה במים ובשמש", en: "Square vinyl sticker · water- and UV-resistant", ru: "Квадратный виниловый стикер · водо- и UV-устойчивый" }, is_new: true, variants: [{ id: "small", label: t.variants.small, price: 15 }, { id: "medium", label: t.variants.medium, price: 25 }, { id: "largeS", label: t.variants.largeS, price: 35 }, { id: "sheet", label: t.variants.sheet, price: 45 }], colors: ["#ffffff", "#f0fdf4", "#fef9c3", "#fdf2f8", "#eff6ff", "#fff7ed", "#fef2f2", "#f0fdfa"], printArea: { x: 20, y: 20, w: 360, h: 360 } },
 ];
@@ -2333,7 +2413,9 @@ const SIZE_OPTIONS = {
 // 1. הגדרת קישורים דינמיים לפי צבעים מתוך ה-Supabase שלכם
 const MOCKUP_URLS = {
   tshirt:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
+  lycra:      "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/t%20shirt%20basic%20.png",
   oversized:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
+  look:       "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   // Stone-wash reuses the Oversize mockup for now (owner will replace later).
   stonewash:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   dryfit:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
@@ -5302,6 +5384,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     return new URLSearchParams(h.slice(qi + 1)).get(`paid`) === `0`;
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [openCat, setOpenCat] = useState(null);
+  const [showFabrics, setShowFabrics] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(0);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -5374,9 +5458,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // (coordinated privately on WhatsApp — no address collected).
   const addressRequired = deliveryMethod !== `personal_beersheva`;
   const [backPrint, setBackPrint] = useState(false);
-  const BACK_PRINT_PRICE = 39;
-  const SECOND_FRONT_PRICE = 20;
-  const SLEEVE_PRICE = 25;
+  // One flat shirt price (₪149) — up to 3 prints (front / back / sleeve) INCLUDED,
+  // no per-placement surcharge. Owner handles any extra special requests directly.
+  const BACK_PRINT_PRICE = 0;
+  const SECOND_FRONT_PRICE = 0;
+  const SLEEVE_PRICE = 0;
   const [secondFront, setSecondFront] = useState({ enabled: false, image: null, pos: { x: 210, y: 120, size: 43 } });
   const [backDesign, setBackDesign] = useState({ enabled: false, sameAsMain: true, image: null });
   const [sleeveLeft, setSleeveLeft] = useState({ enabled: false, sameAsMain: true, image: null });
@@ -6274,31 +6360,102 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <TrustRow lang={lang} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {products.map((p, idx) => (
-                <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
-                  onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); } }}
-                  style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
-                    <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
-                    <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 120 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                    </div>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                        <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
-                        {p.is_bestseller && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
-                        {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
+              {(() => {
+                const OVERSIZE_IDS = ["oversized", "look", "stonewash"];
+                // Single reusable product card (used both standalone and inside the Oversize group).
+                const card = (p, idx) => (
+                  <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
+                    onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); } }}
+                    style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
+                      <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
+                      <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 120 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                       </div>
-                      <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
-                      <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {t.product.options}</span></div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                          <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
+                          {p.is_bestseller && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
+                          {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
+                        </div>
+                        <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
+                        <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {t.product.options}</span></div>
+                      </div>
                     </div>
+                    {selectedProduct === p.id && <span style={{ color: COLORS.accent, flexShrink: 0 }}>✓</span>}
                   </div>
-                  {selectedProduct === p.id && <span style={{ color: COLORS.accent, flexShrink: 0 }}>✓</span>}
-                </div>
-              ))}
+                );
+                const out = [];
+                let oversizeDone = false;
+                products.forEach((p, idx) => {
+                  if (OVERSIZE_IDS.includes(p.id)) {
+                    if (oversizeDone) return;
+                    oversizeDone = true;
+                    const subs = products.filter(x => OVERSIZE_IDS.includes(x.id));
+                    const anySel = subs.some(x => x.id === selectedProduct);
+                    const open = openCat === "oversize" || anySel;
+                    out.push(
+                      <div key="cat-oversize" style={{ background: COLORS.bgCard, border: `2px solid ${anySel ? COLORS.accent : COLORS.border}`, borderRadius: 12, overflow: "hidden" }}>
+                        <div role="button" tabIndex={0} aria-expanded={open}
+                          onClick={() => setOpenCat(o => o === "oversize" ? null : "oversize")}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenCat(o => o === "oversize" ? null : "oversize"); } }}
+                          style={{ padding: isMobile ? "16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
+                            <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: anySel ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
+                            <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <SmartImage src={transformImage(MOCKUP_URLS.oversized, { width: 120 })} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                            </div>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                                <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{lang === "he" ? "אוברסייז" : lang === "ru" ? "Оверсайз" : "Oversize"}</span>
+                                <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{subs.length} {lang === "he" ? "דגמים" : lang === "ru" ? "модели" : "styles"}</span>
+                              </div>
+                              <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{lang === "he" ? "קלאסיק · לוק · סטון-ווש — לחצו לבחירה" : lang === "ru" ? "Classic · Look · Stone-wash — нажмите для выбора" : "Classic · Look · Stone-wash — tap to choose"}</div>
+                              <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>₪149</div>
+                            </div>
+                          </div>
+                          <span style={{ color: COLORS.accent, flexShrink: 0, fontSize: 14 }}>{open ? "▲" : "▼"}</span>
+                        </div>
+                        {open && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: isMobile ? "0 12px 12px" : "0 16px 16px" }}>
+                            {subs.map((sp, i) => card(sp, idx + i))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  } else {
+                    out.push(card(p, idx));
+                  }
+                });
+                return out;
+              })()}
             </div>
             <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>{t.product.continue}</button>
+            {/* Our Fabrics — collapsible educational guide */}
+            <div style={{ marginTop: 28, borderTop: `1px solid ${COLORS.border}`, paddingTop: 18 }}>
+              <div role="button" tabIndex={0} aria-expanded={showFabrics}
+                onClick={() => setShowFabrics(s => !s)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowFabrics(s => !s); } }}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                <span style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>
+                  {lang === "he" ? "🧵 מדריך הבדים שלנו" : lang === "ru" ? "🧵 О наших тканях" : "🧵 Our Fabrics"}
+                </span>
+                <span style={{ color: COLORS.accent, fontSize: 14 }}>{showFabrics ? "▲" : "▼"}</span>
+              </div>
+              {!showFabrics && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6 }}>{lang === "he" ? "מאיזה בד עשויה כל חולצה ולמה זה משנה" : lang === "ru" ? "Из какой ткани каждая футболка и почему это важно" : "What each shirt is made of and why it matters"}</div>}
+              {showFabrics && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+                  {FABRIC_GUIDE.map((f, i) => (
+                    <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: 14 }}>
+                      <div style={{ color: COLORS.accent, fontWeight: 700, fontFamily: "'Playfair Display',serif", fontSize: 15, marginBottom: 8 }}>{f.name[lang] || f.name.en}</div>
+                      <div style={{ color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5, marginBottom: 6 }}><b style={{ color: COLORS.white }}>{lang === "he" ? "איך מייצרים: " : lang === "ru" ? "Как делают: " : "How it's made: "}</b>{f.make[lang] || f.make.en}</div>
+                      <div style={{ color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5 }}><b style={{ color: COLORS.white }}>{lang === "he" ? "למה זה טוב: " : lang === "ru" ? "Чем хорош: " : "Why it's great: "}</b>{f.good[lang] || f.good.en}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -6315,7 +6472,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     onTouchEnd={handleMouseUp}>
                     <div ref={mockupImageRef} style={{ position: "relative" }}>
                     {product.id === "tshirt"    && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
+                    {product.id === "lycra"     && <TShirtMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "oversized" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
+                    {product.id === "look"      && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "stonewash" && <OversizedMockup color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "dryfit"    && <DryfitMockup    color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} secondImageUrl={secondFront.enabled ? secondFront.image : null} secondImagePos={secondFront.pos} />}
                     {product.id === "mug"       && <MugMockup       color={product.colors[selectedColor]} imageUrl={uploadedImage} imagePos={imagePos} />}
@@ -6514,7 +6673,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 )}
                 {/* Placement removed - users drag to position */}
                 {/* Extra prints — shirts only */}
-                {["tshirt","oversized","stonewash","dryfit"].includes(product.id) && (
+                {["tshirt","lycra","oversized","look","stonewash","dryfit"].includes(product.id) && (
                   <div>
                     <label style={labelStyle}>{lang === "he" ? "הדפסות נוספות" : lang === "ru" ? "Дополнительные принты" : "Additional Prints"}</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -6540,7 +6699,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                           }} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", cursor: "pointer" }}>
                             <span style={{ color: COLORS.white, fontSize: 13, fontWeight: 600 }}>{label}</span>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13 }}>+₪{price}</span>
+                              <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13 }}>{price > 0 ? `+₪${price}` : (lang === "he" ? "כלול" : lang === "ru" ? "включено" : "Included")}</span>
                               <div style={{ width: 20, height: 20, borderRadius: "50%", background: state.enabled ? COLORS.accent : "transparent", border: `2px solid ${state.enabled ? COLORS.accent : COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                 {state.enabled && <span style={{ color: "#fff", fontSize: 11 }}>✓</span>}
                               </div>
@@ -6585,10 +6744,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{t.customize.shipping}</span><span>₪{shippingPrice}</span></div>
-                  {backPrint && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "גב" : "Back"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
-                  {secondFront.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "עיצוב נוסף בחזית" : "2nd Front"}</span><span>+₪{SECOND_FRONT_PRICE}</span></div>}
-                  {sleeveLeft.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול שמאל" : "Left Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
-                  {sleeveRight.enabled && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול ימין" : "Right Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
+                  {backPrint && BACK_PRINT_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "גב" : "Back"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
+                  {secondFront.enabled && SECOND_FRONT_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "עיצוב נוסף בחזית" : "2nd Front"}</span><span>+₪{SECOND_FRONT_PRICE}</span></div>}
+                  {sleeveLeft.enabled && SLEEVE_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול שמאל" : "Left Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
+                  {sleeveRight.enabled && SLEEVE_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול ימין" : "Right Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
                   <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{total}</span></div>
                 </div>}
               </div>
