@@ -2012,7 +2012,7 @@ const POLICIES = {
     refund: [
       { type: "p", text: "מדיניות זו מנוסחת על פי חוק הגנת הצרכן, התשמ\"א-1981 ותקנותיו." },
       { type: "h", text: "1. זכות ביטול כללית" },
-      { type: "p", text: "לקוח רשאי לבטל עסקה תוך 14 ימים מיום קבלת המוצר, ובלבד שלא נעשה במוצר שימוש ולא נפגם." },
+      { type: "p", text: "לקוח רשאי לבטל עסקה תוך 14 ימים מיום קבלת המוצר, ובלבד שלא נעשה במוצר שימוש ולא נפגם. סעיף זה חל על פריטים מוכנים בלבד — פריטי הדפסה ובהתאמה אישית מיוצרים לפי הזמנה ואינם ניתנים לביטול לאחר אישור העיצוב." },
       { type: "h", text: "2. ⚠️ מוצרים בעיצוב אישי — אין זכות ביטול" },
       { type: "p", text: "על פי תקנה 6(ב)(1) לחוק הגנת הצרכן, לא ניתן לבטל עסקה עבור חולצות, ספלים, מדבקות ומוצרים אחרים שעוצבו בהתאמה אישית ללקוח (Print-on-Demand). ברגע שהזמנת מוצר עם עיצוב משלך — אין ביטול ואין החזר כספי." },
       { type: "h", text: "3. החזר במקרים מיוחדים" },
@@ -2098,7 +2098,7 @@ const POLICIES = {
     refund: [
       { type: "p", text: "This policy follows Israeli Consumer Protection Law 5741-1981 and its regulations." },
       { type: "h", text: "1. General Cancellation Right" },
-      { type: "p", text: "Customers may cancel an order within 14 days of receiving the product, provided it has not been used or damaged." },
+      { type: "p", text: "Customers may cancel an order within 14 days of receiving the product, provided it has not been used or damaged. This applies to ready-made items only — printed and personalized items are made to order and cannot be cancelled once the design is approved." },
       { type: "h", text: "2. ⚠️ Personalized Items — No Cancellation Right" },
       { type: "p", text: "Per Regulation 6(b)(1), custom-designed items (Print-on-Demand t-shirts, mugs, stickers, etc.) cannot be cancelled. Once you order a product with your own design, no refund or return is available." },
       { type: "h", text: "3. Refunds in Special Cases" },
@@ -2184,7 +2184,7 @@ const POLICIES = {
     refund: [
       { type: "p", text: "Настоящая политика составлена в соответствии с Законом Израиля о защите потребителя 5741-1981." },
       { type: "h", text: "1. Право отмены" },
-      { type: "p", text: "Клиент имеет право отменить заказ в течение 14 дней с момента получения товара, при условии что товар не использовался и не повреждён." },
+      { type: "p", text: "Клиент имеет право отменить заказ в течение 14 дней с момента получения товара, при условии что товар не использовался и не повреждён. Это касается только готовых изделий — печатные и персонализированные изделия изготавливаются под заказ и не подлежат отмене после утверждения дизайна." },
       { type: "h", text: "2. ⚠️ Персонализированные товары — без права отмены" },
       { type: "p", text: "Согласно правилу 6(б)(1), персонализированные товары (футболки, кружки, наклейки с индивидуальным дизайном) не подлежат отмене. После заказа товара с вашим дизайном — возврат невозможен." },
       { type: "h", text: "3. Возврат в особых случаях" },
@@ -6421,7 +6421,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     const open = openCat === "oversize" || anySel;
                     out.push(
                       <div key="cat-oversize" style={{ background: COLORS.bgCard, border: `2px solid ${anySel ? COLORS.accent : COLORS.border}`, borderRadius: 12, overflow: "hidden" }}>
-                        <div role="button" tabIndex={0} aria-expanded={open}
+                        <div role="button" tabIndex={0} aria-expanded={open} aria-controls="oversize-panel"
                           onClick={() => setOpenCat(o => o === "oversize" ? null : "oversize")}
                           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenCat(o => o === "oversize" ? null : "oversize"); } }}
                           style={{ padding: isMobile ? "16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -6439,10 +6439,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                               <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>₪149</div>
                             </div>
                           </div>
-                          <span style={{ color: COLORS.accent, flexShrink: 0, fontSize: 14 }}>{open ? "▲" : "▼"}</span>
+                          <span aria-hidden="true" style={{ color: COLORS.accent, flexShrink: 0, fontSize: 14 }}>{open ? "▲" : "▼"}</span>
                         </div>
                         {open && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: isMobile ? "0 12px 12px" : "0 16px 16px" }}>
+                          <div id="oversize-panel" style={{ display: "flex", flexDirection: "column", gap: 10, padding: isMobile ? "0 12px 12px" : "0 16px 16px" }}>
                             {subs.map((sp, i) => card(sp, idx + i))}
                           </div>
                         )}
@@ -6458,18 +6458,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>{t.product.continue}</button>
             {/* Our Fabrics — collapsible educational guide */}
             <div style={{ marginTop: 28, borderTop: `1px solid ${COLORS.border}`, paddingTop: 18 }}>
-              <div role="button" tabIndex={0} aria-expanded={showFabrics}
+              <div role="button" tabIndex={0} aria-expanded={showFabrics} aria-controls="fabrics-panel"
                 onClick={() => setShowFabrics(s => !s)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowFabrics(s => !s); } }}
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                 <span style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>
                   {lang === "he" ? "🧵 מדריך הבדים שלנו" : lang === "ru" ? "🧵 О наших тканях" : "🧵 Our Fabrics"}
                 </span>
-                <span style={{ color: COLORS.accent, fontSize: 14 }}>{showFabrics ? "▲" : "▼"}</span>
+                <span aria-hidden="true" style={{ color: COLORS.accent, fontSize: 14 }}>{showFabrics ? "▲" : "▼"}</span>
               </div>
               {!showFabrics && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6 }}>{lang === "he" ? "מאיזה בד עשויה כל חולצה ולמה זה משנה" : lang === "ru" ? "Из какой ткани каждая футболка и почему это важно" : "What each shirt is made of and why it matters"}</div>}
               {showFabrics && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+                <div id="fabrics-panel" style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
                   {FABRIC_GUIDE.map((f, i) => (
                     <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: 14 }}>
                       <div style={{ color: COLORS.accent, fontWeight: 700, fontFamily: "'Playfair Display',serif", fontSize: 15, marginBottom: 8 }}>{f.name[lang] || f.name.en}</div>
@@ -9756,7 +9756,7 @@ export default function App() {
     if (cookieConsent !== "accepted") return;
     if (typeof window === "undefined") return;
     if (window.gtag && ANALYTICS.ga4) {
-      window.gtag("event", "page_view", { page_path: `/${page === "home" ? "" : page}` });
+      window.gtag("event", "page_view", { page_path: `/${page === "home" ? "" : page}`, page_title: document.title, page_location: window.location.href });
     }
     if (window.fbq && ANALYTICS.fbPixel) {
       window.fbq("track", "PageView");
@@ -11302,6 +11302,15 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
   const [petName, setPetName] = useState(``); // optional personalization (free)
   const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
   const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
+  // Fire GA4/Meta view_item when the character modal opens (optional-chained, no-op if blocked).
+  useEffect(() => {
+    if (!design || !design.slug || preview) return;
+    try {
+      const value = Number(design.price_shirt_basic) || Number(design.price_shirt) || 149;
+      window.gtag?.("event", "view_item", { currency: "ILS", value, items: [{ item_id: design.slug, item_name: design.name_he || design.name_en }] });
+      window.fbq?.("track", "ViewContent", { content_ids: [design.slug], content_type: "product", currency: "ILS", value });
+    } catch (_) {}
+  }, [design && design.slug]);
   // Slice 3: if a published blog post links to this breed, surface a "read more
   // about the breed" link at the bottom of the modal.
   const [breedPost, setBreedPost] = useState(null);
@@ -12960,9 +12969,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `מאיזה חומר המוצרים? ההדפסה מחזיקה בכביסה?`, en: `What are the products made of? Will the print survive washing?`, ru: `Из чего сделаны товары? Сохранится ли печать после стирки?` },
         a: {
-          he: `הספלים קרמיים. רוב החולצות (טי בייסיק, אוברסייז, סטון ווש) הן 100% כותנה סרוקה, והדרייפיט הוא פוליאסטר טכני נושם (לא כותנה). כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
-          en: `The mugs are ceramic. Most shirts (Tee Basic, Oversize, Stone-wash) are 100% combed cotton, while the Dri-FIT is a breathable technical polyester (not cotton). To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
-          ru: `Кружки керамические. Большинство футболок (Tee Basic, Oversize, Stone-wash) — 100% чёсаный хлопок, а Dri-FIT — дышащий технический полиэстер (не хлопок). Чтобы печать держалась долго: кружку мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
+          he: `הספלים קרמיים. רוב החולצות מבוססות כותנה (טי בייסיק, אוברסייז וסטון-ווש — 100% כותנה סרוקה; לייקרה עם מעט אלסטן לגמישות; לוק עם מעט פוליאסטר לשמירת צורה), והדרייפיט הוא פוליאסטר טכני נושם. כדי שההדפסה תישמר לאורך זמן: את הספל מומלץ לשטוף ביד; את החולצה לכבס בהיפוך, במים קרים, ולייבוש עדין.`,
+          en: `The mugs are ceramic. Most shirts are cotton-based (Tee Basic, Oversize and Stone-wash are 100% combed cotton; Lycra adds a little elastane for stretch; Look adds some polyester for shape), while the Dri-FIT is a breathable technical polyester. To keep the print looking great over time: hand-wash the mug; wash the shirt inside-out, in cold water, and dry gently.`,
+          ru: `Кружки керамические. Большинство футболок на основе хлопка (Tee Basic, Oversize и Stone-wash — 100% чёсаный хлопок; Lycra с добавлением эластана для эластичности; Look с добавлением полиэстера для формы), а Dri-FIT — дышащий технический полиэстер. Чтобы печать держалась долго: кружку мыть вручную; футболку стирать наизнанку, в холодной воде и сушить бережно.`,
         },
       },
       {
