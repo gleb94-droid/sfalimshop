@@ -6551,13 +6551,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                             <div style={{ padding: "10px", borderTop: `1px solid ${COLORS.border}` }}>
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "0 auto" }}>
                                 <div />
-                                <button onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
+                                <button aria-label={lang === "he" ? "הזז למעלה" : lang === "ru" ? "Вверх" : "Move up"} onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
                                 <div />
-                                <button onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
+                                <button aria-label={lang === "he" ? "הזז שמאלה" : lang === "ru" ? "Влево" : "Move left"} onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
                                 <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>✛</span></div>
-                                <button onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
+                                <button aria-label={lang === "he" ? "הזז ימינה" : lang === "ru" ? "Вправо" : "Move right"} onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
                                 <div />
-                                <button onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
+                                <button aria-label={lang === "he" ? "הזז למטה" : lang === "ru" ? "Вниз" : "Move down"} onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
                                 <div />
                               </div>
                             </div>
@@ -6668,13 +6668,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, width: 140, margin: "0 auto" }}>
                           <div />
-                          <button onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
+                          <button aria-label={lang === "he" ? "הזז למעלה" : lang === "ru" ? "Вверх" : "Move up"} onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
                           <div />
-                          <button onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
+                          <button aria-label={lang === "he" ? "הזז שמאלה" : lang === "ru" ? "Влево" : "Move left"} onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
                           <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 12, color: COLORS.gray }}>✛</span></div>
-                          <button onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
+                          <button aria-label={lang === "he" ? "הזז ימינה" : lang === "ru" ? "Вправо" : "Move right"} onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
                           <div />
-                          <button onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
+                          <button aria-label={lang === "he" ? "הזז למטה" : lang === "ru" ? "Вниз" : "Move down"} onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
                           <div />
                         </div>
                       </div>
