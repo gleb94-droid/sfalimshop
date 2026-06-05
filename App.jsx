@@ -5597,8 +5597,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       color: colorHex,
       qty: 1,
       uploadedImage,
-      // mockupUrl is populated asynchronously below — keep any previous value
-      // when re-committing the same line so the thumbnail doesn't disappear.
+      // A customizer item is always a customer upload (data: URL). This flag is
+      // the durable discriminator for the design-approval gate — it survives in
+      // localStorage even after the heavy data URL is stripped on persist.
+      isCustom: true,
+      // uploadedUrl + mockupUrl are filled asynchronously below: the design is
+      // uploaded to storage the moment it's added to the cart so it can never be
+      // lost. Keep any previous value when re-committing the same line.
+      uploadedUrl: null,
       mockupUrl: null,
       imagePos: { ...imagePos },
       backPrint,
@@ -5630,13 +5636,23 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     const posSnap = { ...imagePos };
     const secondUrl = (secondFront.enabled && secondFront.image) ? secondFront.image : null;
     const secondPos = secondUrl ? { ...secondFront.pos } : null;
-    // Compose the product + chosen colour + design overlay into a data URL,
-    // then patch the cart line so the cart thumbnail matches the live preview.
-    generateOrderMockup(productKey, colorHex, designSnap, posSnap, secondUrl, secondPos)
-      .then(dataUrl => {
+    // Upload the design (and the composed mockup) to storage the MOMENT the item
+    // is added to the cart — not at checkout. A design is a multi-MB data: URL; if
+    // it only lived in the cart it could be dropped from the localStorage mirror
+    // on a reload (QuotaExceeded) and be gone by payment time, leaving an order
+    // with no artwork. Storing the public URL up front makes it durable.
+    (async () => {
+      const designUrl = await uploadDesignImage(designSnap);
+      if (designUrl) setCart(c => c.map(it => it.id === cartItemId ? { ...it, uploadedUrl: designUrl } : it));
+      try {
+        const dataUrl = await generateOrderMockup(productKey, colorHex, designSnap, posSnap, secondUrl, secondPos);
+        // Show the freshly drawn preview instantly...
         setCart(c => c.map(it => it.id === cartItemId ? { ...it, mockupUrl: dataUrl } : it));
-      })
-      .catch(() => { /* fallback: cart UI uses uploadedImage / MOCKUP_URLS */ });
+        // ...then swap in the uploaded public URL so the thumbnail survives a reload.
+        const mockupUrl = await uploadDesignImage(dataUrl);
+        if (mockupUrl) setCart(c => c.map(it => it.id === cartItemId ? { ...it, mockupUrl } : it));
+      } catch { /* fallback: cart UI uses uploadedImage / MOCKUP_URLS */ }
+    })();
 
     return true;
   };
@@ -6114,7 +6130,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         if (!itProduct || !itVariant) continue;
 
         const [design_url, second_front_url, back_design_url, sleeve_left_url, sleeve_right_url] = await Promise.all([
-          uploadDesignImage(it.uploadedImage),
+          // Prefer the URL we already uploaded at add-to-cart time; only fall back
+          // to uploading the raw data URL if that didn't happen (returns it as-is
+          // when it's already an https link).
+          uploadDesignImage(it.uploadedUrl || it.uploadedImage),
           it.secondFront.enabled && !it.secondFront.sameAsMain ? uploadDesignImage(it.secondFront.image) : Promise.resolve(null),
           it.backPrint && it.backDesign.image && !it.backDesign.sameAsMain ? uploadDesignImage(it.backDesign.image) : Promise.resolve(null),
           it.sleeveLeft.enabled && it.sleeveLeft.image && !it.sleeveLeft.sameAsMain ? uploadDesignImage(it.sleeveLeft.image) : Promise.resolve(null),
@@ -6123,10 +6142,20 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         const itemTotal = it.itemPrice + (i === 0 ? shippingPrice : 0);
 
-        // Custom upload = the customer's own image (a data: URL pre-upload).
-        // BLOOM items carry an https:// design URL and skip approval.
-        const isCustomUpload = !!(it.uploadedImage && !/^https?:\/\//i.test(it.uploadedImage));
+        // Custom upload = the customer's own image. Prefer the explicit flag set
+        // at add-to-cart time (it survives even after the data URL is stripped
+        // from the localStorage mirror); fall back to sniffing the URL for older
+        // cart items. BLOOM items carry an https:// design URL and skip approval.
+        const isCustomUpload = typeof it.isCustom === `boolean`
+          ? it.isCustom
+          : !!(it.uploadedImage && !/^https?:\/\//i.test(it.uploadedImage));
         if (isCustomUpload) groupNeedsApproval = true;
+        // Safety net: NEVER save a custom order with no artwork. If the design
+        // failed to upload (and no pre-uploaded URL exists), abort the whole
+        // checkout with a clear message instead of creating a blank order.
+        if (isCustomUpload && !design_url) {
+          throw new Error(`design_upload_failed`);
+        }
 
         // Snapshot what the customer saw into one flattened mockup image.
         // BLOOM items already carry a public mockup URL (uploadDesignImage
@@ -6232,7 +6261,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       }
     } catch (e) {
       console.error(`[checkout] order submit failed:`, e);
-      setSubmitError(uiGenericError(lang));
+      const designLost = e instanceof Error && e.message === `design_upload_failed`;
+      setSubmitError(designLost
+        ? (lang === `he`
+            ? `אופס — העיצוב לא נשמר. אנא הוסף/י אותו שוב לעגלה ונסה/י שוב.`
+            : lang === `ru`
+              ? `Упс — дизайн не сохранился. Добавьте его заново в корзину и попробуйте ещё раз.`
+              : `Oops — your design didn't upload. Please re-add it to the cart and try again.`)
+        : uiGenericError(lang));
     }
     setSubmitting(false);
   };
@@ -9256,11 +9292,20 @@ export default function App() {
   useEffect(() => {
     if (typeof window === `undefined`) return;
     try {
-      if (cart.length === 0) window.localStorage.removeItem(CART_STORAGE_KEY);
-      else window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      if (cart.length === 0) { window.localStorage.removeItem(CART_STORAGE_KEY); return; }
+      // Persist a LIGHT copy: strip the heavy data: URL blobs (the raw upload and
+      // the data-URL mockup) so a multi-MB design can't blow the localStorage
+      // quota and drop the whole cart. The durable public links (uploadedUrl and
+      // the uploaded https mockupUrl) are kept, so a reload still has the artwork.
+      const lightCart = cart.map(it => {
+        const m = { ...it };
+        if (typeof m.uploadedImage === `string` && m.uploadedImage.startsWith(`data:`)) m.uploadedImage = null;
+        if (typeof m.mockupUrl === `string` && m.mockupUrl.startsWith(`data:`)) m.mockupUrl = null;
+        return m;
+      });
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lightCart));
     } catch {
-      // QuotaExceeded — likely a cart with several large data-URL mockups.
-      // Persistence is a nice-to-have; the in-memory cart still works.
+      // QuotaExceeded — persistence is a nice-to-have; the in-memory cart still works.
     }
   }, [cart]);
   // Wipe the cart completely — in-memory state AND the localStorage mirror.
