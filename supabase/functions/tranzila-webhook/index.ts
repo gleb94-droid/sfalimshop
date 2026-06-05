@@ -394,6 +394,11 @@ serve(async (req) => {
       const productList = orders.map((o) => o.product).join(", ");
       await supabase.functions.invoke("send-order-confirmation", {
         body: {
+          // Pass order_group so the email renders every item with its real
+          // model, size/variant, colour and mockup preview (the function
+          // re-reads the rows from the DB). Without it the email falls back
+          // to a single generic "N items" line.
+          orderGroup: orderGroupId,
           customerName: firstOrder.customer_name,
           customerEmail: firstOrder.customer_email,
           product: productList,
