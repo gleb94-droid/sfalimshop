@@ -1686,10 +1686,14 @@ const BLOOM_SHIRT_TYPES = [
 const BLOOM_SHIRT_SIZES = [`s`, `m`, `l`, `xl`, `xxl`];
 
 // Resolve a saved hex colour to a readable name (falls back to the hex itself).
+const COLOR_BY_HEX = (() => {
+  const m = new Map();
+  for (const c of [...BLOOM_SHIRT_COLORS, ...Object.values(SHIRT_COLORS)]) m.set(c.hex.toLowerCase(), c);
+  return m;
+})();
 const colorName = (hex, lang) => {
   if (!hex) return "";
-  const all = [...BLOOM_SHIRT_COLORS, ...Object.values(SHIRT_COLORS)];
-  const c = all.find(x => x.hex.toLowerCase() === String(hex).toLowerCase());
+  const c = COLOR_BY_HEX.get(String(hex).toLowerCase());
   return c ? (c[lang] || c.en) : hex;
 };
 
@@ -5493,7 +5497,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // Below 360px the 5-step labels run out of room and clip; track this
   // separately so we can hide the labels entirely on tiny screens while
   // keeping the numbered circles.
-  const [isVeryNarrow, setIsVeryNarrow] = useState(window.innerWidth < 360);
+  const [isVeryNarrow, setIsVeryNarrow] = useState(window.innerWidth < 400);
   const fileRef = useRef();
   const mockupRef = useRef();
   const mockupImageRef = useRef();
@@ -5504,7 +5508,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   useEffect(() => {
     const handle = () => {
       setIsMobile(window.innerWidth < 768);
-      setIsVeryNarrow(window.innerWidth < 360);
+      setIsVeryNarrow(window.innerWidth < 400);
     };
     window.addEventListener('resize', handle);
     return () => window.removeEventListener('resize', handle);
@@ -6518,7 +6522,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       {uploadedImage
                         ? isMobile
                           ? (lang === "he" ? "✋ גרור להזזה · 🤏 צבוט לשינוי גודל" : "✋ Drag to move · 🤏 Pinch to resize")
-                          : (lang === "he" ? "✋ גרור לכוונון מיקום" : "✋ Drag to position")
+                          : (lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для размещения" : "✋ Drag to position")
                         : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : "👆 Tap to upload design")}
                     </p>
                     {/* Design selector — shown when two designs exist */}
@@ -6537,7 +6541,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <div style={{ padding: "8px 12px 12px" }}>
                         {/* Collapsible manual fine-tune */}
                         <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 8, overflow: "hidden", marginBottom: 10 }}>
-                          <div onClick={() => setShowNudge(s => !s)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", cursor: "pointer", background: showNudge ? "rgba(255,107,53,0.08)" : "transparent" }}>
+                          <div role="button" tabIndex={0} aria-expanded={showNudge} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowNudge(s => !s); } }} onClick={() => setShowNudge(s => !s)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", cursor: "pointer", background: showNudge ? "rgba(255,107,53,0.08)" : "transparent" }}>
                             <span style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
                               {lang === "he" ? "🎛️ כיוונון ידני" : lang === "ru" ? "🎛️ Ручная настройка" : "🎛️ Manual fine-tune"}
                             </span>
@@ -6625,7 +6629,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         title={colorName(c, lang)}
                         aria-label={colorName(c, lang)}
                         aria-pressed={selectedColor === i}
-                        style={{ width: 32, height: 32, borderRadius: "50%", background: c, cursor: "pointer", padding: 0, border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)" }} />
+                        style={{ width: 32, height: 32, borderRadius: "50%", background: c, cursor: "pointer", padding: 0, border: `3px solid ${selectedColor === i ? COLORS.accent : "transparent"}`, boxShadow: "0 0 0 1px rgba(255,255,255,0.15)", transition: "transform 0.15s", transform: selectedColor === i ? "scale(1.2)" : "scale(1)", display: "flex", alignItems: "center", justifyContent: "center" }}>{selectedColor === i && <span aria-hidden="true" style={{ color: "#fff", fontSize: 13, fontWeight: 900, lineHeight: 1, textShadow: "0 0 3px rgba(0,0,0,0.85)" }}>✓</span>}</button>
                     ))}
                   </div>
                 </div>
@@ -6654,7 +6658,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {/* Desktop manual fine-tune — collapsible, same as mobile */}
                 {!isMobile && uploadedImage && (
                   <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 10, overflow: "hidden" }}>
-                    <div onClick={() => setShowNudge(s => !s)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", background: showNudge ? "rgba(255,107,53,0.08)" : COLORS.bgCard }}>
+                    <div role="button" tabIndex={0} aria-expanded={showNudge} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowNudge(s => !s); } }} onClick={() => setShowNudge(s => !s)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", background: showNudge ? "rgba(255,107,53,0.08)" : COLORS.bgCard }}>
                       <label style={{ ...labelStyle, marginBottom: 0, cursor: "pointer" }}>
                         {lang === "he" ? "🎛️ כיוונון ידני" : lang === "ru" ? "🎛️ Ручная настройка" : "🎛️ Manual fine-tune"}
                       </label>

@@ -4,8 +4,6 @@
 User-agent: *
 Allow: /
 Disallow: /?staff=1
-Disallow: /admin
-Disallow: /track
 Disallow: /*?staff=*
 
 # Block AI training crawlers (optional — remove if you want AI traffic)
