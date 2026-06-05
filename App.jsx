@@ -695,7 +695,7 @@ function ensureFloatingCardStyles() {
 }
 
 const FloatingProductCardComponent = ({
-  imageUrl = `https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80`,
+  imageUrl = ``,
   name = `חולצת אוברסייז קלאסית`,
   description = `כותנה 100% • גזרה רחבה ונוחה לכל יום`,
   price = `₪149`,
@@ -1988,7 +1988,7 @@ const BUSINESS_INFO = {
   name: { he: "ספלים שופ", en: "Sfalim Shop", ru: "Sfalim Shop" },
   tagline: { he: "מעוצב לסגנון שלך", en: "Designed for Your Style", ru: "Создано в вашем стиле" },
   vatId: "321630279", // עוסק פטור
-  address: { he: "רח׳ י\"א הספורטאים 28, באר שבע", en: "11 HaSportaim St. 28, Be'er Sheva, Israel", ru: "ул. 11 Спортсменов 28, Беэр-Шева, Израиль" },
+  address: { he: "רח׳ הספורטאים 28, באר שבע", en: "HaSportaim St. 28, Be'er Sheva, Israel", ru: "ул. ХаСпортаим 28, Беэр-Шева, Израиль" },
   phone: "050-484-7874",
   phoneIntl: "+972504847874", // E.164 form for tel: links
   email: "hello@sfalimshop.com",
@@ -2485,7 +2485,7 @@ function SmartImage({ src, alt, style, onError, onLoad, srcSet, ...rest }) {
   useEffect(() => {
     const el = imgRef.current;
     if (el && el.complete && el.naturalWidth > 0) setLoaded(true);
-  });
+  }, [src]);
 
   const isRemote = typeof src === "string" && /^https?:/i.test(src);
   const finalSrc = !src
@@ -6747,7 +6747,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                               {!state.sameAsMain && state.image && (
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
                                   <img src={state.image} alt={lang === "he" ? "תצוגה מקדימה של עיצוב" : lang === "ru" ? "Предпросмотр дизайна" : "Design preview"} style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 4, border: `1px solid ${COLORS.border}` }} />
-                                  <span style={{ color: COLORS.accent, fontSize: 12 }}>✓ {lang === "he" ? "עיצוב הועלה" : "Uploaded"}</span>
+                                  <span style={{ color: COLORS.accent, fontSize: 12 }}>✓ {lang === "he" ? "עיצוב הועלה" : lang === "ru" ? "Загружено" : "Uploaded"}</span>
                                 </div>
                               )}
                               <input ref={ref} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handleExtraUpload(e, setState, isSecondFront)} />
