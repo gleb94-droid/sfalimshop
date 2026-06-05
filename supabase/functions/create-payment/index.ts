@@ -61,6 +61,10 @@ function buildTranzilaUrl(opts: {
 }): string {
   const langMap: Record<string, string> = { he: "il", en: "us", ru: "ru" };
   const langCode = langMap[opts.language] ?? "il";
+  // NOTE: do NOT send `myid` — on the Tranzila hosted page `myid` maps to the
+  // ID-number (ת.ז.) field, so passing the order group there shows a long
+  // number in the ID field and disrupts the form. The order group is carried
+  // by `u71` only (which the webhook reads back).
   const params: Array<[string, string]> = [
     ["sum", opts.amount.toFixed(2)],
     ["currency", "1"],
@@ -199,6 +203,8 @@ serve(async (req) => {
     .update({ payment_status: "pending", payment_method: "tranzila" })
     .eq("order_group", orderGroup);
 
+  // Canonical site host. SITE_URL should be set in prod; the fallback now uses
+  // the real canonical host (www.sfalimshop.com) instead of a stray domain.
   const siteUrl = (Deno.env.get("SITE_URL") ?? "https://www.sfalimshop.com").replace(/\/+$/, "");
   const successUrl = `${siteUrl}/api/pay-return?order_group=${encodeURIComponent(orderGroup)}&paid=1`;
   const failUrl = `${siteUrl}/api/pay-return?paid=0`;

@@ -2265,7 +2265,7 @@ const POLICIES = {
 };
 
 // Localization helpers - translate a saved product/variant name to target language
-const PRODUCT_IDS = ['tshirt', 'oversized', 'stonewash', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
+const PRODUCT_IDS = ['tshirt', 'lycra', 'oversized', 'look', 'stonewash', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
 const localizeProduct = (savedName, targetLang) => {
   if (!savedName) return savedName;
   for (const id of PRODUCT_IDS) {
@@ -3131,7 +3131,7 @@ function TrackPage({ lang, user, clearCart }) {
     if (!payReturn) return;
     if (!payReturn.orderGroup) { setPayReturnStatus(`unknown`); return; }
     let cancelled = false;
-    supabase.from(`orders`).select(`payment_status, status`).eq(`order_group`, payReturn.orderGroup)
+    supabase.from(`orders`).select(`payment_status, status, total`).eq(`order_group`, payReturn.orderGroup)
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error || !data || data.length === 0) { setPayReturnStatus(`unknown`); return; }
@@ -3143,7 +3143,22 @@ function TrackPage({ lang, user, clearCart }) {
         // Clear the cart ONLY on a confirmed-succeeded payment return — never on
         // a failure or an unconfirmed/processing return. Guarded by `succeeded`
         // above so we can't wipe a cart that wasn't actually paid for.
-        if (succeeded && typeof clearCart === `function`) clearCart();
+        if (succeeded) {
+          // Fire the GA4 + Meta purchase conversion ONCE per order_group. The
+          // Tranzila redirect lands here, so this is the only place the sale is
+          // known client-side. Optional-chained so an ad-blocked tracker no-ops.
+          try {
+            const og = payReturn.orderGroup;
+            const value = data.reduce((s, o) => s + (Number(o.total) || 0), 0);
+            const already = (typeof sessionStorage !== `undefined`) && sessionStorage.getItem(`sf_purchase_${og}`);
+            if (!already) {
+              window.gtag?.(`event`, `purchase`, { transaction_id: og, currency: `ILS`, value });
+              window.fbq?.(`track`, `Purchase`, { currency: `ILS`, value });
+              try { sessionStorage.setItem(`sf_purchase_${og}`, `1`); } catch (_) {}
+            }
+          } catch (_) {}
+          if (typeof clearCart === `function`) clearCart();
+        }
       });
     return () => { cancelled = true; };
   }, []);
@@ -5597,6 +5612,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       cartItemId = Date.now() + Math.random();
       setCart(c => [...c, { id: cartItemId, ...itemData }]);
       setCurrentItemCartId(cartItemId);
+      // Analytics: a new custom item was added to the cart (consent-gated trackers; no-op if blocked).
+      try {
+        window.gtag?.(`event`, `add_to_cart`, { currency: `ILS`, value: unitPrice, items: [{ item_id: selectedProduct, item_name: product?.name, price: unitPrice, quantity: 1 }] });
+        window.fbq?.(`track`, `AddToCart`, { currency: `ILS`, value: unitPrice, content_ids: [selectedProduct], content_type: `product` });
+      } catch (_) {}
     }
 
     // Snapshot of the inputs so the generator stays correct even if the user
@@ -6273,7 +6293,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           </div>
         </div>
       )}
-      <div style={{ maxWidth: step === 3 ? 1100 : 700, margin: "0 auto", padding: "24px 24px 60px", transition: "max-width 0.25s ease" }}>
+      <div style={{ maxWidth: step === 3 ? 1100 : 700, margin: "0 auto", padding: isMobile ? "16px 14px 48px" : "24px 24px 60px", transition: "max-width 0.25s ease" }}>
         <div style={{ display: "flex", marginBottom: 40 }}>
           {t.steps.map((s, i) => (
             <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
@@ -6350,7 +6370,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                 </div>
                 <button onClick={() => setStep(3)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
-                  {lang === "he" ? "לתשלום" : lang === "ru" ? "К оплате" : "Checkout"} →
+                  {lang === "he" ? "לתשלום" : lang === "ru" ? "К оплате" : "Checkout"} {lang === "he" ? "←" : "→"}
                 </button>
               </div>
             )}
@@ -6555,7 +6575,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                   {/* Lock position buttons — main + second design */}
                   {uploadedImage && (
-                    <button onClick={() => { setActiveDesign('main'); setPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: positionLocked ? COLORS.bgCard : COLORS.accent, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
+                    <button onClick={() => { setActiveDesign('main'); setPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: positionLocked ? COLORS.bgCard : COLORS.accentBtn, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
                       {positionLocked
                         ? (lang === "he" ? "✏️ ערוך מיקום עיצוב ראשי" : lang === "ru" ? "✏️ Редактировать основной" : "✏️ Edit main position")
                         : (lang === "he" ? "✓ אישור מיקום עיצוב ראשי" : lang === "ru" ? "✓ Сохранить основной" : "✓ Lock main position")}
@@ -6585,7 +6605,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               <div style={{ flex: "1 1 200px", display: "flex", flexDirection: "column", gap: 18 }}>
                 <div>
-                  <label style={labelStyle}>{["tshirt","oversized","stonewash","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
+                  <label style={labelStyle}>{["tshirt","lycra","oversized","look","stonewash","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {product.variants.map(v => <button key={v.id} type="button" aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
                   </div>
@@ -6684,7 +6704,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         { key: "sr",  state: sleeveRight, setState: setSleeveRight, ref: sleeveRightRef, label: lang === "he" ? "שרוול ימין" : lang === "ru" ? "Правый рукав" : "Right Sleeve", price: SLEEVE_PRICE },
                       ].map(({ key, state, setState, ref, label, price, isSecondFront }) => (
                         <div key={key} style={{ background: state.enabled ? "rgba(255,107,53,0.08)" : COLORS.bgCard, border: `1px solid ${state.enabled ? COLORS.accent : COLORS.border}`, borderRadius: 10, overflow: "hidden", transition: "all 0.2s" }}>
-                          <div onClick={() => {
+                          <div role="button" tabIndex={0} aria-pressed={state.enabled} aria-label={label}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
+                            onClick={() => {
                             const newEnabled = !state.enabled;
                             setState(p => ({ ...p, enabled: newEnabled }));
                             if (isSecondFront && newEnabled && product) {
@@ -6715,10 +6737,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                                     setSecondFront(p => ({ ...p, sameAsMain: true, image: uploadedImage, pos: { ...p.pos, size: imagePos.size } }));
                                     setActiveDesign('second');
                                   }
-                                }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
                                   {lang === "he" ? "אותו עיצוב" : lang === "ru" ? "Тот же дизайн" : "Same design"}
                                 </button>
-                                <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accent : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
                                   {lang === "he" ? "העלה עיצוב שונה" : lang === "ru" ? "Загрузить другой" : "Upload different"}
                                 </button>
                               </div>
@@ -6754,7 +6776,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
               <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
-              <button onClick={() => uploadedImage && setShowNextChoice(true)} disabled={!uploadedImage} style={{ flex: 1, background: uploadedImage ? COLORS.accent : COLORS.bgCard, color: uploadedImage ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
+              <button onClick={() => uploadedImage && setShowNextChoice(true)} disabled={!uploadedImage} style={{ flex: 1, background: uploadedImage ? COLORS.accentBtn : COLORS.bgCard, color: uploadedImage ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
                 {lang === "he" ? "המשך →" : lang === "ru" ? "Продолжить →" : "Continue →"}
               </button>
             </div>
@@ -7038,6 +7060,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     throw error;
                   }
                   if (data && data.redirect_url) {
+                    // Funnel: last on-site touchpoint before the off-site Tranzila page.
+                    try {
+                      window.gtag?.(`event`, `begin_checkout`, { currency: `ILS`, value: pendingTotal });
+                      window.fbq?.(`track`, `InitiateCheckout`, { currency: `ILS`, value: pendingTotal });
+                    } catch (_) {}
                     window.location.href = data.redirect_url;
                     return;
                   }
