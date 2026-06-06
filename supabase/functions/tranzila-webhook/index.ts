@@ -340,7 +340,12 @@ serve(async (req) => {
   // ---- end Layer 2 ----
 
   const nowIso = new Date().toISOString();
-  const newOrderStatus = isSuccess ? "paid" : "received";
+  // Order STAGE must be a real ORDER_STAGES key (received/design/printing/ready/
+  // shipped/delivered) — "paid" is NOT one, so getStageIndex returned -1 and the
+  // customer's Track page silently fell back to stage 0. The "paid" signal lives
+  // in payment_status='succeeded' (shown via the badge), not in the stage. Keep a
+  // paid order at the first real stage "received"; the shop advances it from there.
+  const newOrderStatus = "received";
   const newPaymentStatus = isSuccess ? "succeeded" : "failed";
 
   const updates: Record<string, unknown> = {

@@ -204,7 +204,7 @@ function TrustStrip({ lang }) {
   const ships = lang === `he` ? `משלוח לכל הארץ` : lang === `ru` ? `Доставка по всему Израилю` : `Ships anywhere in Israel`;
   const secure = lang === `he` ? `תשלום מאובטח` : lang === `ru` ? `Безопасная оплата` : `Secure payment`;
   const item = (icon, text) => (
-    <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6, color: COLORS.gray, fontSize: 12, fontFamily: `'Varela Round',sans-serif` }}>
+    <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6, color: COLORS.gray, fontSize: 12, fontFamily: `'Heebo',sans-serif` }}>
       <AboutIcon name={icon} size={15} color={COLORS.gray} /><span>{text}</span>
     </span>
   );
@@ -997,7 +997,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
           <p style={{
             margin: 0,
             color: COLORS.gray,
-            fontFamily: `'Varela Round',sans-serif`,
+            fontFamily: `'Heebo',sans-serif`,
             fontSize: 12,
             lineHeight: 1.4,
             textAlign: `center`,
@@ -1012,8 +1012,8 @@ const BloomCardLite = React.memo(function BloomCardLite({
         marginTop: 2,
       }}>
         <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-          <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: 18 }}><bdi dir="ltr">{price}</bdi></div>
-          <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 10, letterSpacing: `0.05em`, textTransform: `uppercase` }}>{status}</div>
+          <div style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 18 }}><bdi dir="ltr">{price}</bdi></div>
+          <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 10, letterSpacing: `0.05em`, textTransform: `uppercase` }}>{status}</div>
         </div>
         <button
           type="button"
@@ -1028,7 +1028,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
             display: `inline-flex`,
             alignItems: `center`,
             justifyContent: `center`,
-            fontFamily: `'Varela Round',sans-serif`,
+            fontFamily: `'Heebo',sans-serif`,
             fontSize: 13,
             fontWeight: 700,
             cursor: `pointer`,
@@ -1271,7 +1271,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
           fontWeight: 600,
           letterSpacing: `0.1em`,
           textTransform: `uppercase`,
-          fontFamily: `'Varela Round',sans-serif`,
+          fontFamily: `'Heebo',sans-serif`,
         }}>
         {`✦ ${eyebrowByLang[lang] || eyebrowByLang.he} ✦`}
       </div>
@@ -1483,7 +1483,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
             color: COLORS.accent,
             borderRadius: 999,
             padding: `10px 22px`,
-            fontFamily: `'Varela Round',sans-serif`,
+            fontFamily: `'Heebo',sans-serif`,
             fontSize: 13,
             fontWeight: 700,
             letterSpacing: `0.05em`,
@@ -1751,9 +1751,9 @@ const uiFileTooLarge = (lang) => lang === `he` ? `הקובץ גדול מדי (ע
 // fetches (mirrors the admin error+reload pattern). onRetry re-runs the fetch.
 function LoadError({ lang, onRetry, compact = false }) {
   return (
-    <div role="alert" style={{ textAlign: `center`, padding: compact ? `28px 16px` : `60px 20px`, color: `#9a9a9a`, fontFamily: `'Varela Round',sans-serif` }}>
+    <div role="alert" style={{ textAlign: `center`, padding: compact ? `28px 16px` : `60px 20px`, color: `#9a9a9a`, fontFamily: `'Heebo',sans-serif` }}>
       <div style={{ fontSize: 15, lineHeight: 1.6, marginBottom: 16 }}>{uiLoadError(lang)}</div>
-      <button type="button" onClick={onRetry} style={{ background: `#C0501A`, color: `#fff`, border: `none`, borderRadius: 8, padding: `11px 24px`, fontSize: 14, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{uiRetry(lang)}</button>
+      <button type="button" onClick={onRetry} style={{ background: `#C0501A`, color: `#fff`, border: `none`, borderRadius: 8, padding: `11px 24px`, fontSize: 14, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{uiRetry(lang)}</button>
     </div>
   );
 }
@@ -1823,7 +1823,7 @@ function PaymentBadge({ status, lang, size = "sm" }) {
       background: `${st.color}1f`, border: `1px solid ${st.color}`, color: st.color,
       borderRadius: 999, padding: sm ? "2px 9px" : "4px 12px",
       fontSize: sm ? 11 : 12.5, fontWeight: 700, lineHeight: 1.25,
-      fontFamily: "'Varela Round',sans-serif", whiteSpace: "nowrap",
+      fontFamily: "'Heebo',sans-serif", whiteSpace: "nowrap",
     }}>
       <span style={{ width: 7, height: 7, borderRadius: "50%", background: st.color, flexShrink: 0 }} />
       {label}
@@ -2763,9 +2763,9 @@ function AuthPage({ lang, onAuth }) {
     } catch (err) { setError(err.message); setLoading(false); }
   };
 
-  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
+  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" };
-  const smallBtnStyle = { background: "transparent", border: "none", color: COLORS.accent, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 };
+  const smallBtnStyle = { background: "transparent", border: "none", color: COLORS.accent, cursor: "pointer", fontSize: 11, fontFamily: "'Heebo',sans-serif", fontWeight: 600 };
 
   // Forgot Password mode
   if (mode === "forgot") {
@@ -2775,7 +2775,7 @@ function AuthPage({ lang, onAuth }) {
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🔑</div>
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{t.auth.forgotPwTitle}</h2>
-            <p style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.forgotPwDesc}</p>
+            <p style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, fontFamily: "'Heebo',sans-serif" }}>{t.auth.forgotPwDesc}</p>
           </div>
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 16 }}>
@@ -2784,7 +2784,7 @@ function AuthPage({ lang, onAuth }) {
             </div>
             {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
             {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
-            <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+            <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>
               {loading ? "..." : t.auth.forgotPwBtn}
             </button>
           </form>
@@ -2840,11 +2840,11 @@ function AuthPage({ lang, onAuth }) {
             </div>
             {mode === "register" && (
               <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                   {t.auth.generatePw}
                 </button>
                 {password && (
-                  <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600, transition: "all 0.2s" }}>
+                  <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif", fontWeight: 600, transition: "all 0.2s" }}>
                     {copied ? t.auth.copied : t.auth.copyPw}
                   </button>
                 )}
@@ -2853,7 +2853,7 @@ function AuthPage({ lang, onAuth }) {
           </div>
           {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
           {success && <div role="status" style={{ color: COLORS.success, fontSize: 13, marginBottom: 16, background: "rgba(74,222,128,0.1)", padding: "10px 14px", borderRadius: 8 }}>{success}</div>}
-          <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+          <button type="submit" disabled={loading} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>
             {loading ? "..." : mode === "login" ? t.auth.loginBtn : t.auth.registerBtn}
           </button>
         </form>
@@ -2861,19 +2861,19 @@ function AuthPage({ lang, onAuth }) {
         {/* Magic Link divider */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
           <div style={{ flex: 1, height: 1, background: COLORS.border }} />
-          <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.orDivider}</div>
+          <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Heebo',sans-serif" }}>{t.auth.orDivider}</div>
           <div style={{ flex: 1, height: 1, background: COLORS.border }} />
         </div>
-        <button type="button" onClick={handleMagicLink} disabled={loading} style={{ width: "100%", background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}
+        <button type="button" onClick={handleMagicLink} disabled={loading} style={{ width: "100%", background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif", transition: "all 0.2s" }}
           onMouseOver={e => e.currentTarget.style.borderColor = COLORS.accent}
           onMouseOut={e => e.currentTarget.style.borderColor = COLORS.border}
         >
           {t.auth.magicLink}
         </button>
-        <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 8, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.magicLinkDesc}</p>
+        <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", marginTop: 8, fontFamily: "'Heebo',sans-serif" }}>{t.auth.magicLinkDesc}</p>
 
         {/* Google login button */}
-        <button type="button" onClick={handleGoogleLogin} disabled={loading} style={{ width: "100%", marginTop: 12, background: "#fff", color: "#1a1a1a", border: "1px solid #fff", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}
+        <button type="button" onClick={handleGoogleLogin} disabled={loading} style={{ width: "100%", marginTop: 12, background: "#fff", color: "#1a1a1a", border: "1px solid #fff", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}
           onMouseOver={e => e.currentTarget.style.background = "#f0f0f0"}
           onMouseOut={e => e.currentTarget.style.background = "#fff"}
         >
@@ -2886,7 +2886,7 @@ function AuthPage({ lang, onAuth }) {
           {t.auth.googleBtn}
         </button>
 
-        <div style={{ textAlign: "center", marginTop: 20, color: COLORS.gray, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
+        <div style={{ textAlign: "center", marginTop: 20, color: COLORS.gray, fontSize: 13, fontFamily: "'Heebo',sans-serif" }}>
           {mode === "login" ? t.auth.noAccount : t.auth.hasAccount}{" "}
           <span onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setSuccess(""); setPassword(""); }} style={{ color: COLORS.accent, cursor: "pointer", fontWeight: 600 }}>
             {mode === "login" ? t.auth.register : t.auth.login}
@@ -2940,7 +2940,7 @@ function ResetPasswordPage({ lang, setPage }) {
     setLoading(false);
   };
 
-  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
+  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" };
 
   return (
@@ -2953,7 +2953,7 @@ function ResetPasswordPage({ lang, setPage }) {
         {done ? (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(40,200,120,0.15)", border: "2px solid #28C878", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#28C878", fontSize: 28, fontWeight: 700 }}>✓</div>
-            <div style={{ color: COLORS.success, fontSize: 16, fontWeight: 600, fontFamily: "'Varela Round',sans-serif" }}>{t.auth.pwSet}</div>
+            <div style={{ color: COLORS.success, fontSize: 16, fontWeight: 600, fontFamily: "'Heebo',sans-serif" }}>{t.auth.pwSet}</div>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
@@ -2961,16 +2961,16 @@ function ResetPasswordPage({ lang, setPage }) {
               <label htmlFor="reset-new-password" style={labelStyle}>{t.auth.newPw}</label>
               <div style={{ position: "relative" }}>
                 <input id="reset-new-password" type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 12, paddingInlineStart: 14, paddingInlineEnd: 80 }} />
-                <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 14, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Heebo',sans-serif" }}>
                   {showPassword ? t.auth.hidePw : t.auth.showPw}
                 </button>
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                   {t.auth.generatePw}
                 </button>
                 {password && (
-                  <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                  <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                     {copied ? t.auth.copied : t.auth.copyPw}
                   </button>
                 )}
@@ -2981,7 +2981,7 @@ function ResetPasswordPage({ lang, setPage }) {
               <input id="reset-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
             </div>
             {error && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 16, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{error}</div>}
-            <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+            <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>
               {loading ? "..." : t.auth.setPw}
             </button>
           </form>
@@ -3036,7 +3036,7 @@ function AccountSettings({ lang }) {
     setLoading(false);
   };
 
-  const inputStyle = { width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none" };
+  const inputStyle = { width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 13, outline: "none" };
   const labelStyle = { color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", display: "block", marginBottom: 6 };
 
   return (
@@ -3061,16 +3061,16 @@ function AccountSettings({ lang }) {
                 <label htmlFor="account-new-password" style={labelStyle}>{t.auth.newPw}</label>
                 <div style={{ position: "relative" }}>
                   <input id="account-new-password" type={showPassword ? "text" : "password"} name="new-password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={{ ...inputStyle, paddingBlock: 10, paddingInlineStart: 12, paddingInlineEnd: 70 }} />
-                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                  <button type="button" onClick={() => setShowPassword(s => !s)} style={{ position: "absolute", insetInlineEnd: 8, top: 11, background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 11, fontFamily: "'Heebo',sans-serif" }}>
                     {showPassword ? t.auth.hidePw : t.auth.showPw}
                   </button>
                 </div>
                 <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
-                  <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "6px", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                  <button type="button" onClick={generatePassword} style={{ flex: 1, background: "rgba(255,107,53,0.1)", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 6, padding: "6px", cursor: "pointer", fontSize: 11, fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                     {t.auth.generatePw}
                   </button>
                   {password && (
-                    <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                    <button type="button" onClick={copyPassword} style={{ background: copied ? COLORS.success : "transparent", border: `1px solid ${copied ? COLORS.success : COLORS.border}`, color: copied ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 11, fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                       {copied ? t.auth.copied : t.auth.copyPw}
                     </button>
                   )}
@@ -3081,7 +3081,7 @@ function AccountSettings({ lang }) {
                 <input id="account-confirm-password" type={showPassword ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} required style={inputStyle} />
               </div>
               {error && <div role="alert" style={{ color: "#f87171", fontSize: 12, marginBottom: 12, background: "rgba(248,113,113,0.1)", padding: "8px 12px", borderRadius: 6 }}>{error}</div>}
-              <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              <button type="submit" disabled={loading || !password} style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>
                 {loading ? "..." : t.auth.setPw}
               </button>
             </form>
@@ -3318,7 +3318,7 @@ function TrackPage({ lang, user, clearCart }) {
       ? (lang === `he` ? `התשלום בעיבוד — נעדכן ברגע שהאישור יתקבל. אפשר לרענן בעוד רגע.` : lang === `ru` ? `Оплата обрабатывается — сообщим, как только подтвердится. Обновите через минуту.` : `Your payment is processing — we'll confirm shortly. Try refreshing in a moment.`)
       : (lang === `he` ? `קיבלנו את הפנייה. אם בוצע תשלום, אישור יישלח במייל בהקדם.` : lang === `ru` ? `Мы вас зафиксировали. Если оплата прошла, подтверждение придёт на email.` : `We've got you. If a payment went through, a confirmation email will arrive shortly.`);
     return (
-      <div style={{ minHeight: `100vh`, background: COLORS.bg, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 24, direction: t.dir, fontFamily: `'Varela Round',sans-serif` }}>
+      <div style={{ minHeight: `100vh`, background: COLORS.bg, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 24, direction: t.dir, fontFamily: `'Heebo',sans-serif` }}>
         <div style={{ background: COLORS.bgCard, border: `1px solid ${ok ? `#22c55e` : COLORS.accent}`, borderRadius: 16, padding: `40px 32px`, width: `100%`, maxWidth: 460, textAlign: `center` }}>
           <div style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 80, height: 80, borderRadius: `50%`, background: ok ? `rgba(34,197,94,0.12)` : `rgba(255,107,53,0.12)`, border: `2px solid ${ok ? `#22c55e` : COLORS.accent}`, marginBottom: 20, fontSize: 40 }}>{ok ? `✓` : proc ? `⏳` : `📦`}</div>
           <h2 style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontSize: 26, margin: `0 0 10px` }}>{title}</h2>
@@ -3330,11 +3330,11 @@ function TrackPage({ lang, user, clearCart }) {
             </div>
           )}
           <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#track`); } catch (_) {} setPayReturnDismissed(true); }}
-            style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, marginBottom: 10 }}>
+            style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, marginBottom: 10 }}>
             {lang === `he` ? `למעקב ההזמנות שלי` : lang === `ru` ? `К моим заказам` : `View my orders`}
           </button>
           <button onClick={() => { window.location.hash = ``; }}
-            style={{ width: `100%`, background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px`, fontSize: 14, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+            style={{ width: `100%`, background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px`, fontSize: 14, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
             {lang === `he` ? `חזרה לחנות` : lang === `ru` ? `Вернуться в магазин` : `Back to shop`}
           </button>
         </div>
@@ -3343,7 +3343,7 @@ function TrackPage({ lang, user, clearCart }) {
   }
 
   if (!user) return (
-    <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir, fontFamily: "'Varela Round',sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir, fontFamily: "'Heebo',sans-serif" }}>
       <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 420 }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ fontSize: 42, marginBottom: 12 }}>📦</div>
@@ -3361,10 +3361,10 @@ function TrackPage({ lang, user, clearCart }) {
               onChange={e => setGuestEmail(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") sendTrackLink(); }}
               placeholder="your@email.com"
-              style={{ width: "100%", boxSizing: "border-box", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none", marginTop: 8, marginBottom: 16 }} />
+              style={{ width: "100%", boxSizing: "border-box", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: "none", marginTop: 8, marginBottom: 16 }} />
             {guestError && <div role="alert" style={{ color: "#f87171", fontSize: 13, marginBottom: 14, background: "rgba(248,113,113,0.1)", padding: "10px 14px", borderRadius: 8 }}>{guestError}</div>}
             <button onClick={sendTrackLink} disabled={guestLoading || !guestEmail.trim()}
-              style={{ width: "100%", background: (guestLoading || !guestEmail.trim()) ? COLORS.border : COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: (guestLoading || !guestEmail.trim()) ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              style={{ width: "100%", background: (guestLoading || !guestEmail.trim()) ? COLORS.border : COLORS.accent, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: (guestLoading || !guestEmail.trim()) ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif" }}>
               {guestLoading ? "..." : t.track.guestBtn}
             </button>
           </>
@@ -3374,7 +3374,7 @@ function TrackPage({ lang, user, clearCart }) {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Heebo',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
         <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h1>
         <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
@@ -3382,7 +3382,7 @@ function TrackPage({ lang, user, clearCart }) {
         {actionError && (
           <div role="alert" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", color: "#f87171", fontSize: 14, marginBottom: 20, background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>
             <span>{actionError}</span>
-            <button onClick={() => setActionError("")} style={{ background: "transparent", border: "1px solid rgba(248,113,113,0.5)", color: "#f87171", borderRadius: 8, padding: "6px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{uiRetry(lang)}</button>
+            <button onClick={() => setActionError("")} style={{ background: "transparent", border: "1px solid rgba(248,113,113,0.5)", color: "#f87171", borderRadius: 8, padding: "6px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{uiRetry(lang)}</button>
           </div>
         )}
 
@@ -3447,7 +3447,7 @@ function TrackPage({ lang, user, clearCart }) {
                             <div style={{ color: COLORS.success, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{t.approval.approvedTitle}</div>
                             <div style={{ color: COLORS.gray, fontSize: 13.5, lineHeight: 1.6, marginBottom: 14 }}>{t.approval.approvedDesc}</div>
                             <button onClick={() => payForApprovedOrder(order)} disabled={payBusy === order.id}
-                              style={{ width: "100%", background: payBusy === order.id ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)`, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", fontSize: 16, fontWeight: 700, cursor: payBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: payBusy === order.id ? "none" : "0 8px 24px rgba(255,107,53,0.35)" }}>
+                              style={{ width: "100%", background: payBusy === order.id ? COLORS.bgCard : `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)`, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", fontSize: 16, fontWeight: 700, cursor: payBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif", boxShadow: payBusy === order.id ? "none" : "0 8px 24px rgba(255,107,53,0.35)" }}>
                               {payBusy === order.id ? "..." : `${t.approval.payNow} · ₪${order.total}`}
                             </button>
                           </div>
@@ -3467,14 +3467,14 @@ function TrackPage({ lang, user, clearCart }) {
                                 <input type="file" accept="image/*" onChange={onResubmitFile} style={{ color: COLORS.gray, fontSize: 12, marginBottom: 10, width: "100%" }} />
                                 {resubmitFile && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}><img src={resubmitFile.dataUrl} alt="" style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 4, border: `1px solid ${COLORS.border}` }} /><span style={{ color: COLORS.success, fontSize: 12 }}>✓ {resubmitFile.name}</span></div>}
                                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                                  <button onClick={() => resubmitDesign(order)} disabled={actionBusy === order.id} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{actionBusy === order.id ? t.approval.resubmitting : t.approval.resubmitBtn}</button>
-                                  <button onClick={() => { setResubmitOpenId(null); setResubmitFile(null); }} disabled={actionBusy === order.id} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 16px", fontSize: 13, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>✕</button>
+                                  <button onClick={() => resubmitDesign(order)} disabled={actionBusy === order.id} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif" }}>{actionBusy === order.id ? t.approval.resubmitting : t.approval.resubmitBtn}</button>
+                                  <button onClick={() => { setResubmitOpenId(null); setResubmitFile(null); }} disabled={actionBusy === order.id} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 16px", fontSize: 13, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>✕</button>
                                 </div>
                               </div>
                             ) : (
                               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                                <button onClick={() => { setResubmitOpenId(order.id); setResubmitFile(null); }} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "11px 20px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.editResubmit}</button>
-                                <button onClick={() => cancelApprovalOrder(order)} disabled={actionBusy === order.id} style={{ background: "transparent", color: "#f87171", border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: "11px 20px", fontSize: 13.5, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.approval.cancelOrder}</button>
+                                <button onClick={() => { setResubmitOpenId(order.id); setResubmitFile(null); }} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "11px 20px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.approval.editResubmit}</button>
+                                <button onClick={() => cancelApprovalOrder(order)} disabled={actionBusy === order.id} style={{ background: "transparent", color: "#f87171", border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: "11px 20px", fontSize: 13.5, cursor: actionBusy === order.id ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.approval.cancelOrder}</button>
                               </div>
                             )}
                           </div>
@@ -3513,9 +3513,9 @@ function TrackPage({ lang, user, clearCart }) {
                               </div>
                               {canEditMessage(order.status) ? (
                                 <>
-                                  <textarea value={msgDrafts[order.id] || ""} onChange={e => setMsgDrafts(d => ({ ...d, [order.id]: e.target.value }))} placeholder={lang === "he" ? "הערה למפעיל ההזמנה — בקשות מיוחדות, שינויים וכו'" : lang === "ru" ? "Заметка для исполнителя — особые пожелания и т.п." : "Note to the producer — special requests, etc."} rows={4} style={{ width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} />
+                                  <textarea value={msgDrafts[order.id] || ""} onChange={e => setMsgDrafts(d => ({ ...d, [order.id]: e.target.value }))} placeholder={lang === "he" ? "הערה למפעיל ההזמנה — בקשות מיוחדות, שינויים וכו'" : lang === "ru" ? "Заметка для исполнителя — особые пожелания и т.п." : "Note to the producer — special requests, etc."} rows={4} style={{ width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} />
                                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                                    <button onClick={() => saveCustomerMessage(order.id)} disabled={savingMsg[order.id] || (msgDrafts[order.id] || "") === (order.customer_message || "")} style={{ background: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? COLORS.bgCard : COLORS.accent, color: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? COLORS.gray : "#fff", border: "none", borderRadius: 8, padding: "8px 16px", cursor: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600 }}>
+                                    <button onClick={() => saveCustomerMessage(order.id)} disabled={savingMsg[order.id] || (msgDrafts[order.id] || "") === (order.customer_message || "")} style={{ background: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? COLORS.bgCard : COLORS.accent, color: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? COLORS.gray : "#fff", border: "none", borderRadius: 8, padding: "8px 16px", cursor: ((msgDrafts[order.id] || "") === (order.customer_message || "")) ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 600 }}>
                                       {savingMsg[order.id] ? "..." : (lang === "he" ? "💾 שמור הערה" : lang === "ru" ? "💾 Сохранить" : "💾 Save note")}
                                     </button>
                                     {order.customer_message && (msgDrafts[order.id] || "") === order.customer_message && (
@@ -3526,7 +3526,7 @@ function TrackPage({ lang, user, clearCart }) {
                               ) : (
                                 <>
                                   {order.customer_message ? (
-                                    <div style={{ background: COLORS.bg, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontSize: 13, fontFamily: "'Varela Round',sans-serif" }}>
+                                    <div style={{ background: COLORS.bg, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontSize: 13, fontFamily: "'Heebo',sans-serif" }}>
                                       {order.customer_message_at && (
                                         <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 6 }}>{new Date(order.customer_message_at).toLocaleString(lang === "he" ? "he-IL" : lang === "ru" ? "ru-RU" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })} · {timeAgo(order.customer_message_at, lang)}</div>
                                       )}
@@ -3579,13 +3579,13 @@ function TrackPage({ lang, user, clearCart }) {
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, backdropFilter: "blur(4px)", direction: t.dir }}>
           <div ref={paySoonRef} role="dialog" aria-modal="true" aria-label={t.payment.soonTitle} onKeyDown={(e) => { if (e.key === "Escape") setPaySoon(false); }} style={{ position: "relative", background: "#1a1a1a", border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "36px 32px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(255,107,53,0.2)" }}>
             <button onClick={() => setPaySoon(false)} aria-label={LANGS[lang].bloom.closeModal}
-              style={{ position: "absolute", top: 12, insetInlineEnd: 12, width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Varela Round',sans-serif" }}>×</button>
+              style={{ position: "absolute", top: 12, insetInlineEnd: 12, width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Heebo',sans-serif" }}>×</button>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
               <span style={{ width: 14, height: 14, borderRadius: "50%", background: COLORS.accent, display: "inline-block", boxShadow: `0 0 30px rgba(255,107,53,0.7)` }}></span>
             </div>
             <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
-            <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
+            <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
           </div>
         </div>
       , document.body) : null)}
@@ -4152,13 +4152,13 @@ function AdminPage({ lang }) {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Heebo',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 24px" }}>
         {fetchError && (
           <div role="alert" style={{ background: "rgba(248,113,113,0.12)", border: "1px solid #f87171", color: "#f87171", borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <span>{lang === "he" ? "⚠️ טעינת חלק מהנתונים נכשלה. בדקו את החיבור ונסו לרענן." : lang === "ru" ? "⚠️ Не удалось загрузить часть данных. Проверьте соединение и обновите." : "⚠️ Some data failed to load. Check your connection and reload."}</span>
             <button onClick={() => { setFetchError(false); setLoading(true); setPetsLoading(true); setPacksLoading(true); fetchOrders(); fetchPetDesigns(); fetchStickerPacks(); }}
-              style={{ background: "#f87171", color: "#0f0f0f", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", whiteSpace: "nowrap" }}>
+              style={{ background: "#f87171", color: "#0f0f0f", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", whiteSpace: "nowrap" }}>
               {lang === "he" ? "רענון" : lang === "ru" ? "Обновить" : "Reload"}
             </button>
           </div>
@@ -4184,7 +4184,7 @@ function AdminPage({ lang }) {
                   color: active ? "#fff" : COLORS.gray,
                   border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
                   borderRadius: 999, padding: "8px 18px",
-                  fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 700,
+                  fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 700,
                   cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap",
                 }}
                 onMouseOver={e => { if (!active) { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = COLORS.accent; } }}
@@ -4215,7 +4215,7 @@ function AdminPage({ lang }) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
             {summaryCards.map((c, i) => (
               <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${c.alert ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "14px 16px", textAlign: "start" }}>
-                <div style={{ color: c.alert ? COLORS.accent : COLORS.white, fontWeight: 800, fontSize: 22, fontFamily: "'Varela Round',sans-serif" }}>
+                <div style={{ color: c.alert ? COLORS.accent : COLORS.white, fontWeight: 800, fontSize: 22, fontFamily: "'Heebo',sans-serif" }}>
                   <span dir="ltr" style={{ unicodeBidi: "isolate", display: "inline-block" }}>{c.value}</span>
                 </div>
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{c[lang] || c.en}</div>
@@ -4232,7 +4232,7 @@ function AdminPage({ lang }) {
               onChange={e => setSearch(e.target.value)}
               placeholder={lang === "he" ? "חיפוש לפי שם, אימייל, טלפון או מס׳ הזמנה" : lang === "ru" ? "Поиск: имя, email, телефон или № заказа" : "Search name, email, phone or order #"}
               aria-label={lang === "he" ? "חיפוש הזמנות" : lang === "ru" ? "Поиск заказов" : "Search orders"}
-              style={{ width: "100%", boxSizing: "border-box", background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 10, padding: search ? "10px 36px 10px 14px" : "10px 14px", fontSize: 14, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}
+              style={{ width: "100%", boxSizing: "border-box", background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 10, padding: search ? "10px 36px 10px 14px" : "10px 14px", fontSize: 14, fontFamily: "'Heebo',sans-serif", direction: t.dir }}
             />
             {search && (
               <button onClick={() => setSearch("")} aria-label={lang === "he" ? "נקה חיפוש" : lang === "ru" ? "Очистить" : "Clear search"}
@@ -4241,7 +4241,7 @@ function AdminPage({ lang }) {
           </div>
           <select value={sortMode} onChange={e => setSortMode(e.target.value)}
             aria-label={lang === "he" ? "מיון" : lang === "ru" ? "Сортировка" : "Sort"}
-            style={{ flexShrink: 0, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 10, padding: "10px 14px", fontSize: 13, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", direction: t.dir }}>
+            style={{ flexShrink: 0, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 10, padding: "10px 14px", fontSize: 13, fontFamily: "'Heebo',sans-serif", cursor: "pointer", direction: t.dir }}>
             <option value="newest">{lang === "he" ? "החדשות ביותר" : lang === "ru" ? "Сначала новые" : "Newest first"}</option>
             <option value="oldest">{lang === "he" ? "הישנות ביותר" : lang === "ru" ? "Сначала старые" : "Oldest first"}</option>
           </select>
@@ -4258,7 +4258,7 @@ function AdminPage({ lang }) {
                 border: `1px solid ${filterStatus === key ? (key === "all" ? COLORS.accent : statusColors[key] || COLORS.accent) : COLORS.border}`,
                 color: filterStatus === key ? "#000" : COLORS.gray,
                 borderRadius: 8, padding: "8px 14px", cursor: "pointer",
-                fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
+                fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 600,
                 transition: "all 0.2s",
                 display: "inline-flex", alignItems: "center", gap: 8,
               }}>
@@ -4281,10 +4281,10 @@ function AdminPage({ lang }) {
                 {lang === "he" ? "לא ניתן לשחזר פעולה זו" : lang === "ru" ? "Это действие нельзя отменить" : "This action cannot be undone"}
               </div>
               <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-                <button onClick={() => setDeleteConfirm(null)} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+                <button onClick={() => setDeleteConfirm(null)} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>
                   {lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}
                 </button>
-                <button onClick={() => deleteOrder(deleteConfirm)} style={{ background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                <button onClick={() => deleteOrder(deleteConfirm)} style={{ background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                   {lang === "he" ? "מחק" : lang === "ru" ? "Удалить" : "Delete"}
                 </button>
               </div>
@@ -4456,7 +4456,7 @@ function AdminPage({ lang }) {
                                       a.href = url; a.download = `design-${it.id}.png`;
                                       document.body.appendChild(a); a.click();
                                       document.body.removeChild(a); window.URL.revokeObjectURL(url);
-                                    }} style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>⬇️ Download</button>
+                                    }} style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>⬇️ Download</button>
                                   )}
                                   {/* Extra design downloads */}
                                   {[
@@ -4473,7 +4473,7 @@ function AdminPage({ lang }) {
                                       a.href = url; a.download = `${d.label}-${it.id}.png`;
                                       document.body.appendChild(a); a.click();
                                       document.body.removeChild(a); window.URL.revokeObjectURL(url);
-                                    }} style={{ background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 8px", fontSize: 10, fontWeight: 600, cursor: "pointer", marginInlineStart: 4, fontFamily: "'Varela Round',sans-serif" }}>⬇️ {d.label}</button>
+                                    }} style={{ background: "rgba(255,107,53,0.1)", border: "1px solid #FF6B35", color: "#FF6B35", borderRadius: 6, padding: "4px 8px", fontSize: 10, fontWeight: 600, cursor: "pointer", marginInlineStart: 4, fontFamily: "'Heebo',sans-serif" }}>⬇️ {d.label}</button>
                                   ))}
                                   {/* Per-item status */}
                                   <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${COLORS.border}` }}>
@@ -4502,7 +4502,7 @@ function AdminPage({ lang }) {
                             </div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                               {ORDER_STAGES.map(s => (
-                                <button key={s.key} onClick={() => { group.forEach((o, idx) => updateStatus(o.id, s.key, o.created_at, idx === 0)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                <button key={s.key} onClick={() => { group.forEach((o, idx) => updateStatus(o.id, s.key, o.created_at, idx === 0)); }} style={{ background: order.status === s.key ? statusColors[s.key] : COLORS.bg, border: `1px solid ${order.status === s.key ? statusColors[s.key] : COLORS.border}`, color: order.status === s.key ? "#000" : COLORS.gray, borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Heebo',sans-serif", transition: "all 0.2s", display: "inline-flex", alignItems: "center", gap: 6 }}>
                                   <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: order.status === s.key ? "#000" : s.dot }}></span>
                                   {s[lang] || s.en}
                                 </button>
@@ -4533,7 +4533,7 @@ function AdminPage({ lang }) {
             <button
               type="button"
               onClick={() => { setAddingDesign(true); setEditingDesignId(null); setDesignForm(BLANK_DESIGN); }}
-              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
               {lang === `he` ? `+ הוסף דמות` : lang === `ru` ? `+ Добавить персонажа` : `+ Add character`}
             </button>
           </div>
@@ -4583,7 +4583,7 @@ function AdminPage({ lang }) {
                             border: `1px solid ${d.is_bestseller ? COLORS.accent : COLORS.border}`,
                             color: d.is_bestseller ? "#fff" : COLORS.gray,
                             borderRadius: 6, padding: "6px 12px", cursor: "pointer",
-                            fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
+                            fontFamily: "'Heebo',sans-serif", fontSize: 12, fontWeight: 700,
                             transition: "all 0.2s",
                           }}>{t.badges.bestseller}</button>
                         <button onClick={() => togglePetFlag(d.id, "is_new", !d.is_new)}
@@ -4593,7 +4593,7 @@ function AdminPage({ lang }) {
                             border: `1px solid ${d.is_new ? COLORS.accent : COLORS.border}`,
                             color: d.is_new ? "#fff" : COLORS.gray,
                             borderRadius: 6, padding: "6px 12px", cursor: "pointer",
-                            fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700,
+                            fontFamily: "'Heebo',sans-serif", fontSize: 12, fontWeight: 700,
                             transition: "all 0.2s",
                           }}>{t.badges.new}</button>
                         <button
@@ -4603,7 +4603,7 @@ function AdminPage({ lang }) {
                             setAddingDesign(false);
                             setDesignForm({ ...BLANK_DESIGN, ...d, breed_aliases: d.breed_aliases || `` });
                           }}
-                          style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
+                          style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700 }}>
                           {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
                         </button>
                       </div>
@@ -4643,7 +4643,7 @@ function AdminPage({ lang }) {
             <button
               type="button"
               onClick={() => { setAddingPack(true); setEditingPackId(null); setPackForm(BLANK_PACK); }}
-              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
               {lang === `he` ? `+ הוסף חבילה` : lang === `ru` ? `+ Добавить набор` : `+ Add pack`}
             </button>
           </div>
@@ -4691,7 +4691,7 @@ function AdminPage({ lang }) {
                           setAddingPack(false);
                           setPackForm({ ...BLANK_PACK, ...p, item_slugs: (p.item_slugs || []).join(`, `) });
                         }}
-                        style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>
+                        style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700 }}>
                         {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
                       </button>
                     </div>
@@ -4770,10 +4770,10 @@ function AdminPage({ lang }) {
                     {o.notes && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6, background: COLORS.bg, padding: `7px 10px`, borderRadius: 6 }}>{o.notes}</div>}
                     <div style={{ color: COLORS.grayLight, fontSize: 11, marginTop: 6 }}>{wlDate(o.created_at)} · {timeAgo(o.created_at, lang)}</div>
                     <div style={{ display: `flex`, gap: 10, marginTop: 12, flexWrap: `wrap` }}>
-                      <button onClick={() => reviewDesign(o.id, `approved`)} style={{ background: COLORS.success, color: `#0f0f0f`, border: `none`, borderRadius: 8, padding: `10px 20px`, fontSize: 13.5, fontWeight: 700, cursor: `pointer`, fontFamily: "'Varela Round',sans-serif" }}>
+                      <button onClick={() => reviewDesign(o.id, `approved`)} style={{ background: COLORS.success, color: `#0f0f0f`, border: `none`, borderRadius: 8, padding: `10px 20px`, fontSize: 13.5, fontWeight: 700, cursor: `pointer`, fontFamily: "'Heebo',sans-serif" }}>
                         ✓ {lang === `he` ? `אשר` : lang === `ru` ? `Одобрить` : `Approve`}
                       </button>
-                      <button onClick={() => reviewDesign(o.id, `rejected`)} style={{ background: `transparent`, color: `#f87171`, border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: `10px 20px`, fontSize: 13.5, fontWeight: 700, cursor: `pointer`, fontFamily: "'Varela Round',sans-serif" }}>
+                      <button onClick={() => reviewDesign(o.id, `rejected`)} style={{ background: `transparent`, color: `#f87171`, border: `1px solid rgba(248,113,113,0.5)`, borderRadius: 8, padding: `10px 20px`, fontSize: 13.5, fontWeight: 700, cursor: `pointer`, fontFamily: "'Heebo',sans-serif" }}>
                         ✎ {lang === `he` ? `בקש שינויים` : lang === `ru` ? `Запросить изменения` : `Request changes`}
                       </button>
                     </div>
@@ -4865,7 +4865,7 @@ function AdminPage({ lang }) {
               </p>
             </div>
             <button type="button" onClick={() => { setAddingTestimonial(true); setEditingTestimonialId(null); setTestimonialForm(BLANK_TESTIMONIAL); setTestimonialErrors({}); }}
-              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>
+              style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
               {lang === `he` ? `+ הוסף ביקורת` : lang === `ru` ? `+ Добавить отзыв` : `+ Add review`}
             </button>
           </div>
@@ -4904,11 +4904,11 @@ function AdminPage({ lang }) {
                         <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>“{snippet}{raw.length > 80 ? `…` : ``}”</div>
                       </div>
                       <button type="button" onClick={() => toggleTestimonialActive(r.id, !r.is_active)} aria-pressed={!!r.is_active}
-                        style={{ background: r.is_active ? `rgba(40,200,120,0.12)` : `#111`, border: `1px solid ${r.is_active ? COLORS.success : COLORS.border}`, color: r.is_active ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700, minHeight: 36 }}>
+                        style={{ background: r.is_active ? `rgba(40,200,120,0.12)` : `#111`, border: `1px solid ${r.is_active ? COLORS.success : COLORS.border}`, color: r.is_active ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700, minHeight: 36 }}>
                         {r.is_active ? (lang === `he` ? `מוצג ✓` : lang === `ru` ? `Показан ✓` : `Live ✓`) : (lang === `he` ? `מוסתר` : lang === `ru` ? `Скрыт` : `Hidden`)}
                       </button>
                       <button type="button" onClick={() => { if (isEditing) { setEditingTestimonialId(null); return; } setEditingTestimonialId(r.id); setAddingTestimonial(false); setTestimonialErrors({}); setTestimonialForm({ ...BLANK_TESTIMONIAL, ...r }); }}
-                        style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700, minHeight: 36 }}>
+                        style={{ background: isEditing ? COLORS.accentBtn : `transparent`, color: isEditing ? `#fff` : COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700, minHeight: 36 }}>
                         {isEditing ? (lang === `he` ? `סגור` : lang === `ru` ? `Закрыть` : `Close`) : (lang === `he` ? `ערוך` : lang === `ru` ? `Изменить` : `Edit`)}
                       </button>
                       <button type="button" onClick={() => setDeleteTestimonialConfirm(r.id)} aria-label={lang === `he` ? `מחק ביקורת` : lang === `ru` ? `Удалить отзыв` : `Delete review`}
@@ -4934,8 +4934,8 @@ function AdminPage({ lang }) {
                 <div style={{ color: COLORS.white, fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{lang === "he" ? "למחוק את הביקורת?" : lang === "ru" ? "Удалить отзыв?" : "Delete this review?"}</div>
                 <div style={{ color: COLORS.gray, fontSize: 14, marginBottom: 24 }}>{lang === "he" ? "לא ניתן לשחזר פעולה זו" : lang === "ru" ? "Это действие нельзя отменить" : "This action cannot be undone"}</div>
                 <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-                  <button onClick={() => setDeleteTestimonialConfirm(null)} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}</button>
-                  <button onClick={() => deleteTestimonial(deleteTestimonialConfirm)} disabled={catalogBusy} style={{ background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "10px 24px", cursor: catalogBusy ? "wait" : "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>{lang === "he" ? "מחק" : lang === "ru" ? "Удалить" : "Delete"}</button>
+                  <button onClick={() => setDeleteTestimonialConfirm(null)} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "10px 24px", cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}</button>
+                  <button onClick={() => deleteTestimonial(deleteTestimonialConfirm)} disabled={catalogBusy} style={{ background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "10px 24px", cursor: catalogBusy ? "wait" : "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>{lang === "he" ? "מחק" : lang === "ru" ? "Удалить" : "Delete"}</button>
                 </div>
               </div>
             </div>
@@ -4964,7 +4964,7 @@ function AdminInput({ value, onChange, type, placeholder, disabled, dir }) {
     placeholder={placeholder}
     disabled={disabled}
     dir={dir}
-    style={{ width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: `8px 10px`, fontSize: 13, fontFamily: `'Varela Round',sans-serif`, boxSizing: `border-box`, outline: `none` }}
+    style={{ width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: `8px 10px`, fontSize: 13, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box`, outline: `none` }}
     onFocus={(e) => { e.target.style.borderColor = COLORS.accent; }}
     onBlur={(e) => { e.target.style.borderColor = COLORS.border; }}
   />;
@@ -5002,7 +5002,7 @@ function AdminImageRow({ label, value, onChange, bucket, prefix, uploadAdminImag
           onBlur={(e) => { e.target.style.borderColor = COLORS.border; }}
         />
         <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: `none` }} />
-        <button type="button" disabled={busy || uploading} onClick={() => fileRef.current?.click()} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `8px 12px`, fontSize: 12, fontWeight: 700, cursor: busy || uploading ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, whiteSpace: `nowrap` }}>
+        <button type="button" disabled={busy || uploading} onClick={() => fileRef.current?.click()} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `8px 12px`, fontSize: 12, fontWeight: 700, cursor: busy || uploading ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, whiteSpace: `nowrap` }}>
           {uploading ? `…` : `Upload`}
         </button>
         {value && <img src={value} alt="" style={{ width: 32, height: 32, borderRadius: 4, objectFit: `cover`, border: `1px solid ${COLORS.border}` }} />}
@@ -5020,8 +5020,8 @@ function TestimonialEditor({ form, setForm, busy, errors = {}, onSave, onCancel,
     en: { name: `Customer name *`, city: `City`, rating: `Rating *`, bodyHe: `Review (Hebrew) *`, bodyEn: `English (optional)`, bodyRu: `Русский (optional)`, product: `Product`, avatar: `Avatar URL (optional)`, sort: `Sort`, active: `Live on site`, live: `Live ✓`, hidden: `Hidden`, save: `Save`, cancel: `Cancel`, del: `Delete` },
     ru: { name: `Имя клиента *`, city: `Город`, rating: `Оценка *`, bodyHe: `Отзыв (иврит) *`, bodyEn: `English (необяз.)`, bodyRu: `Русский (необяз.)`, product: `Товар`, avatar: `Аватар URL (необяз.)`, sort: `Порядок`, active: `Показан`, live: `Показан ✓`, hidden: `Скрыт`, save: `Сохранить`, cancel: `Отмена`, del: `Удалить` },
   }[lang] || {};
-  const errStyle = { color: `#f87171`, fontSize: 11, marginTop: 4, fontFamily: `'Varela Round',sans-serif` };
-  const taStyle = { width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: `8px 10px`, fontSize: 13, fontFamily: `'Varela Round',sans-serif`, boxSizing: `border-box`, outline: `none`, resize: `vertical` };
+  const errStyle = { color: `#f87171`, fontSize: 11, marginTop: 4, fontFamily: `'Heebo',sans-serif` };
+  const taStyle = { width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: `8px 10px`, fontSize: 13, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box`, outline: `none`, resize: `vertical` };
   return (
     <div style={{ background: COLORS.bg, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: 18, marginTop: 10, marginBottom: 10, display: `flex`, flexDirection: `column`, gap: 14 }}>
       <div style={{ display: `grid`, gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`, gap: 12 }}>
@@ -5053,16 +5053,16 @@ function TestimonialEditor({ form, setForm, busy, errors = {}, onSave, onCancel,
         <div>
           <AdminFieldLabel>{L.active}</AdminFieldLabel>
           <button type="button" onClick={() => set(`is_active`)(!form.is_active)} aria-pressed={!!form.is_active}
-            style={{ width: `100%`, background: form.is_active ? `rgba(40,200,120,0.12)` : `#111`, border: `1px solid ${form.is_active ? COLORS.success : COLORS.border}`, color: form.is_active ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `8px 10px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 700, minHeight: 40 }}>
+            style={{ width: `100%`, background: form.is_active ? `rgba(40,200,120,0.12)` : `#111`, border: `1px solid ${form.is_active ? COLORS.success : COLORS.border}`, color: form.is_active ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `8px 10px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 13, fontWeight: 700, minHeight: 40 }}>
             {form.is_active ? L.live : L.hidden}
           </button>
         </div>
       </div>
 
       <div style={{ display: `flex`, gap: 10, flexWrap: `wrap`, marginTop: 4 }}>
-        <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 20px`, fontWeight: 700, fontSize: 13, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, minHeight: 44 }}>{busy ? `…` : L.save}</button>
-        <button type="button" onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 20px`, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, minHeight: 44 }}>{L.cancel}</button>
-        {onDelete && <button type="button" onClick={onDelete} style={{ background: `transparent`, color: `#ef4444`, border: `1px solid rgba(239,68,68,0.5)`, borderRadius: 8, padding: `10px 20px`, fontSize: 13, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, minHeight: 44, marginInlineStart: `auto` }}>{L.del}</button>}
+        <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 20px`, fontWeight: 700, fontSize: 13, cursor: busy ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, minHeight: 44 }}>{busy ? `…` : L.save}</button>
+        <button type="button" onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 20px`, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, minHeight: 44 }}>{L.cancel}</button>
+        {onDelete && <button type="button" onClick={onDelete} style={{ background: `transparent`, color: `#ef4444`, border: `1px solid rgba(239,68,68,0.5)`, borderRadius: 8, padding: `10px 20px`, fontSize: 13, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, minHeight: 44, marginInlineStart: `auto` }}>{L.del}</button>}
       </div>
     </div>
   );
@@ -5083,7 +5083,7 @@ function DesignEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadA
         <div><AdminFieldLabel>{L.species}</AdminFieldLabel>
           <div style={{ display: `flex`, gap: 8 }}>
             {[`dog`, `cat`].map(sp => (
-              <button key={sp} type="button" onClick={() => set(`species`)(sp)} style={{ flex: 1, background: form.species === sp ? COLORS.accent : `transparent`, color: form.species === sp ? `#fff` : COLORS.gray, border: `1px solid ${form.species === sp ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: `8px 10px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{sp === `dog` ? L.dog : L.cat}</button>
+              <button key={sp} type="button" onClick={() => set(`species`)(sp)} style={{ flex: 1, background: form.species === sp ? COLORS.accent : `transparent`, color: form.species === sp ? `#fff` : COLORS.gray, border: `1px solid ${form.species === sp ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: `8px 10px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700 }}>{sp === `dog` ? L.dog : L.cat}</button>
             ))}
           </div>
         </div>
@@ -5147,15 +5147,15 @@ function DesignEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadA
       <div>
         <AdminFieldLabel>{L.flags}</AdminFieldLabel>
         <div style={{ display: `flex`, gap: 16, flexWrap: `wrap` }}>
-          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Heebo',sans-serif` }}>
             <input type="checkbox" checked={!!form.is_active} onChange={(e) => set(`is_active`)(e.target.checked)} />
             {L.active}
           </label>
-          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Heebo',sans-serif` }}>
             <input type="checkbox" checked={!!form.is_bestseller} onChange={(e) => set(`is_bestseller`)(e.target.checked)} />
             {L.bestseller}
           </label>
-          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+          <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Heebo',sans-serif` }}>
             <input type="checkbox" checked={!!form.is_new} onChange={(e) => set(`is_new`)(e.target.checked)} />
             {L.fresh}
           </label>
@@ -5163,10 +5163,10 @@ function DesignEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadA
       </div>
       <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
         <div style={{ display: `flex`, gap: 8 }}>
-          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
-          <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
         </div>
-        {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
+        {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 13 }}>{L.del}</button>}
       </div>
     </div>
   );
@@ -5186,7 +5186,7 @@ function PackEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadAdm
         <div><AdminFieldLabel>{L.species}</AdminFieldLabel>
           <div style={{ display: `flex`, gap: 6 }}>
             {[[`dog`, L.dog], [`cat`, L.cat], [`mixed`, L.mixed]].map(([sp, lab]) => (
-              <button key={sp} type="button" onClick={() => set(`species`)(sp)} style={{ flex: 1, background: form.species === sp ? COLORS.accent : `transparent`, color: form.species === sp ? `#fff` : COLORS.gray, border: `1px solid ${form.species === sp ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: `8px 6px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lab}</button>
+              <button key={sp} type="button" onClick={() => set(`species`)(sp)} style={{ flex: 1, background: form.species === sp ? COLORS.accent : `transparent`, color: form.species === sp ? `#fff` : COLORS.gray, border: `1px solid ${form.species === sp ? COLORS.accent : COLORS.border}`, borderRadius: 6, padding: `8px 6px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lab}</button>
             ))}
           </div>
         </div>
@@ -5206,16 +5206,16 @@ function PackEditor({ form, setForm, busy, onSave, onCancel, onDelete, uploadAdm
         <AdminFieldLabel>{L.items}</AdminFieldLabel>
         <AdminInput value={form.item_slugs} onChange={set(`item_slugs`)} placeholder="01_golden_retriever, 09_labrador, ..." dir="ltr" />
       </div>
-      <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Varela Round',sans-serif` }}>
+      <label style={{ display: `inline-flex`, alignItems: `center`, gap: 8, color: COLORS.white, fontSize: 13, fontFamily: `'Heebo',sans-serif` }}>
         <input type="checkbox" checked={!!form.is_active} onChange={(e) => set(`is_active`)(e.target.checked)} />
         {L.active}
       </label>
       <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, justifyContent: `space-between` }}>
         <div style={{ display: `flex`, gap: 8 }}>
-          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.save}</button>
-          <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
+          <button type="button" disabled={busy} onClick={onSave} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 6, padding: `10px 18px`, fontWeight: 700, cursor: busy ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 13 }}>{L.save}</button>
+          <button type="button" disabled={busy} onClick={onCancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 13 }}>{L.cancel}</button>
         </div>
-        {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>{L.del}</button>}
+        {onDelete && <button type="button" disabled={busy} onClick={onDelete} style={{ background: `transparent`, color: `#f87171`, border: `1px solid #f87171`, borderRadius: 6, padding: `10px 18px`, cursor: busy ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 13 }}>{L.del}</button>}
       </div>
     </div>
   );
@@ -5265,7 +5265,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
     cursor: "pointer",
     fontSize: isMobile ? 18 : 14,
     lineHeight: 1,
-    fontFamily: "'Varela Round',sans-serif",
+    fontFamily: "'Heebo',sans-serif",
     fontWeight: 700,
     display: "flex", alignItems: "center", justifyContent: "center",
     touchAction: "manipulation",
@@ -5295,10 +5295,10 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, direction: "ltr" }}>
               <button type="button" aria-label={tr.dec} onClick={() => setQty(it.id, qty - 1)} disabled={qty <= 1} style={{ ...qtyBtnStyle, opacity: qty <= 1 ? 0.4 : 1, cursor: qty <= 1 ? "not-allowed" : "pointer" }}>−</button>
-              <span style={{ minWidth: 22, textAlign: "center", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 14 }}>{qty}</span>
+              <span style={{ minWidth: 22, textAlign: "center", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 14 }}>{qty}</span>
               <button type="button" aria-label={tr.inc} onClick={() => setQty(it.id, qty + 1)} style={qtyBtnStyle}>+</button>
             </div>
-            <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13, fontFamily: "'Varela Round',sans-serif", direction: "ltr" }}>{`₪${unit * qty}`}</span>
+            <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 13, fontFamily: "'Heebo',sans-serif", direction: "ltr" }}>{`₪${unit * qty}`}</span>
           </div>
         </div>
         <button type="button" onClick={() => setCart(c => c.filter(x => x.id !== it.id))} aria-label={tr.remove} style={{
@@ -5345,7 +5345,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} style={{
           display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%",
           background: "transparent", border: "none", color: COLORS.white, cursor: "pointer",
-          fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600, padding: 0,
+          fontFamily: "'Heebo',sans-serif", fontSize: 14, fontWeight: 600, padding: 0,
         }}>
           <span>{`${tr.title} · ${itemCount} ${itemsWord(itemCount, lang)}`}</span>
           <span style={{ color: COLORS.accent, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -5463,7 +5463,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     }
     return e;
   };
-  const fieldErrStyle = { color: "#f87171", fontSize: 12, marginTop: 4, fontFamily: "'Varela Round',sans-serif" };
+  const fieldErrStyle = { color: "#f87171", fontSize: 12, marginTop: 4, fontFamily: "'Heebo',sans-serif" };
   // Custom-upload design approval: when the cart contains an item the customer
   // uploaded their OWN image for, checkout submits the order(s) for review and
   // does NOT start payment (the customer pays later from /track, once approved).
@@ -6352,11 +6352,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     setAccountBusy(false);
   };
 
-  const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: "none" };
+  const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: "none" };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", display: "block", marginBottom: 8 };
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Varela Round',sans-serif", direction: t.dir }}>
+    <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Heebo',sans-serif", direction: t.dir }}>
       {/* Payment-failure return (#order?paid=0) — full-screen retry state. */}
       {payFailed && (
         <div role="dialog" aria-modal="true" aria-label={lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}
@@ -6366,11 +6366,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 26, margin: "0 0 10px" }}>{lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}</h2>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{lang === "he" ? "לא חויבת. אפשר לנסות שוב — ההזמנה שלך נשמרה." : lang === "ru" ? "С вас не списали. Можно попробовать снова — ваш заказ сохранён." : "You weren't charged. You can try again — your order is saved."}</p>
             <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setStep(1); }}
-              style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", marginBottom: 10 }}>
+              style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", marginBottom: 10 }}>
               {lang === "he" ? "לנסות שוב" : lang === "ru" ? "Попробовать снова" : "Try again"}
             </button>
             <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setPage("track"); }}
-              style={{ width: "100%", background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>
+              style={{ width: "100%", background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px", fontSize: 14, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>
               {lang === "he" ? "מעקב ההזמנות שלי" : lang === "ru" ? "К моим заказам" : "Track my orders"}
             </button>
           </div>
@@ -6398,10 +6398,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {lang === "he" ? "הפרטים שהזנת יאבדו" : lang === "ru" ? "Введённые данные будут потеряны" : "Your progress will be lost"}
               </div>
               <div style={{ display: "flex", gap: 12 }}>
-                <button onClick={() => setLeaveWarning(false)} style={{ flex: 1, background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                <button onClick={() => setLeaveWarning(false)} style={{ flex: 1, background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                   {lang === "he" ? "המשך הזמנה" : lang === "ru" ? "Продолжить" : "Keep ordering"}
                 </button>
-                <button onClick={() => { setLeaveWarning(false); pendingNav && pendingNav(); }} style={{ flex: 1, background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
+                <button onClick={() => { setLeaveWarning(false); pendingNav && pendingNav(); }} style={{ flex: 1, background: "#ef4444", border: "none", color: "#fff", borderRadius: 8, padding: "12px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
                   {lang === "he" ? "עזוב" : lang === "ru" ? "Уйти" : "Leave"}
                 </button>
               </div>
@@ -6423,16 +6423,16 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <button onClick={() => {
                   if (nextChoiceIsBloom) { setShowNextChoice(false); setNextChoiceIsBloom(false); setPage("pets"); }
                   else if (addToCart()) { resetForNewItem(); setShowNextChoice(false); setStep(1); }
-                }} style={{ background: COLORS.bgCard, border: `2px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>
+                }} style={{ background: COLORS.bgCard, border: `2px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 15 }}>
                   {lang === "he" ? "הוסף עוד פריט" : lang === "ru" ? "Добавить ещё товар" : "Add another item"}
                 </button>
                 <button onClick={() => {
                   if (nextChoiceIsBloom) { setShowNextChoice(false); setNextChoiceIsBloom(false); setStep(3); }
                   else if (addToCart()) { setShowNextChoice(false); setStep(3); }
-                }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
+                }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", borderRadius: 10, padding: "14px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 15, boxShadow: "0 4px 16px rgba(255,107,53,0.3)" }}>
                   {lang === "he" ? "לתשלום ולסיום" : lang === "ru" ? "К оплате" : "Proceed to checkout"}
                 </button>
-                <button onClick={() => { setShowNextChoice(false); setNextChoiceIsBloom(false); }} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+                <button onClick={() => { setShowNextChoice(false); setNextChoiceIsBloom(false); }} style={{ background: "transparent", border: "none", color: COLORS.gray, padding: "10px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13 }}>
                   {lang === "he" ? "ביטול" : lang === "ru" ? "Отмена" : "Cancel"}
                 </button>
               </div>
@@ -6452,7 +6452,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     {lang === "he" ? "סה״כ:" : lang === "ru" ? "Итого:" : "Total:"} ₪{cartItemsTotal + shippingPrice}
                   </div>
                 </div>
-                <button onClick={() => setStep(3)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+                <button onClick={() => setStep(3)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", cursor: "pointer", fontWeight: 700, fontFamily: "'Heebo',sans-serif", fontSize: 13 }}>
                   {lang === "he" ? "לתשלום" : lang === "ru" ? "К оплате" : "Checkout"} {lang === "he" ? "←" : "→"}
                 </button>
               </div>
@@ -6479,8 +6479,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                           <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
-                          {p.is_bestseller && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
-                          {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
+                          {p.is_bestseller && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
+                          {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
                         </div>
                         <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
                         <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {t.product.options}</span></div>
@@ -6512,7 +6512,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                             <div style={{ minWidth: 0, flex: 1 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                                 <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{lang === "he" ? "אוברסייז" : lang === "ru" ? "Оверсайз" : "Oversize"}</span>
-                                <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{subs.length} {lang === "he" ? "דגמים" : lang === "ru" ? "модели" : "styles"}</span>
+                                <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{subs.length} {lang === "he" ? "דגמים" : lang === "ru" ? "модели" : "styles"}</span>
                               </div>
                               <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{lang === "he" ? "קלאסיק · לוק · סטון-ווש — לחצו לבחירה" : lang === "ru" ? "Classic · Look · Stone-wash — нажмите для выбора" : "Classic · Look · Stone-wash — tap to choose"}</div>
                               <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>₪149</div>
@@ -6534,7 +6534,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 return out;
               })()}
             </div>
-            <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>{t.product.continue}</button>
+            <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>{t.product.continue}</button>
             {/* Our Fabrics — collapsible educational guide */}
             <div style={{ marginTop: 28, borderTop: `1px solid ${COLORS.border}`, paddingTop: 18 }}>
               <div role="button" tabIndex={0} aria-expanded={showFabrics} aria-controls="fabrics-panel"
@@ -6600,18 +6600,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <p style={{ color: COLORS.gray, fontSize: 11, textAlign: "center", padding: "6px 0 4px" }}>
                       {uploadedImage
                         ? isMobile
-                          ? (lang === "he" ? "✋ גרור להזזה · 🤏 צבוט לשינוי גודל" : "✋ Drag to move · 🤏 Pinch to resize")
+                          ? (lang === "he" ? "✋ גרור להזזה · 🤏 צבוט לשינוי גודל" : lang === "ru" ? "✋ Перетащите · 🤏 Сожмите для размера" : "✋ Drag to move · 🤏 Pinch to resize")
                           : (lang === "he" ? "✋ גרור לכוונון מיקום" : lang === "ru" ? "✋ Перетащите для размещения" : "✋ Drag to position")
-                        : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : "👆 Tap to upload design")}
+                        : (lang === "he" ? "👆 לחץ להעלאת עיצוב" : lang === "ru" ? "👆 Нажмите, чтобы загрузить дизайн" : "👆 Tap to upload design")}
                     </p>
                     {/* Design selector — shown when two designs exist */}
                     {uploadedImage && secondFront.enabled && secondFront.image && (
                       <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
-                        <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${activeDesign === 'main' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                          {lang === "he" ? "עיצוב ראשי" : "Main Design"}
+                        <button onClick={() => setActiveDesign('main')} style={{ flex: 1, background: activeDesign === 'main' ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${activeDesign === 'main' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'main' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
+                          {lang === "he" ? "עיצוב ראשי" : lang === "ru" ? "Главный дизайн" : "Main Design"}
                         </button>
-                        <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${activeDesign === 'second' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontWeight: 600 }}>
-                          {lang === "he" ? "עיצוב שני" : "2nd Design"}
+                        <button onClick={() => setActiveDesign('second')} style={{ flex: 1, background: activeDesign === 'second' ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${activeDesign === 'second' ? COLORS.accent : COLORS.border}`, color: activeDesign === 'second' ? "#fff" : COLORS.gray, borderRadius: 6, padding: "6px", fontSize: 11, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontWeight: 600 }}>
+                          {lang === "he" ? "עיצוב שני" : lang === "ru" ? "2-й дизайн" : "2nd Design"}
                         </button>
                       </div>
                     )}
@@ -6630,13 +6630,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                             <div style={{ padding: "10px", borderTop: `1px solid ${COLORS.border}` }}>
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, width: 120, margin: "0 auto" }}>
                                 <div />
-                                <button aria-label={lang === "he" ? "הזז למעלה" : lang === "ru" ? "Вверх" : "Move up"} onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
+                                <button aria-label={lang === "he" ? "הזז למעלה" : lang === "ru" ? "Вверх" : "Move up"} onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Heebo',sans-serif" }}>↑</button>
                                 <div />
-                                <button aria-label={lang === "he" ? "הזז שמאלה" : lang === "ru" ? "Влево" : "Move left"} onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
+                                <button aria-label={lang === "he" ? "הזז שמאלה" : lang === "ru" ? "Влево" : "Move left"} onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Heebo',sans-serif" }}>{isRTL ? "→" : "←"}</button>
                                 <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 10, color: COLORS.gray }}>✛</span></div>
-                                <button aria-label={lang === "he" ? "הזז ימינה" : lang === "ru" ? "Вправо" : "Move right"} onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
+                                <button aria-label={lang === "he" ? "הזז ימינה" : lang === "ru" ? "Вправо" : "Move right"} onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Heebo',sans-serif" }}>{isRTL ? "←" : "→"}</button>
                                 <div />
-                                <button aria-label={lang === "he" ? "הזז למטה" : lang === "ru" ? "Вниз" : "Move down"} onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
+                                <button aria-label={lang === "he" ? "הזז למטה" : lang === "ru" ? "Вниз" : "Move down"} onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 14, fontFamily: "'Heebo',sans-serif" }}>↓</button>
                                 <div />
                               </div>
                             </div>
@@ -6646,7 +6646,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         <div style={{ display: "flex", gap: 6 }}>
                           {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => (
                             <button key={sz.id} onClick={() => handleSelectSize(sz.id)}
-                              style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", textAlign: "center" }}>
+                              style={{ flex: 1, background: selectedSize === sz.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedSize === sz.id ? COLORS.accent : COLORS.border}`, color: selectedSize === sz.id ? "#fff" : COLORS.white, borderRadius: 8, padding: "8px 4px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", textAlign: "center" }}>
                               <div style={{ fontWeight: 700, fontSize: 12 }}>{sz.label[lang] || sz.label.en}</div>
                               <div style={{ fontSize: 10, opacity: 0.8 }}>{sz.cm}</div>
                             </button>
@@ -6658,14 +6658,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                   {/* Lock position buttons — main + second design */}
                   {uploadedImage && (
-                    <button onClick={() => { setActiveDesign('main'); setPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: positionLocked ? COLORS.bgCard : COLORS.accentBtn, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
+                    <button onClick={() => { setActiveDesign('main'); setPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: positionLocked ? COLORS.bgCard : COLORS.accentBtn, color: positionLocked ? COLORS.accent : "#fff", border: `2px solid ${COLORS.accent}`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", boxShadow: positionLocked ? "none" : "0 4px 12px rgba(255,107,53,0.3)" }}>
                       {positionLocked
                         ? (lang === "he" ? "✏️ ערוך מיקום עיצוב ראשי" : lang === "ru" ? "✏️ Редактировать основной" : "✏️ Edit main position")
                         : (lang === "he" ? "✓ אישור מיקום עיצוב ראשי" : lang === "ru" ? "✓ Сохранить основной" : "✓ Lock main position")}
                     </button>
                   )}
                   {uploadedImage && secondFront.enabled && secondFront.image && (
-                    <button onClick={() => { setActiveDesign('second'); setSecondPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: secondPositionLocked ? COLORS.bgCard : "#a78bfa", color: secondPositionLocked ? "#a78bfa" : "#fff", border: `2px solid #a78bfa`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", boxShadow: secondPositionLocked ? "none" : "0 4px 12px rgba(167,139,250,0.3)" }}>
+                    <button onClick={() => { setActiveDesign('second'); setSecondPositionLocked(p => !p); }} style={{ width: "100%", marginTop: 8, background: secondPositionLocked ? COLORS.bgCard : "#a78bfa", color: secondPositionLocked ? "#a78bfa" : "#fff", border: `2px solid #a78bfa`, borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", boxShadow: secondPositionLocked ? "none" : "0 4px 12px rgba(167,139,250,0.3)" }}>
                       {secondPositionLocked
                         ? (lang === "he" ? "✏️ ערוך מיקום עיצוב שני" : lang === "ru" ? "✏️ Редактировать второй" : "✏️ Edit 2nd position")
                         : (lang === "he" ? "אישור מיקום עיצוב שני" : lang === "ru" ? "Сохранить второй" : "Lock 2nd position")}
@@ -6690,7 +6690,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <div>
                   <label style={labelStyle}>{["tshirt","lycra","oversized","look","stonewash","dryfit"].includes(product.id) ? t.customize.size : t.customize.option}</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {product.variants.map(v => <button key={v.id} type="button" aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
+                    {product.variants.map(v => <button key={v.id} type="button" aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, color: selectedVariant === v.id ? "#fff" : COLORS.white, borderRadius: 6, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif", fontWeight: 500, transition: "all 0.15s" }}>{v.label}</button>)}
                   </div>
                 </div>
                 <div>
@@ -6728,9 +6728,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((imagePos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.max(43, p.size - 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Heebo',sans-serif" }}>−</button>
                       <input type="range" min={43} max={160} value={Math.min(160, Math.max(43, imagePos.size))} onChange={e => setImagePos(p => ({ ...p, size: Number(e.target.value) }))} style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
-                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
+                      <button onClick={() => setImagePos(p => ({ ...p, size: Math.min(160, p.size + 7) }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Heebo',sans-serif" }}>+</button>
                     </div>
                   </div>
                 )}
@@ -6747,13 +6747,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${COLORS.border}` }}>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, width: 140, margin: "0 auto" }}>
                           <div />
-                          <button aria-label={lang === "he" ? "הזז למעלה" : lang === "ru" ? "Вверх" : "Move up"} onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↑</button>
+                          <button aria-label={lang === "he" ? "הזז למעלה" : lang === "ru" ? "Вверх" : "Move up"} onClick={() => nudge(0, -5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Heebo',sans-serif" }}>↑</button>
                           <div />
-                          <button aria-label={lang === "he" ? "הזז שמאלה" : lang === "ru" ? "Влево" : "Move left"} onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "→" : "←"}</button>
+                          <button aria-label={lang === "he" ? "הזז שמאלה" : lang === "ru" ? "Влево" : "Move left"} onClick={() => nudge(isRTL ? 5 : -5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Heebo',sans-serif" }}>{isRTL ? "→" : "←"}</button>
                           <div style={{ background: COLORS.bg, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 12, color: COLORS.gray }}>✛</span></div>
-                          <button aria-label={lang === "he" ? "הזז ימינה" : lang === "ru" ? "Вправо" : "Move right"} onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>{isRTL ? "←" : "→"}</button>
+                          <button aria-label={lang === "he" ? "הזז ימינה" : lang === "ru" ? "Вправо" : "Move right"} onClick={() => nudge(isRTL ? -5 : 5, 0)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Heebo',sans-serif" }}>{isRTL ? "←" : "→"}</button>
                           <div />
-                          <button aria-label={lang === "he" ? "הזז למטה" : lang === "ru" ? "Вниз" : "Move down"} onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Varela Round',sans-serif" }}>↓</button>
+                          <button aria-label={lang === "he" ? "הזז למטה" : lang === "ru" ? "Вниз" : "Move down"} onClick={() => nudge(0, 5)} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 6, padding: "10px", cursor: "pointer", fontSize: 16, fontFamily: "'Heebo',sans-serif" }}>↓</button>
                           <div />
                         </div>
                       </div>
@@ -6768,9 +6768,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <span style={{ color: COLORS.accent, fontWeight: 700, marginRight: 8, marginLeft: 8 }}>{Math.round((secondFront.pos.size / 160) * 30)} cm</span>
                     </label>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.max(43, p.pos.size - 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>−</button>
+                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.max(43, p.pos.size - 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Heebo',sans-serif" }}>−</button>
                       <input type="range" min={43} max={160} value={secondFront.pos.size} onChange={e => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Number(e.target.value) } }))} style={{ flex: 1, accentColor: COLORS.accent, cursor: "pointer" }} />
-                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.min(160, p.pos.size + 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Varela Round',sans-serif" }}>+</button>
+                      <button onClick={() => setSecondFront(p => ({ ...p, pos: { ...p.pos, size: Math.min(160, p.pos.size + 7) } }))} style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, color: COLORS.white, cursor: "pointer", fontSize: 18, flexShrink: 0, fontFamily: "'Heebo',sans-serif" }}>+</button>
                     </div>
                   </div>
                 )}
@@ -6820,10 +6820,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                                     setSecondFront(p => ({ ...p, sameAsMain: true, image: uploadedImage, pos: { ...p.pos, size: imagePos.size } }));
                                     setActiveDesign('second');
                                   }
-                                }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                }} style={{ flex: 1, background: state.sameAsMain ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${state.sameAsMain ? COLORS.accent : COLORS.border}`, color: state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif" }}>
                                   {lang === "he" ? "אותו עיצוב" : lang === "ru" ? "Тот же дизайн" : "Same design"}
                                 </button>
-                                <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+                                <button onClick={() => { setState(p => ({ ...p, sameAsMain: false })); ref.current?.click(); }} style={{ flex: 1, background: !state.sameAsMain ? COLORS.accentBtn : COLORS.bgCard, border: `1px solid ${!state.sameAsMain ? COLORS.accent : COLORS.border}`, color: !state.sameAsMain ? "#fff" : COLORS.gray, borderRadius: 6, padding: "8px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif" }}>
                                   {lang === "he" ? "העלה עיצוב שונה" : lang === "ru" ? "Загрузить другой" : "Upload different"}
                                 </button>
                               </div>
@@ -6844,23 +6844,23 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {/* Notes */}
                 <div>
                   <label htmlFor="order-notes-design" style={labelStyle}>{t.form.notes}</label>
-                  <textarea id="order-notes-design" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                  <textarea id="order-notes-design" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={2} style={{ width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 13, outline: "none", resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 </div>
                 {variant && <div style={{ background: COLORS.bgCard, borderRadius: 10, padding: 14, border: `1px solid ${COLORS.border}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{product.name}</span><span>₪{variant.price}</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 6 }}><span>{t.customize.shipping}</span><span>₪{shippingPrice}</span></div>
                   {backPrint && BACK_PRINT_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "גב" : "Back"}</span><span>+₪{BACK_PRINT_PRICE}</span></div>}
-                  {secondFront.enabled && SECOND_FRONT_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "עיצוב נוסף בחזית" : "2nd Front"}</span><span>+₪{SECOND_FRONT_PRICE}</span></div>}
-                  {sleeveLeft.enabled && SLEEVE_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול שמאל" : "Left Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
-                  {sleeveRight.enabled && SLEEVE_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול ימין" : "Right Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
+                  {secondFront.enabled && SECOND_FRONT_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "עיצוב נוסף בחזית" : lang === "ru" ? "2-й спереди" : "2nd Front"}</span><span>+₪{SECOND_FRONT_PRICE}</span></div>}
+                  {sleeveLeft.enabled && SLEEVE_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול שמאל" : lang === "ru" ? "Левый рукав" : "Left Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
+                  {sleeveRight.enabled && SLEEVE_PRICE > 0 && <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.accent, fontSize: 13, marginBottom: 6 }}><span>{lang === "he" ? "שרוול ימין" : lang === "ru" ? "Правый рукав" : "Right Sleeve"}</span><span>+₪{SLEEVE_PRICE}</span></div>}
                   <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 8, display: "flex", justifyContent: "space-between" }}><span style={{ color: COLORS.white, fontWeight: 600 }}>{t.customize.total}</span><span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 18 }}>₪{total}</span></div>
                 </div>}
               </div>
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
-              <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.customize.back}</button>
-              <button onClick={() => uploadedImage && setShowNextChoice(true)} disabled={!uploadedImage} style={{ flex: 1, background: uploadedImage ? COLORS.accentBtn : COLORS.bgCard, color: uploadedImage ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
-                {lang === "he" ? "המשך →" : lang === "ru" ? "Продолжить →" : "Continue →"}
+              <button onClick={() => safeGo(() => setStep(1))} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.customize.back}</button>
+              <button onClick={() => uploadedImage && setShowNextChoice(true)} disabled={!uploadedImage} style={{ flex: 1, background: uploadedImage ? COLORS.accentBtn : COLORS.bgCard, color: uploadedImage ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "12px", fontSize: 15, fontWeight: 600, cursor: uploadedImage ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>
+                {lang === "he" ? "המשך ←" : lang === "ru" ? "Продолжить →" : "Continue →"}
               </button>
             </div>
           </div>
@@ -6892,7 +6892,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <div>
                 <label htmlFor="order-phone" style={labelStyle}>{`${t.form.phone} *`}</label>
                 <div role="group" aria-label={t.form.phone} style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
-                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" aria-pressed={form.phonePrefix === pf.value} onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Varela Round',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
+                  {IL_PREFIXES.map(pf => <button key={pf.value} type="button" aria-pressed={form.phonePrefix === pf.value} onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Heebo',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
                 </div>
                 <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-required="true" aria-invalid={!!fieldErrors.phone} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 {fieldErrors.phone && <div role="alert" style={fieldErrStyle}>{fieldErrors.phone}</div>}
@@ -6907,7 +6907,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     return (
                       <button key={m.id} type="button" role="radio" aria-checked={sel}
                         onClick={() => { setDeliveryMethod(m.id); if (fieldErrors.delivery) setFieldErrors(fe => ({ ...fe, delivery: undefined })); }}
-                        style={{ display: "flex", alignItems: "center", gap: 12, textAlign: "start", width: "100%", minHeight: 44, padding: "12px 14px", borderRadius: 12, cursor: "pointer", background: sel ? "rgba(192,80,26,0.12)" : COLORS.bgCard, border: `1.5px solid ${sel ? COLORS.accent : COLORS.border}`, transition: "all 0.15s", fontFamily: "'Varela Round',sans-serif" }}>
+                        style={{ display: "flex", alignItems: "center", gap: 12, textAlign: "start", width: "100%", minHeight: 44, padding: "12px 14px", borderRadius: 12, cursor: "pointer", background: sel ? "rgba(192,80,26,0.12)" : COLORS.bgCard, border: `1.5px solid ${sel ? COLORS.accent : COLORS.border}`, transition: "all 0.15s", fontFamily: "'Heebo',sans-serif" }}>
                         <span aria-hidden="true" style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", background: sel ? "rgba(192,80,26,0.18)" : COLORS.bg, color: sel ? COLORS.accent : COLORS.gray }}>
                           <DeliveryIcon name={m.icon} size={22} />
                         </span>
@@ -6942,7 +6942,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <button type="button" className="addr-sugg-item" role="option" aria-selected="false" key={i}
                         onClick={() => selectAddress(s)}
                         onKeyDown={e => { if (e.key === "Escape") { setShowAddrSugg(false); const el = document.getElementById("order-street"); if (el) el.focus(); } }}
-                        style={{ display: "block", width: "100%", textAlign: lang === "he" ? "right" : "left", background: "transparent", padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, border: "none", borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Varela Round',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"} onFocus={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onBlur={e => e.currentTarget.style.background = "transparent"}>
+                        style={{ display: "block", width: "100%", textAlign: lang === "he" ? "right" : "left", background: "transparent", padding: "10px 14px", cursor: "pointer", color: COLORS.white, fontSize: 13, border: "none", borderBottom: i < addrSuggestions.length - 1 ? `1px solid ${COLORS.border}` : "none", fontFamily: "'Heebo',sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"} onFocus={e => e.currentTarget.style.background = "rgba(255,107,53,0.1)"} onBlur={e => e.currentTarget.style.background = "transparent"}>
                         <div style={{ color: COLORS.accent, fontWeight: 600 }}>{s.primary}</div>
                         {s.secondary && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{s.secondary}</div>}
                       </button>
@@ -6994,8 +6994,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               );
             })()}
             <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-              <button onClick={() => setStep(product ? 2 : 1)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.form.back}</button>
-              <button onClick={handleSubmit} disabled={!checkoutReady || submitting} style={{ flex: 1, background: checkoutReady ? COLORS.accent : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Varela Round',sans-serif" }}>
+              <button onClick={() => setStep(product ? 2 : 1)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.form.back}</button>
+              <button onClick={handleSubmit} disabled={!checkoutReady || submitting} style={{ flex: 1, background: checkoutReady ? COLORS.accent : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>
                 {submitting ? "..." : `${t.form.place} · ₪${total}`}
               </button>
             </div>
@@ -7029,7 +7029,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             {pendingOrderGroupId && (
               <div style={{ background: "rgba(255,107,53,0.06)", border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: "10px 16px", marginBottom: 20, textAlign: "center" }}>
                 <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>{t.payment.orderNum}</div>
-                <div style={{ color: COLORS.accent, fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em" }}>{`SXP-${pendingOrderGroupId.slice(-8).toUpperCase()}`}</div>
+                <div style={{ color: COLORS.accent, fontSize: 16, fontWeight: 700, fontFamily: "'Heebo',sans-serif", letterSpacing: "0.05em" }}>{`SXP-${pendingOrderGroupId.slice(-8).toUpperCase()}`}</div>
               </div>
             )}
 
@@ -7169,7 +7169,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 fontSize: 17,
                 fontWeight: 700,
                 cursor: paymentProcessing ? "not-allowed" : "pointer",
-                fontFamily: "'Varela Round',sans-serif",
+                fontFamily: "'Heebo',sans-serif",
                 boxShadow: paymentProcessing ? "none" : "0 8px 24px rgba(255,107,53,0.4)",
                 transition: "background 0.2s, box-shadow 0.3s",
                 marginBottom: 18,
@@ -7181,13 +7181,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             </MagneticButton>
 
             {/* Guest clarity — no forced signup, right under the pay CTA */}
-            <div style={{ textAlign: "center", color: COLORS.gray, fontSize: 11.5, marginBottom: 18, fontFamily: "'Varela Round',sans-serif" }}>{t.payment.guestPay}</div>
+            <div style={{ textAlign: "center", color: COLORS.gray, fontSize: 11.5, marginBottom: 18, fontFamily: "'Heebo',sans-serif" }}>{t.payment.guestPay}</div>
 
             {/* Secure-redirect reassurance overlay — shown the instant we start
                 the handoff to Tranzila, so the screen is never blank/ambiguous.
                 Portaled to <body> so a filtered #root can't reanchor it. */}
             {paymentProcessing && typeof document !== `undefined` && createPortal(
-              <div role="status" aria-live="assertive" style={{ position: `fixed`, inset: 0, zIndex: 10000, background: `rgba(15,15,15,0.93)`, backdropFilter: `blur(6px)`, WebkitBackdropFilter: `blur(6px)`, display: `flex`, flexDirection: `column`, alignItems: `center`, justifyContent: `center`, gap: 18, padding: 24, textAlign: `center`, fontFamily: `'Varela Round',sans-serif`, direction: lang === `he` ? `rtl` : `ltr` }}>
+              <div role="status" aria-live="assertive" style={{ position: `fixed`, inset: 0, zIndex: 10000, background: `rgba(15,15,15,0.93)`, backdropFilter: `blur(6px)`, WebkitBackdropFilter: `blur(6px)`, display: `flex`, flexDirection: `column`, alignItems: `center`, justifyContent: `center`, gap: 18, padding: 24, textAlign: `center`, fontFamily: `'Heebo',sans-serif`, direction: lang === `he` ? `rtl` : `ltr` }}>
                 <div style={{ width: 54, height: 54, borderRadius: `50%`, border: `3px solid rgba(255,107,53,0.25)`, borderTopColor: COLORS.accent, animation: `sfPaySpin 0.8s linear infinite` }} />
                 <div style={{ display: `inline-flex`, alignItems: `center`, gap: 9, color: `#fff`, fontSize: 17, fontWeight: 700, maxWidth: 320 }}>
                   <AboutIcon name="lock" size={19} color={COLORS.accent} /><span>{t.payment.redirecting}</span>
@@ -7225,7 +7225,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {t.payment.businessLine}
               </div>
               {/* Owner-authenticity line — small, warm, on-brand */}
-              <div style={{ color: COLORS.accent, fontSize: 11, marginTop: 9, display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Varela Round',sans-serif" }}>
+              <div style={{ color: COLORS.accent, fontSize: 11, marginTop: 9, display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Heebo',sans-serif" }}>
                 <AboutIcon name="heart" size={13} color={COLORS.accent} /><span>{t.payment.ownerLine}</span>
               </div>
             </div>
@@ -7235,7 +7235,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <button
                 onClick={() => setStep(3)}
                 disabled={paymentProcessing}
-                style={{ flex: 1, background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 16px", fontSize: 13, cursor: paymentProcessing ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}
+                style={{ flex: 1, background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 16px", fontSize: 13, cursor: paymentProcessing ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif" }}
               >
                 {t.payment.editDetails}
               </button>
@@ -7264,7 +7264,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   setPaymentProcessing(false);
                 }}
                 disabled={paymentProcessing}
-                style={{ background: "transparent", color: "#888", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 16px", fontSize: 13, cursor: paymentProcessing ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif" }}
+                style={{ background: "transparent", color: "#888", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 16px", fontSize: 13, cursor: paymentProcessing ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif" }}
               >
                 {t.payment.cancel}
               </button>
@@ -7280,7 +7280,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <button
                     onClick={dismissPaymentSoonModal}
                     aria-label={LANGS[lang].bloom.closeModal}
-                    style={{ position: "absolute", top: 12, insetInlineEnd: 12, width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Varela Round',sans-serif" }}
+                    style={{ position: "absolute", top: 12, insetInlineEnd: 12, width: 32, height: 32, borderRadius: "50%", background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Heebo',sans-serif" }}
                   >
                     ×
                   </button>
@@ -7295,7 +7295,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   </div>
                   <button
                     onClick={dismissPaymentSoonModal}
-                    style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", width: "100%" }}
+                    style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", width: "100%" }}
                   >
                     {t.payment.soonBtn}
                   </button>
@@ -7378,7 +7378,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{t.confirm.accountTitle}</div>
                     <div style={{ color: COLORS.gray, fontSize: 13.5, lineHeight: 1.6, maxWidth: 380, margin: "0 auto 18px" }}>{t.confirm.accountDesc}</div>
                     {accountError && <div style={{ color: "#f87171", fontSize: 12.5, marginBottom: 12 }}>{accountError}</div>}
-                    <button type="button" onClick={handleGoogleSignup} disabled={accountBusy} style={{ width: "100%", background: "#fff", color: "#1a1a1a", border: "1px solid #fff", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: accountBusy ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: accountBusy ? 0.6 : 1 }}
+                    <button type="button" onClick={handleGoogleSignup} disabled={accountBusy} style={{ width: "100%", background: "#fff", color: "#1a1a1a", border: "1px solid #fff", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: accountBusy ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: accountBusy ? 0.6 : 1 }}
                       onMouseOver={e => { if (!accountBusy) e.currentTarget.style.background = "#f0f0f0"; }}
                       onMouseOut={e => { e.currentTarget.style.background = "#fff"; }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -7389,16 +7389,16 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       </svg>
                       {t.auth.googleBtn}
                     </button>
-                    <button type="button" onClick={handleAccountMagicLink} disabled={accountBusy} style={{ display: "block", margin: "14px auto 0", background: "transparent", border: "none", color: COLORS.accent, fontSize: 13, fontWeight: 600, cursor: accountBusy ? "not-allowed" : "pointer", fontFamily: "'Varela Round',sans-serif", padding: 4 }}>{t.auth.magicLink}</button>
-                    <button type="button" onClick={() => setShowAccountOffer(false)} style={{ display: "block", margin: "6px auto 0", background: "transparent", border: "none", color: COLORS.gray, fontSize: 13, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", padding: 4 }}>{t.confirm.accountLater}</button>
+                    <button type="button" onClick={handleAccountMagicLink} disabled={accountBusy} style={{ display: "block", margin: "14px auto 0", background: "transparent", border: "none", color: COLORS.accent, fontSize: 13, fontWeight: 600, cursor: accountBusy ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif", padding: 4 }}>{t.auth.magicLink}</button>
+                    <button type="button" onClick={() => setShowAccountOffer(false)} style={{ display: "block", margin: "6px auto 0", background: "transparent", border: "none", color: COLORS.gray, fontSize: 13, cursor: "pointer", fontFamily: "'Heebo',sans-serif", padding: 4 }}>{t.confirm.accountLater}</button>
                   </>
                 )}
               </div>
             )}
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.track} →</button>}
-              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" }); setQty(1); setPendingOrderGroupId(null); setPendingOrderIds([]); setPendingTotal(0); setSubmittedForApproval(false); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Varela Round',sans-serif" }}>{t.confirm.another}</button>
+              {user && <button onClick={() => setPage("track")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.confirm.track} →</button>}
+              <button onClick={() => { setStep(1); setSelectedProduct(null); setUploadedImage(null); setForm({ name: "", email: "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" }); setQty(1); setPendingOrderGroupId(null); setPendingOrderIds([]); setPendingTotal(0); setSubmittedForApproval(false); }} style={{ background: "transparent", color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "14px 28px", fontSize: 15, cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.confirm.another}</button>
             </div>
           </div>
         )}
@@ -7477,11 +7477,11 @@ function CookieConsent({ lang, onAccept, onReject }) {
         <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF6B35", boxShadow: "0 0 12px rgba(255,107,53,0.6)" }}></span>
         <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: "italic", letterSpacing: "0.5px" }}>{t.title}</div>
       </div>
-      <p style={{ color: "#bbb", fontFamily: "'Varela Round',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 10, marginTop: 0 }}>
+      <p style={{ color: "#bbb", fontFamily: "'Heebo',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 10, marginTop: 0 }}>
         {t.body}
       </p>
       <p style={{ marginTop: 0, marginBottom: 16 }}>
-        <a href="#policies/privacy" style={{ color: "#FF6B35", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, textDecoration: "underline" }}>{t.more}</a>
+        <a href="#policies/privacy" style={{ color: "#FF6B35", fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 600, textDecoration: "underline" }}>{t.more}</a>
       </p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: isRTL ? "flex-start" : "flex-end" }}>
         <button onClick={onReject} style={{
@@ -7492,7 +7492,7 @@ function CookieConsent({ lang, onAccept, onReject }) {
           borderRadius: 8,
           fontSize: 13,
           fontWeight: 600,
-          fontFamily: "'Varela Round',sans-serif",
+          fontFamily: "'Heebo',sans-serif",
           cursor: "pointer",
           transition: "all 0.2s",
         }}
@@ -7507,7 +7507,7 @@ function CookieConsent({ lang, onAccept, onReject }) {
           borderRadius: 8,
           fontSize: 13,
           fontWeight: 700,
-          fontFamily: "'Varela Round',sans-serif",
+          fontFamily: "'Heebo',sans-serif",
           cursor: "pointer",
           boxShadow: "0 4px 16px rgba(255,107,53,0.35)",
           transition: "all 0.2s",
@@ -7908,7 +7908,7 @@ function TrustRow({ lang }) {
       background: "rgba(255,107,53,0.04)",
       maxWidth: 720,
       margin: "0 auto",
-      fontFamily: "'Varela Round',sans-serif",
+      fontFamily: "'Heebo',sans-serif",
       fontSize: isMobile ? 12 : 13,
       color: COLORS.gray,
       boxSizing: "border-box",
@@ -7964,13 +7964,13 @@ function EventOrdersSection({ lang }) {
   return (
     <section aria-labelledby="event-orders-title" dir={dir} style={{ background: COLORS.bg, padding: `8px 24px 72px` }}>
       <div style={{ maxWidth: 860, margin: `0 auto`, background: `linear-gradient(180deg, rgba(255,107,53,0.08) 0%, rgba(255,107,53,0.03) 100%)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 20, padding: isRTL ? `40px 28px` : `40px 28px`, textAlign: `center` }}>
-        <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Varela Round',sans-serif` }}>{eyebrow}</span>
+        <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>{eyebrow}</span>
         <h2 id="event-orders-title" style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 900, fontSize: `clamp(28px,5vw,42px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 16px` }}>{heading}</h2>
-        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 15.5, lineHeight: 1.7, maxWidth: 640, margin: `0 auto 26px` }}>{copy}</p>
+        <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15.5, lineHeight: 1.7, maxWidth: 640, margin: `0 auto 26px` }}>{copy}</p>
 
         <ul role="list" style={{ listStyle: `none`, margin: `0 0 30px`, padding: 0, display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 10 }}>
           {chips.map((c) => (
-            <li key={c.key} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, padding: `9px 15px`, borderRadius: 999, border: `1px solid rgba(255,107,53,0.25)`, background: `rgba(255,107,53,0.06)`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13.5, fontWeight: 500, whiteSpace: `nowrap` }}>
+            <li key={c.key} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, padding: `9px 15px`, borderRadius: 999, border: `1px solid rgba(255,107,53,0.25)`, background: `rgba(255,107,53,0.06)`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, fontWeight: 500, whiteSpace: `nowrap` }}>
               <span style={{ display: `inline-flex`, color: COLORS.accent, flexShrink: 0 }}>{c.icon}</span>
               <span>{c.label}</span>
             </li>
@@ -7979,7 +7979,7 @@ function EventOrdersSection({ lang }) {
 
         {waValid && (
           <a href={href} target="_blank" rel="noopener noreferrer" aria-label={ctaLabel}
-            style={{ display: `inline-flex`, alignItems: `center`, gap: 10, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, textDecoration: `none`, transition: `background 0.2s, box-shadow 0.3s`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)` }}
+            style={{ display: `inline-flex`, alignItems: `center`, gap: 10, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, transition: `background 0.2s, box-shadow 0.3s`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)` }}
             onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
             onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accentBtn; }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.892c0 2.096.549 4.142 1.595 5.945L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.582 0 11.94-5.335 11.944-11.893a11.821 11.821 0 0 0-3.487-8.46z" /></svg>
@@ -8109,9 +8109,9 @@ function Reviews({ lang }) {
                 <img src={r.author_avatar} alt={r.author_name} loading="lazy" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: `1px solid ${COLORS.border}` }} />
               )}
               <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.3 }}>
-                <span style={{ color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 13 }}>{r.author_name}</span>
+                <span style={{ color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontWeight: 600, fontSize: 13 }}>{r.author_name}</span>
                 {(r.author_city || r.product) && (
-                  <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>
+                  <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Heebo',sans-serif" }}>
                     {[r.author_city, r.product].filter(Boolean).join(" · ")}
                   </span>
                 )}
@@ -8135,7 +8135,7 @@ function ProductBadges({ product, lang }) {
   return (
     <div style={{ position: "absolute", top: 10, insetInlineStart: 10, display: "flex", flexDirection: "column", gap: 6, zIndex: 3, pointerEvents: "none" }}>
       {showBest && (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accentBtn, color: "#fff", fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: COLORS.accentBtn, color: "#fff", fontFamily: "'Heebo',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, boxShadow: "0 4px 12px rgba(255,107,53,0.35)", whiteSpace: "nowrap" }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21.02 7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
@@ -8143,7 +8143,7 @@ function ProductBadges({ product, lang }) {
         </span>
       )}
       {showNew && (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(15,15,15,0.85)", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Varela Round',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 8px", borderRadius: 6, backdropFilter: "blur(4px)", whiteSpace: "nowrap" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(15,15,15,0.85)", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Heebo',sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 8px", borderRadius: 6, backdropFilter: "blur(4px)", whiteSpace: "nowrap" }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
             <path d="M12 3l1.91 5.18L19 10l-5.09 1.82L12 17l-1.91-5.18L5 10l5.09-1.82L12 3z" />
           </svg>
@@ -8175,20 +8175,20 @@ function Hero({ setPage, lang }) {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
-      <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Varela Round',sans-serif" }}>{t.hero.badge}</div>
+      <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Heebo',sans-serif" }}>{t.hero.badge}</div>
       <h1 className="reveal" data-delay="1" style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
         {t.hero.h1line1}<br /><span style={{ color: COLORS.accent, fontStyle: "italic" }}>{t.hero.h1line2}</span>
       </h1>
-      <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Varela Round',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
+      <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Heebo',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
       <span className="reveal" data-delay="3" style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-        <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentBtnHover} onMouseOut={e => e.target.style.background = COLORS.accentBtn}>{t.hero.cta}</MagneticButton>
+        <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentBtnHover} onMouseOut={e => e.target.style.background = COLORS.accentBtn}>{t.hero.cta}</MagneticButton>
         <button onClick={() => setPage("pets")} style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", letterSpacing: "0.3px", transition: "background 0.2s, color 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
         >{t.hero.ctaSecondary} →</button>
-        <a href="/quiz" style={{ display: "inline-flex", alignItems: "center", background: COLORS.accentDim, color: COLORS.accent, border: `1px solid rgba(255,107,53,0.4)`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", textDecoration: "none", fontFamily: "'Varela Round',sans-serif", transition: "background 0.2s, color 0.2s" }}
+        <a href="/quiz" style={{ display: "inline-flex", alignItems: "center", background: COLORS.accentDim, color: COLORS.accent, border: `1px solid rgba(255,107,53,0.4)`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", textDecoration: "none", fontFamily: "'Heebo',sans-serif", transition: "background 0.2s, color 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
-          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtnDim; e.currentTarget.style.color = COLORS.accent; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentDim; e.currentTarget.style.color = COLORS.accent; }}
         >{t.quiz.hero_cta}</a>
       </span>
       <div className="reveal" data-delay="4" style={{ marginTop: isMobile ? 48 : 64, width: "100%", maxWidth: 720, padding: "0 8px", boxSizing: "border-box" }}>
@@ -8214,8 +8214,8 @@ function Hero({ setPage, lang }) {
             </div>
             <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
             <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
-            <div style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: 12, lineHeight: 1.5, marginTop: 4, minHeight: 34 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
-            <div style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 13, marginTop: 8 }}>{formatPriceRange(p.variants)}</div>
+            <div style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 12, lineHeight: 1.5, marginTop: 4, minHeight: 34 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
+            <div style={{ color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 13, marginTop: 8 }}>{formatPriceRange(p.variants)}</div>
           </div>
         ))}
       </div>
@@ -8259,7 +8259,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
       {cartCount > 0 && (
-        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${itemsWord(cartCount, lang)} ${lang === "he" ? "בסל" : lang === "ru" ? "в корзине" : "in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
+        <span key={bumpKey} className="cart-badge-bump" role="status" aria-live="polite" aria-label={`${cartCount} ${itemsWord(cartCount, lang)} ${lang === "he" ? "בסל" : lang === "ru" ? "в корзине" : "in cart"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Heebo',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{cartCount}</span>
       )}
     </button>
   );
@@ -8277,7 +8277,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
       {favCount > 0 && (
-        <span role="status" aria-live="polite" aria-label={`${favCount} ${lang === "he" ? "מועדפים" : lang === "ru" ? "в избранном" : "favorites"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{favCount}</span>
+        <span role="status" aria-live="polite" aria-label={`${favCount} ${lang === "he" ? "מועדפים" : lang === "ru" ? "в избранном" : "favorites"}`} style={{ position: "absolute", top: -7, insetInlineEnd: -7, minWidth: 19, height: 19, padding: "0 5px", boxSizing: "border-box", borderRadius: 10, background: COLORS.accentBtn, color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "'Heebo',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${COLORS.bg}` }}>{favCount}</span>
       )}
     </button>
   );
@@ -8316,7 +8316,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           >{t.nav.pets}</button>
           <div role="group" aria-label={lang === "he" ? "שפה" : lang === "ru" ? "Язык" : "Language"} style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
             {Object.keys(LANGS).map(l => (
-              <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "8px 12px" : "9px 14px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+              <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: isMobile ? "8px 12px" : "9px 14px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700, fontFamily: "'Heebo',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
             ))}
           </div>
         </div>
@@ -8339,7 +8339,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
             color: page === p ? COLORS.accent : COLORS.gray,
             padding: "8px 18px", borderRadius: 8, cursor: "pointer",
-            fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif",
+            fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Heebo',sans-serif",
             fontSize: 13, fontWeight: p === "pets" ? 700 : 500,
             fontStyle: p === "pets" ? "italic" : "normal",
             letterSpacing: p === "pets" ? "0.5px" : "normal",
@@ -8349,22 +8349,22 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
           onMouseOut={e => { if(page !== p) { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav[p]}</button>
         ))}
-        <button onClick={() => goToBlog && goToBlog()} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+        <button onClick={() => goToBlog && goToBlog()} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "blog") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
           onMouseOut={e => { if(page !== "blog") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
         >{t.navBlog}</button>
-        <a href="/quiz" style={{ background: "transparent", border: "1px solid transparent", color: COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textDecoration: "none", transition: "all 0.2s" }}
+        <a href="/quiz" style={{ background: "transparent", border: "1px solid transparent", color: COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 500, textDecoration: "none", transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
           onMouseOut={e => { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}
         >{t.quiz.nav}</a>
         {user && (
-          <button onClick={() => setPage("track")} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
+          <button onClick={() => setPage("track")} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}
           onMouseOver={e => { if(page !== "track") { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}}
           onMouseOut={e => { if(page !== "track") { e.currentTarget.style.color = COLORS.gray; e.currentTarget.style.background = "transparent"; }}}
           >{t.nav.track}</button>
         )}
         {isAdmin && (
-          <button onClick={() => setPage("admin")} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>{t.nav.admin}</button>
+          <button onClick={() => setPage("admin")} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.gray, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>{t.nav.admin}</button>
         )}
       </div>}
 
@@ -8383,19 +8383,19 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         {cartButton}
         {instagramButton}
         {user ? (
-          <button onClick={onLogout} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, padding: "7px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, transition: "all 0.2s" }}
+          <button onClick={onLogout} style={{ background: "transparent", border: `1px solid ${COLORS.border}`, color: COLORS.gray, padding: "7px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13, transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
           onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.gray; }}
           >{t.nav.logout}</button>
         ) : (
-          <button onClick={() => setPage("auth")} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", boxShadow: "0 0 20px rgba(255,107,53,0.3)" }}
+          <button onClick={() => setPage("auth")} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", boxShadow: "0 0 20px rgba(255,107,53,0.3)" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.boxShadow = "0 0 30px rgba(255,107,53,0.5)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
           onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,107,53,0.3)"; e.currentTarget.style.transform = "translateY(0)"; }}
           >{t.nav.login}</button>
         )}
         <div style={{ display: "flex", gap: 2, background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: 3, border: `1px solid ${COLORS.border}` }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "9px 13px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? COLORS.accentBtn : "transparent", color: lang === l ? "#fff" : COLORS.gray, border: "none", borderRadius: 6, padding: "9px 13px", minHeight: 38, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Heebo',sans-serif", transition: "all 0.2s" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>}
@@ -8403,21 +8403,21 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
     {/* Mobile dropdown */}
     {mobileMenu && (
-      <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
+      <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, maxHeight: "calc(100vh - 72px)", overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
         {["home", "order", "pets", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Varela Round',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
-        <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
-        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
-        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
+        <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
+        {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
+        {isAdmin && <button onClick={() => { setPage("admin"); setMobileMenu(false); }} aria-current={page === "admin" ? "page" : undefined} style={{ background: page === "admin" ? COLORS.accentDim : "transparent", border: page === "admin" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "admin" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.admin}</button>}
         <div style={{ height: 1, background: COLORS.border, margin: "8px 0" }} />
         {user
-          ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
-          : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
+          ? <button onClick={() => { onLogout(); setMobileMenu(false); }} style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, width: "100%" }}>{t.nav.logout}</button>
+          : <button onClick={() => { setPage("auth"); setMobileMenu(false); }} style={{ background: COLORS.accentBtn, border: "none", color: "#fff", padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, width: "100%" }}>{t.nav.login}</button>
         }
         <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={t.bloom.instagramAria}
           onClick={() => setMobileMenu(false)}
-          style={{ background: "transparent", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, width: "100%", boxSizing: "border-box", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all 0.2s" }}
+          style={{ background: "transparent", border: `1px solid ${COLORS.accent}`, color: COLORS.accent, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, width: "100%", boxSizing: "border-box", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "all 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -8429,7 +8429,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         </a>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
           {Object.keys(LANGS).map(l => (
-            <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accentBtn : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{LANGS[l].label}</button>
+            <button key={l} aria-pressed={lang === l} onClick={() => { setLang(l); setMobileMenu(false); }} style={{ background: lang === l ? COLORS.accentBtn : COLORS.bgCard, color: lang === l ? "#fff" : COLORS.gray, border: `1px solid ${lang === l ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Heebo',sans-serif" }}>{LANGS[l].label}</button>
           ))}
         </div>
       </div>
@@ -8574,7 +8574,7 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
     ru: { title: 'Доступность', textSize: 'Размер текста', contrast: 'Высокий контраст', motion: 'Без анимации', links: 'Выделять ссылки', reset: 'Сбросить', close: 'Закрыть' },
   }[lang] || { title: 'Accessibility', textSize: 'Text Size', contrast: 'High Contrast', motion: 'Reduce Motion', links: 'Highlight Links', reset: 'Reset', close: 'Close' };
 
-  const btnBase = { width: '100%', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 500, textAlign: 'start', transition: 'all 0.2s', marginBottom: 8 };
+  const btnBase = { width: '100%', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 500, textAlign: 'start', transition: 'all 0.2s', marginBottom: 8 };
 
   const widget = (
     <>
@@ -8612,7 +8612,7 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
           animation: 'fadeUp 0.2s ease',
         }}>
-          <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 16, fontFamily: "'Varela Round',sans-serif", letterSpacing: "0.05em" }}>
+          <div style={{ color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 16, fontFamily: "'Heebo',sans-serif", letterSpacing: "0.05em" }}>
             {t.title}
           </div>
 
@@ -8621,7 +8621,7 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
             <div style={{ color: '#888', fontSize: 11, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t.textSize}</div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button aria-label={lang === 'he' ? 'הקטן טקסט' : lang === 'ru' ? 'Уменьшить текст' : 'Decrease text size'} onClick={() => setFontSize(f => Math.max(100, f - 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>−</button>
-              <div style={{ flex: 1, textAlign: 'center', color: '#FF6B35', fontWeight: 700, fontFamily: "'Varela Round',sans-serif" }}>{fontSize}%</div>
+              <div style={{ flex: 1, textAlign: 'center', color: '#FF6B35', fontWeight: 700, fontFamily: "'Heebo',sans-serif" }}>{fontSize}%</div>
               <button aria-label={lang === 'he' ? 'הגדל טקסט' : lang === 'ru' ? 'Увеличить текст' : 'Increase text size'} onClick={() => setFontSize(f => Math.min(130, f + 10))} style={{ ...btnBase, width: 36, height: 36, padding: 0, textAlign: 'center', background: '#111', border: '1px solid #2a2a2a', color: '#fff', fontSize: 18, marginBottom: 0 }}>+</button>
             </div>
           </div>
@@ -8823,7 +8823,7 @@ function AboutPage({ lang, setPage }) {
   const sectionStyle = { maxWidth: 900, margin: '0 auto', padding: '0 24px' };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f0f0f', paddingTop: 90, fontFamily: "'Varela Round',sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: '#0f0f0f', paddingTop: 90, fontFamily: "'Heebo',sans-serif" }}>
 
       {/* Hero section */}
       <div style={{ ...sectionStyle, textAlign: 'center', padding: '60px 24px 80px' }}>
@@ -8869,7 +8869,7 @@ function AboutPage({ lang, setPage }) {
                 onMouseOver={e => { e.currentTarget.style.borderColor = '#FF6B35'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                 <div style={{ width: 36, height: 3, background: 'rgba(255,107,53,0.6)', marginBottom: 16, borderRadius: 2, marginInlineStart: 0 }}></div>
-                <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, marginBottom: tech.label ? 3 : 12, fontFamily: "'Varela Round',sans-serif", letterSpacing: '0.3px' }}>{tech.name}</div>
+                <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, marginBottom: tech.label ? 3 : 12, fontFamily: "'Heebo',sans-serif", letterSpacing: '0.3px' }}>{tech.name}</div>
                 {tech.label && <div style={{ color: '#FF6B35', fontSize: 13, fontWeight: 600, marginBottom: 12 }}>{tech.label}</div>}
                 <div style={{ color: '#a8a8a8', fontSize: 14, lineHeight: 1.75 }}>{tech.desc}</div>
               </div>
@@ -8907,7 +8907,7 @@ function AboutPage({ lang, setPage }) {
           {/* Closing line + primary CTA → the BLOOM collection (#pets route). */}
           <p className="reveal" data-delay="2" style={{ color: '#cfcfcf', fontSize: 17, lineHeight: 1.8, maxWidth: 600, margin: '0 auto 28px' }}>{t.closing} <AboutIcon name="flower2" size="1.05em" strokeWidth={1.6} color="#FF6B35" style={{ display: 'inline-block', verticalAlign: '-0.15em' }} /></p>
           <span className="reveal" data-delay="3">
-            <MagneticButton onClick={() => setPage('pets')} style={{ background: COLORS.accentBtn, color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Varela Round',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'box-shadow 0.3s' }}>
+            <MagneticButton onClick={() => setPage('pets')} style={{ background: COLORS.accentBtn, color: '#fff', border: 'none', padding: '16px 48px', borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: "'Heebo',sans-serif", boxShadow: '0 0 30px rgba(255,107,53,0.4)', transition: 'box-shadow 0.3s' }}>
               {t.ctaBloom} {isRTL ? `←` : `→`}
             </MagneticButton>
           </span>
@@ -8961,7 +8961,7 @@ function CartToast({ message, lang, onClose, onViewCart, actionLabel, onAction }
         display: "flex",
         alignItems: "center",
         gap: 12,
-        fontFamily: "'Varela Round',sans-serif",
+        fontFamily: "'Heebo',sans-serif",
         animation: `${isMobile ? "cartToastInMobile" : "cartToastInDesktop"} 0.3s cubic-bezier(.2,.6,.2,1)`,
       }}>
       <span aria-hidden="true" style={{ color: "#4ade80", fontSize: 22, lineHeight: 1, flexShrink: 0 }}>✓</span>
@@ -8971,7 +8971,7 @@ function CartToast({ message, lang, onClose, onViewCart, actionLabel, onAction }
           background: COLORS.accentBtn, border: "none", color: "#fff",
           padding: isMobile ? "10px 14px" : "8px 14px",
           borderRadius: 10, cursor: "pointer", fontSize: 13, fontWeight: 700,
-          fontFamily: "'Varela Round',sans-serif", flexShrink: 0,
+          fontFamily: "'Heebo',sans-serif", flexShrink: 0,
           minHeight: isMobile ? 40 : "auto", touchAction: "manipulation",
           transition: "background 0.2s",
         }}
@@ -9021,7 +9021,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
     cursor: "pointer",
     fontSize: isMobile ? 20 : 16,
     lineHeight: 1,
-    fontFamily: "'Varela Round',sans-serif",
+    fontFamily: "'Heebo',sans-serif",
     fontWeight: 700,
     display: "flex", alignItems: "center", justifyContent: "center",
     touchAction: "manipulation",
@@ -9088,7 +9088,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
         boxShadow: "0 0 60px rgba(0,0,0,0.6)",
         display: "flex", flexDirection: "column",
         direction: isRTL ? "rtl" : "ltr",
-        fontFamily: "'Varela Round',sans-serif",
+        fontFamily: "'Heebo',sans-serif",
         animation: `${isRTL ? "cartSlideL" : "cartSlideR"} 0.3s cubic-bezier(.2,.6,.2,1)`,
       }}>
         {/* Header */}
@@ -9141,10 +9141,10 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, direction: "ltr" }}>
                         <button type="button" onClick={() => setQty(it.id, qty - 1)} disabled={qty <= 1} aria-label={lang === "he" ? "הפחת" : lang === "ru" ? "Уменьшить" : "Decrease"} style={{ ...qtyBtnStyle, opacity: qty <= 1 ? 0.4 : 1, cursor: qty <= 1 ? "not-allowed" : "pointer" }}>−</button>
-                        <span aria-live="polite" style={{ minWidth: 26, textAlign: "center", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>{qty}</span>
+                        <span aria-live="polite" style={{ minWidth: 26, textAlign: "center", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 15 }}>{qty}</span>
                         <button type="button" onClick={() => setQty(it.id, qty + 1)} aria-label={lang === "he" ? "הוסף" : lang === "ru" ? "Увеличить" : "Increase"} style={qtyBtnStyle}>+</button>
                       </div>
-                      <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14, fontFamily: "'Varela Round',sans-serif", direction: "ltr" }}>
+                      <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14, fontFamily: "'Heebo',sans-serif", direction: "ltr" }}>
                         {qty > 1 ? `₪${unit} × ${qty} = ₪${unit * qty}` : `₪${unit * qty}`}
                       </div>
                     </div>
@@ -9182,23 +9182,24 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
             <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray, fontSize: 13, marginBottom: 11 }}>
               <span>{tr.shipping}</span><span>{tr.shipAtCheckout}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 11, borderTop: `1px solid ${COLORS.border}`, marginBottom: 15 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 11, borderTop: `1px solid ${COLORS.border}`, marginBottom: 4 }}>
               <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{tr.total}</span>
               <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display',serif" }}>{`₪${total}`}</span>
             </div>
+            <div style={{ color: COLORS.gray, fontSize: 11, textAlign: lang === "he" ? "right" : "left", marginBottom: 15 }}>{lang === "he" ? "+ משלוח מ-₪27 · איסוף עצמי בבאר שבע חינם" : lang === "ru" ? "+ доставка от ₪27 · самовывоз в Беэр-Шеве бесплатно" : "+ shipping from ₪27 · free pickup in Be'er Sheva"}</div>
             {/* Trust strip — supports the buying decision right by the checkout CTA */}
             <div style={{ marginBottom: 15 }}><TrustStrip lang={lang} /></div>
             <button onClick={onCheckout} style={{
               width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none",
               borderRadius: 12, padding: isMobile ? "16px" : "15px", fontSize: 16, fontWeight: 700, cursor: "pointer",
-              fontFamily: "'Varela Round',sans-serif", boxShadow: "0 6px 20px rgba(255,107,53,0.35)",
+              fontFamily: "'Heebo',sans-serif", boxShadow: "0 6px 20px rgba(255,107,53,0.35)",
               transition: "background 0.2s", touchAction: "manipulation",
             }}
             onMouseOver={e => e.currentTarget.style.background = COLORS.accentBtnHover}
             onMouseOut={e => e.currentTarget.style.background = COLORS.accentBtn}
             ><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><AboutIcon name="lock" size={16} color="#fff" />{tr.checkout}</span></button>
             {/* Reassurance directly under the CTA: guest-friendly + receipt + processor */}
-            <div style={{ marginTop: 11, textAlign: "center", color: COLORS.gray, fontSize: 11, lineHeight: 1.6, fontFamily: "'Varela Round',sans-serif" }}>
+            <div style={{ marginTop: 11, textAlign: "center", color: COLORS.gray, fontSize: 11, lineHeight: 1.6, fontFamily: "'Heebo',sans-serif" }}>
               <div>{tr.guestNote}</div>
               <div>{tr.trustReceipt}</div>
             </div>
@@ -9235,10 +9236,10 @@ function NotFoundPage({ lang, setPage }) {
       <div style={{ textAlign: `center`, padding: `60px 24px`, maxWidth: 560 }}>
         <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `5rem`, color: COLORS.accent, lineHeight: 1, marginBottom: 12 }}>404</div>
         <h1 style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 700, fontSize: `1.8rem`, color: COLORS.white, margin: `0 0 12px` }}>{title}</h1>
-        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 16, lineHeight: 1.6, margin: `0 0 28px` }}>{body}</p>
+        <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 16, lineHeight: 1.6, margin: `0 0 28px` }}>{body}</p>
         <div style={{ display: `flex`, gap: 12, justifyContent: `center`, flexWrap: `wrap` }}>
-          <button type="button" onClick={() => setPage(`home`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{homeBtn}</button>
-          <button type="button" onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{petsBtn}</button>
+          <button type="button" onClick={() => setPage(`home`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{homeBtn}</button>
+          <button type="button" onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{petsBtn}</button>
         </div>
       </div>
     </div>
@@ -9351,6 +9352,15 @@ export default function App() {
         const m = { ...it };
         if (typeof m.uploadedImage === `string` && m.uploadedImage.startsWith(`data:`)) m.uploadedImage = null;
         if (typeof m.mockupUrl === `string` && m.mockupUrl.startsWith(`data:`)) m.mockupUrl = null;
+        // Also strip nested extra-print data: URLs (2nd front / back / sleeves) —
+        // these are multi-MB and were NOT stripped before, so a cart with several
+        // prints could blow the ~5MB localStorage quota and drop the WHOLE mirror
+        // (losing all artwork on reload). Keep the object shape, null only the blob.
+        for (const k of [`secondFront`, `backDesign`, `sleeveLeft`, `sleeveRight`]) {
+          if (m[k] && typeof m[k] === `object` && typeof m[k].image === `string` && m[k].image.startsWith(`data:`)) {
+            m[k] = { ...m[k], image: null };
+          }
+        }
         return m;
       });
       window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lightCart));
@@ -9922,7 +9932,7 @@ export default function App() {
         :focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
         input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
         /* WCAG 2.4.1 — skip to content. Off-screen until focused, then pinned top-center. */
-        .skip-link { position: fixed; top: -100px; inset-inline-start: 50%; transform: translateX(-50%); z-index: 10000; background: #C0501A; color: #fff; padding: 12px 22px; border-radius: 0 0 10px 10px; font-family: 'Varela Round', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: top 0.15s ease; }
+        .skip-link { position: fixed; top: -100px; inset-inline-start: 50%; transform: translateX(-50%); z-index: 10000; background: #C0501A; color: #fff; padding: 12px 22px; border-radius: 0 0 10px 10px; font-family: 'Heebo', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: top 0.15s ease; }
         .skip-link:focus { top: 0; outline: 2px solid #fff; outline-offset: 2px; }
         /* iOS Safari auto-zooms when a focused input's font-size is < 16px. The
            form inputs use 13–14px; force >=16px on small screens so no field
@@ -10063,7 +10073,7 @@ export default function App() {
           border: none;
           padding: 0;
           cursor: pointer;
-          font-family: 'Varela Round', sans-serif;
+          font-family: 'Heebo', sans-serif;
           font-size: 13px;
           line-height: 1.6;
           transition: color 0.3s cubic-bezier(.2,.6,.2,1), letter-spacing 0.3s cubic-bezier(.2,.6,.2,1);
@@ -10124,7 +10134,7 @@ export default function App() {
                 <div style={{
                   minHeight: "100vh", background: COLORS.bg, color: COLORS.gray,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "'Varela Round',sans-serif", padding: "80px 20px",
+                  fontFamily: "'Heebo',sans-serif", padding: "80px 20px",
                 }}>
                   <div style={{ textAlign: "center" }}>
                     <div style={{
@@ -10344,7 +10354,7 @@ function WaitlistForm({ lang, source, breedInterest = null, autoFocus = false })
 
   if (done) {
     return (
-      <div role="status" aria-live="polite" style={{ background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.4)`, borderRadius: 12, padding: `18px 20px`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 15, lineHeight: 1.5, textAlign: isRTL ? `right` : `left` }}>
+      <div role="status" aria-live="polite" style={{ background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.4)`, borderRadius: 12, padding: `18px 20px`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.5, textAlign: isRTL ? `right` : `left` }}>
         {status === `already` ? w.already : w.success}
       </div>
     );
@@ -10352,7 +10362,7 @@ function WaitlistForm({ lang, source, breedInterest = null, autoFocus = false })
 
   return (
     <form onSubmit={submit} noValidate style={{ width: `100%` }}>
-      <label htmlFor={inputId} style={{ display: `block`, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, marginBottom: 8, textAlign: isRTL ? `right` : `left` }}>
+      <label htmlFor={inputId} style={{ display: `block`, color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 12, marginBottom: 8, textAlign: isRTL ? `right` : `left` }}>
         {w.ph}
       </label>
       <div style={{ display: `flex`, flexDirection: isRTL ? `row-reverse` : `row`, gap: 10, flexWrap: `wrap` }}>
@@ -10367,11 +10377,11 @@ function WaitlistForm({ lang, source, breedInterest = null, autoFocus = false })
           placeholder={w.ph}
           disabled={busy}
           dir="ltr"
-          style={{ flex: `1 1 200px`, minWidth: 0, background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `14px 16px`, fontSize: 15, fontFamily: `'Varela Round',sans-serif`, outline: `none`, textAlign: `left` }}
+          style={{ flex: `1 1 200px`, minWidth: 0, background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `14px 16px`, fontSize: 15, fontFamily: `'Heebo',sans-serif`, outline: `none`, textAlign: `left` }}
           onFocus={(ev) => { ev.target.style.borderColor = COLORS.accent; }}
           onBlur={(ev) => { ev.target.style.borderColor = COLORS.border; }}
         />
-        <button type="submit" disabled={busy} style={{ flexShrink: 0, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: busy ? `wait` : `pointer`, opacity: busy ? 0.7 : 1, transition: `background 0.2s` }}
+        <button type="submit" disabled={busy} style={{ flexShrink: 0, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: busy ? `wait` : `pointer`, opacity: busy ? 0.7 : 1, transition: `background 0.2s` }}
           onMouseOver={(ev) => { if (!busy) ev.currentTarget.style.background = COLORS.accentBtnHover; }}
           onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accentBtn; }}>
           {busy ? w.submitting : w.submit}
@@ -10379,12 +10389,12 @@ function WaitlistForm({ lang, source, breedInterest = null, autoFocus = false })
       </div>
       <div aria-live="polite" style={{ minHeight: 18, marginTop: 8, textAlign: isRTL ? `right` : `left` }}>
         {(status === `invalid` || status === `error`) && (
-          <span style={{ color: `#ff7a6b`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13 }}>
+          <span style={{ color: `#ff7a6b`, fontFamily: `'Heebo',sans-serif`, fontSize: 13 }}>
             {status === `invalid` ? w.invalid : w.error}
           </span>
         )}
       </div>
-      <div style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 11, lineHeight: 1.5, marginTop: 4, textAlign: isRTL ? `right` : `left` }}>
+      <div style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 11, lineHeight: 1.5, marginTop: 4, textAlign: isRTL ? `right` : `left` }}>
         {w.consent}
       </div>
     </form>
@@ -10415,7 +10425,7 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
           {ctaText}
         </div>
       )}
-      <button type="button" onClick={() => setOpen(true)} style={{ width: variant === `breed` ? `100%` : `auto`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 32px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 28px rgba(255,107,53,0.35)`, transition: `background 0.2s, transform 0.2s` }}
+      <button type="button" onClick={() => setOpen(true)} style={{ width: variant === `breed` ? `100%` : `auto`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 32px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 28px rgba(255,107,53,0.35)`, transition: `background 0.2s, transform 0.2s` }}
         onMouseOver={(ev) => { ev.currentTarget.style.background = COLORS.accentBtnHover; ev.currentTarget.style.transform = `translateY(-2px)`; }}
         onMouseOut={(ev) => { ev.currentTarget.style.background = COLORS.accentBtn; ev.currentTarget.style.transform = `translateY(0)`; }}>
         {w.joinBtn}
@@ -10850,7 +10860,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           <div style={{ width: 60, height: 1, background: COLORS.accent }} />
         </div>
 
-        <p className="reveal" data-delay="3" style={{ color: COLORS.gray, fontSize: isMobile ? 15 : 18, fontFamily: "'Varela Round',sans-serif", maxWidth: 540, margin: "0 auto 8px", lineHeight: 1.5 }}>
+        <p className="reveal" data-delay="3" style={{ color: COLORS.gray, fontSize: isMobile ? 15 : 18, fontFamily: "'Heebo',sans-serif", maxWidth: 540, margin: "0 auto 8px", lineHeight: 1.5 }}>
           {t.subheading}
         </p>
         <p className="reveal" data-delay="4" style={{ color: "#8a8a8a", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
@@ -10863,7 +10873,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         <section style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", padding: isMobile ? "0 20px 24px" : "0 40px 32px" }}>
           <div style={{ background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 18, padding: isMobile ? "28px 22px" : "40px 44px", textAlign: "center" }}>
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: isMobile ? "1.6rem" : "2.2rem", color: COLORS.white, margin: "0 0 12px", lineHeight: 1.2 }}>{w.heroTitle}</h2>
-            <p style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: isMobile ? 14 : 16, lineHeight: 1.5, maxWidth: 560, margin: "0 auto 24px" }}>{w.heroSub}</p>
+            <p style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: isMobile ? 14 : 16, lineHeight: 1.5, maxWidth: 560, margin: "0 auto 24px" }}>{w.heroSub}</p>
             <div style={{ maxWidth: 460, margin: "0 auto" }}>
               <JoinBloomCTA lang={lang} source="bloom" variant="hero" />
             </div>
@@ -10879,9 +10889,9 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
             onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "rgba(255,107,53,0.35)"; }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 20 : 24, marginBottom: 6 }}>{quizT.banner_title}</div>
-              <div style={{ color: COLORS.gray, fontFamily: "'Varela Round',sans-serif", fontSize: isMobile ? 13 : 15, lineHeight: 1.5 }}>{quizT.banner_sub}</div>
+              <div style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: isMobile ? 13 : 15, lineHeight: 1.5 }}>{quizT.banner_sub}</div>
             </div>
-            <span style={{ flexShrink: 0, background: COLORS.accentBtn, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
+            <span style={{ flexShrink: 0, background: COLORS.accentBtn, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
           </div>
         </a>
       </section>
@@ -10891,7 +10901,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "16px 16px 0" : "24px 40px 0" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.4rem" : "1.9rem", color: COLORS.white, margin: 0 }}>{(LANGS[lang] || LANGS.he).blogHeroTitle}</h2>
-            <button onClick={() => goToBlog && goToBlog()} style={{ background: "transparent", border: "none", color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{(LANGS[lang] || LANGS.he).blogFromOurBlog}</button>
+            <button onClick={() => goToBlog && goToBlog()} style={{ background: "transparent", border: "none", color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{(LANGS[lang] || LANGS.he).blogFromOurBlog}</button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 16 : 20 }}>
             {blogPosts.map((p) => <BlogCard key={p.slug} post={p} lang={lang} goToBlog={goToBlog} compact />)}
@@ -10918,7 +10928,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
             three options — counts beside them so the user knows what to
             expect before clicking. */}
         {!loading && designs.length > 0 && (
-          <div style={{ display: "flex", flexDirection: isMobile ? `column` : `row`, alignItems: isMobile ? `stretch` : `center`, gap: 12, marginBottom: 32, flexWrap: "wrap", position: `sticky`, top: 72, zIndex: 40, background: `rgba(15,15,15,0.92)`, backdropFilter: `blur(12px)`, WebkitBackdropFilter: `blur(12px)`, paddingTop: 16, paddingBottom: 16, borderBottom: `1px solid ${COLORS.border}` }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? `column` : `row`, alignItems: isMobile ? `stretch` : `center`, gap: 12, marginBottom: 32, flexWrap: "wrap", position: isMobile ? `static` : `sticky`, top: 72, zIndex: 40, background: `rgba(15,15,15,0.92)`, backdropFilter: `blur(12px)`, WebkitBackdropFilter: `blur(12px)`, paddingTop: 16, paddingBottom: 16, borderBottom: `1px solid ${COLORS.border}` }}>
             <div role="tablist" aria-label={t.collectionEyebrow} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {[
                 { id: `all`, icon: `pawprint`, label: t.tabAll, count: designs.length },
@@ -10941,7 +10951,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                       padding: `12px 22px`,
                       fontSize: 15,
                       fontWeight: 700,
-                      fontFamily: `'Varela Round',sans-serif`,
+                      fontFamily: `'Heebo',sans-serif`,
                       cursor: `pointer`,
                       transition: `background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s`,
                       transform: active ? `scale(1.05)` : `scale(1)`,
@@ -10966,7 +10976,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                   color: favOnly ? `#fff` : COLORS.gray,
                   border: `${favOnly ? 2 : 1}px solid ${favOnly ? COLORS.accent : COLORS.border}`,
                   borderRadius: 999, padding: `12px 20px`, fontSize: 15, fontWeight: 700,
-                  fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`,
+                  fontFamily: `'Heebo',sans-serif`, cursor: `pointer`,
                   display: `inline-flex`, alignItems: `center`, gap: 6,
                   transition: `background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s`,
                   transform: favOnly ? `scale(1.05)` : `scale(1)`,
@@ -10991,7 +11001,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                   borderRadius: 8,
                   padding: `10px 14px`,
                   fontSize: 14,
-                  fontFamily: `'Varela Round',sans-serif`,
+                  fontFamily: `'Heebo',sans-serif`,
                   outline: `none`,
                   boxSizing: `border-box`,
                   direction: isRTL ? `rtl` : `ltr`,
@@ -11004,7 +11014,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
               <button
                 type="button"
                 onClick={() => { setSpeciesFilter(`all`); setBreedQuery(``); setFavOnly(false); }}
-                style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `8px 14px`, fontSize: 12, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>
+                style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `8px 14px`, fontSize: 12, fontFamily: `'Heebo',sans-serif`, cursor: `pointer` }}>
                 {t.clearFilters}
               </button>
             )}
@@ -11016,7 +11026,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         )}
 
         {loading && !loadError && (
-          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Varela Round',sans-serif" }}>
+          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Heebo',sans-serif" }}>
             <div style={{ display: "inline-block", width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: "50%", animation: "petsSpin 0.8s linear infinite", marginBottom: 16 }} />
             <div>{t.loading}</div>
           </div>
@@ -11066,7 +11076,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                     </div>
                     <div style={{ padding: isMobile ? `12px 14px` : 18, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
                       <h4 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? 17 : 20, color: COLORS.white, margin: 0 }}>{packName}</h4>
-                      <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 12 }}>
+                      <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 12 }}>
                         {`${(pack.item_slugs || []).length} ${lang === `he` ? `מדבקות` : lang === `ru` ? `наклеек` : `stickers`}`}
                       </div>
                       <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginTop: `auto`, gap: 10 }}>
@@ -11082,7 +11092,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                             padding: `8px 16px`,
                             fontSize: 13,
                             fontWeight: 700,
-                            fontFamily: `'Varela Round',sans-serif`,
+                            fontFamily: `'Heebo',sans-serif`,
                             cursor: `pointer`,
                             transition: `background 0.2s`,
                           }}
@@ -11132,7 +11142,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         <h3 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.8rem" : "2.4rem", color: COLORS.white, margin: "0 0 12px 0" }}>
           {t.ctaTitle}
         </h3>
-        <p style={{ color: COLORS.gray, fontSize: isMobile ? 14 : 16, fontFamily: "'Varela Round',sans-serif", marginBottom: 30 }}>
+        <p style={{ color: COLORS.gray, fontSize: isMobile ? 14 : 16, fontFamily: "'Heebo',sans-serif", marginBottom: 30 }}>
           {preview ? w.heroSub : t.ctaSub}
         </p>
         {preview ? (
@@ -11147,7 +11157,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           padding: isMobile ? "14px 28px" : "16px 36px",
           borderRadius: 10,
           cursor: "pointer",
-          fontFamily: "'Varela Round',sans-serif",
+          fontFamily: "'Heebo',sans-serif",
           fontSize: isMobile ? 14 : 15,
           fontWeight: 700,
           letterSpacing: "0.3px",
@@ -11219,7 +11229,7 @@ function PetBadges({ design, lang }) {
           gap: 4,
           background: COLORS.accentBtn,
           color: "#fff",
-          fontFamily: "'Varela Round',sans-serif",
+          fontFamily: "'Heebo',sans-serif",
           fontSize: 10,
           fontWeight: 700,
           letterSpacing: "0.08em",
@@ -11243,7 +11253,7 @@ function PetBadges({ design, lang }) {
           background: "rgba(15,15,15,0.85)",
           color: COLORS.accent,
           border: `1px solid ${COLORS.accent}`,
-          fontFamily: "'Varela Round',sans-serif",
+          fontFamily: "'Heebo',sans-serif",
           fontSize: 10,
           fontWeight: 700,
           letterSpacing: "0.08em",
@@ -11380,8 +11390,8 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
         }}>
           {/* Pre-launch: no price shown — the breed detail offers "Join the
               BLOOM Family" instead of a purchase. */}
-          <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif" }}>{preview ? `` : `${priceFrom}${Number(design.price_mug) || Number(design.price_sticker) || 59}`}</span>
-          <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>{lang === "he" ? "←" : "→"}</span>
+          <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Heebo',sans-serif" }}>{preview ? `` : ((Number(design.price_mug) || Number(design.price_sticker)) ? `${priceFrom}${Number(design.price_mug) || Number(design.price_sticker)}` : ``)}</span>
+          <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Heebo',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>{lang === "he" ? "←" : "→"}</span>
         </div>
       </div>
     </div>
@@ -11522,6 +11532,10 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         slug: design.slug,
         ...personalization,
       });
+      // Close the modal so the "View cart" toast (fired by addBloomToCart) is
+      // visible — gives forward momentum instead of leaving the user on a modal
+      // that covers the confirmation.
+      if (onClose) onClose();
       return;
     }
     // Single-sticker purchase was retired (stickers are pack-only / free
@@ -11541,6 +11555,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       shirtColor: null,
       ...personalization,
     });
+    if (onClose) onClose();
   };
 
   // Lock body scroll when modal open
@@ -11644,7 +11659,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           cursor: "pointer",
           fontSize: 13,
           fontWeight: 600,
-          fontFamily: "'Varela Round',sans-serif",
+          fontFamily: "'Heebo',sans-serif",
           display: "flex",
           alignItems: "center",
           gap: 6,
@@ -11723,7 +11738,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <button
                 type="button"
                 onClick={() => goToBreed(design.slug)}
-                style={{ alignSelf: isRTL ? `flex-end` : `flex-start`, background: `transparent`, border: `none`, color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 700, cursor: `pointer`, padding: 0, marginBottom: 20, display: `inline-flex`, alignItems: `center`, gap: 6 }}
+                style={{ alignSelf: isRTL ? `flex-end` : `flex-start`, background: `transparent`, border: `none`, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 13, fontWeight: 700, cursor: `pointer`, padding: 0, marginBottom: 20, display: `inline-flex`, alignItems: `center`, gap: 6 }}
                 onMouseOver={e => { e.currentTarget.style.textDecoration = `underline`; }}
                 onMouseOut={e => { e.currentTarget.style.textDecoration = `none`; }}>
                 <span aria-hidden="true">📄</span>
@@ -11780,7 +11795,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 disabled={!design.design_url}
                 onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
                 onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
-                style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}
+                style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}
               >
                 <AboutIcon name="cart" size={18} color="#fff" />{lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
               </button>
@@ -11792,8 +11807,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginBottom: 24, padding: `10px 12px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8 }}>
                 <AboutIcon name="truck" size={18} color={COLORS.accent} style={{ marginTop: 1 }} />
                 <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-                  {t.madeToOrder && <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, letterSpacing: `0.04em` }}>{t.madeToOrder}</span>}
-                  {t.shipFlat && <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Varela Round',sans-serif`, lineHeight: 1.5 }}>{t.shipFlat}</span>}
+                  {t.madeToOrder && <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, letterSpacing: `0.04em` }}>{t.madeToOrder}</span>}
+                  {t.shipFlat && <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif`, lineHeight: 1.5 }}>{t.shipFlat}</span>}
                 </div>
               </div>
             )}
@@ -11807,7 +11822,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <button
                 type="button"
                 onClick={() => goToBlog(breedPost.slug)}
-                style={{ marginTop: 4, marginBottom: 8, background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 18px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, transition: `background 0.2s, color 0.2s` }}
+                style={{ marginTop: 4, marginBottom: 8, background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 18px`, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, transition: `background 0.2s, color 0.2s` }}
                 onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = `#fff`; }}
                 onMouseOut={(e) => { e.currentTarget.style.background = `transparent`; e.currentTarget.style.color = COLORS.accent; }}>
                 {(LANGS[lang] || LANGS.he).blogReadMoreBreed}
@@ -11853,7 +11868,7 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
         width: "100%",
         textAlign: "inherit",
       }}>
-      <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
+      <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
       <span style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 24, fontWeight: 800, letterSpacing: "0.01em" }}>₪{price}</span>
     </button>
   );
@@ -11980,7 +11995,7 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
 
           {/* Enlarge button */}
           <button type="button" onClick={(e) => { e.stopPropagation(); setZoomed(true); }} aria-label={zoomLabel}
-            style={{ position: `absolute`, bottom: 10, insetInlineEnd: 10, background: `rgba(0,0,0,0.55)`, color: `#fff`, border: `none`, borderRadius: 20, padding: `6px 11px`, display: `flex`, alignItems: `center`, gap: 6, fontSize: 11, fontFamily: "'Varela Round',sans-serif", letterSpacing: `0.05em`, backdropFilter: `blur(6px)`, cursor: `pointer`, zIndex: 4 }}>
+            style={{ position: `absolute`, bottom: 10, insetInlineEnd: 10, background: `rgba(0,0,0,0.55)`, color: `#fff`, border: `none`, borderRadius: 20, padding: `6px 11px`, display: `flex`, alignItems: `center`, gap: 6, fontSize: 11, fontFamily: "'Heebo',sans-serif", letterSpacing: `0.05em`, backdropFilter: `blur(6px)`, cursor: `pointer`, zIndex: 4 }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
             </svg>
@@ -12031,9 +12046,9 @@ function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }
           <span aria-hidden="true" style={{ display: `inline-flex`, color: COLORS.accent }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 6.1L20 11l-6.1 1.9L12 19l-1.9-6.1L4 11l6.1-1.9L12 3z" /></svg>
           </span>
-          <span style={{ color: COLORS.accent, fontFamily: "'Varela Round',sans-serif", fontSize: 15, fontWeight: 700 }}>{t.petNameTitle}</span>
+          <span style={{ color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontSize: 15, fontWeight: 700 }}>{t.petNameTitle}</span>
         </span>
-        <span style={{ background: COLORS.accentBtn, color: `#fff`, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
+        <span style={{ background: COLORS.accentBtn, color: `#fff`, fontFamily: "'Heebo',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
       </div>
       <label htmlFor="bloom-pet-name" style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
       <input
@@ -12044,11 +12059,11 @@ function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }
         placeholder={t.petNamePlaceholder}
         maxLength={20}
         dir={isRTL ? `rtl` : `ltr`}
-        style={{ width: `100%`, boxSizing: `border-box`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px 14px`, color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 14, outline: `none`, transition: `border-color 0.2s` }}
+        style={{ width: `100%`, boxSizing: `border-box`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `12px 14px`, color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: `none`, transition: `border-color 0.2s` }}
         onFocus={(e) => { e.currentTarget.style.borderColor = COLORS.accent; }}
         onBlur={(e) => { e.currentTarget.style.borderColor = COLORS.border; }}
       />
-      {t.petNameHelper && <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Varela Round',sans-serif", marginTop: 6, lineHeight: 1.5 }}>{t.petNameHelper}</div>}
+      {t.petNameHelper && <div style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Heebo',sans-serif", marginTop: 6, lineHeight: 1.5 }}>{t.petNameHelper}</div>}
 
       {/* Progressive disclosure — only after a name is typed. */}
       {show && (
@@ -12148,15 +12163,15 @@ function BreedStoryCard({ design, lang }) {
   const isRTL = lang === `he`;
   return (
     <div style={{ marginBottom: 24, padding: `16px 18px`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 12, textAlign: isRTL ? `right` : `left` }}>
-      <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 8, display: `flex`, alignItems: `center`, gap: 6 }}>
+      <div style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 8, display: `flex`, alignItems: `center`, gap: 6 }}>
         <AboutIcon name="pawprint" size={18} color={COLORS.accent} />
         <span>{lang === `he` ? `על הגזע` : lang === `ru` ? `О породе` : `About the breed`}</span>
       </div>
-      <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{design[`breed_origin_${lang}`]}</p>
+      <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, lineHeight: 1.6, margin: 0 }}>{design[`breed_origin_${lang}`]}</p>
       {design[`breed_facts_${lang}`] && (
         <ul style={{ margin: 0, marginTop: 12, padding: 0, listStyle: `none`, display: `flex`, flexDirection: `column`, gap: 7 }}>
           {String(design[`breed_facts_${lang}`]).split(/\n/).filter(Boolean).map((fact, i) => (
-            <li key={i} style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13.5, lineHeight: 1.5, display: `flex`, alignItems: `flex-start`, gap: 8 }}>
+            <li key={i} style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, lineHeight: 1.5, display: `flex`, alignItems: `flex-start`, gap: 8 }}>
               <span style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>•</span>
               <span>{fact}</span>
             </li>
@@ -12180,7 +12195,7 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
           <span style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase" }}>
             {lang === "he" ? "צבע חולצה" : lang === "ru" ? "Цвет футболки" : "Shirt color"}
           </span>
-          <span style={{ color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontSize: 12, fontWeight: 600 }}>
+          <span style={{ color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 12, fontWeight: 600 }}>
             {selectedColor[lang] || selectedColor.en}
           </span>
         </div>
@@ -12223,7 +12238,7 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
                 border: `1px solid ${shirtType === st.id ? COLORS.accent : COLORS.border}`,
                 color: shirtType === st.id ? "#fff" : COLORS.white,
                 borderRadius: 8, padding: "10px 12px", cursor: "pointer",
-                fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
+                fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 600,
                 transition: "background 0.2s, border-color 0.2s",
               }}
             >{st.label[lang] || st.label.en}</button>
@@ -12249,7 +12264,7 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
                 border: `1px solid ${shirtSize === sz ? COLORS.accent : COLORS.border}`,
                 color: shirtSize === sz ? "#fff" : COLORS.white,
                 borderRadius: 8, padding: "8px 12px", cursor: "pointer",
-                fontFamily: "'Varela Round',sans-serif", fontSize: 13, fontWeight: 600,
+                fontFamily: "'Heebo',sans-serif", fontSize: 13, fontWeight: 600,
                 transition: "background 0.2s, border-color 0.2s",
               }}
             >{sz.toUpperCase()}</button>
@@ -12372,7 +12387,7 @@ function BloomCharacterRail({ characters, lang, goToBreed, isMobile, heading }) 
               <div style={{ width: `100%`, aspectRatio: `1414 / 2000`, pointerEvents: `none` }}>
                 <SmartImage src={transformImage(img, { width: 300 })} srcSet={srcSetFor(img, [200, 400])} sizes={isMobile ? `118px` : `150px`} alt={nm} loading="lazy" decoding="async" draggable={false} style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block` }} />
               </div>
-              <div style={{ color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 4px 0`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap`, pointerEvents: `none` }}>{nm}</div>
+              <div style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 600, padding: `8px 4px 0`, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap`, pointerEvents: `none` }}>{nm}</div>
             </button>
           );
         })}
@@ -12543,7 +12558,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
         <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{tt.notFound}</div>
-        <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
+        <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
       </div>
     );
   }
@@ -12605,7 +12620,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       <div style={{ maxWidth: 1100, margin: `0 auto`, padding: isMobile ? `20px 16px 80px` : `36px 24px 110px`, position: `relative`, zIndex: 1 }}>
 
         {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" style={{ display: `flex`, flexWrap: `wrap`, gap: 8, alignItems: `center`, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, marginBottom: 24 }}>
+        <nav aria-label="breadcrumb" style={{ display: `flex`, flexWrap: `wrap`, gap: 8, alignItems: `center`, color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 13, marginBottom: 24 }}>
           <button onClick={() => setPage(`home`)} style={{ background: `none`, border: `none`, color: COLORS.gray, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{tt.home}</button>
           <span aria-hidden="true">/</span>
           <button onClick={() => setPage(`pets`)} style={{ background: `none`, border: `none`, color: COLORS.accent, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{tt.collection}</button>
@@ -12639,7 +12654,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
               <div style={{ display: `flex`, alignItems: `center`, gap: 8 }}>
                 <FavHeart slug={design.slug} name={name} lang={lang} size={36} />
                 <button type="button" onClick={handleShare} aria-label={tt.share} title={tt.share}
-                  style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: `transparent`, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 20, padding: `6px 14px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 600, cursor: `pointer` }}
+                  style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: `transparent`, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 20, padding: `6px 14px`, fontFamily: `'Heebo',sans-serif`, fontSize: 13, fontWeight: 600, cursor: `pointer` }}
                   onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; }}
                   onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; }}>
                   <span aria-hidden="true">↗</span><span>{tt.share}</span>
@@ -12689,7 +12704,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                     disabled={!design.design_url}
                     onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
                     onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
-                    style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Varela Round',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}>
+                    style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}>
                     <AboutIcon name="cart" size={18} color="#fff" />{tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
                   </button>
                   </div>
@@ -12697,8 +12712,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginBottom: 24, padding: `10px 12px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8 }}>
                   <AboutIcon name="truck" size={18} color={COLORS.accent} style={{ marginTop: 1 }} />
                   <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-                    <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, letterSpacing: `0.04em` }}>{tt.made}</span>
-                    <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Varela Round',sans-serif`, lineHeight: 1.5 }}>{tt.shipFlat}</span>
+                    <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, letterSpacing: `0.04em` }}>{tt.made}</span>
+                    <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif`, lineHeight: 1.5 }}>{tt.shipFlat}</span>
                   </div>
                 </div>
               </>
@@ -12716,7 +12731,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
 
         {/* Back to collection */}
         <div style={{ marginTop: 48 }}>
-          <button onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{isRTL ? `${tt.back} ←` : `← ${tt.back}`}</button>
+          <button onClick={() => setPage(`pets`)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer` }}>{isRTL ? `${tt.back} ←` : `← ${tt.back}`}</button>
         </div>
       </div>
     </div>
@@ -12754,7 +12769,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
     <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", padding: 24, zIndex: 10, direction: lang === "he" ? "rtl" : "ltr" }}>
       <div style={{ position: "absolute", top: 20, insetInlineEnd: 20, display: "flex", gap: 8 }}>
         {["he", "en", "ru"].map(l => (
-          <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? "#C0501A" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Varela Round',sans-serif" }}>
+          <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)} style={{ background: lang === l ? "#C0501A" : "transparent", border: `1px solid ${lang === l ? "#FF6B35" : "#333"}`, color: lang === l ? "#fff" : "#999", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12, fontFamily: "'Heebo',sans-serif" }}>
             {l.toUpperCase()}
           </button>
         ))}
@@ -12764,17 +12779,17 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
           <span style={{ width: 14, height: 14, borderRadius: "50%", background: "#FF6B35", display: "inline-block", boxShadow: "0 0 30px rgba(255,107,53,0.7)", animation: "maintPulse 2s ease-in-out infinite" }}></span>
         </div>
         <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 48, color: "#fff", marginBottom: 16, letterSpacing: "-0.5px" }}>{m.title}</h1>
-        <p style={{ color: "#999", fontSize: 18, marginBottom: 8, fontFamily: "'Varela Round',sans-serif" }}>{m.sub}</p>
-        <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", marginBottom: 28 }}>{m.back}</p>
+        <p style={{ color: "#999", fontSize: 18, marginBottom: 8, fontFamily: "'Heebo',sans-serif" }}>{m.sub}</p>
+        <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Heebo',sans-serif", marginBottom: 28 }}>{m.back}</p>
         {/* Public entry into the pre-launch BLOOM "Find Your Breed" preview. */}
         <div style={{ marginBottom: 24 }}>
-          <button onClick={() => setPage("pets")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer", boxShadow: "0 8px 28px rgba(255,107,53,0.35)", transition: "background 0.2s, transform 0.2s" }}
+          <button onClick={() => setPage("pets")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700, fontFamily: "'Heebo',sans-serif", cursor: "pointer", boxShadow: "0 8px 28px rgba(255,107,53,0.35)", transition: "background 0.2s, transform 0.2s" }}
             onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; e.currentTarget.style.transform = "translateY(-2px)"; }}
             onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.transform = "translateY(0)"; }}>
             {m.explore}
           </button>
         </div>
-        <a href={SOCIAL.instagram} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Varela Round',sans-serif", fontWeight: 600, fontSize: 14 }}>
+        <a href={SOCIAL.instagram} target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)", color: "#fff", padding: "12px 24px", borderRadius: 10, textDecoration: "none", fontFamily: "'Heebo',sans-serif", fontWeight: 600, fontSize: 14 }}>
           Instagram @sfalimshop
         </a>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 36, opacity: 0.85 }}>
@@ -12792,7 +12807,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
           letterSpacing: lang === "he" ? "0.04em" : "0.02em"
         }}>{BUSINESS_INFO.tagline[lang]}</div>
       </div>
-      <div style={{ position: "absolute", bottom: 56, fontSize: 12, color: "#8a8a8a", fontFamily: "'Varela Round',sans-serif", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "center", padding: "0 16px" }}>
+      <div style={{ position: "absolute", bottom: 56, fontSize: 12, color: "#8a8a8a", fontFamily: "'Heebo',sans-serif", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "center", padding: "0 16px" }}>
         <a href="/privacy" style={{ color: "#888", textDecoration: "none" }}>
           {lang === "he" ? "פרטיות" : lang === "ru" ? "Конфиденциальность" : "Privacy Policy"}
         </a>
@@ -12809,9 +12824,9 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
           {lang === "he" ? "צור קשר" : lang === "ru" ? "Контакты" : "Contact"}
         </a>
       </div>
-      <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#8a8a8a", fontFamily: "'Varela Round',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "#8a8a8a", fontFamily: "'Heebo',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
         {!showStaff ? (
-          <button onClick={() => setShowStaff(true)} style={{ background: "none", border: "none", color: "#8a8a8a", cursor: "pointer", fontSize: 11, fontFamily: "'Varela Round',sans-serif", padding: 4 }}>· {m.staff} ·</button>
+          <button onClick={() => setShowStaff(true)} style={{ background: "none", border: "none", color: "#8a8a8a", cursor: "pointer", fontSize: 11, fontFamily: "'Heebo',sans-serif", padding: 4 }}>· {m.staff} ·</button>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, direction: lang === "he" ? "rtl" : "ltr" }}>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -12823,8 +12838,8 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
                 onKeyDown={e => { if (e.key === "Enter") submitStaff(); }}
                 placeholder={m.pwPlaceholder}
                 aria-label={m.pwPlaceholder}
-                style={{ background: "#181818", border: `1px solid ${pwErr ? "#a33" : "#333"}`, borderRadius: 8, color: "#ddd", padding: "8px 12px", fontSize: 13, fontFamily: "'Varela Round',sans-serif", width: 170, outline: "none" }} />
-              <button onClick={submitStaff} style={{ background: COLORS.accentBtn, border: "none", borderRadius: 8, color: "#fff", padding: "8px 14px", fontSize: 13, fontWeight: 700, fontFamily: "'Varela Round',sans-serif", cursor: "pointer" }}>{m.pwGo}</button>
+                style={{ background: "#181818", border: `1px solid ${pwErr ? "#a33" : "#333"}`, borderRadius: 8, color: "#ddd", padding: "8px 12px", fontSize: 13, fontFamily: "'Heebo',sans-serif", width: 170, outline: "none" }} />
+              <button onClick={submitStaff} style={{ background: COLORS.accentBtn, border: "none", borderRadius: 8, color: "#fff", padding: "8px 14px", fontSize: 13, fontWeight: 700, fontFamily: "'Heebo',sans-serif", cursor: "pointer" }}>{m.pwGo}</button>
             </div>
             {pwErr && <span style={{ color: "#e06a5a", fontSize: 11 }}>{m.pwErr}</span>}
           </div>
@@ -12870,7 +12885,7 @@ function PoliciesPage({ lang }) {
       <h1 className="reveal" style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 42, marginBottom: 8 }}>
         {lang === "he" ? "מדיניות ותקנון" : lang === "ru" ? "Политика и условия" : "Policies & Terms"}
       </h1>
-      <p className="reveal" data-delay="1" style={{ color: "#999", fontSize: 15, marginBottom: 32, fontFamily: "'Varela Round',sans-serif" }}>
+      <p className="reveal" data-delay="1" style={{ color: "#999", fontSize: 15, marginBottom: 32, fontFamily: "'Heebo',sans-serif" }}>
         {BUSINESS_INFO.name[lang]}
       </p>
 
@@ -12892,7 +12907,7 @@ function PoliciesPage({ lang }) {
               else if (e.key === "End") n = ids.length - 1;
               if (n >= 0) { e.preventDefault(); goSection(ids[n]); const el = document.getElementById(`policy-tab-${ids[n]}`); if (el) el.focus(); }
             }}
-            style={{ background: active ? COLORS.accentBtn : "#1a1a1a", color: active ? "#fff" : "#a0a0a0", border: `1px solid ${active ? COLORS.accentBtn : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 600 }}>
+            style={{ background: active ? COLORS.accentBtn : "#1a1a1a", color: active ? "#fff" : "#a0a0a0", border: `1px solid ${active ? COLORS.accentBtn : "#333"}`, borderRadius: 8, padding: "10px 16px", cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 14, fontWeight: 600 }}>
             {s.title[lang]}
           </button>
           );
@@ -12903,7 +12918,7 @@ function PoliciesPage({ lang }) {
         <h2 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
           {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
         </h2>
-        <div style={{ color: "#ccc", fontFamily: "'Varela Round',sans-serif", fontSize: 14, lineHeight: 1.8 }}>
+        <div style={{ color: "#ccc", fontFamily: "'Heebo',sans-serif", fontSize: 14, lineHeight: 1.8 }}>
           {(content[activeSection] || []).map((block, i) => {
             if (block.type === "h") return <h3 key={i} style={{ color: "#FF6B35", fontSize: 17, marginTop: 24, marginBottom: 10, fontWeight: 700 }}>{block.text}</h3>;
             if (block.type === "p") return <p key={i} style={{ marginBottom: 12 }}>{block.text}</p>;
@@ -12917,7 +12932,7 @@ function PoliciesPage({ lang }) {
         </div>
       </div>
 
-      <div style={{ background: "rgba(255,107,53,0.08)", border: "1px solid #FF6B35", borderRadius: 12, padding: "16px 20px", marginTop: 24, color: "#ccc", fontFamily: "'Varela Round',sans-serif", fontSize: 13 }}>
+      <div style={{ background: "rgba(255,107,53,0.08)", border: "1px solid #FF6B35", borderRadius: 12, padding: "16px 20px", marginTop: 24, color: "#ccc", fontFamily: "'Heebo',sans-serif", fontSize: 13 }}>
         <div style={{ color: "#FF6B35", fontWeight: 700, marginBottom: 6, letterSpacing: "0.05em" }}>
           {lang === "he" ? "צריכים עזרה?" : lang === "ru" ? "Нужна помощь?" : "Need help?"}
         </div>
@@ -12950,7 +12965,7 @@ function Footer({ lang, setPage }) {
             <div style={{ width: 4, height: 4, background: "rgba(255,107,53,0.7)", borderRadius: "50%" }}></div>
             <div style={{ width: 18, height: 2, background: "rgba(255,107,53,0.5)", borderRadius: 2 }}></div>
           </div>
-          <div style={{ color: "#888", fontSize: 13, fontFamily: "'Varela Round',sans-serif", lineHeight: 1.9 }}>
+          <div style={{ color: "#888", fontSize: 13, fontFamily: "'Heebo',sans-serif", lineHeight: 1.9 }}>
             <div style={{ marginBottom: 4 }}>{BUSINESS_INFO.address[lang]}</div>
             <div style={{ marginBottom: 4 }}>
               <a href={`tel:${BUSINESS_INFO.phoneIntl}`} className="footer-contact-link" style={{ color: "#888" }}>{BUSINESS_INFO.phone}</a>
@@ -12962,7 +12977,7 @@ function Footer({ lang, setPage }) {
           </div>
         </div>
         <div className="reveal" data-delay="2">
-          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
+          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Heebo',sans-serif" }}>
             {lang === "he" ? "מידע משפטי" : lang === "ru" ? "Юр. информация" : "Legal"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -12974,7 +12989,7 @@ function Footer({ lang, setPage }) {
           </div>
         </div>
         <div className="reveal" data-delay="3">
-          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
+          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Heebo',sans-serif" }}>
             {lang === "he" ? "עזרה" : lang === "ru" ? "Помощь" : "Help"}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -12984,15 +12999,15 @@ function Footer({ lang, setPage }) {
           </div>
         </div>
         <div className="reveal" data-delay="4">
-          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Varela Round',sans-serif" }}>
+          <div style={{ color: "#ccc", fontSize: 11, fontWeight: 600, marginBottom: 18, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Heebo',sans-serif" }}>
             {lang === "he" ? "עקבו אחרינו" : lang === "ru" ? "Соцсети" : "Follow Us"}
           </div>
-          <a href={SOCIAL.instagram} target="_blank" rel="noopener" className="footer-contact-link" style={{ display: "inline-block", color: "#888", fontFamily: "'Varela Round',sans-serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.3px" }}>
+          <a href={SOCIAL.instagram} target="_blank" rel="noopener" className="footer-contact-link" style={{ display: "inline-block", color: "#888", fontFamily: "'Heebo',sans-serif", fontSize: 14, fontWeight: 500, letterSpacing: "0.3px" }}>
             Instagram <span style={{ color: "#8a8a8a" }}>· @sfalimshop</span>
           </a>
         </div>
       </div>
-      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#a0a0a0", fontSize: 11, fontFamily: "'Varela Round',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
+      <div style={{ maxWidth: 1100, margin: "40px auto 0", paddingTop: 22, borderTop: "1px solid #1a1a1a", color: "#a0a0a0", fontSize: 11, fontFamily: "'Heebo',sans-serif", textAlign: "center", letterSpacing: "0.05em" }}>
         © {new Date().getFullYear()} {BUSINESS_INFO.name[lang]} · {lang === "he" ? "כל הזכויות שמורות" : lang === "ru" ? "Все права защищены" : "All rights reserved"}
       </div>
     </footer>
@@ -13171,7 +13186,7 @@ function FaqAccordionItem({ item, lang, isRTL, idBase }) {
             width: `100%`, display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 14,
             background: `transparent`, border: `none`, cursor: `pointer`,
             padding: `18px 20px`, textAlign: `start`,
-            color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 16, fontWeight: 600, lineHeight: 1.4,
+            color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 16, fontWeight: 600, lineHeight: 1.4,
           }}>
           <span>{item.q[lang]}</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={open ? COLORS.accent : COLORS.gray} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, transition: `transform 0.25s ease, stroke 0.2s ease`, transform: open ? `rotate(180deg)` : `rotate(0deg)` }}>
@@ -13180,7 +13195,7 @@ function FaqAccordionItem({ item, lang, isRTL, idBase }) {
         </button>
       </h3>
       <div id={panelId} role="region" aria-labelledby={btnId} hidden={!open} style={{ padding: `0 20px 18px` }}>
-        <p style={{ margin: 0, color: `#d6d6d6`, fontFamily: `'Varela Round',sans-serif`, fontSize: 15, lineHeight: 1.75 }}>{item.a[lang]}</p>
+        <p style={{ margin: 0, color: `#d6d6d6`, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.75 }}>{item.a[lang]}</p>
       </div>
     </div>
   );
@@ -13236,7 +13251,7 @@ function FaqPage({ lang }) {
     <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
       <div style={{ maxWidth: 820, margin: `0 auto`, padding: `48px 22px 100px`, textAlign: isRTL ? `right` : `left` }}>
         <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `2.4rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 10px`, letterSpacing: `-0.01em` }}>{pageTitle}</h1>
-        <p style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 15, margin: `0 0 40px` }}>{intro}</p>
+        <p style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 15, margin: `0 0 40px` }}>{intro}</p>
 
         {groups.map(g => (
           <section key={g.id} style={{ marginBottom: 36 }}>
@@ -13475,10 +13490,10 @@ function BlogCard({ post, lang, goToBlog, compact = false }) {
       <div style={{ padding: compact ? `16px 18px` : `20px 22px`, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
         <span style={{ alignSelf: isRTL ? `flex-end` : `flex-start`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 10, letterSpacing: `1.5px`, textTransform: `uppercase` }}>{blogCategoryLabel(lang, post.category)}</span>
         <h3 style={{ margin: 0, color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: compact ? 19 : 22, lineHeight: 1.25 }}>{title}</h3>
-        <p style={{ margin: 0, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, lineHeight: 1.55, display: `-webkit-box`, WebkitLineClamp: 2, WebkitBoxOrient: `vertical`, overflow: `hidden` }}>{excerpt}</p>
+        <p style={{ margin: 0, color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, lineHeight: 1.55, display: `-webkit-box`, WebkitLineClamp: 2, WebkitBoxOrient: `vertical`, overflow: `hidden` }}>{excerpt}</p>
         <div style={{ marginTop: `auto`, paddingTop: 10, display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10 }}>
-          <span style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 12 }}>{formatBlogDate(post.published_at, lang)}</span>
-          <span style={{ color: hover ? COLORS.accent : COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, fontWeight: 700, transition: `color 0.2s` }}>{(LANGS[lang] || LANGS.he).blogReadMore}</span>
+          <span style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 12 }}>{formatBlogDate(post.published_at, lang)}</span>
+          <span style={{ color: hover ? COLORS.accent : COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 13, fontWeight: 700, transition: `color 0.2s` }}>{(LANGS[lang] || LANGS.he).blogReadMore}</span>
         </div>
       </div>
     </article>
@@ -13569,7 +13584,7 @@ function BlogIndex({ lang, goToBlog }) {
       {/* Hero */}
       <section style={{ position: `relative`, zIndex: 1, padding: isMobile ? `56px 20px 28px` : `90px 40px 40px`, textAlign: `center`, maxWidth: 900, margin: `0 auto` }}>
         <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.6rem` : `4rem`, color: COLORS.white, margin: `0 0 16px`, letterSpacing: `-0.02em` }}>{t.blogHeroTitle}</h1>
-        <p style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: isMobile ? 15 : 18, lineHeight: 1.5, margin: 0 }}>{t.blogHeroSubtitle}</p>
+        <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 18, lineHeight: 1.5, margin: 0 }}>{t.blogHeroSubtitle}</p>
       </section>
 
       {/* Category filter */}
@@ -13579,7 +13594,7 @@ function BlogIndex({ lang, goToBlog }) {
             const active = category === c.id;
             return (
               <button key={c.id} type="button" role="tab" aria-selected={active} onClick={() => changeCategory(c.id)}
-                style={{ background: active ? COLORS.accentBtn : `transparent`, color: active ? `#fff` : COLORS.gray, border: `${active ? 2 : 1}px solid ${active ? COLORS.accent : COLORS.border}`, borderRadius: 999, padding: `9px 20px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer`, transition: `all 0.2s` }}>{c.label}</button>
+                style={{ background: active ? COLORS.accentBtn : `transparent`, color: active ? `#fff` : COLORS.gray, border: `${active ? 2 : 1}px solid ${active ? COLORS.accent : COLORS.border}`, borderRadius: 999, padding: `9px 20px`, fontSize: 14, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, transition: `all 0.2s` }}>{c.label}</button>
             );
           })}
         </div>
@@ -13590,7 +13605,7 @@ function BlogIndex({ lang, goToBlog }) {
         {loadError ? (
           <LoadError lang={lang} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : loading ? (
-          <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Varela Round',sans-serif` }}>
+          <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Heebo',sans-serif` }}>
             <div style={{ display: `inline-block`, width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `blogSpin 0.8s linear infinite` }} />
           </div>
         ) : posts.length === 0 ? (
@@ -13605,7 +13620,7 @@ function BlogIndex({ lang, goToBlog }) {
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
                   <button key={n} type="button" onClick={() => gotoPageNum(n)}
                     aria-current={n === pageNum ? `page` : undefined}
-                    style={{ minWidth: 40, height: 40, background: n === pageNum ? COLORS.accent : `transparent`, color: n === pageNum ? `#fff` : COLORS.gray, border: `1px solid ${n === pageNum ? COLORS.accent : COLORS.border}`, borderRadius: 8, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700 }}>{n}</button>
+                    style={{ minWidth: 40, height: 40, background: n === pageNum ? COLORS.accent : `transparent`, color: n === pageNum ? `#fff` : COLORS.gray, border: `1px solid ${n === pageNum ? COLORS.accent : COLORS.border}`, borderRadius: 8, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700 }}>{n}</button>
                 ))}
               </div>
             )}
@@ -13732,7 +13747,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
         <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{t.blogNotFound}</div>
-        <button onClick={() => goToBlog()} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
+        <button onClick={() => goToBlog()} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
       </div>
     );
   }
@@ -13749,7 +13764,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
       <article style={{ maxWidth: 820, margin: `0 auto`, padding: isMobile ? `24px 18px 80px` : `40px 24px 120px` }}>
         {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" style={{ display: `flex`, flexWrap: `wrap`, gap: 8, alignItems: `center`, color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, marginBottom: 24 }}>
+        <nav aria-label="breadcrumb" style={{ display: `flex`, flexWrap: `wrap`, gap: 8, alignItems: `center`, color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 13, marginBottom: 24 }}>
           <button onClick={() => setPage(`home`)} style={{ background: `none`, border: `none`, color: COLORS.grayLight, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{t.blogBreadcrumbHome}</button>
           <span>/</span>
           <button onClick={() => goToBlog()} style={{ background: `none`, border: `none`, color: COLORS.accent, cursor: `pointer`, fontFamily: `inherit`, fontSize: `inherit`, padding: 0 }}>{t.navBlog}</button>
@@ -13759,7 +13774,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
 
         <span style={{ display: `inline-block`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `2px`, textTransform: `uppercase`, marginBottom: 12 }}>{blogCategoryLabel(lang, post.category)}</span>
         <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.2rem` : `3rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 12px`, letterSpacing: `-0.01em` }}>{title}</h1>
-        <div style={{ color: COLORS.grayLight, fontFamily: `'Varela Round',sans-serif`, fontSize: 13, marginBottom: 28 }}>{t.blogPublishedOn}{formatBlogDate(post.published_at, lang)}</div>
+        <div style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 13, marginBottom: 28 }}>{t.blogPublishedOn}{formatBlogDate(post.published_at, lang)}</div>
 
         {/* Cover */}
         {post.cover_image_url && (
@@ -13769,7 +13784,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         )}
 
         {/* Body */}
-        <div className="blog-body" style={{ color: `#d6d6d6`, fontFamily: `'Varela Round',sans-serif`, fontSize: isMobile ? 16 : 17, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+        <div className="blog-body" style={{ color: `#d6d6d6`, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 16 : 17, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
 
         {/* Related product — deep-links to this breed's modal on the pets page
             (the slug query lives inside the hash; PetsPage parses it open). */}
@@ -13784,26 +13799,26 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 20 }}>{petName}</div>
-              <div style={{ color: COLORS.accent, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 6 }}>{t.blogRelatedProduct}</div>
+              <div style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 6 }}>{t.blogRelatedProduct}</div>
             </div>
           </div>
         )}
 
         {/* Quiz CTA */}
         <a href="/quiz" style={{ display: `block`, marginTop: 32, textDecoration: `none` }}>
-          <div style={{ background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 16, padding: isMobile ? `20px 22px` : `22px 28px`, textAlign: `center`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontWeight: 700, fontSize: isMobile ? 15 : 17 }}>{t.blogQuizCta}</div>
+          <div style={{ background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 16, padding: isMobile ? `20px 22px` : `22px 28px`, textAlign: `center`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: isMobile ? 15 : 17 }}>{t.blogQuizCta}</div>
         </a>
 
         {/* Share */}
         <div style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${COLORS.border}` }}>
-          <div style={{ color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 14 }}>{t.blogShareTitle}</div>
+          <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, marginBottom: 14 }}>{t.blogShareTitle}</div>
           <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
             <a href={`https://wa.me/?text=${encodeURIComponent(`${title} ${shareUrl}`)}`} target="_blank" rel="noopener noreferrer"
-              style={{ background: `#25D366`, color: `#fff`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, textDecoration: `none` }}>{t.blogShareWhatsapp}</a>
+              style={{ background: `#25D366`, color: `#fff`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, textDecoration: `none` }}>{t.blogShareWhatsapp}</a>
             <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer"
-              style={{ background: `#1877F2`, color: `#fff`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, textDecoration: `none` }}>{t.blogShareFacebook}</a>
+              style={{ background: `#1877F2`, color: `#fff`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, textDecoration: `none` }}>{t.blogShareFacebook}</a>
             <button type="button" onClick={copyLink}
-              style={{ background: copied ? COLORS.success : `transparent`, color: copied ? `#000` : COLORS.white, border: `1px solid ${copied ? COLORS.success : COLORS.border}`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, transition: `all 0.2s` }}>{copied ? t.blogShareCopied : t.blogShareCopy}</button>
+              style={{ background: copied ? COLORS.success : `transparent`, color: copied ? `#000` : COLORS.white, border: `1px solid ${copied ? COLORS.success : COLORS.border}`, borderRadius: 10, padding: `11px 20px`, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, cursor: `pointer`, transition: `all 0.2s` }}>{copied ? t.blogShareCopied : t.blogShareCopy}</button>
           </div>
         </div>
 
@@ -13818,7 +13833,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         )}
 
         <div style={{ marginTop: 48 }}>
-          <button onClick={() => goToBlog()} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
+          <button onClick={() => goToBlog()} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 10, padding: `12px 24px`, fontSize: 14, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
         </div>
       </article>
 
@@ -13938,8 +13953,8 @@ function BlogAdmin({ uploadAdminImage, lang }) {
     fetchPosts();
   };
 
-  const inp = { width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 12px`, color: COLORS.white, fontFamily: `'Varela Round',sans-serif`, fontSize: 14, outline: `none`, boxSizing: `border-box`, marginTop: 4 };
-  const lbl = { color: COLORS.gray, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, display: `block`, marginTop: 12 };
+  const inp = { width: `100%`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 12px`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 14, outline: `none`, boxSizing: `border-box`, marginTop: 4 };
+  const lbl = { color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 12, display: `block`, marginTop: 12 };
   const field = (label, key, opts = {}) => (
     <label style={lbl}>{label}
       {opts.area
@@ -13956,7 +13971,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
           <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>{loading ? (lang === `he` ? `טוען...` : `Loading...`) : `${posts.length} ${lang === `he` ? `פוסטים` : `posts`}`}</p>
         </div>
         {!editing && (
-          <button onClick={startNew} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `+ פוסט חדש` : `+ New post`}</button>
+          <button onClick={startNew} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 16px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{lang === `he` ? `+ פוסט חדש` : `+ New post`}</button>
         )}
       </div>
 
@@ -13995,7 +14010,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
             </div>
             <div style={{ flex: 1, minWidth: 220 }}>
               <input ref={fileRef} type="file" accept="image/*" onChange={handleCover} style={{ display: `none` }} />
-              <button type="button" onClick={() => fileRef.current && fileRef.current.click()} disabled={uploading} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `8px 14px`, fontSize: 12, fontWeight: 700, cursor: uploading ? `wait` : `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{uploading ? `…` : (lang === `he` ? `העלה כריכה` : `Upload cover`)}</button>
+              <button type="button" onClick={() => fileRef.current && fileRef.current.click()} disabled={uploading} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `8px 14px`, fontSize: 12, fontWeight: 700, cursor: uploading ? `wait` : `pointer`, fontFamily: `'Heebo',sans-serif` }}>{uploading ? `…` : (lang === `he` ? `העלה כריכה` : `Upload cover`)}</button>
               {field(`cover_image_url`, `cover_image_url`, { dir: `ltr` })}
             </div>
           </div>
@@ -14011,15 +14026,15 @@ function BlogAdmin({ uploadAdminImage, lang }) {
           {showPreview && (
             <div style={{ marginTop: 16, border: `1px dashed ${COLORS.border}`, borderRadius: 10, padding: 16, background: COLORS.bg }}>
               <div style={{ color: COLORS.accent, fontSize: 11, fontFamily: `'IBM Plex Mono',monospace`, marginBottom: 10 }}>PREVIEW (content_he)</div>
-              <div className="blog-body" style={{ color: `#d6d6d6`, fontFamily: `'Varela Round',sans-serif`, fontSize: 16, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(form.content_he) }} />
+              <div className="blog-body" style={{ color: `#d6d6d6`, fontFamily: `'Heebo',sans-serif`, fontSize: 16, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(form.content_he) }} />
             </div>
           )}
 
           <div style={{ display: `flex`, gap: 10, marginTop: 18, flexWrap: `wrap` }}>
-            <button onClick={() => save(false)} disabled={busy} style={{ background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `שמור טיוטה` : `Save draft`)}</button>
-            <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
-            <button onClick={() => setShowPreview((s) => !s)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `תצוגה מקדימה` : `Preview`}</button>
-            <button onClick={cancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif` }}>{lang === `he` ? `ביטול` : `Cancel`}</button>
+            <button onClick={() => save(false)} disabled={busy} style={{ background: COLORS.bg, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{busy ? `…` : (lang === `he` ? `שמור טיוטה` : `Save draft`)}</button>
+            <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
+            <button onClick={() => setShowPreview((s) => !s)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{lang === `he` ? `תצוגה מקדימה` : `Preview`}</button>
+            <button onClick={cancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{lang === `he` ? `ביטול` : `Cancel`}</button>
             <style>{`.blog-body h2{font-family:'Playfair Display',serif;font-style:italic;color:#fff;font-size:1.5rem;margin:20px 0 10px} .blog-body p{margin:0 0 14px} .blog-body a{color:#FF6B35} .blog-body img{max-width:100%;height:auto;border-radius:10px}`}</style>
           </div>
         </div>
@@ -14030,15 +14045,15 @@ function BlogAdmin({ uploadAdminImage, lang }) {
           {posts.length === 0 && <div style={{ color: COLORS.gray, fontSize: 14, padding: 16 }}>{lang === `he` ? `אין פוסטים עדיין` : `No posts yet`}</div>}
           {posts.map((p) => (
             <div key={p.id} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `10px 14px`, display: `flex`, alignItems: `center`, gap: 12, flexWrap: `wrap` }}>
-              <span style={{ background: p.status === `published` ? `rgba(74,222,128,0.15)` : `rgba(255,255,255,0.06)`, color: p.status === `published` ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `4px 10px`, fontSize: 11, fontWeight: 700, fontFamily: `'Varela Round',sans-serif`, flexShrink: 0 }}>{p.status}</span>
+              <span style={{ background: p.status === `published` ? `rgba(74,222,128,0.15)` : `rgba(255,255,255,0.06)`, color: p.status === `published` ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `4px 10px`, fontSize: 11, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, flexShrink: 0 }}>{p.status}</span>
               <div style={{ flex: 1, minWidth: 160 }}>
                 <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: `'Playfair Display',serif` }}>{p.title_he || p.title_en || p.slug}</div>
                 <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{[p.category, p.published_at ? formatBlogDate(p.published_at, lang) : `—`, `${p.views_count || 0} ${lang === `he` ? `צפיות` : `views`}`].filter(Boolean).join(` · `)}</div>
               </div>
               <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
-                <button onClick={() => startEdit(p)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lang === `he` ? `ערוך` : `Edit`}</button>
-                <button onClick={() => togglePublish(p)} style={{ background: `transparent`, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{p.status === `published` ? (lang === `he` ? `הסתר` : `Unpublish`) : (lang === `he` ? `פרסם` : `Publish`)}</button>
-                <button onClick={() => remove(p)} style={{ background: `transparent`, color: `#ef4444`, border: `1px solid #ef4444`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Varela Round',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lang === `he` ? `מחק` : `Delete`}</button>
+                <button onClick={() => startEdit(p)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lang === `he` ? `ערוך` : `Edit`}</button>
+                <button onClick={() => togglePublish(p)} style={{ background: `transparent`, color: COLORS.white, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700 }}>{p.status === `published` ? (lang === `he` ? `הסתר` : `Unpublish`) : (lang === `he` ? `פרסם` : `Publish`)}</button>
+                <button onClick={() => remove(p)} style={{ background: `transparent`, color: `#ef4444`, border: `1px solid #ef4444`, borderRadius: 6, padding: `6px 12px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: 700 }}>{lang === `he` ? `מחק` : `Delete`}</button>
               </div>
             </div>
           ))}
