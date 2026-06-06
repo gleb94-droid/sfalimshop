@@ -5826,16 +5826,44 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     // BLOOM designs are already hosted on Supabase — reuse the URL, don't re-upload.
     if (/^https?:\/\//i.test(dataUrl)) return dataUrl;
     try {
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const ext = blob.type.includes('png') ? 'png' : 'jpg';
+      // The `designs` bucket only accepts png/jpeg/webp. An uploaded file can
+      // arrive with an empty or unsupported mime (e.g. HEIC, or no type at all),
+      // which the bucket rejects with HTTP 415 invalid_mime_type — leaving the
+      // order with no artwork. So re-encode the image to a clean PNG via canvas;
+      // the resulting blob is always image/png and always accepted.
+      let blob = null;
+      let ext = `png`;
+      let contentType = `image/png`;
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = reject;
+          im.src = dataUrl;
+        });
+        const canvas = document.createElement(`canvas`);
+        canvas.width = img.naturalWidth || img.width || 1;
+        canvas.height = img.naturalHeight || img.height || 1;
+        canvas.getContext(`2d`).drawImage(img, 0, 0);
+        blob = await new Promise(r => canvas.toBlob(r, `image/png`));
+      } catch (_) { blob = null; }
+      // Fallback (e.g. a format the browser can't draw): use the raw bytes but
+      // force a bucket-accepted content type so the upload still goes through.
+      if (!blob) {
+        const raw = await (await fetch(dataUrl)).blob();
+        const t = (raw.type || ``).toLowerCase();
+        contentType = (t === `image/png` || t === `image/jpeg` || t === `image/webp`) ? t : `image/png`;
+        ext = contentType === `image/jpeg` ? `jpg` : contentType === `image/webp` ? `webp` : `png`;
+        blob = raw;
+      }
       const fileName = `design-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { data, error } = await supabase.storage.from('designs').upload(fileName, blob, { contentType: blob.type, upsert: false });
+      const { data, error } = await supabase.storage.from(`designs`).upload(fileName, blob, { contentType, upsert: false });
       if (data && !error) {
-        const { data: urlData } = supabase.storage.from('designs').getPublicUrl(fileName);
+        const { data: urlData } = supabase.storage.from(`designs`).getPublicUrl(fileName);
         return urlData.publicUrl;
       }
-    } catch (e) { console.log('Upload error:', e); }
+      if (error) console.log(`Upload error:`, error);
+    } catch (e) { console.log(`Upload error:`, e); }
     return null;
   };
 
