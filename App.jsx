@@ -1586,6 +1586,9 @@ const PET_NAME_COLOR_DEFAULT = `#FF6B35`;
 // total, the order total, and the stored orders.total; shown to the customer via
 // the +₪20 pill and the cart line. Empty name = no surcharge.
 const PET_NAME_SURCHARGE = 20;
+// Custom BLOOM commission (we draw a design from the customer's pet photos).
+// Pay-first, shirt-only in v1. KEEP IN SYNC with create-payment's commission branch.
+const COMMISSION_SHIRT_PRICE = 189;
 const hasHebrew = (s) => /[֐-׿]/.test(s || ``);
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 // Single source of truth for social links — referenced anywhere the Instagram
@@ -1735,6 +1738,9 @@ const CUSTOM_STICKERS_ENABLED = false;
 // The product + all its wiring stay in place; flip this to TRUE to show it in
 // the order-wizard grid again (also re-add it to the index.html ItemList JSON-LD).
 const STONEWASH_ENABLED = true;
+// Master switch for the "draw my pet in BLOOM style" commission flow. Starts OFF
+// so the whole feature stays hidden until it's built + tested; flip to true to launch.
+const BLOOM_COMMISSION_ENABLED = false;
 
 // Friendly, trilingual user-facing error text. The raw error is logged to the
 // console for debugging — never surfaced to the customer (no raw e.message).
@@ -1864,6 +1870,26 @@ const LANGS = {
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
+    commission: {
+      choiceTitle: `יש לכם עיצוב מוכן, או שנצייר אחד מהתמונות?`,
+      choiceUpload: `יש לי עיצוב — אעלה אותו`,
+      choiceUploadSub: `קובץ מוכן להדפסה`,
+      choiceCommission: `ציירו לי דיוקן BLOOM של החיה שלי`,
+      choiceCommissionSub: `שולחים תמונות, ואנחנו מעצבים`,
+      badge: `BLOOM לפי הזמנה`,
+      heading: `דיוקן BLOOM אישי של החיה שלכם`,
+      price: `₪189 · עיצוב בעבודת יד`,
+      microHow: `אחרי התשלום ייפתח וואטסאפ — שולחים 2–4 תמונות של החיה מזוויות שונות, ואנחנו מציירים.`,
+      microRevisions: `עד 3 סבבי תיקונים, עד שתהיו מרוצים.`,
+      microTime: `תצוגה מקדימה תוך 3–5 ימי עסקים.`,
+      microRefund: `עבודה בהזמנה אישית — אין החזר כספי לאחר אישור העיצוב (אבל מתקנים עד שאתם מרוצים).`,
+      addBtn: `המשך לתשלום ←`,
+      postHeading: `קיבלנו את ההזמנה! 🎨`,
+      postSub: `עכשיו שלחו לנו בוואטסאפ 2–4 תמונות של החיה מזוויות שונות (פנים, פרופיל, גוף מלא), ונתחיל לצייר.`,
+      postCta: `שליחת תמונות בוואטסאפ`,
+      postPrefill: (id) => `היי! ביצעתי הזמנת BLOOM אישית מספר ${id} — הנה תמונות של החיה שלי:`,
+      adminBadge: `קומישן BLOOM — ממתין לתמונות`,
+    },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
     payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור מס׳ 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "14 יום להחזרת פריטי מדף", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו", redirecting: "מעבירים אותך לעמוד התשלום המאובטח", redirectingSub: "רק רגע — אל תסגרו את החלון", ownerLine: "מודפס באהבה ביד, בבאר שבע", guestPay: "תשלום כאורח · ללא צורך בהרשמה" },
@@ -1908,6 +1934,26 @@ const LANGS = {
     reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
+    commission: {
+      choiceTitle: `Have a design ready, or should we draw one from photos?`,
+      choiceUpload: `I have a design — I'll upload it`,
+      choiceUploadSub: `A print-ready file`,
+      choiceCommission: `Draw a BLOOM portrait of my pet`,
+      choiceCommissionSub: `You send photos, we design it`,
+      badge: `BLOOM made to order`,
+      heading: `A personalized BLOOM portrait of your pet`,
+      price: `₪189 · hand-made design`,
+      microHow: `After payment, WhatsApp opens — send 2–4 photos of your pet from different angles, and we'll draw it.`,
+      microRevisions: `Up to 3 rounds of revisions, until you're happy.`,
+      microTime: `Preview within 3–5 business days.`,
+      microRefund: `Made to order — no cash refund after you approve the design (but we revise until you're happy).`,
+      addBtn: `Continue to payment →`,
+      postHeading: `We've got your order! 🎨`,
+      postSub: `Now send us 2–4 photos of your pet from different angles (face, profile, full body) on WhatsApp, and we'll start drawing.`,
+      postCta: `Send photos on WhatsApp`,
+      postPrefill: (id) => `Hi! I placed a custom BLOOM order #${id} — here are photos of my pet:`,
+      adminBadge: `BLOOM commission — awaiting photos`,
+    },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
     form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
     payment: { title: "Secure Payment", subtitle: "Review and confirm your order", orderNum: "Order #", summary: "Order Summary", subtotal: "Subtotal", shipping: "Shipping", total: "Total to Pay", deliveryTo: "Delivery Address", payBtn: "Pay ", paySuffix: " Securely →", processing: "Processing...", soonTitle: "Payment system coming soon", soonSub: "We're finalizing setup with our payment processor. Your order is saved and we'll personally contact you when the system is live.", soonBtn: "Close and save order", cancel: "Cancel Order", editDetails: "← Edit Details", confirmCancel: "Cancel this order?", securedBy: "Secured by", acceptedCards: "We accept:", businessLine: "Sfalim Shop · Exempt Dealer No. 321630279", trustFast: "Fast and secure payment", trustSSL: "256-bit SSL encryption", trustReturn: "14-day returns on ready-made items", trustNoSave: "We never store card details", redirecting: "Taking you to the secure payment page", redirectingSub: "One moment — please don't close this window", ownerLine: "Printed by hand with love, in Be'er Sheva", guestPay: "Checkout as guest · no account needed" },
@@ -1952,6 +1998,26 @@ const LANGS = {
     reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
+    commission: {
+      choiceTitle: `Есть готовый дизайн или нарисовать по фото?`,
+      choiceUpload: `У меня есть дизайн — загружу`,
+      choiceUploadSub: `Готовый файл для печати`,
+      choiceCommission: `Нарисуйте BLOOM-портрет моего питомца`,
+      choiceCommissionSub: `Вы присылаете фото — мы рисуем`,
+      badge: `BLOOM на заказ`,
+      heading: `Персональный BLOOM-портрет вашего питомца`,
+      price: `₪189 · ручная работа`,
+      microHow: `После оплаты откроется WhatsApp — пришлите 2–4 фото питомца с разных ракурсов, и мы нарисуем.`,
+      microRevisions: `До 3 раундов правок, пока не понравится.`,
+      microTime: `Превью в течение 3–5 рабочих дней.`,
+      microRefund: `Изготовление под заказ — возврата денег нет после утверждения дизайна (но правим, пока вы не довольны).`,
+      addBtn: `Перейти к оплате →`,
+      postHeading: `Заказ принят! 🎨`,
+      postSub: `Теперь пришлите нам 2–4 фото питомца с разных ракурсов (анфас, профиль, в полный рост) в WhatsApp, и мы начнём рисовать.`,
+      postCta: `Отправить фото в WhatsApp`,
+      postPrefill: (id) => `Здравствуйте! Я оформил персональный BLOOM-заказ №${id} — вот фото моего питомца:`,
+      adminBadge: `Комиссия BLOOM — ждёт фото`,
+    },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
     form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
     payment: { title: "Безопасная оплата", subtitle: "Проверьте и подтвердите заказ", orderNum: "Заказ №", summary: "Сводка заказа", subtotal: "Промежуточный итог", shipping: "Доставка", total: "Итого к оплате", deliveryTo: "Адрес доставки", payBtn: "Оплатить ", paySuffix: " безопасно →", processing: "Обработка...", soonTitle: "Платёжная система скоро запустится", soonSub: "Мы завершаем настройку с провайдером платежей. Ваш заказ сохранён, мы свяжемся с вами лично, когда система заработает.", soonBtn: "Закрыть и сохранить заказ", cancel: "Отменить заказ", editDetails: "← Изменить данные", confirmCancel: "Отменить заказ?", securedBy: "Защищено", acceptedCards: "Способы оплаты:", businessLine: "Sfalim Shop · Освобождённый предприниматель № 321630279", trustFast: "Быстрая и безопасная оплата", trustSSL: "256-bit SSL шифрование", trustReturn: "Возврат готовых товаров — 14 дней", trustNoSave: "Мы не сохраняем данные карты", redirecting: "Переходим на страницу безопасной оплаты", redirectingSub: "Один момент — не закрывайте окно", ownerLine: "Печатаем вручную с любовью, в Беэр-Шеве", guestPay: "Оплата как гость · без регистрации" },
@@ -5581,6 +5647,46 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // (its buttons return to the collection) vs a custom item.
   const [nextChoiceIsBloom, setNextChoiceIsBloom] = useState(!!pendingBloomItem);
 
+  // Custom BLOOM commission: add a shirt to the cart with NO design (we draw it
+  // from photos the customer sends on WhatsApp after paying). Reuses the current
+  // product/variant/colour selection. Carries inert shirt-extra fields so the cart
+  // drawer / order summary code that reads them never crashes. Pet name is taken
+  // in the WhatsApp brief (free) — no surcharge here.
+  const addCommissionToCart = () => {
+    if (!product || !variant) return false;
+    const unitPrice = COMMISSION_SHIRT_PRICE;
+    const colorHex = product.colors[selectedColor];
+    const cartItemId = Date.now() + Math.random();
+    const itemData = {
+      productId: selectedProduct,
+      productName: product.name,
+      variantId: selectedVariant,
+      variantLabel: variant.label,
+      colorIdx: selectedColor,
+      color: colorHex,
+      qty: 1,
+      uploadedImage: null,
+      isCustom: false,
+      isCommission: true,
+      uploadedUrl: null,
+      mockupUrl: null,
+      imagePos: { x: 150, y: 130, size: 85 },
+      backPrint: false,
+      backDesign: { enabled: false, sameAsMain: true, image: null },
+      secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
+      sleeveLeft: { enabled: false, sameAsMain: true, image: null },
+      sleeveRight: { enabled: false, sameAsMain: true, image: null },
+      unitPrice,
+      itemPrice: unitPrice,
+    };
+    setCart(c => [...c, { id: cartItemId, ...itemData }]);
+    try {
+      window.gtag?.(`event`, `add_to_cart`, { currency: `ILS`, value: unitPrice, items: [{ item_id: selectedProduct, item_name: product?.name, price: unitPrice, quantity: 1 }] });
+      window.fbq?.(`track`, `AddToCart`, { currency: `ILS`, value: unitPrice, content_ids: [selectedProduct], content_type: `product` });
+    } catch (_) {}
+    return true;
+  };
+
   const commitCurrentItem = () => {
     if (!product || !variant || !uploadedImage) return false;
     // Quantity is always 1 at item creation time now — the user adjusts it
@@ -6159,6 +6265,47 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             if (orderData?.id) createdOrderIds.push(orderData.id);
           } else {
             const { error } = await supabase.from(`orders`).insert(packRow);
+            if (error) throw error;
+          }
+          continue;
+        }
+
+        // Custom BLOOM commission: pay-first, no design upload, no mockup, and it
+        // must NEVER enter the design-approval gate (we draw the artwork AFTER
+        // payment from photos the customer sends on WhatsApp). Minimal row, then
+        // skip the shirt-style image pipeline. Do NOT set groupNeedsApproval.
+        if (it.isCommission) {
+          const commissionItemTotal = it.itemPrice + (i === 0 ? shippingPrice : 0);
+          const commissionRow = {
+            customer_name: form.name, customer_email: form.email, customer_phone: phone,
+            ...addr,
+            delivery_method: deliveryMethod,
+            product: it.productName,
+            variant: it.variantLabel || it.variantId || `commission`,
+            color: it.color,
+            quantity: it.qty,
+            total: commissionItemTotal,
+            notes: form.notes,
+            requires_design_approval: false,
+            design_approval_status: `not_required`,
+            status: `pending_payment`,
+            payment_status: `idle`,
+            currency: `ILS`,
+            user_id: user?.id || null,
+            design_url: null,
+            mockup_url: null,
+            product_color: it.color,
+            language: lang,
+            back_print: false,
+            order_group: orderGroupId,
+            extra_prints: { shipping_method: deliveryMethod, src: `commission`, pid: it.productId, vid: it.variantId, slug: null },
+          };
+          if (user) {
+            const { data: orderData, error } = await supabase.from(`orders`).insert(commissionRow).select().single();
+            if (error) throw error;
+            if (orderData?.id) createdOrderIds.push(orderData.id);
+          } else {
+            const { error } = await supabase.from(`orders`).insert(commissionRow);
             if (error) throw error;
           }
           continue;

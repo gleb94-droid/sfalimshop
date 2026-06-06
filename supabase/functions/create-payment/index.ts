@@ -257,6 +257,12 @@ serve(async (req) => {
           unit = await priceBloom(String(meta.slug || ""), pid, !!row.pet_name);
         } else if (meta.src === "pack") {
           unit = await pricePack(String(meta.slug || ""));
+        } else if (meta.src === "commission") {
+          // Custom BLOOM commission (we draw the design from the customer's photos).
+          // Flat price regardless of shirt type. KEEP IN SYNC WITH
+          // COMMISSION_SHIRT_PRICE in App.jsx. Pet name is taken free via WhatsApp,
+          // so pet_name is normally null here, but keep the surcharge for safety.
+          unit = 189 + (row.pet_name ? PET_SURCHARGE : 0);
         }
         if (unit == null || !isFinite(unit) || unit <= 0) { allResolved = false; break; }
         const itemTotal = unit * qty;
