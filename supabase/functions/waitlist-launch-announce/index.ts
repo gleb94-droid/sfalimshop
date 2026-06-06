@@ -63,10 +63,9 @@ const SITE_URL = `https://www.sfalimshop.com`;
 const SHOP_URL = `https://www.sfalimshop.com/#pets`; // CTA → the live BLOOM gallery
 const INSTAGRAM = `https://www.instagram.com/sfalimshop/`;
 
-// Webhook shared secret (in-code fallback). Override in prod by setting the
-// LAUNCH_ANNOUNCE_SECRET Edge Function secret, then rotate this value. Distinct
-// from the waitlist-welcome secret on purpose.
-const WEBHOOK_SECRET_FALLBACK = `ca6c5be8a2d152a6d38ba3ae6c87f49330f77acfee591792`;
+// Webhook shared secret — REQUIRED from the LAUNCH_ANNOUNCE_SECRET Edge Function
+// secret. No in-code fallback (fail-closed): if it isn't set, every request is
+// rejected rather than authorized by a value committed to the repo.
 
 // Batched sending — respect Resend's default ~2 req/s and the Edge Function
 // wall-clock limit. If the list is large, the function returns after sending
@@ -217,8 +216,8 @@ Deno.serve(async (req: Request) => {
   if (req.method !== `POST`) return json({ error: `method_not_allowed` }, 405);
 
   // ── Secret gate — ALWAYS enforced ──
-  const expectedSecret = Deno.env.get(`LAUNCH_ANNOUNCE_SECRET`) || WEBHOOK_SECRET_FALLBACK;
-  if (req.headers.get(`x-webhook-secret`) !== expectedSecret) {
+  const expectedSecret = Deno.env.get(`LAUNCH_ANNOUNCE_SECRET`) ?? ``;
+  if (!expectedSecret || req.headers.get(`x-webhook-secret`) !== expectedSecret) {
     return json({ error: `unauthorized`, skipped: true }, 401);
   }
 

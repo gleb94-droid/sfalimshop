@@ -202,8 +202,8 @@ serve(async (req) => {
   //   src=custom → fixed CATALOG ; src=bloom → pet_designs ; src=pack → sticker_packs
   // Shipping comes from delivery_method. If EVERY row resolves we persist the
   // corrected per-row totals (so the webhook amount-check + emails stay in sync)
-  // and charge that sum; if anything can't be resolved we fall back to the stored
-  // totals so a legitimate order is never blocked.
+  // and charge that sum. If anything can't be resolved we REJECT (fail closed) —
+  // see the security note below.
   // KEEP THIS CATALOG IN SYNC WITH PRODUCTS in App.jsx.
   // ============================================================
   const CATALOG: Record<string, number | Record<string, number>> = {
@@ -269,11 +269,16 @@ serve(async (req) => {
     authoritativeAmount = null;
   }
 
-  const clientTotal = existing.reduce((s, o) => s + (Number(o.total) || 0), 0);
-  const amount = (authoritativeAmount != null && authoritativeAmount > 0) ? authoritativeAmount : clientTotal;
-  if (!isFinite(amount) || amount <= 0) {
-    return json({ ok: false, error: "invalid_server_amount" }, 400);
+  // SECURITY (B1 — fail CLOSED): never charge a client-supplied total. If the
+  // server could not authoritatively re-price EVERY row (allResolved=false above),
+  // the order is malformed or tampered — REJECT instead of falling open to
+  // SUM(orders.total), which a guest fully controls on INSERT (the protect trigger
+  // only freezes total on UPDATE, never INSERT). Every legitimate cart row carries
+  // src + pid/vid/slug, so a row that won't resolve is itself the red flag.
+  if (authoritativeAmount == null || !isFinite(authoritativeAmount) || authoritativeAmount <= 0) {
+    return json({ ok: false, error: "unresolved_pricing" }, 400);
   }
+  const amount = authoritativeAmount;
 
   // Persist the corrected per-row totals so the webhook's amount check + the
   // confirmation/admin emails reflect what we actually charge.

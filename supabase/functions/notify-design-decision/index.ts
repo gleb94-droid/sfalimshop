@@ -37,9 +37,9 @@ const PAGE = `#f5f3ef`;
 const SITE_URL = `https://www.sfalimshop.com`;
 const INSTAGRAM = `https://www.instagram.com/sfalimshop/`;
 
-// Webhook shared secret (in-code fallback). Override in prod with the
-// DESIGN_NOTIFY_WEBHOOK_SECRET Edge Function secret, then rotate this value.
-const WEBHOOK_SECRET_FALLBACK = `b9d4f1a7c0e83562d1f4a9b6e2c7د08`.replace(/[^a-z0-9]/gi, ``) || `b9d4f1a7c0e83562d1f4a9b6e2c708`;
+// Webhook shared secret — REQUIRED from the DESIGN_NOTIFY_WEBHOOK_SECRET Edge
+// Function secret. No in-code fallback (fail-closed): if it isn't set, every
+// request is rejected rather than authorized by a value committed to the repo.
 
 type Lang = `he` | `en` | `ru`;
 type Decision = `approved` | `rejected`;
@@ -216,8 +216,8 @@ Deno.serve(async (req: Request) => {
   if (req.method === `OPTIONS`) return new Response(`ok`, { headers: cors });
   if (req.method !== `POST`) return json({ error: `method_not_allowed` }, 405);
 
-  const expectedSecret = Deno.env.get(`DESIGN_NOTIFY_WEBHOOK_SECRET`) || WEBHOOK_SECRET_FALLBACK;
-  if (req.headers.get(`x-webhook-secret`) !== expectedSecret) {
+  const expectedSecret = Deno.env.get(`DESIGN_NOTIFY_WEBHOOK_SECRET`) ?? ``;
+  if (!expectedSecret || req.headers.get(`x-webhook-secret`) !== expectedSecret) {
     return json({ error: `unauthorized`, skipped: true }, 401);
   }
 

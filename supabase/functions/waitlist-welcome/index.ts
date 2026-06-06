@@ -50,10 +50,10 @@ const PAGE = `#f5f3ef`;
 const SITE_URL = `https://www.sfalimshop.com`;
 const INSTAGRAM = `https://www.instagram.com/sfalimshop/`;
 
-// Webhook shared secret (in-code fallback). The DB webhook on public.waitlist
-// sends this as the "x-webhook-secret" header. Override in prod by setting the
-// WAITLIST_WEBHOOK_SECRET Edge Function secret, then rotate this value.
-const WEBHOOK_SECRET_FALLBACK = `7e4edf71cb1d7514b43a6def3502be33aeffede9d75928e6`;
+// Webhook shared secret — REQUIRED from the WAITLIST_WEBHOOK_SECRET Edge Function
+// secret. No in-code fallback (fail-closed): the DB webhook on public.waitlist
+// sends the matching "x-webhook-secret" header; if the secret isn't set, every
+// request is rejected rather than authorized by a value committed to the repo.
 
 type Lang = "he" | "en" | "ru";
 
@@ -184,9 +184,9 @@ Deno.serve(async (req: Request) => {
   // Shared-secret gate — ALWAYS enforced. Only the DB webhook (which sends the
   // matching x-webhook-secret header) can reach the send path; anyone who finds
   // the public function URL and calls it without the secret gets 401, no send.
-  const expectedSecret = Deno.env.get(`WAITLIST_WEBHOOK_SECRET`) || WEBHOOK_SECRET_FALLBACK;
+  const expectedSecret = Deno.env.get(`WAITLIST_WEBHOOK_SECRET`) ?? ``;
   const got = req.headers.get(`x-webhook-secret`);
-  if (got !== expectedSecret) return json({ error: `unauthorized`, skipped: true }, 401);
+  if (!expectedSecret || got !== expectedSecret) return json({ error: `unauthorized`, skipped: true }, 401);
 
   let payload: any;
   try {
