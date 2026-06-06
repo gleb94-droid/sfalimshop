@@ -1740,7 +1740,7 @@ const CUSTOM_STICKERS_ENABLED = false;
 const STONEWASH_ENABLED = true;
 // Master switch for the "draw my pet in BLOOM style" commission flow. Starts OFF
 // so the whole feature stays hidden until it's built + tested; flip to true to launch.
-const BLOOM_COMMISSION_ENABLED = false;
+const BLOOM_COMMISSION_ENABLED = true;
 
 // Friendly, trilingual user-facing error text. The raw error is logged to the
 // console for debugging — never surfaced to the customer (no raw e.message).
