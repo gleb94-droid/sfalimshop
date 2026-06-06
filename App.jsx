@@ -8715,7 +8715,7 @@ function AboutPage({ lang, setPage }) {
         `Sfalim Shop נולד מתוך אהבה ליצירה. כבר קרוב ל-4 שנים אני עוסק בעיצוב והדפסה על חולצות וספלים — התחלתי בקטן, ועם הזמן למדתי, חקרתי, והתאהבתי יותר ויותר ביכולת לקחת רעיון ולהפוך אותו למשהו מוחשי. לאורך הדרך עיצבתי מתנות אישיות, מוצרים לאירועים, ומיתוג לספורטאים — ותמיד חלמתי על מקום משלי שבו אוכל להביא את החזון שלי לעולם.`,
         `לפני כשנה עלה הרעיון של BLOOM: בעלי חיים מעוצבים בלבוש פרחוני מרהיב, עם תכשיטים, בסגנון שלא ראיתם. הרעיון התבשל, התפתח, וקם לחיים בעבודה קשה סביב השעון — קולקציה עצומה של כלבים וחתולים, שכל אחד מהם הוא יצירת אמנות בפני עצמה.`,
         `אני אוהב בעלי חיים בכל ליבי — בבית שלי שני חתולים מאומצים, ויש לי חמלה גדולה לכל חיה. BLOOM הוא הדרך שלי לחבר בין האהבה הזו ליצירה: לתת לאנשים חיוך כשהם רואים עיצוב מיוחד, ובמיוחד כשהם מוצאים חיה שמזכירה את שלהם.`,
-        `וזו רק ההתחלה. החזון גדול — קולקציות חדשות בדרך, והרעיון ממשיך להתפתח. אני גם חולם לאפשר בקרוב עיצוב אישי של חיית המחמד שלכם בסגנון BLOOM — כלב, חתול, או כל חבר אחר. אין שמחה גדולה יותר מלדעת שבעל חיה נושא עליו עיצוב ייחודי של החבר הכי טוב שלו, וגאה להראות אותו לעולם.`,
+        `וזו רק ההתחלה. החזון גדול — קולקציות חדשות בדרך, והרעיון ממשיך להתפתח. ואני גאה במיוחד להציע עיצוב אישי של חיית המחמד שלכם בסגנון BLOOM — כלב, חתול, או כל חבר אחר — שאנחנו יוצרים מהתמונות שתשלחו לנו בוואטסאפ. אין שמחה גדולה יותר מלדעת שבעל חיה נושא עליו עיצוב ייחודי של החבר הכי טוב שלו, וגאה להראות אותו לעולם.`,
       ],
       whyTitle: `למה ספלים שופ?`,
       why: [
@@ -8752,7 +8752,7 @@ function AboutPage({ lang, setPage }) {
         `Sfalim Shop was born out of a love for creating. For nearly 4 years I've worked in designing and printing on shirts and mugs — I started small, and over time I learned, explored, and fell more and more in love with the ability to take an idea and turn it into something real. Along the way I designed personal gifts, products for events, and branding for athletes — and I always dreamed of a place of my own where I could bring my vision to the world.`,
         `About a year ago, the idea of BLOOM came to life: animals styled in stunning floral outfits with jewelry, in a style you've never seen. The idea grew, developed, and came alive through hard work around the clock — a huge collection of dogs and cats, each one a work of art in its own right.`,
         `I love animals with all my heart — at home I have two adopted cats, and I have deep compassion for every animal. BLOOM is my way of connecting that love with creation: to give people a smile when they see a special design, and especially when they find an animal that reminds them of their own.`,
-        `And this is just the beginning. The vision is big — new collections on the way, and the idea keeps evolving. I also dream of soon offering a personalized design of your own pet in the BLOOM style — dog, cat, or any other friend. There's no greater joy than knowing a pet owner is wearing a unique design of their best friend, proud to show it to the world.`,
+        `And this is just the beginning. The vision is big — new collections on the way, and the idea keeps evolving. And I'm especially proud to offer a personalized design of your own pet in the BLOOM style — dog, cat, or any other friend — created from the photos you send us on WhatsApp. There's no greater joy than knowing a pet owner is wearing a unique design of their best friend, proud to show it to the world.`,
       ],
       whyTitle: `Why Sfalim Shop?`,
       why: [
@@ -8789,7 +8789,7 @@ function AboutPage({ lang, setPage }) {
         `Sfalim Shop родился из любви к творчеству. Уже почти 4 года я занимаюсь дизайном и печатью на футболках и кружках — начинал с малого, со временем учился, исследовал и всё больше влюблялся в способность взять идею и превратить её во что-то реальное. На этом пути я создавал персональные подарки, продукцию для мероприятий и брендинг для спортсменов — и всегда мечтал о собственном месте, где смогу принести своё видение миру.`,
         `Около года назад родилась идея BLOOM: животные в потрясающих цветочных нарядах с украшениями, в стиле, которого вы ещё не видели. Идея росла, развивалась и ожила благодаря упорной работе круглые сутки — огромная коллекция собак и кошек, каждая из которых — произведение искусства.`,
         `Я люблю животных всем сердцем — дома у меня две кошки из приюта, и я испытываю глубокое сострадание к каждому животному. BLOOM — это мой способ соединить эту любовь с творчеством: подарить людям улыбку, когда они видят особый дизайн, особенно когда находят животное, похожее на их собственное.`,
-        `И это только начало. Видение большое — новые коллекции в пути, и идея продолжает развиваться. Я также мечтаю вскоре предложить персональный дизайн вашего питомца в стиле BLOOM — собаки, кошки или любого другого друга. Нет большей радости, чем знать, что владелец носит уникальный дизайн своего лучшего друга и гордо показывает его миру.`,
+        `И это только начало. Видение большое — новые коллекции в пути, и идея продолжает развиваться. И мне особенно приятно предлагать персональный дизайн вашего питомца в стиле BLOOM — собаки, кошки или любого другого друга — который мы создаём по фотографиям, что вы присылаете нам в WhatsApp. Нет большей радости, чем знать, что владелец носит уникальный дизайн своего лучшего друга и гордо показывает его миру.`,
       ],
       whyTitle: `Почему Sfalim Shop?`,
       why: [
@@ -13053,17 +13053,17 @@ const FAQ_GROUPS = [
       {
         q: { he: `איך מזמינים מוצר עם תמונה של החיה שלי?`, en: `How do I order a product with a photo of my pet?`, ru: `Как заказать товар с фотографией моего питомца?` },
         a: {
-          he: `בוחרים מוצר, מעלים תמונה, ואנחנו מעצבים אותה בסגנון BLOOM. לפני שאתם משלמים — אנחנו שולחים לכם את העיצוב לאישור. רק כשאתם מרוצים ומאשרים, עוברים לתשלום והפקה.`,
-          en: `Choose a product, upload a photo, and we'll design it in the BLOOM style. Before you pay, we send you the design for approval. Only once you're happy and approve it do we move on to payment and production.`,
-          ru: `Выберите товар, загрузите фотографию, и мы оформим её в стиле BLOOM. Перед оплатой мы пришлём вам дизайн на утверждение. Только когда вы довольны и подтверждаете его, мы переходим к оплате и производству.`,
+          he: `שולחים לנו בוואטסאפ 2–4 תמונות של החיה מזוויות שונות, ואנחנו מעצבים אותה בסגנון BLOOM. לפני שאתם משלמים — אנחנו שולחים לכם את העיצוב לאישור. רק כשאתם מרוצים ומאשרים, עוברים לתשלום והפקה.`,
+          en: `Send us 2–4 photos of your pet from different angles on WhatsApp, and we'll design it in the BLOOM style. Before you pay, we send you the design for approval. Only once you're happy and approve it do we move on to payment and production.`,
+          ru: `Пришлите нам в WhatsApp 2–4 фотографии питомца с разных ракурсов, и мы оформим их в стиле BLOOM. Перед оплатой мы пришлём вам дизайн на утверждение. Только когда вы довольны и подтверждаете его, мы переходим к оплате и производству.`,
         },
       },
       {
         q: { he: `אילו תמונות הכי מתאימות?`, en: `Which photos work best?`, ru: `Какие фотографии подходят лучше всего?` },
         a: {
-          he: `תמונה חדה, בתאורה טובה (אור יום מצוין), עם פרצוף ברור וממורכז. ככל שהתמונה איכותית יותר — העיצוב יוצא טוב יותר.`,
-          en: `A sharp photo in good lighting (daylight is excellent), with a clear, centered face. The better the photo's quality, the better the design comes out.`,
-          ru: `Чёткая фотография при хорошем освещении (дневной свет — отлично), с ясной и расположенной по центру мордочкой. Чем выше качество фотографии, тем лучше получается дизайн.`,
+          he: `2–4 תמונות חדות בתאורה טובה (אור יום מצוין), מזוויות שונות — פנים מלאות, פרופיל מהצד, ותמונת גוף שלמה. ככל שתשלחו יותר תמונות טובות ומגוונות — העיצוב יוצא טוב יותר.`,
+          en: `2–4 sharp photos in good lighting (daylight is excellent), from different angles — a full front face, a side profile, and a full-body shot. The more good, varied photos you send, the better the design comes out.`,
+          ru: `2–4 чёткие фотографии при хорошем освещении (дневной свет — отлично), с разных ракурсов — морда анфас, профиль сбоку и фото в полный рост. Чем больше хороших и разнообразных фото вы пришлёте, тем лучше получится дизайн.`,
         },
       },
       {
