@@ -987,7 +987,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
         <div style={{
           margin: 0,
           color: COLORS.white,
-          fontFamily: `'Playfair Display',serif`,
+          fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`,
           fontSize: 20,
           letterSpacing: `0.02em`,
           lineHeight: 1.15,
@@ -1898,6 +1898,8 @@ const LANGS = {
       postSub: `עכשיו שלחו לנו בוואטסאפ 2–4 תמונות של החיה מזוויות שונות (פנים, פרופיל, גוף מלא), ונתחיל לצייר.`,
       postCta: `שליחת תמונות בוואטסאפ`,
       postPrefill: (id) => `היי! ביצעתי הזמנת BLOOM אישית מספר ${id} — הנה תמונות של החיה שלי:`,
+      cartNotePet: `🎨 דיוקן בעבודת יד — נצייר מהתמונות שתשלחו בוואטסאפ אחרי התשלום`,
+      cartNoteCustom: `🎨 עיצוב בעבודת יד — נעצב לפי הרעיון שתשלחו בוואטסאפ אחרי התשלום`,
       adminBadge: `קומישן BLOOM — ממתין לתמונות`,
     },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
@@ -1967,6 +1969,8 @@ const LANGS = {
       postSub: `Now send us 2–4 photos of your pet from different angles (face, profile, full body) on WhatsApp, and we'll start drawing.`,
       postCta: `Send photos on WhatsApp`,
       postPrefill: (id) => `Hi! I placed a custom BLOOM order #${id} — here are photos of my pet:`,
+      cartNotePet: `🎨 Hand-drawn portrait — we'll draw it from the photos you send on WhatsApp after payment`,
+      cartNoteCustom: `🎨 Hand-made design — we'll design it from the idea you send on WhatsApp after payment`,
       adminBadge: `BLOOM commission — awaiting photos`,
     },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
@@ -2036,6 +2040,8 @@ const LANGS = {
       postSub: `Теперь пришлите нам 2–4 фото питомца с разных ракурсов (анфас, профиль, в полный рост) в WhatsApp, и мы начнём рисовать.`,
       postCta: `Отправить фото в WhatsApp`,
       postPrefill: (id) => `Здравствуйте! Я оформил персональный BLOOM-заказ №${id} — вот фото моего питомца:`,
+      cartNotePet: `🎨 Портрет вручную — нарисуем по фото, которые пришлёте в WhatsApp после оплаты`,
+      cartNoteCustom: `🎨 Дизайн вручную — нарисуем по идее, которую пришлёте в WhatsApp после оплаты`,
       adminBadge: `Комиссия BLOOM — ждёт фото`,
     },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
@@ -2860,7 +2866,7 @@ function AuthPage({ lang, onAuth }) {
         <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🔑</div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28 }}>{t.auth.forgotPwTitle}</h2>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28 }}>{t.auth.forgotPwTitle}</h2>
             <p style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, fontFamily: "'Heebo',sans-serif" }}>{t.auth.forgotPwDesc}</p>
           </div>
           <form onSubmit={handleSubmit}>
@@ -2887,8 +2893,8 @@ function AuthPage({ lang, onAuth }) {
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
       <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ display: "inline-block", padding: "4px 16px", borderBottom: "2px solid rgba(255,107,53,0.5)", color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 22, marginBottom: 16 }}>Sfalim</div>
-          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, marginTop: 8 }}>{mode === "login" ? t.auth.loginTitle : t.auth.registerTitle}</h2>
+          <div style={{ display: "inline-block", padding: "4px 16px", borderBottom: "2px solid rgba(255,107,53,0.5)", color: COLORS.accent, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontSize: 22, marginBottom: 16 }}>Sfalim</div>
+          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, marginTop: 8 }}>{mode === "login" ? t.auth.loginTitle : t.auth.registerTitle}</h2>
         </div>
         <form onSubmit={handleSubmit}>
           {mode === "register" && (
@@ -3033,8 +3039,8 @@ function ResetPasswordPage({ lang, setPage }) {
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
       <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ display: "inline-block", padding: "4px 16px", borderBottom: "2px solid rgba(255,107,53,0.5)", color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 22, marginBottom: 16 }}>Sfalim</div>
-          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, marginTop: 8 }}>{t.auth.resetPwTitle}</h2>
+          <div style={{ display: "inline-block", padding: "4px 16px", borderBottom: "2px solid rgba(255,107,53,0.5)", color: COLORS.accent, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontSize: 22, marginBottom: 16 }}>Sfalim</div>
+          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, marginTop: 8 }}>{t.auth.resetPwTitle}</h2>
         </div>
         {done ? (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
@@ -3412,7 +3418,7 @@ function TrackPage({ lang, user, clearCart }) {
       <div style={{ minHeight: `100vh`, background: COLORS.bg, display: `flex`, alignItems: `center`, justifyContent: `center`, padding: 24, direction: t.dir, fontFamily: `'Heebo',sans-serif` }}>
         <div style={{ background: COLORS.bgCard, border: `1px solid ${ok ? `#22c55e` : COLORS.accent}`, borderRadius: 16, padding: `40px 32px`, width: `100%`, maxWidth: 460, textAlign: `center` }}>
           <div style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 80, height: 80, borderRadius: `50%`, background: ok ? `rgba(34,197,94,0.12)` : `rgba(255,107,53,0.12)`, border: `2px solid ${ok ? `#22c55e` : COLORS.accent}`, marginBottom: 20, fontSize: 40 }}>{ok ? `✓` : proc ? `⏳` : `📦`}</div>
-          <h2 style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontSize: 26, margin: `0 0 10px` }}>{title}</h2>
+          <h2 style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontSize: 26, margin: `0 0 10px` }}>{title}</h2>
           <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{sub}</p>
           {payReturn.orderGroup && (
             <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: `10px 16px`, marginBottom: 24 }}>
@@ -3448,7 +3454,7 @@ function TrackPage({ lang, user, clearCart }) {
       <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 40, width: "100%", maxWidth: 420 }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ fontSize: 42, marginBottom: 12 }}>📦</div>
-          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0 }}>{t.track.guestTitle}</h2>
+          <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, margin: 0 }}>{t.track.guestTitle}</h2>
           <p style={{ color: COLORS.gray, fontSize: 13.5, marginTop: 10, lineHeight: 1.6 }}>{t.track.guestDesc}</p>
         </div>
         {guestSent ? (
@@ -3477,7 +3483,7 @@ function TrackPage({ lang, user, clearCart }) {
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Heebo',sans-serif", direction: t.dir }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px" }}>
-        <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h1>
+        <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 36, marginBottom: 8 }}>{t.track.title}</h1>
         <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 32 }}>{t.track.sub}</p>
 
         {actionError && (
@@ -3493,7 +3499,7 @@ function TrackPage({ lang, user, clearCart }) {
           orders.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
               <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
-              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
+              <div style={{ fontSize: 22, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
               <div style={{ fontSize: 16, color: "#888" }}>{t.track.noOrders}</div>
             </div>
           ) : (
@@ -3684,7 +3690,7 @@ function TrackPage({ lang, user, clearCart }) {
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
               <span style={{ width: 14, height: 14, borderRadius: "50%", background: COLORS.accent, display: "inline-block", boxShadow: `0 0 30px rgba(255,107,53,0.7)` }}></span>
             </div>
-            <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
+            <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
             <button onClick={() => setPaySoon(false)} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", width: "100%" }}>{t.payment.soonBtn}</button>
           </div>
@@ -4297,7 +4303,7 @@ function AdminPage({ lang }) {
         </nav>
         <div id="admin-orders" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
           <div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36 }}>{t.admin.title}</h2>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 36 }}>{t.admin.title}</h2>
             <p style={{ color: COLORS.gray, marginTop: 4 }}>{orders.length} {t.admin.total}</p>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -4397,7 +4403,7 @@ function AdminPage({ lang }) {
           (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).filter(orderMatchesSearch).length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
               <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
-              <div style={{ fontSize: 22, fontFamily: "'Playfair Display',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
+              <div style={{ fontSize: 22, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
               <div style={{ fontSize: 16, color: "#888" }}>{search.trim() ? (lang === "he" ? "לא נמצאו הזמנות לחיפוש" : lang === "ru" ? "Заказы не найдены" : "No orders match your search") : t.admin.noOrders}</div>
             </div>
           ) : (
@@ -4627,7 +4633,7 @@ function AdminPage({ lang }) {
         <div id="admin-pets" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
             <div>
-              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>BLOOM</h2>
+              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>BLOOM</h2>
               <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
                 {petsLoading
                   ? (lang === "he" ? "טוען..." : lang === "ru" ? "Загрузка..." : "Loading...")
@@ -4674,7 +4680,7 @@ function AdminPage({ lang }) {
                         {thumb && <SmartImage src={thumb} alt={dName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                       </div>
                       <div style={{ flex: 1, minWidth: 120 }}>
-                        <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif" }}>{dName}</div>
+                        <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{dName}</div>
                         <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>
                           {[d.species, d.breed_en || d.breed_he, d.is_active ? `` : (lang === `he` ? `כבוי` : lang === `ru` ? `выкл` : `inactive`)].filter(Boolean).join(` · `)}
                         </div>
@@ -4735,7 +4741,7 @@ function AdminPage({ lang }) {
         <div id="admin-packs" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
             <div>
-              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
                 {lang === `he` ? `חבילות מדבקות` : lang === `ru` ? `Наборы наклеек` : `Sticker packs`}
               </h2>
               <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
@@ -4783,7 +4789,7 @@ function AdminPage({ lang }) {
                         {p.image_url && <SmartImage src={p.image_url} alt={pName} style={{ width: `100%`, height: `100%`, objectFit: `contain` }} />}
                       </div>
                       <div style={{ flex: 1, minWidth: 120 }}>
-                        <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: `'Playfair Display',serif` }}>{pName}</div>
+                        <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif` }}>{pName}</div>
                         <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>
                           {[p.species, `₪${p.price}`, `${(p.item_slugs || []).length} ${lang === `he` ? `מדבקות` : lang === `ru` ? `наклеек` : `stickers`}`, p.is_active ? `` : (lang === `he` ? `כבוי` : lang === `ru` ? `выкл` : `inactive`)].filter(Boolean).join(` · `)}
                         </div>
@@ -4826,7 +4832,7 @@ function AdminPage({ lang }) {
         {/* ===== Pending design-approval queue — custom uploads awaiting review ===== */}
         <div id="admin-approvals" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
           <div style={{ marginBottom: 20 }}>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
               {lang === `he` ? `אישור עיצובים` : lang === `ru` ? `Одобрение дизайнов` : `Pending design approval`}
             </h2>
             <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
@@ -4891,7 +4897,7 @@ function AdminPage({ lang }) {
         {/* ===== Waitlist dashboard (read-only) — Task 10 ===== */}
         <div id="admin-waitlist" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
           <div style={{ marginBottom: 20 }}>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
               {lang === `he` ? `רשימת המתנה` : lang === `ru` ? `Лист ожидания` : `Waitlist`}
             </h2>
             <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
@@ -4959,7 +4965,7 @@ function AdminPage({ lang }) {
         <div id="admin-testimonials" style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
             <div>
-              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
+              <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, margin: 0, letterSpacing: "-0.01em" }}>
                 {lang === `he` ? `ביקורות` : lang === `ru` ? `Отзывы` : `Reviews`}
               </h2>
               <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>
@@ -5386,6 +5392,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
+          {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11, lineHeight: 1.45, marginTop: 3 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
           {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={13} color={it.petNameColor || COLORS.accent} /><span>{it.petName} (+₪{PET_NAME_SURCHARGE})</span></div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
@@ -5426,7 +5433,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: COLORS.gray }}>
         <span>{tr.shipping}</span><span style={{ color: COLORS.white, textAlign: isRTL ? "left" : "right" }}>{!deliveryMethod ? tr.choose : shippingLineLabel(deliveryMethod, lang)}</span>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${COLORS.border}`, color: COLORS.accent, fontWeight: 700, fontSize: 17, fontFamily: "'Playfair Display',serif" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${COLORS.border}`, color: COLORS.accent, fontWeight: 700, fontSize: 17, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>
         <span>{tr.total}</span><span>{`₪${total}`}</span>
       </div>
     </div>
@@ -5482,7 +5489,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
       maxHeight: "calc(100vh - 120px)",
       overflowY: "auto",
     }}>
-      <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 19, margin: "0 0 14px 0" }}>
+      <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontWeight: 700, fontSize: 19, margin: "0 0 14px 0" }}>
         {tr.title}
       </h3>
       {cart.length === 0 ? (
@@ -6582,7 +6589,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           style={{ position: "fixed", inset: 0, zIndex: 2000, background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
           <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "40px 32px", maxWidth: 440, width: "100%", textAlign: "center" }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 80, height: 80, borderRadius: "50%", background: "rgba(248,113,113,0.12)", border: "2px solid #f87171", marginBottom: 20, fontSize: 38, color: "#f87171", fontWeight: 700 }}>✕</div>
-            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 26, margin: "0 0 10px" }}>{lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}</h2>
+            <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 26, margin: "0 0 10px" }}>{lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}</h2>
             <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{lang === "he" ? "לא חויבת. אפשר לנסות שוב — ההזמנה שלך נשמרה." : lang === "ru" ? "С вас не списали. Можно попробовать снова — ваш заказ сохранён." : "You weren't charged. You can try again — your order is saved."}</p>
             <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); setStep(1); }}
               style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", marginBottom: 10 }}>
@@ -6632,7 +6639,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 420, width: "100%", textAlign: "center" }}>
               <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: "50%", background: "rgba(40,200,120,0.12)", border: "2px solid #28C878", marginBottom: 16, color: "#28C878", fontSize: 26, fontWeight: 700 }}>✓</div>
-              <div style={{ color: COLORS.white, fontSize: 20, fontWeight: 700, marginBottom: 8, fontFamily: "'Playfair Display',serif" }}>
+              <div style={{ color: COLORS.white, fontSize: 20, fontWeight: 700, marginBottom: 8, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>
                 {lang === "he" ? "הפריט נוסף לסל!" : lang === "ru" ? "Товар добавлен в корзину!" : "Item added to cart!"}
               </div>
               <div style={{ color: COLORS.gray, fontSize: 14, marginBottom: 24 }}>
@@ -6676,7 +6683,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </button>
               </div>
             )}
-            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h1>
+            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 32, marginBottom: 8 }}>{t.product.title}</h1>
             <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 20 }}>{t.product.sub}</p>
             <div className="reveal" data-delay="2" style={{ marginBottom: 24 }}>
               <TrustRow lang={lang} />
@@ -6685,19 +6692,19 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               {(() => {
                 const OVERSIZE_IDS = ["oversized", "look", "stonewash"];
                 // Single reusable product card (used both standalone and inside the Oversize group).
-                const card = (p, idx) => (
-                  <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
+                const card = (p, num) => (
+                  <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(num || 1, 6))}
                     onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); }}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); } }}
                     style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
-                      <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
+                      {num != null && <span style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(num).padStart(2, '0')}</span>}
                       <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 120 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                       </div>
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                          <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
+                          <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 16 : 18 }}>{p.name}</span>
                           {p.is_bestseller && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4 }}>{LANGS[lang].badges.bestseller}</span>}
                           {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
                         </div>
@@ -6710,10 +6717,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 );
                 const out = [];
                 let oversizeDone = false;
+                let dn = 0;
                 products.forEach((p, idx) => {
                   if (OVERSIZE_IDS.includes(p.id)) {
                     if (oversizeDone) return;
                     oversizeDone = true;
+                    dn += 1;
+                    const groupNum = dn;
                     const subs = products.filter(x => OVERSIZE_IDS.includes(x.id));
                     const anySel = subs.some(x => x.id === selectedProduct);
                     const open = openCat === "oversize" || anySel;
@@ -6724,13 +6734,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenCat(o => o === "oversize" ? null : "oversize"); } }}
                           style={{ padding: isMobile ? "16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
-                            <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: anySel ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
+                            <span style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: anySel ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(groupNum).padStart(2, '0')}</span>
                             <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <SmartImage src={transformImage(MOCKUP_URLS.oversized, { width: 120 })} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                             </div>
                             <div style={{ minWidth: 0, flex: 1 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                                <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 16 : 18 }}>{lang === "he" ? "אוברסייז" : lang === "ru" ? "Оверсайз" : "Oversize"}</span>
+                                <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 16 : 18 }}>{lang === "he" ? "אוברסייז" : lang === "ru" ? "Оверсайз" : "Oversize"}</span>
                                 <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{subs.length} {lang === "he" ? "דגמים" : lang === "ru" ? "модели" : "styles"}</span>
                               </div>
                               <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{lang === "he" ? "קלאסיק · לוק · סטון-ווש — לחצו לבחירה" : lang === "ru" ? "Classic · Look · Stone-wash — нажмите для выбора" : "Classic · Look · Stone-wash — tap to choose"}</div>
@@ -6741,13 +6751,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         </div>
                         {open && (
                           <div id="oversize-panel" style={{ display: "flex", flexDirection: "column", gap: 10, padding: isMobile ? "0 12px 12px" : "0 16px 16px" }}>
-                            {subs.map((sp, i) => card(sp, idx + i))}
+                            {subs.map((sp) => card(sp, null))}
                           </div>
                         )}
                       </div>
                     );
                   } else {
-                    out.push(card(p, idx));
+                    dn += 1;
+                    out.push(card(p, dn));
                   }
                 });
                 return out;
@@ -6809,7 +6820,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 onClick={() => setShowFabrics(s => !s)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowFabrics(s => !s); } }}
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-                <span style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 18 }}>
+                <span style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 18 }}>
                   {lang === "he" ? "🧵 מדריך הבדים שלנו" : lang === "ru" ? "🧵 О наших тканях" : "🧵 Our Fabrics"}
                 </span>
                 <span aria-hidden="true" style={{ color: COLORS.accent, fontSize: 14 }}>{showFabrics ? "▲" : "▼"}</span>
@@ -6819,7 +6830,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <div id="fabrics-panel" style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
                   {FABRIC_GUIDE.map((f, i) => (
                     <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: 14 }}>
-                      <div style={{ color: COLORS.accent, fontWeight: 700, fontFamily: "'Playfair Display',serif", fontSize: 15, marginBottom: 8 }}>{f.name[lang] || f.name.en}</div>
+                      <div style={{ color: COLORS.accent, fontWeight: 700, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 15, marginBottom: 8 }}>{f.name[lang] || f.name.en}</div>
                       <div style={{ color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5, marginBottom: 6 }}><b style={{ color: COLORS.white }}>{lang === "he" ? "איך מייצרים: " : lang === "ru" ? "Как делают: " : "How it's made: "}</b>{f.make[lang] || f.make.en}</div>
                       <div style={{ color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5 }}><b style={{ color: COLORS.white }}>{lang === "he" ? "למה זה טוב: " : lang === "ru" ? "Чем хорош: " : "Why it's great: "}</b>{f.good[lang] || f.good.en}</div>
                     </div>
@@ -6832,7 +6843,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         {step === 2 && product && (
           <div>
-            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h1>
+            <h1 className="reveal" style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 32, marginBottom: 8 }}>{t.customize.title(product.name)}</h1>
             <p className="reveal" data-delay="1" style={{ color: COLORS.gray, marginBottom: 24 }}>{t.customize.sub}</p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
@@ -7151,7 +7162,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
             {/* Form column — wider on desktop (flex 1.5 vs sidebar's 1) */}
             <div style={{ flex: isMobile ? "none" : "1.5", width: "100%", minWidth: 0 }}>
-            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h1>
+            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 32, marginBottom: 8 }}>{t.form.title}</h1>
             {submitError && <div role="alert" style={{ color: "#f87171", fontSize: 14, margin: "8px 0 16px", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>{submitError}</div>}
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.form.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -7288,7 +7299,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
               </div>
-              <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h1>
+              <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 34, marginBottom: 6 }}>{t.payment.title}</h1>
               {submitError && <div role="alert" style={{ color: "#f87171", fontSize: 14, margin: "10px 0", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>{submitError}</div>}
               <p style={{ color: COLORS.gray, fontSize: 15 }}>{t.payment.subtitle}</p>
             </div>
@@ -7333,7 +7344,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: `1px solid ${COLORS.border}` }}>
                   <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{t.payment.total}</span>
-                  <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 26, fontFamily: "'Playfair Display',serif" }}>₪{pendingTotal}</span>
+                  <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 26, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>₪{pendingTotal}</span>
                 </div>
               </div>
             </div>
@@ -7555,7 +7566,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
                     <span style={{ width: 14, height: 14, borderRadius: "50%", background: COLORS.accent, display: "inline-block", boxShadow: `0 0 30px rgba(255,107,53,0.7)`, animation: "maintPulse 2s ease-in-out infinite" }}></span>
                   </div>
-                  <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
+                  <h3 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 24, marginBottom: 14 }}>{t.payment.soonTitle}</h3>
                   <p style={{ color: COLORS.gray, fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{t.payment.soonSub}</p>
                   <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: "12px 16px", marginBottom: 24, textAlign: "start" }}>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginBottom: 4 }}>{t.payment.orderNum}</div>
@@ -7576,7 +7587,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         {step === 5 && (
           <div style={{ textAlign: "center", padding: "20px 0 60px" }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 88, height: 88, borderRadius: "50%", background: submittedForApproval ? "rgba(255,107,53,0.12)" : "rgba(34,197,94,0.12)", border: `2px solid ${submittedForApproval ? COLORS.accent : "#22c55e"}`, marginBottom: 24, fontSize: 44 }}>{submittedForApproval ? "🎨" : "✓"}</div>
-            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 36, marginBottom: 8 }}>{submittedForApproval ? t.approval.submittedTitle : t.confirm.title}</h1>
+            <h1 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 36, marginBottom: 8 }}>{submittedForApproval ? t.approval.submittedTitle : t.confirm.title}</h1>
             <p style={{ color: COLORS.gray, fontSize: 15, marginBottom: 24 }}>{t.confirm.subtitle}</p>
 
             {submittedForApproval && (
@@ -7643,7 +7654,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <div style={{ color: COLORS.success, fontSize: 14, fontWeight: 600, lineHeight: 1.6 }}>{t.auth.magicLinkSent}</div>
                 ) : (
                   <>
-                    <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{t.confirm.accountTitle}</div>
+                    <div style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{t.confirm.accountTitle}</div>
                     <div style={{ color: COLORS.gray, fontSize: 13.5, lineHeight: 1.6, maxWidth: 380, margin: "0 auto 18px" }}>{t.confirm.accountDesc}</div>
                     {accountError && <div style={{ color: "#f87171", fontSize: 12.5, marginBottom: 12 }}>{accountError}</div>}
                     <button type="button" onClick={handleGoogleSignup} disabled={accountBusy} style={{ width: "100%", background: "#fff", color: "#1a1a1a", border: "1px solid #fff", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: accountBusy ? "not-allowed" : "pointer", fontFamily: "'Heebo',sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: accountBusy ? 0.6 : 1 }}
@@ -7743,7 +7754,7 @@ function CookieConsent({ lang, onAccept, onReject }) {
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF6B35", boxShadow: "0 0 12px rgba(255,107,53,0.6)" }}></span>
-        <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: "italic", letterSpacing: "0.5px" }}>{t.title}</div>
+        <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 14, fontStyle: "italic", letterSpacing: "0.5px" }}>{t.title}</div>
       </div>
       <p style={{ color: "#bbb", fontFamily: "'Heebo',sans-serif", fontSize: 13, lineHeight: 1.65, marginBottom: 10, marginTop: 0 }}>
         {t.body}
@@ -8233,7 +8244,7 @@ function EventOrdersSection({ lang }) {
     <section aria-labelledby="event-orders-title" dir={dir} style={{ background: COLORS.bg, padding: `8px 24px 72px` }}>
       <div style={{ maxWidth: 860, margin: `0 auto`, background: `linear-gradient(180deg, rgba(255,107,53,0.08) 0%, rgba(255,107,53,0.03) 100%)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 20, padding: isRTL ? `40px 28px` : `40px 28px`, textAlign: `center` }}>
         <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>{eyebrow}</span>
-        <h2 id="event-orders-title" style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 900, fontSize: `clamp(28px,5vw,42px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 16px` }}>{heading}</h2>
+        <h2 id="event-orders-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(28px,5vw,42px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 16px` }}>{heading}</h2>
         <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15.5, lineHeight: 1.7, maxWidth: 640, margin: `0 auto 26px` }}>{copy}</p>
 
         <ul role="list" style={{ listStyle: `none`, margin: `0 0 30px`, padding: 0, display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 10 }}>
@@ -8351,7 +8362,7 @@ function Reviews({ lang }) {
         <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", marginBottom: 12, textTransform: "uppercase" }}>
           {t.eyebrow}
         </div>
-        <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "2rem" : "2.6rem", margin: 0, letterSpacing: "-0.01em" }}>
+        <h2 style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "2rem" : "2.6rem", margin: 0, letterSpacing: "-0.01em" }}>
           {t.title}
         </h2>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 18 }}>
@@ -8369,7 +8380,7 @@ function Reviews({ lang }) {
             onTouchEnd={e => { e.currentTarget.style.transform = "translateY(0)"; }}
             onTouchCancel={e => { e.currentTarget.style.transform = "translateY(0)"; }}>
             <ReviewStars rating={r.rating} label={t.aria} />
-            <blockquote style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: isMobile ? 16 : 18, lineHeight: 1.55, margin: 0 }}>
+            <blockquote style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontSize: isMobile ? 16 : 18, lineHeight: 1.55, margin: 0 }}>
               “{body(r)}”
             </blockquote>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: "auto", paddingTop: 8, borderTop: `1px solid ${COLORS.border}` }}>
@@ -8444,13 +8455,13 @@ function Hero({ setPage, lang }) {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
       <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Heebo',sans-serif" }}>{t.hero.badge}</div>
-      <h1 className="reveal" data-delay="1" style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
+      <h1 className="reveal" data-delay="1" style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
         {t.hero.h1line1}<br /><span style={{ color: COLORS.accent, fontStyle: "italic" }}>{t.hero.h1line2}</span>
       </h1>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Heebo',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
       <span className="reveal" data-delay="3" style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
         <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentBtnHover} onMouseOut={e => e.target.style.background = COLORS.accentBtn}>{t.hero.cta}</MagneticButton>
-        <button onClick={() => setPage("pets")} style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", letterSpacing: "0.3px", transition: "background 0.2s, color 0.2s" }}
+        <button onClick={() => setPage("pets")} style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", letterSpacing: "0.3px", transition: "background 0.2s, color 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
         >{t.hero.ctaSecondary} →</button>
@@ -8480,7 +8491,7 @@ function Hero({ setPage, lang }) {
             <div style={{ width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 320 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
-            <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
+            <div style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
             <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
             <div style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 12, lineHeight: 1.5, marginTop: 4, minHeight: 34 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
             <div style={{ color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 13, marginTop: 8 }}>{formatPriceRange(p.variants)}</div>
@@ -8578,7 +8589,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
         </button>
         {/* Explore BLOOM + language switcher */}
         <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12, flexShrink: 0 }}>
-          <button onClick={() => setPage("pets")} style={{ background: page === "pets" ? COLORS.accentDim : "transparent", border: `1px solid ${page === "pets" ? COLORS.accent : COLORS.border}`, color: page === "pets" ? COLORS.accent : COLORS.white, padding: isMobile ? "8px 14px" : "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 13 : 14, letterSpacing: "0.5px", whiteSpace: "nowrap", transition: "all 0.2s" }}
+          <button onClick={() => setPage("pets")} style={{ background: page === "pets" ? COLORS.accentDim : "transparent", border: `1px solid ${page === "pets" ? COLORS.accent : COLORS.border}`, color: page === "pets" ? COLORS.accent : COLORS.white, padding: isMobile ? "8px 14px" : "8px 20px", borderRadius: 8, cursor: "pointer", fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 13 : 14, letterSpacing: "0.5px", whiteSpace: "nowrap", transition: "all 0.2s" }}
             onMouseOver={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.color = COLORS.accent; } }}
             onMouseOut={e => { if (page !== "pets") { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.color = COLORS.white; } }}
           >{t.nav.pets}</button>
@@ -8607,7 +8618,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
             color: page === p ? COLORS.accent : COLORS.gray,
             padding: "8px 18px", borderRadius: 8, cursor: "pointer",
-            fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Heebo',sans-serif",
+            fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif",
             fontSize: 13, fontWeight: p === "pets" ? 700 : 500,
             fontStyle: p === "pets" ? "italic" : "normal",
             letterSpacing: p === "pets" ? "0.5px" : "normal",
@@ -8673,7 +8684,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     {mobileMenu && (
       <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, maxHeight: "calc(100vh - 72px)", overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
         {["home", "order", "pets", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
         <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
         {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
@@ -9098,7 +9109,7 @@ function AboutPage({ lang, setPage }) {
         <div className="reveal" style={{ display: 'inline-block', background: 'rgba(255,107,53,0.15)', border: '1px solid rgba(255,107,53,0.3)', borderRadius: 100, padding: '6px 18px', marginBottom: 24, color: '#FF6B35', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           {t.badge}
         </div>
-        <h1 className="reveal" data-delay="1" style={{ color: '#fff', fontSize: 'clamp(32px,5.5vw,60px)', fontWeight: 900, marginBottom: 16, fontFamily: "'Playfair Display',serif", letterSpacing: '-1px', lineHeight: 1.15 }}>{t.hero} <AboutIcon name="flower2" size="0.72em" strokeWidth={1.6} style={{ display: 'inline-block', verticalAlign: '-0.1em' }} /></h1>
+        <h1 className="reveal" data-delay="1" style={{ color: '#fff', fontSize: 'clamp(32px,5.5vw,60px)', fontWeight: 900, marginBottom: 16, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", letterSpacing: '-1px', lineHeight: 1.15 }}>{t.hero} <AboutIcon name="flower2" size="0.72em" strokeWidth={1.6} style={{ display: 'inline-block', verticalAlign: '-0.1em' }} /></h1>
         <p className="reveal" data-delay="2" style={{ color: '#FF6B35', fontSize: 18 }}>{t.subtitle}</p>
       </div>
 
@@ -9114,7 +9125,7 @@ function AboutPage({ lang, setPage }) {
       {/* Why us — benefit cards */}
       <div style={{ background: '#111', borderTop: '1px solid #1e1e1e', borderBottom: '1px solid #1e1e1e', padding: '60px 24px', marginTop: 32 }}>
         <div style={{ ...sectionStyle }}>
-          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 36, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}><AboutIcon name="sparkles" size={26} /><span>{t.whyTitle}</span></span></h2>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 36, textAlign: 'center', fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}><AboutIcon name="sparkles" size={26} /><span>{t.whyTitle}</span></span></h2>
           <div style={{ display: 'grid', gridTemplateColumns: vw >= 700 ? '1fr 1fr' : '1fr', gap: 16, maxWidth: 760, margin: '0 auto' }}>
             {t.why?.map((w, i) => (
               <div key={i} className="reveal" data-delay={String(i + 1)} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '22px 24px', color: '#cfcfcf', fontSize: 15, lineHeight: 1.7, textAlign: isRTL ? 'right' : 'left', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
@@ -9130,7 +9141,7 @@ function AboutPage({ lang, setPage }) {
           bands (why-us, contact) so the page reads as an alternating rhythm. */}
       <div style={{ background: '#0f0f0f', padding: '60px 24px' }}>
         <div style={{ ...sectionStyle }}>
-          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 40, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.techTitle}</h2>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 40, textAlign: 'center', fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{t.techTitle}</h2>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.tech?.map((tech, i) => (
               <div key={i} className="reveal" data-delay={String(i + 1)} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 16, padding: '26px 24px', flex: '1 1 240px', maxWidth: 300, transition: 'border-color 0.3s, transform 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)', textAlign: isRTL ? 'right' : 'left' }}
@@ -9149,7 +9160,7 @@ function AboutPage({ lang, setPage }) {
       {/* Process */}
       <div style={{ padding: '60px 24px' }}>
         <div style={{ ...sectionStyle }}>
-          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 48, textAlign: 'center', fontFamily: "'Playfair Display',serif" }}>{t.processTitle}</h2>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 48, textAlign: 'center', fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{t.processTitle}</h2>
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', justifyContent: 'center' }}>
             {t.process?.map((step, i) => (
               <div key={i} className="reveal" data-delay={String(i + 1)} style={{ flex: '1 1 150px', textAlign: 'center', padding: '0 12px', position: 'relative' }}>
@@ -9167,7 +9178,7 @@ function AboutPage({ lang, setPage }) {
       {/* Contact */}
       <div style={{ background: '#111', borderTop: '1px solid #1e1e1e', padding: '60px 24px' }}>
         <div style={{ ...sectionStyle, textAlign: 'center' }}>
-          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 32, fontFamily: "'Playfair Display',serif" }}>{t.contactTitle}</h2>
+          <h2 className="reveal" style={{ color: '#fff', fontSize: 32, marginBottom: 32, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{t.contactTitle}</h2>
           <div className="reveal" data-delay="1" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 36 }}>
             <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>{t.location}</div>
             <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: '20px 32px', color: '#888', fontSize: 15 }}>hello@sfalimshop.com</div>
@@ -9361,7 +9372,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
       }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 22px", borderBottom: `1px solid ${COLORS.border}`, flexShrink: 0 }}>
-          <div id="cart-drawer-title" style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 700 }}>
+          <div id="cart-drawer-title" style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 22, fontWeight: 700 }}>
             {`${tr.title}${cart.length > 0 ? ` (${cart.length})` : ""}`}
           </div>
           <button onClick={onClose} aria-label={tr.close} style={{
@@ -9395,6 +9406,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
+                    {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11.5, lineHeight: 1.45, marginTop: 4 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
                     {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={14} color={it.petNameColor || COLORS.accent} /><span>{it.petName} (+₪{PET_NAME_SURCHARGE})</span></div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
@@ -9452,9 +9464,9 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 11, borderTop: `1px solid ${COLORS.border}`, marginBottom: 4 }}>
               <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{tr.total}</span>
-              <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display',serif" }}>{`₪${total}`}</span>
+              <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{`₪${total}`}</span>
             </div>
-            <div style={{ color: COLORS.gray, fontSize: 11, textAlign: lang === "he" ? "right" : "left", marginBottom: 15 }}>{lang === "he" ? "+ משלוח מ-₪27 · איסוף עצמי בבאר שבע חינם" : lang === "ru" ? "+ доставка от ₪27 · самовывоз в Беэр-Шеве бесплатно" : "+ shipping from ₪27 · free pickup in Be'er Sheva"}</div>
+            <div style={{ color: COLORS.gray, fontSize: 11, textAlign: lang === "he" ? "right" : "left", marginBottom: 15 }}>{lang === "he" ? "+ משלוח מ-₪27 · איסוף עצמי בבאר שבע ללא עלות" : lang === "ru" ? "+ доставка от ₪27 · самовывоз в Беэр-Шеве без доплаты" : "+ shipping from ₪27 · pickup in Be'er Sheva at no charge"}</div>
             {/* Trust strip — supports the buying decision right by the checkout CTA */}
             <div style={{ marginBottom: 15 }}><TrustStrip lang={lang} /></div>
             <button onClick={onCheckout} style={{
@@ -9502,8 +9514,8 @@ function NotFoundPage({ lang, setPage }) {
   return (
     <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `70vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
       <div style={{ textAlign: `center`, padding: `60px 24px`, maxWidth: 560 }}>
-        <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `5rem`, color: COLORS.accent, lineHeight: 1, marginBottom: 12 }}>404</div>
-        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontWeight: 700, fontSize: `1.8rem`, color: COLORS.white, margin: `0 0 12px` }}>{title}</h1>
+        <div style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `5rem`, color: COLORS.accent, lineHeight: 1, marginBottom: 12 }}>404</div>
+        <h1 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 700, fontSize: `1.8rem`, color: COLORS.white, margin: `0 0 12px` }}>{title}</h1>
         <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 16, lineHeight: 1.6, margin: `0 0 28px` }}>{body}</p>
         <div style={{ display: `flex`, gap: 12, justifyContent: `center`, flexWrap: `wrap` }}>
           <button type="button" onClick={() => setPage(`home`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 999, padding: `12px 28px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{homeBtn}</button>
@@ -10689,7 +10701,7 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
   return (
     <div style={isHero ? { display: `flex`, flexDirection: `column`, alignItems: `center`, textAlign: `center` } : { textAlign: isRTL ? `right` : `left` }}>
       {ctaText && (
-        <div style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 18, lineHeight: 1.35, marginBottom: 14 }}>
+        <div style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 18, lineHeight: 1.35, marginBottom: 14 }}>
           {ctaText}
         </div>
       )}
@@ -10944,7 +10956,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
       heading: "Bloom.",
       subheading: "אוסף מובחר. דמויות עם נשמה.",
-      subheading2: (n) => `${n} דיוקנאות בשמן — לכל אחד אופי משלו.`,
+      subheading2: (n) => `${n} דיוקנאות חיות מצוירים — בחרו את הגזע שלכם והדפיסו על חולצה או ספל.`,
       scroll: "גלה את האוסף",
       collectionEyebrow: "האוסף",
       collectionCount: (n) => `${n} דמויות`,
@@ -10992,7 +11004,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
       heading: "Bloom.",
       subheading: "A curated collection. Characters with soul.",
-      subheading2: (n) => `${n} oil portraits, each one with its own personality.`,
+      subheading2: (n) => `${n} illustrated pet portraits — pick your breed and print it on a shirt or mug.`,
       scroll: "Browse the collection",
       collectionEyebrow: "THE COLLECTION",
       collectionCount: (n) => `${n} CHARACTERS`,
@@ -11040,7 +11052,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       eyebrow: "BLOOM COLLECTION · PET COUTURE",
       heading: "Bloom.",
       subheading: "Кураторская коллекция. Персонажи с душой.",
-      subheading2: (n) => `${n} масляных портретов, каждый со своим характером.`,
+      subheading2: (n) => `${n} рисованных портретов питомцев — выберите породу и напечатайте на футболке или кружке.`,
       scroll: "Просмотреть коллекцию",
       collectionEyebrow: "КОЛЛЕКЦИЯ",
       collectionCount: (n) => `${n} ПЕРСОНАЖЕЙ`,
@@ -11107,7 +11119,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
 
         <div style={{ transform: `translateY(${pTitle}px)`, willChange: "transform" }}>
         <h1 className="reveal" data-delay="1" style={{
-          fontFamily: "'Playfair Display',serif",
+          fontFamily: "'Playfair Display','Frank Ruhl Libre',serif",
           fontStyle: "italic",
           fontWeight: 900,
           fontSize: isMobile ? "5rem" : "9rem",
@@ -11131,7 +11143,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         <p className="reveal" data-delay="3" style={{ color: COLORS.gray, fontSize: isMobile ? 15 : 18, fontFamily: "'Heebo',sans-serif", maxWidth: 540, margin: "0 auto 8px", lineHeight: 1.5 }}>
           {t.subheading}
         </p>
-        <p className="reveal" data-delay="4" style={{ color: "#8a8a8a", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
+        <p className="reveal" data-delay="4" style={{ color: "#8a8a8a", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
           {t.subheading2 ? t.subheading2(designs.length) : ``}
         </p>
       </section>
@@ -11140,7 +11152,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       {preview && (
         <section style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", padding: isMobile ? "0 20px 24px" : "0 40px 32px" }}>
           <div style={{ background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 18, padding: isMobile ? "28px 22px" : "40px 44px", textAlign: "center" }}>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: isMobile ? "1.6rem" : "2.2rem", color: COLORS.white, margin: "0 0 12px", lineHeight: 1.2 }}>{w.heroTitle}</h2>
+            <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontWeight: 800, fontSize: isMobile ? "1.6rem" : "2.2rem", color: COLORS.white, margin: "0 0 12px", lineHeight: 1.2 }}>{w.heroTitle}</h2>
             <p style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: isMobile ? 14 : 16, lineHeight: 1.5, maxWidth: 560, margin: "0 auto 24px" }}>{w.heroSub}</p>
             <div style={{ maxWidth: 460, margin: "0 auto" }}>
               <JoinBloomCTA lang={lang} source="bloom" variant="hero" />
@@ -11156,7 +11168,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
             onMouseOver={e => { e.currentTarget.style.boxShadow = "0 12px 30px rgba(255,107,53,0.18)"; e.currentTarget.style.borderColor = COLORS.accent; }}
             onMouseOut={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "rgba(255,107,53,0.35)"; }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ color: COLORS.white, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 20 : 24, marginBottom: 6 }}>{quizT.banner_title}</div>
+              <div style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? 20 : 24, marginBottom: 6 }}>{quizT.banner_title}</div>
               <div style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: isMobile ? 13 : 15, lineHeight: 1.5 }}>{quizT.banner_sub}</div>
             </div>
             <span style={{ flexShrink: 0, background: COLORS.accentBtn, color: "#fff", borderRadius: 999, padding: "12px 24px", fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 15, whiteSpace: "nowrap" }}>{quizT.banner_cta}</span>
@@ -11168,7 +11180,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       {blogPosts.length >= 3 && (
         <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "16px 16px 0" : "24px 40px 0" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.4rem" : "1.9rem", color: COLORS.white, margin: 0 }}>{(LANGS[lang] || LANGS.he).blogHeroTitle}</h2>
+            <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.4rem" : "1.9rem", color: COLORS.white, margin: 0 }}>{(LANGS[lang] || LANGS.he).blogHeroTitle}</h2>
             <button onClick={() => goToBlog && goToBlog()} style={{ background: "transparent", border: "none", color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{(LANGS[lang] || LANGS.he).blogFromOurBlog}</button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 16 : 20 }}>
@@ -11184,7 +11196,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
             <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "2px", marginBottom: 8 }}>
               {t.collectionEyebrow}
             </div>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: 0 }}>
+            <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: 0 }}>
               {t.collectionCount ? t.collectionCount(filtered.length) : ``}
             </h2>
           </div>
@@ -11301,13 +11313,13 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         )}
 
         {!loading && !loadError && designs.length === 0 && (
-          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 20 }}>
+          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontSize: 20 }}>
             {t.empty}
           </div>
         )}
 
         {!loading && designs.length > 0 && filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 18 }}>
+          <div style={{ textAlign: "center", padding: 80, color: COLORS.gray, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontSize: 18 }}>
             {favOnly ? t.favEmpty : t.noResults}
           </div>
         )}
@@ -11321,7 +11333,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
             <div style={{ color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `2px`, marginBottom: 8 }}>
               {t.packsEyebrow}
             </div>
-            <h3 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? `1.4rem` : `1.8rem`, color: COLORS.white, margin: `0 0 16px 0` }}>
+            <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? `1.4rem` : `1.8rem`, color: COLORS.white, margin: `0 0 16px 0` }}>
               {t.packsHeading}
             </h3>
             <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(auto-fit, minmax(280px, 1fr))`, gap: isMobile ? 12 : 20 }}>
@@ -11343,12 +11355,12 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
                       <SmartImage src={pack.image_url} alt={packName} loading="lazy" style={{ width: `100%`, height: `100%`, objectFit: `contain`, padding: 8 }} />
                     </div>
                     <div style={{ padding: isMobile ? `12px 14px` : 18, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
-                      <h4 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? 17 : 20, color: COLORS.white, margin: 0 }}>{packName}</h4>
+                      <h4 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? 17 : 20, color: COLORS.white, margin: 0 }}>{packName}</h4>
                       <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 12 }}>
                         {`${(pack.item_slugs || []).length} ${lang === `he` ? `מדבקות` : lang === `ru` ? `наклеек` : `stickers`}`}
                       </div>
                       <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginTop: `auto`, gap: 10 }}>
-                        <span style={{ color: COLORS.accent, fontFamily: `'Playfair Display',serif`, fontWeight: 700, fontSize: 18 }}>{`₪${pack.price}`}</span>
+                        <span style={{ color: COLORS.accent, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 700, fontSize: 18 }}>{`₪${pack.price}`}</span>
                         <button
                           type="button"
                           onClick={() => onAddStickerPack(pack)}
@@ -11407,7 +11419,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       {/* Pre-launch: the order CTA is replaced by a closing "Join the BLOOM
           Family" band so the public never hits a buy action. */}
       <section className="reveal" style={{ position: "relative", zIndex: 1, padding: isMobile ? "60px 20px" : "80px 40px", textAlign: "center", borderTop: `1px solid ${COLORS.border}`, maxWidth: 900, margin: "0 auto" }}>
-        <h3 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.8rem" : "2.4rem", color: COLORS.white, margin: "0 0 12px 0" }}>
+        <h3 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.8rem" : "2.4rem", color: COLORS.white, margin: "0 0 12px 0" }}>
           {t.ctaTitle}
         </h3>
         <p style={{ color: COLORS.gray, fontSize: isMobile ? 14 : 16, fontFamily: "'Heebo',sans-serif", marginBottom: 30 }}>
@@ -11628,7 +11640,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
       {/* Text content */}
       <div style={{ padding: isMobile ? 14 : 20 }}>
         <h3 style={{
-          fontFamily: "'Playfair Display',serif",
+          fontFamily: "'Playfair Display','Frank Ruhl Libre',serif",
           fontStyle: "italic",
           fontWeight: 700,
           fontSize: isMobile ? 22 : 28,
@@ -11642,7 +11654,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
             field stays in the data for the gallery filter — display only. */}
         <div style={{
           color: COLORS.accent,
-          fontFamily: "'Playfair Display',serif",
+          fontFamily: "'Playfair Display','Frank Ruhl Libre',serif",
           fontStyle: "italic",
           fontWeight: 400,
           fontSize: isMobile ? 13 : 15,
@@ -11972,7 +11984,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
             </div>
 
             <h2 id="pet-modal-title" style={{
-              fontFamily: "'Playfair Display',serif",
+              fontFamily: "'Playfair Display','Frank Ruhl Libre',serif",
               fontStyle: "italic",
               fontWeight: 900,
               fontSize: isMobile ? "2.5rem" : "3.5rem",
@@ -11987,7 +11999,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
 
             <div style={{
               color: COLORS.accent,
-              fontFamily: "'Playfair Display',serif",
+              fontFamily: "'Playfair Display','Frank Ruhl Libre',serif",
               fontStyle: "italic",
               fontWeight: 400,
               fontSize: isMobile ? 18 : 22,
@@ -12137,7 +12149,7 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
         textAlign: "inherit",
       }}>
       <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
-      <span style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 24, fontWeight: 800, letterSpacing: "0.01em" }}>₪{price}</span>
+      <span style={{ color: COLORS.accent, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontSize: 24, fontWeight: 800, letterSpacing: "0.01em" }}>₪{price}</span>
     </button>
   );
 }
@@ -12613,7 +12625,7 @@ function BloomCharacterRail({ characters, lang, goToBreed, isMobile, heading }) 
 
   return (
     <div style={{ marginTop: isMobile ? 48 : 64 }}>
-      <h2 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: "0 0 24px" }}>{heading}</h2>
+      <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.5rem" : "2rem", color: COLORS.white, margin: "0 0 24px" }}>{heading}</h2>
       <div
         ref={scrollerRef}
         onMouseEnter={() => { pausedRef.current = true; }}
@@ -12825,7 +12837,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   if (notFound || !design) {
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
-        <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{tt.notFound}</div>
+        <div style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{tt.notFound}</div>
         <button onClick={() => setPage(`pets`)} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer` }}>{tt.back}</button>
       </div>
     );
@@ -12930,11 +12942,11 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
               </div>
             </div>
 
-            <h1 style={{ fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 900, fontSize: isMobile ? "2.6rem" : "3.6rem", color: COLORS.white, margin: "0 0 4px 0", lineHeight: 1, letterSpacing: "-0.02em" }}>{name}</h1>
+            <h1 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 900, fontSize: isMobile ? "2.6rem" : "3.6rem", color: COLORS.white, margin: "0 0 4px 0", lineHeight: 1, letterSpacing: "-0.02em" }}>{name}</h1>
 
             {/* Species (dog/cat) intentionally not shown — display only; the
                 species field stays in the data for the gallery filter. */}
-            {tagline && <div style={{ color: COLORS.accent, fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontWeight: 400, fontSize: isMobile ? 18 : 22, marginBottom: 24 }}>— {tagline}</div>}
+            {tagline && <div style={{ color: COLORS.accent, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 400, fontSize: isMobile ? 18 : 22, marginBottom: 24 }}>— {tagline}</div>}
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
               <div style={{ width: 30, height: 1, background: COLORS.accent }} />
@@ -13046,7 +13058,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
           <span style={{ width: 14, height: 14, borderRadius: "50%", background: "#FF6B35", display: "inline-block", boxShadow: "0 0 30px rgba(255,107,53,0.7)", animation: "maintPulse 2s ease-in-out infinite" }}></span>
         </div>
-        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 48, color: "#fff", marginBottom: 16, letterSpacing: "-0.5px" }}>{m.title}</h1>
+        <h1 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 48, color: "#fff", marginBottom: 16, letterSpacing: "-0.5px" }}>{m.title}</h1>
         <p style={{ color: "#999", fontSize: 18, marginBottom: 8, fontFamily: "'Heebo',sans-serif" }}>{m.sub}</p>
         <p style={{ color: "#FF6B35", fontSize: 16, fontWeight: 700, fontFamily: "'Heebo',sans-serif", marginBottom: 28 }}>{m.back}</p>
         {/* Public entry into the pre-launch BLOOM "Find Your Breed" preview. */}
@@ -13068,7 +13080,7 @@ function MaintenancePage({ lang, setLang, setPage, onUnlock }) {
         <div style={{
           marginTop: 14,
           color: "#888",
-          fontFamily: lang === "he" ? "'Heebo',sans-serif" : "'Playfair Display',serif",
+          fontFamily: lang === "he" ? "'Heebo',sans-serif" : "'Playfair Display','Frank Ruhl Libre',serif",
           fontStyle: lang === "he" ? "normal" : "italic",
           fontWeight: 400,
           fontSize: 14,
@@ -13150,7 +13162,7 @@ function PoliciesPage({ lang }) {
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 24px 60px", direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
-      <h1 className="reveal" style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 42, marginBottom: 8 }}>
+      <h1 className="reveal" style={{ color: "#fff", fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 42, marginBottom: 8 }}>
         {lang === "he" ? "מדיניות ותקנון" : lang === "ru" ? "Политика и условия" : "Policies & Terms"}
       </h1>
       <p className="reveal" data-delay="1" style={{ color: "#999", fontSize: 15, marginBottom: 32, fontFamily: "'Heebo',sans-serif" }}>
@@ -13183,7 +13195,7 @@ function PoliciesPage({ lang }) {
       </div>
 
       <div className="reveal" data-delay="3" id="policy-panel" role="tabpanel" tabIndex={0} aria-labelledby={`policy-tab-${activeSection}`} style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 16, padding: "32px 28px" }}>
-        <h2 style={{ color: "#fff", fontFamily: "'Playfair Display',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
+        <h2 style={{ color: "#fff", fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 28, marginBottom: 20, borderBottom: "1px solid #333", paddingBottom: 12 }}>
           {POLICY_SECTIONS.find(s => s.id === activeSection)?.title[lang]}
         </h2>
         <div style={{ color: "#ccc", fontFamily: "'Heebo',sans-serif", fontSize: 14, lineHeight: 1.8 }}>
@@ -13226,8 +13238,8 @@ function Footer({ lang, setPage }) {
     <footer style={{ background: "#0a0a0a", borderTop: "1px solid #1a1a1a", padding: "48px 24px 24px", marginTop: 60, direction: isRTL ? "rtl" : "ltr", position: "relative", zIndex: 5 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 40 }}>
         <div className="reveal" data-delay="1">
-          <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 700, marginBottom: 8, letterSpacing: "0.3px" }}>{BUSINESS_INFO.name[lang]}</div>
-          <div style={{ color: "#a8a8a8", fontFamily: lang === "he" ? "'Heebo',sans-serif" : "'Playfair Display',serif", fontStyle: lang === "he" ? "normal" : "italic", fontWeight: 400, fontSize: 13, letterSpacing: lang === "he" ? "0.04em" : "0.02em", marginBottom: 14 }}>{BUSINESS_INFO.tagline[lang]}</div>
+          <div style={{ color: "#FF6B35", fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: 26, fontWeight: 700, marginBottom: 8, letterSpacing: "0.3px" }}>{BUSINESS_INFO.name[lang]}</div>
+          <div style={{ color: "#a8a8a8", fontFamily: lang === "he" ? "'Heebo',sans-serif" : "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: lang === "he" ? "normal" : "italic", fontWeight: 400, fontSize: 13, letterSpacing: lang === "he" ? "0.04em" : "0.02em", marginBottom: 14 }}>{BUSINESS_INFO.tagline[lang]}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 18 }}>
             <div style={{ width: 18, height: 2, background: "rgba(255,107,53,0.5)", borderRadius: 2 }}></div>
             <div style={{ width: 4, height: 4, background: "rgba(255,107,53,0.7)", borderRadius: "50%" }}></div>
@@ -13518,7 +13530,7 @@ function FaqPage({ lang }) {
   return (
     <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
       <div style={{ maxWidth: 820, margin: `0 auto`, padding: `48px 22px 100px`, textAlign: isRTL ? `right` : `left` }}>
-        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `2.4rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 10px`, letterSpacing: `-0.01em` }}>{pageTitle}</h1>
+        <h1 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: `2.4rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 10px`, letterSpacing: `-0.01em` }}>{pageTitle}</h1>
         <p style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 15, margin: `0 0 40px` }}>{intro}</p>
 
         {groups.map(g => (
@@ -13757,7 +13769,7 @@ function BlogCard({ post, lang, goToBlog, compact = false }) {
       </div>
       <div style={{ padding: compact ? `16px 18px` : `20px 22px`, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
         <span style={{ alignSelf: isRTL ? `flex-end` : `flex-start`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 10, letterSpacing: `1.5px`, textTransform: `uppercase` }}>{blogCategoryLabel(lang, post.category)}</span>
-        <h3 style={{ margin: 0, color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: compact ? 19 : 22, lineHeight: 1.25 }}>{title}</h3>
+        <h3 style={{ margin: 0, color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: compact ? 19 : 22, lineHeight: 1.25 }}>{title}</h3>
         <p style={{ margin: 0, color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, lineHeight: 1.55, display: `-webkit-box`, WebkitLineClamp: 2, WebkitBoxOrient: `vertical`, overflow: `hidden` }}>{excerpt}</p>
         <div style={{ marginTop: `auto`, paddingTop: 10, display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10 }}>
           <span style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 12 }}>{formatBlogDate(post.published_at, lang)}</span>
@@ -13851,7 +13863,7 @@ function BlogIndex({ lang, goToBlog }) {
     <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 72, direction: isRTL ? `rtl` : `ltr` }}>
       {/* Hero */}
       <section style={{ position: `relative`, zIndex: 1, padding: isMobile ? `56px 20px 28px` : `90px 40px 40px`, textAlign: `center`, maxWidth: 900, margin: `0 auto` }}>
-        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.6rem` : `4rem`, color: COLORS.white, margin: `0 0 16px`, letterSpacing: `-0.02em` }}>{t.blogHeroTitle}</h1>
+        <h1 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.6rem` : `4rem`, color: COLORS.white, margin: `0 0 16px`, letterSpacing: `-0.02em` }}>{t.blogHeroTitle}</h1>
         <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 18, lineHeight: 1.5, margin: 0 }}>{t.blogHeroSubtitle}</p>
       </section>
 
@@ -13877,7 +13889,7 @@ function BlogIndex({ lang, goToBlog }) {
             <div style={{ display: `inline-block`, width: 32, height: 32, border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent, borderRadius: `50%`, animation: `blogSpin 0.8s linear infinite` }} />
           </div>
         ) : posts.length === 0 ? (
-          <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 20 }}>{t.blogEmpty}</div>
+          <div style={{ textAlign: `center`, padding: 80, color: COLORS.gray, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: 20 }}>{t.blogEmpty}</div>
         ) : (
           <>
             <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(auto-fill, minmax(300px, 1fr))`, gap: isMobile ? 16 : 28 }}>
@@ -14014,7 +14026,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
   if (notFound || !post) {
     return (
       <div style={{ background: COLORS.bg, color: COLORS.white, minHeight: `100vh`, paddingTop: 120, textAlign: `center`, direction: isRTL ? `rtl` : `ltr`, padding: `120px 20px` }}>
-        <div style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{t.blogNotFound}</div>
+        <div style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: 28, marginBottom: 20 }}>{t.blogNotFound}</div>
         <button onClick={() => goToBlog()} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `12px 26px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer` }}>{t.blogBackToList}</button>
       </div>
     );
@@ -14041,7 +14053,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         </nav>
 
         <span style={{ display: `inline-block`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `2px`, textTransform: `uppercase`, marginBottom: 12 }}>{blogCategoryLabel(lang, post.category)}</span>
-        <h1 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.2rem` : `3rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 12px`, letterSpacing: `-0.01em` }}>{title}</h1>
+        <h1 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.2rem` : `3rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 12px`, letterSpacing: `-0.01em` }}>{title}</h1>
         <div style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 13, marginBottom: 28 }}>{t.blogPublishedOn}{formatBlogDate(post.published_at, lang)}</div>
 
         {/* Cover */}
@@ -14066,7 +14078,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
               <SmartImage src={pet.mockup_mug_url || pet.mockup_url} alt={petName} style={{ width: `100%`, height: `100%`, objectFit: `cover` }} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 20 }}>{petName}</div>
+              <div style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: 20 }}>{petName}</div>
               <div style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 6 }}>{t.blogRelatedProduct}</div>
             </div>
           </div>
@@ -14093,7 +14105,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         {/* Related posts */}
         {related.length > 0 && (
           <div style={{ marginTop: 56 }}>
-            <h2 style={{ fontFamily: `'Playfair Display',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? `1.5rem` : `2rem`, color: COLORS.white, margin: `0 0 24px` }}>{t.blogRelatedPosts}</h2>
+            <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: isMobile ? `1.5rem` : `2rem`, color: COLORS.white, margin: `0 0 24px` }}>{t.blogRelatedPosts}</h2>
             <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(3, 1fr)`, gap: isMobile ? 16 : 20 }}>
               {related.map((r) => <BlogCard key={r.slug} post={r} lang={lang} goToBlog={goToBlog} compact />)}
             </div>
@@ -14108,8 +14120,8 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
       {/* Scoped typography for the post body */}
       <style>{`
         @keyframes blogSpin { to { transform: rotate(360deg); } }
-        .blog-body h2 { font-family: 'Playfair Display', serif; font-style: italic; color: #fff; font-size: 1.7rem; margin: 32px 0 14px; line-height: 1.3; }
-        .blog-body h3 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.35rem; margin: 26px 0 12px; }
+        .blog-body h2 { font-family: 'Playfair Display','Frank Ruhl Libre', serif; font-style: italic; color: #fff; font-size: 1.7rem; margin: 32px 0 14px; line-height: 1.3; }
+        .blog-body h3 { font-family: 'Playfair Display','Frank Ruhl Libre', serif; color: #fff; font-size: 1.35rem; margin: 26px 0 12px; }
         .blog-body p { margin: 0 0 18px; }
         .blog-body a { color: #FF6B35; }
         .blog-body ul, .blog-body ol { margin: 0 0 18px; padding-inline-start: 24px; }
@@ -14235,7 +14247,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
     <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${COLORS.border}` }}>
       <div style={{ display: `flex`, alignItems: `center`, justifyContent: `space-between`, marginBottom: 20, flexWrap: `wrap`, gap: 10 }}>
         <div>
-          <h2 style={{ color: COLORS.white, fontFamily: `'Playfair Display',serif`, fontSize: 28, margin: 0 }}>{lang === `he` ? `בלוג` : `Blog`}</h2>
+          <h2 style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontSize: 28, margin: 0 }}>{lang === `he` ? `בלוג` : `Blog`}</h2>
           <p style={{ color: COLORS.gray, marginTop: 4, fontSize: 13 }}>{loading ? (lang === `he` ? `טוען...` : `Loading...`) : `${posts.length} ${lang === `he` ? `פוסטים` : `posts`}`}</p>
         </div>
         {!editing && (
@@ -14303,7 +14315,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
             <button onClick={() => save(true)} disabled={busy} style={{ background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{busy ? `…` : (lang === `he` ? `פרסם` : `Publish`)}</button>
             <button onClick={() => setShowPreview((s) => !s)} style={{ background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{lang === `he` ? `תצוגה מקדימה` : `Preview`}</button>
             <button onClick={cancel} style={{ background: `transparent`, color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: `10px 18px`, fontWeight: 700, fontSize: 13, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{lang === `he` ? `ביטול` : `Cancel`}</button>
-            <style>{`.blog-body h2{font-family:'Playfair Display',serif;font-style:italic;color:#fff;font-size:1.5rem;margin:20px 0 10px} .blog-body p{margin:0 0 14px} .blog-body a{color:#FF6B35} .blog-body img{max-width:100%;height:auto;border-radius:10px}`}</style>
+            <style>{`.blog-body h2{font-family:'Playfair Display','Frank Ruhl Libre',serif;font-style:italic;color:#fff;font-size:1.5rem;margin:20px 0 10px} .blog-body p{margin:0 0 14px} .blog-body a{color:#FF6B35} .blog-body img{max-width:100%;height:auto;border-radius:10px}`}</style>
           </div>
         </div>
       )}
@@ -14315,7 +14327,7 @@ function BlogAdmin({ uploadAdminImage, lang }) {
             <div key={p.id} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: `10px 14px`, display: `flex`, alignItems: `center`, gap: 12, flexWrap: `wrap` }}>
               <span style={{ background: p.status === `published` ? `rgba(74,222,128,0.15)` : `rgba(255,255,255,0.06)`, color: p.status === `published` ? COLORS.success : COLORS.gray, borderRadius: 6, padding: `4px 10px`, fontSize: 11, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, flexShrink: 0 }}>{p.status}</span>
               <div style={{ flex: 1, minWidth: 160 }}>
-                <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: `'Playfair Display',serif` }}>{p.title_he || p.title_en || p.slug}</div>
+                <div style={{ color: COLORS.white, fontWeight: 600, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif` }}>{p.title_he || p.title_en || p.slug}</div>
                 <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{[p.category, p.published_at ? formatBlogDate(p.published_at, lang) : `—`, `${p.views_count || 0} ${lang === `he` ? `צפיות` : `views`}`].filter(Boolean).join(` · `)}</div>
               </div>
               <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
