@@ -5393,6 +5393,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const t = LANGS[lang];
   const products = getCustomProducts(t);
   const [step, setStep] = useState((pendingBloomItem || pendingCheckout) ? 3 : 1);
+  // Every step change (and arriving on checkout from the cart) should start at
+  // the top — otherwise the page keeps the previous scroll position and the
+  // customer lands mid-page, below the form/content they need to see.
+  useEffect(() => { try { window.scrollTo(0, 0); } catch (_) {} }, [step]);
   // Payment-failure return (#order?paid=0) from create-payment's fail redirect.
   // UI-ONLY: surfaces a clear retry path. Safe if visited directly.
   const [payFailed, setPayFailed] = useState(() => {
