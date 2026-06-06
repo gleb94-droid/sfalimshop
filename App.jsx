@@ -5665,6 +5665,34 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // When true, the Step-1 shirt path is a "draw my pet from photos" commission
   // (pay-first, no upload) instead of the normal upload customizer.
   const [commissionMode, setCommissionMode] = useState(false);
+  const commissionRef = useRef(null);
+  // When a shirt is picked, scroll the "upload vs draw-from-photos" choice into
+  // view (it sits below the product list) so it's noticed — especially on mobile.
+  useEffect(() => {
+    if (BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `mug` && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && commissionRef.current) {
+      try { commissionRef.current.scrollIntoView({ behavior: `smooth`, block: `center` }); } catch (_) {}
+    }
+  }, [selectedProduct]);
+
+  // Browser / phone BACK button → go to the PREVIOUS order step instead of
+  // leaving the whole order to the home page. We keep a single history "guard"
+  // entry and re-arm it on each Back while step > 1; at step 1, Back leaves the
+  // order as usual. Mount-only so it survives step changes.
+  useEffect(() => {
+    try { window.history.pushState({ sfOrderGuard: true }, ``); } catch (_) {}
+    const onPop = () => {
+      setStep((s) => {
+        if (s > 1) {
+          try { window.history.pushState({ sfOrderGuard: true }, ``); } catch (_) {}
+          try { window.scrollTo(0, 0); } catch (_) {}
+          return s - 1;
+        }
+        return s;
+      });
+    };
+    window.addEventListener(`popstate`, onPop);
+    return () => window.removeEventListener(`popstate`, onPop);
+  }, []);
 
   // Custom BLOOM commission: add a shirt to the cart with NO design (we draw it
   // from photos the customer sends on WhatsApp after paying). Reuses the current
@@ -6702,8 +6730,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             </div>
             {/* Custom BLOOM commission — shirt-only choice: upload your own design, or we draw one from photos */}
             {BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `mug` && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && (
-              <div style={{ marginTop: 20, background: COLORS.bgCard, border: `2px solid ${commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: 18 }}>
-                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14, marginBottom: 12 }}>{t.commission.choiceTitle}</div>
+              <div ref={commissionRef} style={{ marginTop: 20, background: `linear-gradient(135deg, rgba(255,107,53,0.14), rgba(255,107,53,0.04))`, border: `2px solid ${COLORS.accent}`, borderRadius: 14, padding: 18, boxShadow: `0 6px 24px rgba(255,107,53,0.18)` }}>
+                <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 4 }}>✨ {t.commission.badge}</div>
+                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>{t.commission.choiceTitle}</div>
                 <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
                   <button onClick={() => setCommissionMode(false)} style={{ flex: `1 1 180px`, textAlign: `start`, background: !commissionMode ? `rgba(255,107,53,0.1)` : `transparent`, border: `2px solid ${!commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>📁 {t.commission.choiceUpload}</div>
