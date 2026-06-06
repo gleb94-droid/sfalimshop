@@ -5779,7 +5779,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     + (sleeveLeft.enabled ? SLEEVE_PRICE : 0)
     + (sleeveRight.enabled ? SLEEVE_PRICE : 0) : 0;
   const hasOrderInProgress = cart.length > 0 || (step === 2 && variant);
-  const total = (cartItemsTotal + currentItemTotal) + (hasOrderInProgress ? shippingPrice : 0);
+  // Don't double-count: once the in-progress item has been committed to the cart
+  // (currentItemCartId is set) its price is already inside cartItemsTotal, so only
+  // add currentItemTotal while it's still a live, uncommitted preview (steps 1–2).
+  // Without this the checkout button showed cart + customizer = e.g. ₪2 for one
+  // ₪1 shirt, while the order summary (cart only) correctly showed ₪1.
+  const total = (cartItemsTotal + (currentItemCartId ? 0 : currentItemTotal)) + (hasOrderInProgress ? shippingPrice : 0);
   // Single source of truth for "can submit the checkout form". A delivery
   // method must be chosen; address is only needed for the UPS methods.
   const baseFieldsComplete = !!(form.name && form.email && form.phoneNumber && form.phoneNumber.length === 7);
