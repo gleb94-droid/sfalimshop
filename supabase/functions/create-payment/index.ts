@@ -258,11 +258,15 @@ serve(async (req) => {
         } else if (meta.src === "pack") {
           unit = await pricePack(String(meta.slug || ""));
         } else if (meta.src === "commission") {
-          // Custom BLOOM commission (we draw the design from the customer's photos).
-          // Flat price regardless of shirt type. KEEP IN SYNC WITH
-          // COMMISSION_SHIRT_PRICE in App.jsx. Pet name is taken free via WhatsApp,
-          // so pet_name is normally null here, but keep the surcharge for safety.
-          unit = 189 + (row.pet_name ? PET_SURCHARGE : 0);
+          // Custom commission (we draw the design). Price by service type
+          // (pet portrait / custom design) × product (shirt / mug).
+          // KEEP IN SYNC WITH COMMISSION_PRICE in App.jsx.
+          const CPRICE: Record<string, { shirt: number; mug: number }> = {
+            pet: { shirt: 189, mug: 149 },
+            custom: { shirt: 149, mug: 109 },
+          };
+          const ctype = meta.ctype === "custom" ? "custom" : "pet";
+          unit = pid === "mug" ? CPRICE[ctype].mug : CPRICE[ctype].shirt;
         }
         if (unit == null || !isFinite(unit) || unit <= 0) { allResolved = false; break; }
         const itemTotal = unit * qty;

@@ -1586,9 +1586,14 @@ const PET_NAME_COLOR_DEFAULT = `#FF6B35`;
 // total, the order total, and the stored orders.total; shown to the customer via
 // the +₪20 pill and the cart line. Empty name = no surcharge.
 const PET_NAME_SURCHARGE = 20;
-// Custom BLOOM commission (we draw a design from the customer's pet photos).
-// Pay-first, shirt-only in v1. KEEP IN SYNC with create-payment's commission branch.
-const COMMISSION_SHIRT_PRICE = 189;
+// Custom commission (we draw the design). Two services × two products.
+// Pay-first; the customer sends photos (pet) or an idea (custom) on WhatsApp.
+// KEEP IN SYNC with create-payment's commission branch.
+const COMMISSION_PRICE = { pet: { shirt: 189, mug: 149 }, custom: { shirt: 149, mug: 109 } };
+const commissionPrice = (ctype, pid) => {
+  const tier = COMMISSION_PRICE[ctype] || COMMISSION_PRICE.pet;
+  return pid === `mug` ? tier.mug : tier.shirt;
+};
 const hasHebrew = (s) => /[֐-׿]/.test(s || ``);
 const ADMIN_EMAIL = "gleb2009@gmail.com";
 // Single source of truth for social links — referenced anywhere the Instagram
@@ -1876,6 +1881,11 @@ const LANGS = {
       choiceUploadSub: `קובץ מוכן להדפסה`,
       choiceCommission: `ציירו לי דיוקן BLOOM של החיה שלי`,
       choiceCommissionSub: `שולחים תמונות, ואנחנו מעצבים`,
+      choiceCustom: `צרו לי עיצוב משלי (טקסט / לוגו / רעיון)`,
+      choiceCustomSub: `מתארים רעיון — ואנחנו מעצבים`,
+      customHow: `אחרי התשלום ייפתח וואטסאפ — שולחים את הרעיון: טקסט, לוגו, תמונה או תיאור, ואנחנו מעצבים.`,
+      customPostSub: `עכשיו שלחו בוואטסאפ את הרעיון: טקסט, לוגו, תמונת השראה או תיאור — ונתחיל.`,
+      customPostPrefill: (id) => `היי! ביצעתי הזמנת עיצוב אישי מספר ${id} — הנה הרעיון שלי:`,
       badge: `BLOOM לפי הזמנה`,
       heading: `דיוקן BLOOM אישי של החיה שלכם`,
       price: `₪189 · עיצוב בעבודת יד`,
@@ -1940,6 +1950,11 @@ const LANGS = {
       choiceUploadSub: `A print-ready file`,
       choiceCommission: `Draw a BLOOM portrait of my pet`,
       choiceCommissionSub: `You send photos, we design it`,
+      choiceCustom: `Create a custom design for me (text / logo / idea)`,
+      choiceCustomSub: `Describe the idea — we design it`,
+      customHow: `After payment, WhatsApp opens — send your idea: text, a logo, an image or a description, and we'll design it.`,
+      customPostSub: `Now send your idea on WhatsApp: text, a logo, a reference image or a description — and we'll start.`,
+      customPostPrefill: (id) => `Hi! I placed a custom design order #${id} — here's my design idea:`,
       badge: `BLOOM made to order`,
       heading: `A personalized BLOOM portrait of your pet`,
       price: `₪189 · hand-made design`,
@@ -2004,6 +2019,11 @@ const LANGS = {
       choiceUploadSub: `Готовый файл для печати`,
       choiceCommission: `Нарисуйте BLOOM-портрет моего питомца`,
       choiceCommissionSub: `Вы присылаете фото — мы рисуем`,
+      choiceCustom: `Создайте мне свой дизайн (текст / лого / идея)`,
+      choiceCustomSub: `Опишите идею — мы нарисуем`,
+      customHow: `После оплаты откроется WhatsApp — пришлите идею: текст, логотип, картинку или описание, и мы нарисуем.`,
+      customPostSub: `Теперь пришлите идею в WhatsApp: текст, логотип, картинку-референс или описание — и мы начнём.`,
+      customPostPrefill: (id) => `Здравствуйте! Я оформил заказ на дизайн №${id} — вот моя идея:`,
       badge: `BLOOM на заказ`,
       heading: `Персональный BLOOM-портрет вашего питомца`,
       price: `₪189 · ручная работа`,
@@ -3198,6 +3218,7 @@ function TrackPage({ lang, user, clearCart }) {
   const [payReturnDismissed, setPayReturnDismissed] = useState(false);
   const [payReturnStatus, setPayReturnStatus] = useState(`loading`); // loading | succeeded | processing | unknown
   const [isCommissionPaid, setIsCommissionPaid] = useState(false); // paid group has a commission → show the WhatsApp photo CTA
+  const [commissionPaidType, setCommissionPaidType] = useState(`pet`); // 'pet' | 'custom' — which brief to show
   useEffect(() => {
     if (!payReturn) return;
     if (!payReturn.orderGroup) { setPayReturnStatus(`unknown`); return; }
@@ -3211,7 +3232,9 @@ function TrackPage({ lang, user, clearCart }) {
         // from order status alone.
         const succeeded = data.some(o => o.payment_status === `succeeded`);
         setPayReturnStatus(succeeded ? `succeeded` : `processing`);
-        setIsCommissionPaid(succeeded && data.some(o => o.extra_prints?.src === `commission`));
+        const commOrder = data.find(o => o.extra_prints?.src === `commission`);
+        setIsCommissionPaid(succeeded && !!commOrder);
+        if (commOrder) setCommissionPaidType(commOrder.extra_prints?.ctype || `pet`);
         // Clear the cart ONLY on a confirmed-succeeded payment return — never on
         // a failure or an unconfirmed/processing return. Guarded by `succeeded`
         // above so we can't wipe a cart that wasn't actually paid for.
@@ -3400,8 +3423,8 @@ function TrackPage({ lang, user, clearCart }) {
           {ok && isCommissionPaid && (
             <div style={{ background: `rgba(37,211,102,0.08)`, border: `1px solid rgba(37,211,102,0.4)`, borderRadius: 12, padding: 16, marginBottom: 20, textAlign: `start` }}>
               <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t.commission.postHeading}</div>
-              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{t.commission.postSub}</div>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t.commission.postPrefill(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`))}`} target="_blank" rel="noopener noreferrer"
+              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{commissionPaidType === `pet` ? t.commission.postSub : t.commission.customPostSub}</div>
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent((commissionPaidType === `pet` ? t.commission.postPrefill : t.commission.customPostPrefill)(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`))}`} target="_blank" rel="noopener noreferrer"
                 style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, background: `#25D366`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: 14, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box` }}>
                 <span style={{ fontSize: 18 }}>💬</span> {t.commission.postCta}
               </a>
@@ -5665,11 +5688,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // When true, the Step-1 shirt path is a "draw my pet from photos" commission
   // (pay-first, no upload) instead of the normal upload customizer.
   const [commissionMode, setCommissionMode] = useState(false);
+  const [commissionType, setCommissionType] = useState(`pet`); // 'pet' | 'custom'
   const commissionRef = useRef(null);
   // When a shirt is picked, scroll the "upload vs draw-from-photos" choice into
   // view (it sits below the product list) so it's noticed — especially on mobile.
   useEffect(() => {
-    if (BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `mug` && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && commissionRef.current) {
+    if (BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && commissionRef.current) {
       try { commissionRef.current.scrollIntoView({ behavior: `smooth`, block: `center` }); } catch (_) {}
     }
   }, [selectedProduct]);
@@ -5701,8 +5725,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // in the WhatsApp brief (free) — no surcharge here.
   const addCommissionToCart = () => {
     if (!product || !variant) return false;
-    const unitPrice = COMMISSION_SHIRT_PRICE;
-    const colorHex = product.colors[selectedColor];
+    const unitPrice = commissionPrice(commissionType, selectedProduct);
+    const colorHex = (product.colors && product.colors[selectedColor]) || null;
     const cartItemId = Date.now() + Math.random();
     const itemData = {
       productId: selectedProduct,
@@ -5715,6 +5739,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       uploadedImage: null,
       isCustom: false,
       isCommission: true,
+      commissionType,
       uploadedUrl: null,
       mockupUrl: null,
       imagePos: { x: 150, y: 130, size: 85 },
@@ -6345,7 +6370,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             language: lang,
             back_print: false,
             order_group: orderGroupId,
-            extra_prints: { shipping_method: deliveryMethod, src: `commission`, pid: it.productId, vid: it.variantId, slug: null },
+            extra_prints: { shipping_method: deliveryMethod, src: `commission`, ctype: it.commissionType || `pet`, pid: it.productId, vid: it.variantId, slug: null },
           };
           if (user) {
             const { data: orderData, error } = await supabase.from(`orders`).insert(commissionRow).select().single();
@@ -6734,13 +6759,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 4 }}>✨ {t.commission.badge}</div>
                 <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>{t.commission.choiceTitle}</div>
                 <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
-                  <button onClick={() => setCommissionMode(false)} style={{ flex: `1 1 180px`, textAlign: `start`, background: !commissionMode ? `rgba(255,107,53,0.1)` : `transparent`, border: `2px solid ${!commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                  <button onClick={() => setCommissionMode(false)} style={{ flex: `1 1 150px`, textAlign: `start`, background: !commissionMode ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${!commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>📁 {t.commission.choiceUpload}</div>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceUploadSub}</div>
                   </button>
-                  <button onClick={() => setCommissionMode(true)} style={{ flex: `1 1 180px`, textAlign: `start`, background: commissionMode ? `rgba(255,107,53,0.1)` : `transparent`, border: `2px solid ${commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
-                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>🎨 {t.commission.choiceCommission}</div>
+                  <button onClick={() => { setCommissionMode(true); setCommissionType(`pet`); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `pet`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `pet`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>🐾 {t.commission.choiceCommission}</div>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCommissionSub}</div>
+                  </button>
+                  <button onClick={() => { setCommissionMode(true); setCommissionType(`custom`); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `custom`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `custom`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>✏️ {t.commission.choiceCustom}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCustomSub}</div>
                   </button>
                 </div>
                 {commissionMode && (
@@ -6751,14 +6780,16 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                         <button key={i} aria-label={`${t.customize.color} ${i + 1}`} aria-pressed={selectedColor === i} onClick={() => setSelectedColor(i)} style={{ width: 30, height: 30, borderRadius: `50%`, background: hex, border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`, cursor: `pointer`, padding: 0 }} />
                       ))}
                     </div>
+                    {(product?.variants || []).length > 1 && (<>
                     <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.size}</div>
                     <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
                       {(product?.variants || []).map((v) => (
                         <button key={v.id} aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : `transparent`, color: selectedVariant === v.id ? `#fff` : COLORS.gray, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `8px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{v.label}</button>
                       ))}
                     </div>
+                    </>)}
                     <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: `12px 14px`, fontSize: 12.5, lineHeight: 1.7, color: COLORS.gray }}>
-                      <div>📸 {t.commission.microHow}</div>
+                      <div>📸 {commissionType === `pet` ? t.commission.microHow : t.commission.customHow}</div>
                       <div>🔁 {t.commission.microRevisions}</div>
                       <div>⏱️ {t.commission.microTime}</div>
                       <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
@@ -6768,7 +6799,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
             )}
             {commissionMode && BLOOM_COMMISSION_ENABLED ? (
-              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setSelectedProduct(null); setStep(3); } }} disabled={!selectedProduct || !selectedVariant} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{COMMISSION_SHIRT_PRICE}</button>
+              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setSelectedProduct(null); setStep(3); } }} disabled={!selectedProduct || !selectedVariant} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{commissionPrice(commissionType, selectedProduct)}</button>
             ) : (
               <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>{t.product.continue}</button>
             )}
