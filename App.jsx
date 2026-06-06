@@ -5716,6 +5716,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       petName: pendingBloomItem.petName || null,
       petNameFont: pendingBloomItem.petNameFont || null,
       petNameColor: pendingBloomItem.petNameColor || null,
+      // BLOOM identity for server-side price verification (pet_designs lookup).
+      bloomSlug: pendingBloomItem.slug || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -6144,7 +6146,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             product_color: null,
             language: lang,
             back_print: false,
-            extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: deliveryMethod },
+            extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: deliveryMethod, src: `pack`, slug: it.stickerPack?.slug || it.variantId || null },
             order_group: orderGroupId,
           };
           if (user) {
@@ -6245,7 +6247,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           order_group: orderGroupId,
           // Shipping (folded into the first row's total above) + the chosen
           // delivery method, mirrored onto extra_prints (jsonb) for the admin.
-          extra_prints: { shipping_method: deliveryMethod },
+          // Pricing metadata so create-payment can recompute the authoritative
+          // price server-side (never trust the browser-sent total):
+          //   src = custom (fixed catalog) | bloom (pet_designs) ; pid/vid/slug
+          //   identify the catalog entry / BLOOM design.
+          extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null },
         };
 
         if (user) {
@@ -9482,6 +9488,8 @@ export default function App() {
       petName: item.petName || null,
       petNameFont: item.petNameFont || null,
       petNameColor: item.petNameColor || null,
+      // BLOOM identity for server-side price verification (pet_designs lookup).
+      bloomSlug: item.slug || null,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -11507,6 +11515,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         mockupUrl,
         characterName: name,
         shirtColor: selectedColor,
+        slug: design.slug,
         ...personalization,
       });
       return;
@@ -11524,6 +11533,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       designUrl: design.design_url,
       mockupUrl,
       characterName: name,
+      slug: design.slug,
       shirtColor: null,
       ...personalization,
     });
