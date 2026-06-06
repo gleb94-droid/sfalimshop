@@ -5242,7 +5242,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
 
   // Inline qty updater — falls back to a local impl if the parent didn't pass one.
   const setQty = updateCartQty || ((id, q) => {
-    if (q < 1) { setCart(c => c.filter(it => it.id !== id)); return; }
+    if (q < 1) return; // floor at 1 — removal is only via the 🗑 button
     setCart(c => c.map(it => {
       if (it.id !== id) return it;
       const unit = Number(it.unitPrice ?? it.itemPrice / Math.max(1, it.qty || 1)) || 0;
@@ -5294,7 +5294,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, direction: "ltr" }}>
-              <button type="button" aria-label={tr.dec} onClick={() => setQty(it.id, qty - 1)} style={qtyBtnStyle}>−</button>
+              <button type="button" aria-label={tr.dec} onClick={() => setQty(it.id, qty - 1)} disabled={qty <= 1} style={{ ...qtyBtnStyle, opacity: qty <= 1 ? 0.4 : 1, cursor: qty <= 1 ? "not-allowed" : "pointer" }}>−</button>
               <span style={{ minWidth: 22, textAlign: "center", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 14 }}>{qty}</span>
               <button type="button" aria-label={tr.inc} onClick={() => setQty(it.id, qty + 1)} style={qtyBtnStyle}>+</button>
             </div>
@@ -8952,7 +8952,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
 
   // Fallback if the parent didn't pass an updater (defensive, e.g. older callers).
   const setQty = updateCartQty || ((id, q) => {
-    if (q < 1) { setCart(c => c.filter(it => it.id !== id)); return; }
+    if (q < 1) return; // floor at 1 — removal is only via the 🗑 button
     setCart(c => c.map(it => {
       if (it.id !== id) return it;
       const unit = Number(it.unitPrice ?? it.itemPrice / Math.max(1, it.qty || 1)) || 0;
@@ -9090,7 +9090,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                     {extras && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{extras}</div>}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, direction: "ltr" }}>
-                        <button type="button" onClick={() => setQty(it.id, qty - 1)} aria-label={lang === "he" ? "הפחת" : lang === "ru" ? "Уменьшить" : "Decrease"} style={qtyBtnStyle}>−</button>
+                        <button type="button" onClick={() => setQty(it.id, qty - 1)} disabled={qty <= 1} aria-label={lang === "he" ? "הפחת" : lang === "ru" ? "Уменьшить" : "Decrease"} style={{ ...qtyBtnStyle, opacity: qty <= 1 ? 0.4 : 1, cursor: qty <= 1 ? "not-allowed" : "pointer" }}>−</button>
                         <span aria-live="polite" style={{ minWidth: 26, textAlign: "center", color: COLORS.white, fontFamily: "'Varela Round',sans-serif", fontWeight: 700, fontSize: 15 }}>{qty}</span>
                         <button type="button" onClick={() => setQty(it.id, qty + 1)} aria-label={lang === "he" ? "הוסף" : lang === "ru" ? "Увеличить" : "Increase"} style={qtyBtnStyle}>+</button>
                       </div>
@@ -9562,10 +9562,10 @@ export default function App() {
   // Cart line update — used by the CartDrawer +/- buttons. Drops the line
   // entirely when qty falls below 1, otherwise recomputes itemPrice.
   const updateCartQty = (itemId, newQty) => {
-    if (newQty < 1) {
-      setCart(c => c.filter(it => it.id !== itemId));
-      return;
-    }
+    // The "−" button must NOT delete the item — quantity floors at 1. Removing
+    // is done only via the explicit trash (🗑) button, so a customer can't
+    // accidentally empty their cart on the last step before payment.
+    if (newQty < 1) return;
     setCart(c => c.map(it => {
       if (it.id !== itemId) return it;
       const unit = Number(it.unitPrice ?? it.itemPrice / Math.max(1, it.qty || 1)) || 0;
