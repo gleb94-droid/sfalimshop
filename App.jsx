@@ -3197,11 +3197,12 @@ function TrackPage({ lang, user, clearCart }) {
   });
   const [payReturnDismissed, setPayReturnDismissed] = useState(false);
   const [payReturnStatus, setPayReturnStatus] = useState(`loading`); // loading | succeeded | processing | unknown
+  const [isCommissionPaid, setIsCommissionPaid] = useState(false); // paid group has a commission → show the WhatsApp photo CTA
   useEffect(() => {
     if (!payReturn) return;
     if (!payReturn.orderGroup) { setPayReturnStatus(`unknown`); return; }
     let cancelled = false;
-    supabase.from(`orders`).select(`payment_status, status, total`).eq(`order_group`, payReturn.orderGroup)
+    supabase.from(`orders`).select(`payment_status, status, total, extra_prints`).eq(`order_group`, payReturn.orderGroup)
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error || !data || data.length === 0) { setPayReturnStatus(`unknown`); return; }
@@ -3210,6 +3211,7 @@ function TrackPage({ lang, user, clearCart }) {
         // from order status alone.
         const succeeded = data.some(o => o.payment_status === `succeeded`);
         setPayReturnStatus(succeeded ? `succeeded` : `processing`);
+        setIsCommissionPaid(succeeded && data.some(o => o.extra_prints?.src === `commission`));
         // Clear the cart ONLY on a confirmed-succeeded payment return — never on
         // a failure or an unconfirmed/processing return. Guarded by `succeeded`
         // above so we can't wipe a cart that wasn't actually paid for.
@@ -3393,6 +3395,16 @@ function TrackPage({ lang, user, clearCart }) {
             <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 10, padding: `10px 16px`, marginBottom: 24 }}>
               <div style={{ color: COLORS.gray, fontSize: 11, letterSpacing: `0.1em`, textTransform: `uppercase`, marginBottom: 3 }}>{lang === `he` ? `מספר הזמנה` : lang === `ru` ? `Номер заказа` : `Order number`}</div>
               <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 15, letterSpacing: `0.05em` }}>{`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`}</div>
+            </div>
+          )}
+          {ok && isCommissionPaid && (
+            <div style={{ background: `rgba(37,211,102,0.08)`, border: `1px solid rgba(37,211,102,0.4)`, borderRadius: 12, padding: 16, marginBottom: 20, textAlign: `start` }}>
+              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t.commission.postHeading}</div>
+              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{t.commission.postSub}</div>
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t.commission.postPrefill(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`))}`} target="_blank" rel="noopener noreferrer"
+                style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, background: `#25D366`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: 14, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box` }}>
+                <span style={{ fontSize: 18 }}>💬</span> {t.commission.postCta}
+              </a>
             </div>
           )}
           <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#track`); } catch (_) {} setPayReturnDismissed(true); }}
@@ -4410,6 +4422,9 @@ function AdminPage({ lang }) {
                         <div style={{ textAlign: "end" }}>
                           <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{groupTotal}</div>
                           <div style={{ marginTop: 6 }}><PaymentBadge status={order.payment_status} lang={lang} /></div>
+                          {group.some(o => o.extra_prints?.src === `commission`) && (
+                            <div style={{ marginTop: 6, display: `inline-block`, background: `rgba(255,107,53,0.12)`, border: `1px solid rgba(255,107,53,0.45)`, color: COLORS.accent, borderRadius: 8, padding: `3px 10px`, fontSize: 11, fontWeight: 700 }}>🎨 {t.commission.adminBadge}</div>
+                          )}
                           <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 6px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
                           <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
                           {order.completed_at && <div style={{ color: COLORS.success, fontSize: 11, marginTop: 2 }}>✓ {timeBetween(order.created_at, order.completed_at, lang)}</div>}
@@ -5647,6 +5662,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // (its buttons return to the collection) vs a custom item.
   const [nextChoiceIsBloom, setNextChoiceIsBloom] = useState(!!pendingBloomItem);
 
+  // When true, the Step-1 shirt path is a "draw my pet from photos" commission
+  // (pay-first, no upload) instead of the normal upload customizer.
+  const [commissionMode, setCommissionMode] = useState(false);
+
   // Custom BLOOM commission: add a shirt to the cart with NO design (we draw it
   // from photos the customer sends on WhatsApp after paying). Reuses the current
   // product/variant/colour selection. Carries inert shirt-extra fields so the cart
@@ -6615,8 +6634,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 // Single reusable product card (used both standalone and inside the Oversize group).
                 const card = (p, idx) => (
                   <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(idx + 1, 6))}
-                    onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); } }}
+                    onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); } }}
                     style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                       <span style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}</span>
@@ -6681,7 +6700,49 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 return out;
               })()}
             </div>
-            <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>{t.product.continue}</button>
+            {/* Custom BLOOM commission — shirt-only choice: upload your own design, or we draw one from photos */}
+            {BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `mug` && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && (
+              <div style={{ marginTop: 20, background: COLORS.bgCard, border: `2px solid ${commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: 18 }}>
+                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14, marginBottom: 12 }}>{t.commission.choiceTitle}</div>
+                <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
+                  <button onClick={() => setCommissionMode(false)} style={{ flex: `1 1 180px`, textAlign: `start`, background: !commissionMode ? `rgba(255,107,53,0.1)` : `transparent`, border: `2px solid ${!commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>📁 {t.commission.choiceUpload}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceUploadSub}</div>
+                  </button>
+                  <button onClick={() => setCommissionMode(true)} style={{ flex: `1 1 180px`, textAlign: `start`, background: commissionMode ? `rgba(255,107,53,0.1)` : `transparent`, border: `2px solid ${commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>🎨 {t.commission.choiceCommission}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCommissionSub}</div>
+                  </button>
+                </div>
+                {commissionMode && (
+                  <div style={{ marginTop: 16 }}>
+                    <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.color}</div>
+                    <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
+                      {(product?.colors || []).map((hex, i) => (
+                        <button key={i} aria-label={`${t.customize.color} ${i + 1}`} aria-pressed={selectedColor === i} onClick={() => setSelectedColor(i)} style={{ width: 30, height: 30, borderRadius: `50%`, background: hex, border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`, cursor: `pointer`, padding: 0 }} />
+                      ))}
+                    </div>
+                    <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.size}</div>
+                    <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
+                      {(product?.variants || []).map((v) => (
+                        <button key={v.id} aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : `transparent`, color: selectedVariant === v.id ? `#fff` : COLORS.gray, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `8px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{v.label}</button>
+                      ))}
+                    </div>
+                    <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: `12px 14px`, fontSize: 12.5, lineHeight: 1.7, color: COLORS.gray }}>
+                      <div>📸 {t.commission.microHow}</div>
+                      <div>🔁 {t.commission.microRevisions}</div>
+                      <div>⏱️ {t.commission.microTime}</div>
+                      <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {commissionMode && BLOOM_COMMISSION_ENABLED ? (
+              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setSelectedProduct(null); setStep(3); } }} disabled={!selectedProduct || !selectedVariant} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{COMMISSION_SHIRT_PRICE}</button>
+            ) : (
+              <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>{t.product.continue}</button>
+            )}
             {/* Our Fabrics — collapsible educational guide */}
             <div style={{ marginTop: 28, borderTop: `1px solid ${COLORS.border}`, paddingTop: 18 }}>
               <div role="button" tabIndex={0} aria-expanded={showFabrics} aria-controls="fabrics-panel"
