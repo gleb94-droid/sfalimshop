@@ -5554,6 +5554,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [showPaymentSoonModal, setShowPaymentSoonModal] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({}); // checkout inline validation
   const [submitError, setSubmitError] = useState("");  // friendly inline error (submit/pay)
+  // Blocks combining a hand-made commission (pay-first, no approval) with an
+  // uploaded custom design (approval-first, pay-later) in the SAME cart — that
+  // mix would route the whole group into the no-payment approval queue and the
+  // commission would never get charged. We keep them as separate orders.
+  const [mixWarn, setMixWarn] = useState("");
   // Trilingual checkout validation — required + email/phone/postal format. Returns
   // a {field: message} map; empty = valid. Values stay in `form` so nothing is lost.
   const validateCheckout = () => {
@@ -5653,6 +5658,13 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     return () => window.removeEventListener("keydown", onKey);
   }, [leaveWarning]);
 
+  // Auto-dismiss the "can't mix commission + upload" warning after a few seconds.
+  useEffect(() => {
+    if (!mixWarn) return;
+    const id = setTimeout(() => setMixWarn(""), 6000);
+    return () => clearTimeout(id);
+  }, [mixWarn]);
+
   // Escape dismisses the payment-failure return overlay (#order?paid=0).
   useEffect(() => {
     if (!payFailed) return;
@@ -5730,8 +5742,16 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // product/variant/colour selection. Carries inert shirt-extra fields so the cart
   // drawer / order summary code that reads them never crashes. Pet name is taken
   // in the WhatsApp brief (free) — no surcharge here.
+  const mixMsg = lang === `he`
+    ? `אי אפשר לשלב באותה עגלה דיוקן בעבודת יד (תשלום מיידי) והעלאת קובץ משלכם (הממתינה לאישור) — אלו תהליכים שונים. השלימו הזמנה אחת, ואז התחילו את השנייה.`
+    : lang === `ru`
+    ? `Нельзя объединить в одной корзине портрет ручной работы (оплата сразу) и загруженный свой файл (ждёт одобрения) — это разные процессы. Оформите один заказ, затем начните второй.`
+    : `A hand-made portrait (paid now) and your own uploaded file (awaits approval) can't share one cart — they're different flows. Complete one order, then start the other.`;
+
   const addCommissionToCart = () => {
     if (!product || !variant) return false;
+    if (cart.some(it => it.isCustom)) { setMixWarn(mixMsg); return false; }
+    setMixWarn(``);
     const unitPrice = commissionPrice(commissionType, selectedProduct);
     const colorHex = (product.colors && product.colors[selectedColor]) || null;
     const cartItemId = Date.now() + Math.random();
@@ -5768,6 +5788,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   const commitCurrentItem = () => {
     if (!product || !variant || !uploadedImage) return false;
+    if (cart.some(it => it.isCommission)) { setMixWarn(mixMsg); return false; }
+    setMixWarn(``);
     // Quantity is always 1 at item creation time now — the user adjusts it
     // inside the cart drawer (+/- buttons). unitPrice is the per-item price
     // including extras; itemPrice = unitPrice × qty (recomputed by updateCartQty).
@@ -6611,6 +6633,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             </div>
           ))}
         </div>
+
+        {/* Incompatible-cart warning (commission pay-first vs custom-upload approval-first) */}
+        {mixWarn && (
+          <div role="alert" style={{ position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)", zIndex: 2200, maxWidth: 460, width: "calc(100% - 32px)", background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 12, padding: "14px 16px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-start", gap: 12 }}>
+            <span aria-hidden="true" style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
+            <div style={{ color: COLORS.white, fontSize: 13, lineHeight: 1.5, fontFamily: "'Heebo',sans-serif", flex: 1, textAlign: lang === "he" ? "right" : "left" }}>{mixWarn}</div>
+            <button type="button" onClick={() => setMixWarn("")} aria-label={lang === "he" ? "סגירה" : lang === "ru" ? "Закрыть" : "Close"} style={{ background: "transparent", border: "none", color: COLORS.gray, cursor: "pointer", fontSize: 18, lineHeight: 1, flexShrink: 0 }}>×</button>
+          </div>
+        )}
 
         {/* Leave warning modal */}
         {leaveWarning && (
