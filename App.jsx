@@ -6779,8 +6779,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                       {num != null && <span style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(num).padStart(2, '0')}</span>}
-                      <div style={{ width: isMobile ? 44 : 54, height: isMobile ? 44 : 54, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 120 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                      <div style={{ width: isMobile ? 60 : 76, height: isMobile ? 60 : 76, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: COLORS.bg, border: `1px solid ${selectedProduct === p.id ? "rgba(255,107,53,0.4)" : COLORS.border}`, borderRadius: 10, padding: 6, transition: "border-color 0.2s" }}>
+                        <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 200 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                       </div>
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
