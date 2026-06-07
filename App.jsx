@@ -8654,6 +8654,64 @@ function Hero({ setPage, lang }) {
   );
 }
 
+// HomeMugsBanner — surfaces the core product (mugs) high on the home page and
+// funnels to the /mugs hub. Compact promo: copy + a few real BLOOM-mug photos + CTA.
+function HomeMugsBanner({ lang, setPage }) {
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
+  const [imgs, setImgs] = useState([]);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data } = await supabase.from(`pet_designs`).select(`slug,mockup_mug_url`).eq(`is_active`, true).order(`sort_order`, { ascending: true }).limit(40);
+        if (!alive) return;
+        setImgs((data || []).filter(d => d.mockup_mug_url).slice(0, 4));
+      } catch (_) {}
+    })();
+    return () => { alive = false; };
+  }, []);
+  const T = {
+    he: { eyebrow: `הליבה שלנו`, heading: `הספלים שלנו`, sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים.`, cta: `כל הספלים` },
+    en: { eyebrow: `Our core`, heading: `Our Mugs`, sub: `"Sfalim" means mugs — and it's what we do best. A BLOOM portrait, your own design, or a designed mug for weddings & events.`, cta: `All mugs` },
+    ru: { eyebrow: `Наша основа`, heading: `Наши кружки`, sub: `«Сфалим» значит «кружки» — и это то, что мы делаем лучше всего. Портрет BLOOM, свой дизайн или дизайнерская кружка на свадьбу и события.`, cta: `Все кружки` },
+  }[lang] || { eyebrow: `הליבה שלנו`, heading: `הספלים שלנו`, sub: ``, cta: `כל הספלים` };
+
+  return (
+    <section aria-labelledby="home-mugs-title" dir={isRTL ? `rtl` : `ltr`} style={{ background: COLORS.bg, padding: isMobile ? `8px 18px 40px` : `8px 32px 64px` }}>
+      <div style={{ maxWidth: 1000, margin: `0 auto`, background: `linear-gradient(135deg, rgba(255,107,53,0.12), rgba(255,107,53,0.03))`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 22, padding: isMobile ? `26px 22px` : `34px 40px`, display: `flex`, flexDirection: isMobile ? `column` : `row`, alignItems: `center`, gap: isMobile ? 22 : 36 }}>
+        <div style={{ flex: 1, textAlign: isMobile ? `center` : (isRTL ? `right` : `left`) }}>
+          <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `5px 15px`, marginBottom: 12, color: COLORS.accent, fontSize: 11, fontWeight: 700, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>☕ {T.eyebrow}</span>
+          <h2 id="home-mugs-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(26px,4.5vw,40px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 12px` }}>{T.heading}</h2>
+          <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 20px` : `0 0 20px` }}>{T.sub}</p>
+          <button type="button" onClick={() => setPage(`mugs`)} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` }}
+            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+            onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
+            <span aria-hidden="true">☕</span> {T.cta} {isRTL ? `←` : `→`}
+          </button>
+        </div>
+        {imgs.length > 0 && (
+          <div style={{ display: `grid`, gridTemplateColumns: `repeat(2, 1fr)`, gap: 10, flexShrink: 0, width: isMobile ? `100%` : 280, maxWidth: 320 }}>
+            {imgs.map((d) => (
+              <button key={d.slug} type="button" onClick={() => setPage(`mugs`)} aria-label={T.cta}
+                style={{ aspectRatio: `1 / 1`, borderRadius: 12, overflow: `hidden`, border: `1px solid ${COLORS.border}`, background: COLORS.bgCard, padding: 0, cursor: `pointer`, transition: `border-color 0.2s, transform 0.2s` }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-3px)`; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
+                <SmartImage src={transformImage(d.mockup_mug_url, { width: 360 })} alt={T.cta} loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // MugsPage — the dedicated flagship hub for mugs. The brand name "ספלים"
 // literally means "mugs", so this puts the core product front-and-centre.
 // Showcase + CTAs into the EXISTING flows (BLOOM gallery / order / WhatsApp) —
@@ -10789,7 +10847,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><HomeMugsBanner lang={lang} setPage={setPage} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
