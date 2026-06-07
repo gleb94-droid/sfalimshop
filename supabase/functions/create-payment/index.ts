@@ -246,7 +246,11 @@ serve(async (req) => {
       for (let i = 0; i < existing.length; i++) {
         const row = existing[i] as any;
         const meta = (row.extra_prints && typeof row.extra_prints === "object") ? row.extra_prints : {};
-        const qty = Number(row.quantity) || 1;
+        // Quantity must be a positive integer. Clamp to a sane range so a tampered
+        // INSERT can't under-charge with a fractional qty (e.g. 0.5 → half price)
+        // or over-charge with an absurd value. Legit cart quantities are small.
+        const qRaw = Math.floor(Number(row.quantity));
+        const qty = (isFinite(qRaw) && qRaw >= 1) ? Math.min(qRaw, 100) : 1;
         const pid = String(meta.pid || "");
         let unit: number | null = null;
         if (meta.src === "custom") {
@@ -265,6 +269,13 @@ serve(async (req) => {
             pet: { shirt: 189, mug: 149 },
             custom: { shirt: 149, mug: 109 },
           };
+          // ctype/pid come from client-set extra_prints. Unknown ctype coerces to
+          // "pet" (the MORE expensive tier — safe direction), and non-"mug" → shirt.
+          // RESIDUAL (accepted): a tampered INSERT can declare ctype:"custom" to pay
+          // the cheaper tier (−₪40). A complete fix needs a server-trusted anchor for
+          // the commission type (small schema follow-up) — there is no independent
+          // server record of pet-vs-custom today. Low impact + requires crafting an
+          // insert with the public anon key.
           const ctype = meta.ctype === "custom" ? "custom" : "pet";
           unit = pid === "mug" ? CPRICE[ctype].mug : CPRICE[ctype].shirt;
         }
