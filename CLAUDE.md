@@ -23,7 +23,7 @@ Every project agent should read this file before acting. It is the **shared brai
 
 ### 🚀 Production / branch state
 - **Production = `main` (HEAD `82a4cad`)**, deployed behind the maintenance gate (all 3 launch flags still ON). Latest on main: the **custom BLOOM commission flow** (`BLOOM_COMMISSION_ENABLED=true`) — see 2026-06-06 below — plus the earlier custom-shirt order-flow overhaul (flat ₪149 · Lycra/Look · Stone-wash · per-model colours · all prints included · Oversize category · "Our Fabrics"), mobile card glow + a11y contrast, FB/Meta domain-verification tag. Public still sees the maintenance page; launch = flip the 3 flags.
-- **`launch-prep` is 2 commits AHEAD of `main`** (`7410c06`, `2e7222c` — pre-launch polish, **not deployed**): Hebrew heading font (Frank Ruhl Libre), commission cart clarity, BLOOM gallery explainer, product-numbering + cart-wording fixes, and a mixed-cart guard (commission + custom upload). Pushed to origin. Merge to `main` to deploy.
+- **`launch-prep` is 4 commits AHEAD of `main`** (HEAD `ca75fa1` — pre-launch polish + new feature, **not deployed**): `7410c06` Hebrew heading font (Frank Ruhl Libre) + commission cart clarity + BLOOM explainer + numbering/wording fixes · `2e7222c` mixed-cart guard · `5c5a3c9` CLAUDE.md · `ca75fa1` **wedding/company event-mugs section** (WhatsApp-quote MVP). Pushed to origin. Merge to `main` to deploy (still behind the gate). **Also LIVE in prod Supabase already (not a code change):** the first real testimonial (Ella, ★5) → the home `Reviews` block is now active.
 - **Staff** (`?staff=1` + `VITE_STAFF_PASSWORD`, set in Vercel Prod+Preview; build-time var → redeploy to change; unset = gate stays closed) see the full live site.
 
 ### 💳 Payments — LIVE & verified on production
@@ -52,7 +52,7 @@ Every project agent should read this file before acting. It is the **shared brai
 - **Font-size control rewritten:** was root-font-size (only scaled `em` text); now **CSS `zoom` via `--sf-a11y-zoom` var on `#root` + `[data-sf-zoom]` overlays** (PetModal/cart/lightbox). Levels **100/110/120/130%**. FABs portaled to `<body>` stay viewport-fixed; removed the FAB overlay-self-hide so it stays visible/tappable over PetModal under zoom (`6499fbe` + `2e6853c`). **Lesson reaffirmed:** `zoom` (like `filter`/`transform`) makes its element a containing block for `position:fixed` descendants — keep fixed FABs OUTSIDE the zoomed subtree.
 - **PENDING (agent-memory note):** full overflow sweep 360/390/414 × he/en/ru × every zoom level when browser MCP returns; **cap max to 120%** if any level overflows (esp. cart panel `width:100%` at 130%).
 
-When going public: **flip the 3 launch flags.** (Note: `launch-prep` is 2 unmerged polish commits ahead of `main` — `7410c06` + `2e7222c`, see 2026-06-06 below — merge them to `main` first to deploy the Hebrew heading font, commission cart clarity, BLOOM explainer, and mixed-cart guard.)
+When going public: **flip the 3 launch flags.** (Note: `launch-prep` is 4 unmerged commits ahead of `main` — through `ca75fa1`, see 2026-06-06/07 below — merge them to `main` first to deploy the Hebrew heading font, commission cart clarity, BLOOM explainer, mixed-cart guard, and the wedding/event-mugs section.)
 
 ### 🔔 Launch gates (all 3 still ON → flip at launch)
 - `MAINTENANCE_MODE` (App.jsx, ~line 1509, find by name) `true` → **`false`**
@@ -101,6 +101,7 @@ Past dated "STATE AS OF" snapshots, compressed. Each line = a shipped milestone;
   - **DECISIONS (owner):** home stays **carousel-first** (Hero below — not reordered); **commission pricing-security hole deferred** (see Payments note above); **reviews** — owner to supply 1–2 real testimonials to seed the (currently empty → hidden) `testimonials` block before launch.
   - **Noted, not fixed (related, payment-adjacent):** the same strand-unpaid risk exists for **BLOOM item + custom upload** in one cart (same root: pay-first vs approval-first); product-mockup duplication (Lycra/Look/Stone-wash share images) deliberately left for a future real photoshoot.
   - Full older findings live in `AUDIT-2026-06-05.md`.
+- **2026-06-07 (wedding/event mugs + first real review, on `launch-prep` `ca75fa1`)** — Short research → shipped the owner's idea: a **wedding & company/branded event MUGS** section on the home page (`EventMugsSection`, he/en/ru, styled like `EventOrdersSection`, rendered right after it). Keepsake/gift positioning distinct from the shirt group-orders block: covers weddings (names/date/photo) + company/branded (logo/date) + the on-brand "your pet as a BLOOM portrait" angle; shows what can go on the mug, a price anchor (**His & Hers pair from ₪149** · small table (10) · company by quote), and a WhatsApp "get a quote" CTA with a guided prefill. **MVP = WhatsApp-quote only — no cart/DB/payment.** Matching wedding/event-mugs FAQ entry added. Phase 2 (post-launch): productized `/mugs-events` page + intake form + his/hers cart SKU. — Also loaded the **first real testimonial** into prod Supabase (`testimonials`: Ella, ★5, repeat customer, custom photo-collage shirt as a gift; he/en/ru body) → the home `Reviews` section + AggregateRating JSON-LD now render (was hidden while empty). **Next ideas parked** (from the research): WhatsApp welcome/reply template, waitlist launch-email draft, more testimonials, and post-launch "wow" features (mug studio, gift-a-character, UGC loop, character-of-the-month, sticker-pack builder).
 
 ---
 
@@ -172,7 +173,7 @@ sfalimshop/
 | `admins` | 1 (`gleb2009@gmail.com`) | Self-select RLS only |
 | `sticker_packs` | 2 | BLOOM sticker bundles (both ₪35) |
 | `blog_posts` | 4 published | Trilingual; gated behind maintenance until launch |
-| `testimonials` | EMPTY | `Reviews` section stays hidden until real reviews added |
+| `testimonials` | 1 active (Ella, ★5) | First real review added 2026-06-07 → `Reviews` section now renders. Add more via admin Testimonials manager. |
 | `waitlist` | grows (pre-launch) | RLS enabled. `email`, `lang`, `source`, `consent`, `breed_interest`, `launch_notified_at`. INSERT fires `waitlist-welcome` via DB webhook (pg_net trigger → edge fn). |
 
 ### `pet_designs` key columns
