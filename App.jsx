@@ -8495,10 +8495,10 @@ function Reviews({ lang }) {
                 <img src={r.author_avatar} alt={r.author_name} loading="lazy" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: `1px solid ${COLORS.border}` }} />
               )}
               <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.3 }}>
-                <span style={{ color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontWeight: 600, fontSize: 13 }}>{r.author_name}</span>
+                <span style={{ color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontWeight: 600, fontSize: 13 }}>{(lang !== "he" && r[`author_name_${lang}`]) || r.author_name}</span>
                 {(r.author_city || r.product) && (
                   <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Heebo',sans-serif" }}>
-                    {[r.author_city, r.product].filter(Boolean).join(" · ")}
+                    {[r.author_city, (lang !== "he" && r[`product_${lang}`]) || localizeProduct(r.product, lang)].filter(Boolean).join(" · ")}
                   </span>
                 )}
               </div>

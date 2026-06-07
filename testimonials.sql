@@ -6,8 +6,12 @@
 
 create table if not exists public.testimonials (
   id              uuid primary key default gen_random_uuid(),
-  -- Display info
+  -- Display info. author_name is the Hebrew/default name; the *_en/*_ru columns
+  -- are optional per-language overrides so the name localizes with the site
+  -- language (e.g. אלה / Ella / Элла). If empty, the front-end falls back to author_name.
   author_name     text not null,                -- e.g. "מאיה ל'"  or "Maya L."
+  author_name_en  text,                         -- optional English display name
+  author_name_ru  text,                         -- optional Russian display name
   author_city     text,                         -- e.g. "תל אביב"  (optional, shown small)
   author_avatar   text,                         -- optional URL to a square avatar image
   rating          int  not null check (rating between 1 and 5),
@@ -15,8 +19,12 @@ create table if not exists public.testimonials (
   body_he         text not null,
   body_en         text,
   body_ru         text,
-  -- Optional context — which product the review is about ("BLOOM Pixel", "ספל" …)
+  -- Optional context — which product the review is about ("BLOOM Pixel", "ספל" …).
+  -- `product` is the Hebrew/default; product_en/product_ru are optional per-language
+  -- overrides. Standard catalog product names also auto-localize via localizeProduct().
   product         text,
+  product_en      text,                         -- optional English product label
+  product_ru      text,                         -- optional Russian product label
   -- Admin controls
   is_active       boolean not null default true,
   sort_order      int     not null default 0,
