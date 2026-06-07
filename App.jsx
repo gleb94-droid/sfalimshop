@@ -1896,8 +1896,8 @@ const LANGS = {
   he: {
     dir: "rtl", label: "HE",
     nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
-    blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה →', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון →', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו →', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
-    quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
+    blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה ←', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון ←', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו ←', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
+    quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון ←", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח מ-₪27", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
@@ -1962,7 +1962,7 @@ const LANGS = {
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
     products: { tshirt: "חולצת טי בייסיק", lycra: "חולצת לייקרה", oversized: "חולצת אוברסייז", look: "חולצת לוק אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
     variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
-    bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} →` },
+    bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} ←` },
   },
   en: {
     dir: "ltr", label: "EN",
@@ -2884,7 +2884,7 @@ function AuthPage({ lang, onAuth }) {
     } catch (err) { setError(err.message); setLoading(false); }
   };
 
-  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
+  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, marginTop: 8 };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" };
   const smallBtnStyle = { background: "transparent", border: "none", color: COLORS.accent, cursor: "pointer", fontSize: 11, fontFamily: "'Heebo',sans-serif", fontWeight: 600 };
 
@@ -3061,7 +3061,7 @@ function ResetPasswordPage({ lang, setPage }) {
     setLoading(false);
   };
 
-  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: "none", marginTop: 8 };
+  const inputStyle = { width: "100%", background: "#111", border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, marginTop: 8 };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, textTransform: "uppercase" };
 
   return (
@@ -3157,7 +3157,7 @@ function AccountSettings({ lang }) {
     setLoading(false);
   };
 
-  const inputStyle = { width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 13, outline: "none" };
+  const inputStyle = { width: "100%", background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "10px 12px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 13 };
   const labelStyle = { color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", display: "block", marginBottom: 6 };
 
   return (
@@ -5641,6 +5641,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const sleeveRightRef = useRef();
   const [leaveWarning, setLeaveWarning] = useState(false);
   const leaveDialogRef = useDialogFocus(leaveWarning); // focus-trap + restore for the leave-order modal
+  const payFailedRef = useDialogFocus(payFailed); // focus-trap + restore for the payment-failure modal
   const [pendingNav, setPendingNav] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   // Below 360px the 5-step labels run out of room and clip; track this
@@ -6629,14 +6630,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     setAccountBusy(false);
   };
 
-  const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14, outline: "none" };
+  const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14 };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", display: "block", marginBottom: 8 };
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Heebo',sans-serif", direction: t.dir }}>
       {/* Payment-failure return (#order?paid=0) — full-screen retry state. */}
       {payFailed && (
-        <div role="dialog" aria-modal="true" aria-label={lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}
+        <div ref={payFailedRef} role="dialog" aria-modal="true" aria-label={lang === "he" ? "התשלום לא הושלם" : lang === "ru" ? "Оплата не завершена" : "Payment didn't go through"}
+          onKeyDown={e => { if (e.key === "Escape") { try { window.history.replaceState({}, ``, `${window.location.pathname}#order`); } catch (_) {} setPayFailed(false); } }}
           style={{ position: "fixed", inset: 0, zIndex: 2000, background: COLORS.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, direction: t.dir }}>
           <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 16, padding: "40px 32px", maxWidth: 440, width: "100%", textAlign: "center" }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 80, height: 80, borderRadius: "50%", background: "rgba(248,113,113,0.12)", border: "2px solid #f87171", marginBottom: 20, fontSize: 38, color: "#f87171", fontWeight: 700 }}>✕</div>
@@ -8507,9 +8509,9 @@ function Reviews({ lang }) {
           <div style={{ width: 40, height: 1, background: COLORS.accent }} />
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))", gap: isMobile ? 16 : 24 }}>
+      <div style={{ display: reviews.length < 3 ? "flex" : "grid", flexDirection: reviews.length < 3 ? "column" : undefined, alignItems: reviews.length < 3 ? "center" : undefined, gridTemplateColumns: reviews.length < 3 ? undefined : (isMobile ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))"), gap: isMobile ? 16 : 24 }}>
         {reviews.map((r, idx) => (
-          <article key={r.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} aria-label={t.aria} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? "20px 18px" : "26px 24px", display: "flex", flexDirection: "column", gap: 12, transition: "border-color 0.25s, transform 0.18s cubic-bezier(.2,.6,.2,1)" }}
+          <article key={r.id} className="reveal" data-delay={String(Math.min(idx + 1, 6))} aria-label={`${(lang !== "he" && r[`author_name_${lang}`]) || r.author_name} — ${t.aria}`} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? "20px 18px" : "26px 24px", display: "flex", flexDirection: "column", gap: 12, transition: "border-color 0.25s, transform 0.18s cubic-bezier(.2,.6,.2,1)", ...(reviews.length < 3 ? { maxWidth: 600, width: "100%", alignItems: "center", textAlign: "center" } : {}) }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-4px)"; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; }}
             onTouchStart={e => { e.currentTarget.style.transform = "scale(0.97)"; }}
@@ -8616,7 +8618,7 @@ function Hero({ setPage, lang }) {
         <button onClick={() => setPage("pets")} style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", letterSpacing: "0.3px", transition: "background 0.2s, color 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = COLORS.accent; }}
-        >{t.hero.ctaSecondary} →</button>
+        >{t.hero.ctaSecondary} {lang === "he" ? "←" : "→"}</button>
         <a href="/quiz" style={{ display: "inline-flex", alignItems: "center", background: COLORS.accentDim, color: COLORS.accent, border: `1px solid rgba(255,107,53,0.4)`, padding: "16px 28px", borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: "pointer", textDecoration: "none", fontFamily: "'Heebo',sans-serif", transition: "background 0.2s, color 0.2s" }}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = "#fff"; }}
           onMouseOut={e => { e.currentTarget.style.background = COLORS.accentDim; e.currentTarget.style.color = COLORS.accent; }}
@@ -8669,9 +8671,19 @@ function HomeMugsBanner({ lang, setPage }) {
     let alive = true;
     (async () => {
       try {
-        const { data } = await supabase.from(`pet_designs`).select(`slug,mockup_mug_url`).eq(`is_active`, true).order(`sort_order`, { ascending: true }).limit(40);
+        const { data } = await supabase.from(`pet_designs`).select(`slug,name_he,name_en,name_ru,species,mockup_mug_url`).eq(`is_active`, true).order(`sort_order`, { ascending: true }).limit(70);
         if (!alive) return;
-        setImgs((data || []).filter(d => d.mockup_mug_url).slice(0, 4));
+        const all = (data || []).filter(d => d.mockup_mug_url);
+        // Interleave dogs + cats so the 4 tiles aren't all dogs (cats are slugs 48-70).
+        const dogs = all.filter(d => d.species === `dog`);
+        const cats = all.filter(d => d.species === `cat`);
+        const mix = [];
+        let di = 0, ci = 0;
+        while (mix.length < 4 && (di < dogs.length || ci < cats.length)) {
+          if (di < dogs.length) mix.push(dogs[di++]);
+          if (mix.length < 4 && ci < cats.length) mix.push(cats[ci++]);
+        }
+        setImgs(mix.length ? mix : all.slice(0, 4));
       } catch (_) {}
     })();
     return () => { alive = false; };
@@ -8697,14 +8709,17 @@ function HomeMugsBanner({ lang, setPage }) {
         </div>
         {imgs.length > 0 && (
           <div style={{ display: `grid`, gridTemplateColumns: `repeat(2, 1fr)`, gap: 10, flexShrink: 0, width: isMobile ? `100%` : 280, maxWidth: 320 }}>
-            {imgs.map((d) => (
-              <button key={d.slug} type="button" onClick={() => setPage(`mugs`)} aria-label={T.cta}
+            {imgs.map((d) => {
+              const nm = d[`name_${lang}`] || d.name_he || ``;
+              return (
+              <button key={d.slug} type="button" onClick={() => setPage(`mugs`)} aria-label={`${nm} — ${T.cta}`}
                 style={{ aspectRatio: `1 / 1`, borderRadius: 12, overflow: `hidden`, border: `1px solid ${COLORS.border}`, background: COLORS.bgCard, padding: 0, cursor: `pointer`, transition: `border-color 0.2s, transform 0.2s` }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-3px)`; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
-                <SmartImage src={transformImage(d.mockup_mug_url, { width: 360 })} alt={T.cta} loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
+                <SmartImage src={transformImage(d.mockup_mug_url, { width: 360 })} alt="" loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
               </button>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -8730,11 +8745,21 @@ function MugsPage({ lang, setPage }) {
     (async () => {
       try {
         const { data } = await supabase.from(`pet_designs`)
-          .select(`slug,name_he,name_en,name_ru,mockup_mug_url`)
-          .eq(`is_active`, true).order(`sort_order`, { ascending: true }).limit(40);
+          .select(`slug,name_he,name_en,name_ru,species,mockup_mug_url`)
+          .eq(`is_active`, true).order(`sort_order`, { ascending: true }).limit(70);
         if (!alive) return;
-        const withMug = (data || []).filter(d => d.mockup_mug_url).slice(0, 8);
-        setMugDesigns(withMug);
+        const all = (data || []).filter(d => d.mockup_mug_url);
+        // Interleave dogs (slugs 01-47) and cats (48-70) so both species show —
+        // a plain sort_order slice would only ever surface dogs.
+        const dogs = all.filter(d => d.species === `dog`);
+        const cats = all.filter(d => d.species === `cat`);
+        const mix = [];
+        let di = 0, ci = 0;
+        while (mix.length < 8 && (di < dogs.length || ci < cats.length)) {
+          if (di < dogs.length) mix.push(dogs[di++]);
+          if (mix.length < 8 && ci < cats.length) mix.push(cats[ci++]);
+        }
+        setMugDesigns(mix.length ? mix : all.slice(0, 8));
       } catch (_) {}
     })();
     return () => { alive = false; };
@@ -8851,9 +8876,9 @@ function MugsPage({ lang, setPage }) {
                 onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-4px)`; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
                 <div style={{ width: `100%`, aspectRatio: `1 / 1`, borderRadius: 10, overflow: `hidden`, background: COLORS.bg }}>
-                  <SmartImage src={transformImage(d.mockup_mug_url, { width: 420 })} alt={d[`name_${lang}`] || d.name_he || ``} loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
+                  <SmartImage src={transformImage(d.mockup_mug_url, { width: 420 })} alt="" loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
                 </div>
-                <div style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600, marginTop: 8, textAlign: `center`, whiteSpace: `nowrap`, overflow: `hidden`, textOverflow: `ellipsis` }}>{(d.name_en || d.name_he || ``).toUpperCase()}</div>
+                <div style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600, marginTop: 8, textAlign: `center`, whiteSpace: `nowrap`, overflow: `hidden`, textOverflow: `ellipsis` }}>{(d[`name_${lang}`] || d.name_he || d.name_en || ``).toUpperCase()}</div>
               </button>
             ))}
           </div>
@@ -8885,11 +8910,11 @@ function MugsPage({ lang, setPage }) {
                 <span style={{ display: `inline-flex`, alignItems: `center`, gap: 7, color: COLORS.accent, fontWeight: 700, fontSize: 14, fontFamily: `'Heebo',sans-serif` }}>{w.cta} {isRTL ? `←` : `→`}</span>
               </>
             );
-            const cardStyle = { display: `flex`, flexDirection: `column`, textAlign: isRTL ? `right` : `left`, background: `linear-gradient(160deg, rgba(255,107,53,0.08), rgba(255,107,53,0.02))`, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 20, cursor: `pointer`, textDecoration: `none`, transition: `border-color 0.2s, transform 0.2s` };
+            const cardStyle = { display: `flex`, flexDirection: `column`, textAlign: `start`, background: `linear-gradient(160deg, rgba(255,107,53,0.08), rgba(255,107,53,0.02))`, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 20, cursor: `pointer`, textDecoration: `none`, transition: `border-color 0.2s, transform 0.2s` };
             const hov = { over: e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-4px)`; }, out: e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; } };
             return w.href
-              ? <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" style={cardStyle} onMouseOver={hov.over} onMouseOut={hov.out}>{inner}</a>
-              : <div key={i} role="button" tabIndex={0} onClick={w.go} onKeyDown={e => { if (e.key === `Enter` || e.key === ` `) { e.preventDefault(); w.go(); } }} style={cardStyle} onMouseOver={hov.over} onMouseOut={hov.out}>{inner}</div>;
+              ? <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" aria-label={w.title} style={cardStyle} onMouseOver={hov.over} onMouseOut={hov.out}>{inner}</a>
+              : <div key={i} role="button" tabIndex={0} aria-label={w.title} onClick={w.go} onKeyDown={e => { if (e.key === `Enter` || e.key === ` `) { e.preventDefault(); w.go(); } }} style={cardStyle} onMouseOver={hov.over} onMouseOut={hov.out}>{inner}</div>;
           })}
         </div>
       </section>
