@@ -1895,7 +1895,7 @@ const timeBetween = (start, end, lang) => {
 const LANGS = {
   he: {
     dir: "rtl", label: "HE",
-    nav: { home: "בית", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
+    nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה →', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון →', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו →', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון →", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
@@ -1966,7 +1966,7 @@ const LANGS = {
   },
   en: {
     dir: "ltr", label: "EN",
-    nav: { home: "Home", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
+    nav: { home: "Home", mugs: "Mugs", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
@@ -2037,7 +2037,7 @@ const LANGS = {
   },
   ru: {
     dir: "ltr", label: "RU",
-    nav: { home: "Главная", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
+    nav: { home: "Главная", mugs: "Кружки", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
@@ -8654,6 +8654,221 @@ function Hero({ setPage, lang }) {
   );
 }
 
+// MugsPage — the dedicated flagship hub for mugs. The brand name "ספלים"
+// literally means "mugs", so this puts the core product front-and-centre.
+// Showcase + CTAs into the EXISTING flows (BLOOM gallery / order / WhatsApp) —
+// no new cart/DB/payment logic.
+function MugsPage({ lang, setPage }) {
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
+  const [mugDesigns, setMugDesigns] = useState([]);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data } = await supabase.from(`pet_designs`)
+          .select(`slug,name_he,name_en,name_ru,mockup_mug_url`)
+          .eq(`is_active`, true).order(`sort_order`, { ascending: true }).limit(40);
+        if (!alive) return;
+        const withMug = (data || []).filter(d => d.mockup_mug_url).slice(0, 8);
+        setMugDesigns(withMug);
+      } catch (_) {}
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const waValid = /^\d{6,15}$/.test(WHATSAPP_NUMBER || ``);
+  const wa = (text) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+
+  const iconProps = { width: 26, height: 26, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  const ICONS = {
+    paw: <svg {...iconProps}><circle cx="5.5" cy="12.5" r="1.7" /><circle cx="9.5" cy="8.5" r="1.7" /><circle cx="14.5" cy="8.5" r="1.7" /><circle cx="18.5" cy="12.5" r="1.7" /><path d="M8.5 16.5c0-2.2 1.6-3.3 3.5-3.3s3.5 1.1 3.5 3.3-1.6 3.8-3.5 3.8-3.5-1.6-3.5-3.8z" /></svg>,
+    upload: <svg {...iconProps}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>,
+    brush: <svg {...iconProps}><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08" /><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z" /></svg>,
+    rings: <svg {...iconProps}><circle cx="9" cy="14" r="6" /><circle cx="15" cy="14" r="6" /><path d="M9 4l3 3 3-3" /></svg>,
+  };
+
+  const D = {
+    he: {
+      eyebrow: `ספלים שופ`,
+      heading: `הספלים שלנו`,
+      sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. ספל קרמי איכותי עם העיצוב שאתם אוהבים, מודפס באהבה ביד בבאר שבע.`,
+      badges: [`קרמיקה 11oz`, `עמיד במדיח`, `הדפסת סובלימציה`, `מודפס ביד בבאר שבע`],
+      bloomTitle: `כל דמות BLOOM — גם על ספל`,
+      bloomSub: `70 דיוקנאות חיות מצוירים. בחרו את הגזע שלכם והדפיסו אותו על ספל.`,
+      bloomCta: `עיין באוסף BLOOM`,
+      waysTitle: `איך מזמינים ספל`,
+      ways: [
+        { icon: `paw`, title: `החיה שלכם על ספל`, price: `₪59`, desc: `בחרו דמות מאוסף BLOOM`, cta: `לאוסף`, go: () => setPage(`pets`) },
+        { icon: `upload`, title: `העיצוב שלכם`, price: `₪69`, desc: `העלו תמונה או לוגו משלכם`, cta: `התחילו`, go: () => setPage(`order`) },
+        { icon: `brush`, title: `נצייר לכם`, price: `החל מ-₪109`, desc: `שלחו רעיון או תמונה — ונעצב ביד`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספל עם עיצוב בעבודת יד`) : null },
+        { icon: `rings`, title: `חתונה ואירועים`, price: `סט זוגי מ-₪149`, desc: `שמות · תאריך · תמונה · סטים לשולחן`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספלים מעוצבים לאירוע (חתונה / חברה)`) : null },
+      ],
+      whyTitle: `למה הספלים שלנו`,
+      why: [`קרמיקה איכותית 11oz, נעימה ליד`, `הדפסת סובלימציה — צבעים חיים שלא נמחקים`, `עמיד בכביסה במדיח`, `מודפס ידנית בבאר שבע · אספקה מהירה`],
+      giftTitle: `מתנה שנשארת`,
+      giftText: `ספל מעוצב זו מתנה אישית שמלווה כל בוקר. מושלם ליום הולדת, חתונה, מתנה לצוות — או סתם כי בא לכם לפנק.`,
+      finalCta: `התחילו לעצב ספל`,
+    },
+    en: {
+      eyebrow: `Sfalim Shop`,
+      heading: `Our Mugs`,
+      sub: `"Sfalim" literally means "mugs" — and it's what we do best. A quality ceramic mug with the design you love, printed by hand with love in Be'er Sheva.`,
+      badges: [`11oz ceramic`, `Dishwasher-safe`, `Sublimation print`, `Hand-printed in Be'er Sheva`],
+      bloomTitle: `Every BLOOM character — on a mug too`,
+      bloomSub: `70 hand-illustrated pet portraits. Pick your breed and print it on a mug.`,
+      bloomCta: `Browse the BLOOM collection`,
+      waysTitle: `Ways to order a mug`,
+      ways: [
+        { icon: `paw`, title: `Your pet on a mug`, price: `₪59`, desc: `Choose a BLOOM character`, cta: `Browse`, go: () => setPage(`pets`) },
+        { icon: `upload`, title: `Your own design`, price: `₪69`, desc: `Upload a photo or your logo`, cta: `Start`, go: () => setPage(`order`) },
+        { icon: `brush`, title: `We design it`, price: `from ₪109`, desc: `Send an idea or photo — we'll design it by hand`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in a mug with a hand-made design`) : null },
+        { icon: `rings`, title: `Weddings & events`, price: `pair from ₪149`, desc: `Names · date · photo · table sets`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in designed mugs for an event (wedding / company)`) : null },
+      ],
+      whyTitle: `Why our mugs`,
+      why: [`Quality 11oz ceramic, nice in the hand`, `Sublimation print — vivid colours that won't peel`, `Dishwasher-safe`, `Hand-printed in Be'er Sheva · fast turnaround`],
+      giftTitle: `A keepsake that lasts`,
+      giftText: `A designed mug is a personal gift used every morning. Perfect for a birthday, wedding, a team gift — or just to treat yourself.`,
+      finalCta: `Start designing a mug`,
+    },
+    ru: {
+      eyebrow: `Sfalim Shop`,
+      heading: `Наши кружки`,
+      sub: `«Сфалим» и означает «кружки» — и это то, что мы делаем лучше всего. Качественная керамическая кружка с дизайном, который вам нравится, напечатана вручную с любовью в Беэр-Шеве.`,
+      badges: [`Керамика 11oz`, `Можно в посудомойку`, `Сублимационная печать`, `Печать вручную в Беэр-Шеве`],
+      bloomTitle: `Любой персонаж BLOOM — и на кружке`,
+      bloomSub: `70 рисованных портретов питомцев. Выберите породу и напечатайте на кружке.`,
+      bloomCta: `Каталог BLOOM`,
+      waysTitle: `Как заказать кружку`,
+      ways: [
+        { icon: `paw`, title: `Питомец на кружке`, price: `₪59`, desc: `Выберите персонажа BLOOM`, cta: `В каталог`, go: () => setPage(`pets`) },
+        { icon: `upload`, title: `Свой дизайн`, price: `₪69`, desc: `Загрузите фото или логотип`, cta: `Начать`, go: () => setPage(`order`) },
+        { icon: `brush`, title: `Нарисуем за вас`, price: `от ₪109`, desc: `Пришлите идею или фото — нарисуем вручную`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересует кружка с дизайном ручной работы`) : null },
+        { icon: `rings`, title: `Свадьба и события`, price: `пара от ₪149`, desc: `Имена · дата · фото · наборы на стол`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересуют дизайнерские кружки для события (свадьба / компания)`) : null },
+      ],
+      whyTitle: `Почему наши кружки`,
+      why: [`Качественная керамика 11oz, приятная в руке`, `Сублимация — яркие цвета, которые не стираются`, `Можно мыть в посудомойке`, `Печать вручную в Беэр-Шеве · быстрый срок`],
+      giftTitle: `Память, которая остаётся`,
+      giftText: `Дизайнерская кружка — личный подарок, который рядом каждое утро. Отлично на день рождения, свадьбу, подарок команде — или просто себе.`,
+      finalCta: `Создать кружку`,
+    },
+  };
+  const c = D[lang] || D.he;
+
+  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, padding: isMobile ? `0 18px` : `0 32px` };
+  const ctaBtnStyle = { display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` };
+
+  return (
+    <div dir={isRTL ? `rtl` : `ltr`} style={{ minHeight: `100vh`, paddingTop: 72, paddingBottom: 80, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.10) 0%, transparent 55%), ${COLORS.bg}`, color: COLORS.white }}>
+      {/* HERO */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 36 : 64, paddingBottom: isMobile ? 28 : 40, textAlign: `center` }}>
+        <span className="reveal" style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>☕ {c.eyebrow}</span>
+        <h1 className="reveal" data-delay="1" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(34px,7vw,68px)`, lineHeight: 1.05, margin: `0 0 16px` }}>{c.heading}</h1>
+        <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.7, maxWidth: 620, margin: `0 auto 24px` }}>{c.sub}</p>
+        <ul className="reveal" data-delay="3" role="list" style={{ listStyle: `none`, margin: 0, padding: 0, display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 9 }}>
+          {c.badges.map((b, i) => (
+            <li key={i} style={{ display: `inline-flex`, alignItems: `center`, gap: 7, padding: `8px 14px`, borderRadius: 999, border: `1px solid rgba(255,107,53,0.22)`, background: `rgba(255,107,53,0.06)`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 500 }}>
+              <span aria-hidden="true" style={{ color: COLORS.accent }}>✓</span>{b}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* BLOOM MUG SHOWCASE — real product photos */}
+      {mugDesigns.length > 0 && (
+        <section style={{ ...sectionStyle, paddingTop: isMobile ? 20 : 36, paddingBottom: isMobile ? 20 : 36 }}>
+          <div style={{ textAlign: `center`, marginBottom: 22 }}>
+            <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(24px,4.5vw,36px)`, margin: `0 0 8px` }}>{c.bloomTitle}</h2>
+            <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, maxWidth: 560, margin: `0 auto` }}>{c.bloomSub}</p>
+          </div>
+          <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(4, 1fr)`, gap: isMobile ? 12 : 16, marginBottom: 24 }}>
+            {mugDesigns.map((d) => (
+              <button key={d.slug} type="button" onClick={() => setPage(`pets`)} aria-label={d[`name_${lang}`] || d.name_he}
+                style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: 10, cursor: `pointer`, transition: `border-color 0.2s, transform 0.2s`, overflow: `hidden` }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-4px)`; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
+                <div style={{ width: `100%`, aspectRatio: `1 / 1`, borderRadius: 10, overflow: `hidden`, background: COLORS.bg }}>
+                  <SmartImage src={transformImage(d.mockup_mug_url, { width: 420 })} alt={d[`name_${lang}`] || d.name_he || ``} loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
+                </div>
+                <div style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600, marginTop: 8, textAlign: `center`, whiteSpace: `nowrap`, overflow: `hidden`, textOverflow: `ellipsis` }}>{(d.name_en || d.name_he || ``).toUpperCase()}</div>
+              </button>
+            ))}
+          </div>
+          <div style={{ textAlign: `center` }}>
+            <button type="button" onClick={() => setPage(`pets`)} style={{ ...ctaBtnStyle, background: `transparent`, color: COLORS.accent, border: `1px solid ${COLORS.accent}`, boxShadow: `none` }}
+              onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtn; e.currentTarget.style.color = `#fff`; }}
+              onMouseOut={e => { e.currentTarget.style.background = `transparent`; e.currentTarget.style.color = COLORS.accent; }}>
+              {c.bloomCta} {isRTL ? `←` : `→`}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* WAYS TO ORDER */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 26 : 44, paddingBottom: isMobile ? 8 : 20 }}>
+        <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(24px,4.5vw,36px)`, textAlign: `center`, margin: `0 0 24px` }}>{c.waysTitle}</h2>
+        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(2, 1fr)`, gap: 14 }}>
+          {c.ways.map((w, i) => {
+            const inner = (
+              <>
+                <div style={{ display: `flex`, alignItems: `center`, gap: 12, marginBottom: 10 }}>
+                  <span aria-hidden="true" style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 48, height: 48, borderRadius: 12, background: COLORS.accentDim, color: COLORS.accent, flexShrink: 0 }}>{ICONS[w.icon]}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 17, fontFamily: `'Heebo',sans-serif` }}>{w.title}</div>
+                    <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 14, fontFamily: `'Heebo',sans-serif`, marginTop: 2 }}>{w.price}</div>
+                  </div>
+                </div>
+                <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, lineHeight: 1.55, marginBottom: 14, flex: 1 }}>{w.desc}</div>
+                <span style={{ display: `inline-flex`, alignItems: `center`, gap: 7, color: COLORS.accent, fontWeight: 700, fontSize: 14, fontFamily: `'Heebo',sans-serif` }}>{w.cta} {isRTL ? `←` : `→`}</span>
+              </>
+            );
+            const cardStyle = { display: `flex`, flexDirection: `column`, textAlign: isRTL ? `right` : `left`, background: `linear-gradient(160deg, rgba(255,107,53,0.08), rgba(255,107,53,0.02))`, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 20, cursor: `pointer`, textDecoration: `none`, transition: `border-color 0.2s, transform 0.2s` };
+            const hov = { over: e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-4px)`; }, out: e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; } };
+            return w.href
+              ? <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" style={cardStyle} onMouseOver={hov.over} onMouseOut={hov.out}>{inner}</a>
+              : <div key={i} role="button" tabIndex={0} onClick={w.go} onKeyDown={e => { if (e.key === `Enter` || e.key === ` `) { e.preventDefault(); w.go(); } }} style={cardStyle} onMouseOver={hov.over} onMouseOut={hov.out}>{inner}</div>;
+          })}
+        </div>
+      </section>
+
+      {/* WHY OUR MUGS + GIFT */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 30 : 48 }}>
+        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `1.1fr 0.9fr`, gap: 18 }}>
+          <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 18, padding: isMobile ? `22px 20px` : `28px 28px` }}>
+            <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: 22, margin: `0 0 16px` }}>{c.whyTitle}</h3>
+            <ul role="list" style={{ listStyle: `none`, margin: 0, padding: 0, display: `flex`, flexDirection: `column`, gap: 12 }}>
+              {c.why.map((w, i) => (
+                <li key={i} style={{ display: `flex`, alignItems: `flex-start`, gap: 10, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, lineHeight: 1.5 }}>
+                  <span aria-hidden="true" style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>✓</span>{w}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ background: `linear-gradient(160deg, rgba(255,107,53,0.14), rgba(255,107,53,0.03))`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 18, padding: isMobile ? `22px 20px` : `28px 28px`, display: `flex`, flexDirection: `column`, justifyContent: `center` }}>
+            <div style={{ fontSize: 30, marginBottom: 8 }} aria-hidden="true">🎁</div>
+            <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: 22, margin: `0 0 10px` }}>{c.giftTitle}</h3>
+            <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, lineHeight: 1.65, margin: 0 }}>{c.giftText}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 32 : 52, textAlign: `center` }}>
+        <button type="button" onClick={() => setPage(`order`)} style={ctaBtnStyle}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
+          <span aria-hidden="true" style={{ fontSize: 18 }}>☕</span> {c.finalCta} {isRTL ? `←` : `→`}
+        </button>
+      </section>
+    </div>
+  );
+}
+
 // Nav
 function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick, preview = false }) {
   const t = LANGS[lang];
@@ -8764,7 +8979,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-        {["home", "order", "pets", "about"].map(p => (
+        {["home", "mugs", "pets", "order", "about"].map(p => (
           <button key={p} onClick={() => setPage(p)} aria-current={page === p ? "page" : undefined} style={{
             background: page === p ? COLORS.accentDim : "transparent",
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
@@ -8835,7 +9050,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     {/* Mobile dropdown */}
     {mobileMenu && (
       <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, maxHeight: "calc(100vh - 72px)", overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
-        {["home", "order", "pets", "about"].map(p => (
+        {["home", "mugs", "pets", "order", "about"].map(p => (
           <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
         <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
@@ -9679,7 +9894,7 @@ function NotFoundPage({ lang, setPage }) {
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
+ const VALID_PAGES = ['home', 'mugs', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -10196,6 +10411,7 @@ export default function App() {
     const titles = {
       he: {
         home:     "ספלים שופ | הדפסות מותאמות אישית — חולצות, ספלים, מדבקות",
+        mugs:     "הספלים שלנו | ספלים קרמיים מעוצבים | ספלים שופ",
         order:    "הזמן עיצוב משלך | ספלים שופ",
         pets:     "BLOOM Collection | אוסף דיוקנאות חיות מחמד | ספלים שופ",
         about:    "על ספלים שופ | מי אנחנו",
@@ -10206,6 +10422,7 @@ export default function App() {
       },
       en: {
         home:     "Sfalim Shop | Custom Prints — Shirts, Mugs, Stickers",
+        mugs:     "Our Mugs | Custom Ceramic Mugs | Sfalim Shop",
         order:    "Design Your Order | Sfalim Shop",
         pets:     "BLOOM Collection | Pet Couture by Sfalim Shop",
         about:    "About Sfalim Shop",
@@ -10216,6 +10433,7 @@ export default function App() {
       },
       ru: {
         home:     "Sfalim Shop | Индивидуальная печать — футболки, кружки, стикеры",
+        mugs:     "Наши кружки | Дизайнерские керамические кружки | Sfalim Shop",
         order:    "Создать заказ | Sfalim Shop",
         pets:     "BLOOM Collection | Pet Couture от Sfalim Shop",
         about:    "О Sfalim Shop",
@@ -10573,6 +10791,7 @@ export default function App() {
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
             {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
+            {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
             {page === "blog" && (blogSlug
@@ -13860,18 +14079,21 @@ const GENERIC_SEO_DESC = {
 const VIEW_SEO_DESC = {
   he: {
     order: `עצבו מוצר משלכם — העלו תמונה, בחרו חולצה/ספל/מדבקה, צבע ומידה, ואנחנו מדפיסים בישראל ושולחים עד הבית.`,
+    mugs: `הספלים שלנו — ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס ביד בבאר שבע.`,
     pets: `אוסף BLOOM — 70 דיוקנאות מאוירים של כלבים וחתולים על חולצות, ספלים ומדבקות. מצאו את הגזע שלכם.`,
     about: `הסיפור של ספלים שופ — הדפסה מקומית בבאר שבע, באהבה ובדיוק, עם משלוח לכל הארץ.`,
     track: `מעקב אחר ההזמנה שלכם בספלים שופ.`,
   },
   en: {
     order: `Design your own — upload a photo, pick a shirt/mug/sticker, colour and size; printed in Israel and shipped to your door.`,
+    mugs: `Our mugs — an 11oz ceramic mug with a BLOOM portrait, your own design, or a designed mug for weddings & events. Hand-printed in Be'er Sheva.`,
     pets: `The BLOOM collection — 70 hand-illustrated dog & cat portraits on shirts, mugs and stickers. Find your breed.`,
     about: `The Sfalim Shop story — printed locally in Be'er Sheva with care, shipped anywhere in Israel.`,
     track: `Track your Sfalim Shop order.`,
   },
   ru: {
     order: `Создайте свой товар — загрузите фото, выберите футболку/кружку/стикер, цвет и размер; печатаем в Израиле с доставкой на дом.`,
+    mugs: `Наши кружки — керамическая кружка 11oz с портретом BLOOM, вашим дизайном или дизайнерская кружка на свадьбу и события. Печать вручную в Беэр-Шеве.`,
     pets: `Коллекция BLOOM — 70 рисованных портретов собак и кошек на футболках, кружках и стикерах. Найдите свою породу.`,
     about: `История Sfalim Shop — печатаем в Беэр-Шеве с любовью, доставка по всему Израилю.`,
     track: `Отслеживание вашего заказа в Sfalim Shop.`,
