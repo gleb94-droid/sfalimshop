@@ -1114,7 +1114,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     const clamp = (n, lim) => Math.max(-lim, Math.min(lim, n));
     const onOrient = (e) => {
       if (e.beta == null || e.gamma == null) return;
-      pending = { rx: clamp(-(e.beta - 45) * 0.18, 8), ry: clamp(e.gamma * 0.4, 8) };
+      pending = { rx: clamp(-(e.beta - 45) * 0.22, 10), ry: clamp(e.gamma * 0.5, 10) };
       if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (pending) setTilt(pending); });
     };
     window.addEventListener(`deviceorientation`, onOrient);
@@ -10363,11 +10363,11 @@ export default function App() {
            radial-gradient is inherently soft (NO live filter:blur → mobile-safe);
            animates transform only (compositor). Especially valuable on phones,
            where the particle canvas bails. Gated by !reduceMotion in JS too. */
-        .sf-aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .sf-aurora { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
         .sf-aurora > span { position: absolute; display: block; border-radius: 50%; will-change: transform; }
-        .sf-aurora .a1 { width: 70vw; height: 70vw; top: -18vw; inset-inline-start: -12vw; background: radial-gradient(circle at center, rgba(255,107,53,0.20), rgba(255,107,53,0) 68%); animation: sfAur1 24s ease-in-out infinite alternate; }
-        .sf-aurora .a2 { width: 60vw; height: 60vw; bottom: -16vw; inset-inline-end: -10vw; background: radial-gradient(circle at center, rgba(255,150,70,0.16), rgba(255,150,70,0) 68%); animation: sfAur2 30s ease-in-out infinite alternate; }
-        .sf-aurora .a3 { width: 48vw; height: 48vw; top: 26vw; inset-inline-start: 30vw; background: radial-gradient(circle at center, rgba(255,90,40,0.13), rgba(255,90,40,0) 70%); animation: sfAur3 34s ease-in-out infinite alternate; }
+        .sf-aurora .a1 { width: 72vw; height: 72vw; top: -18vw; inset-inline-start: -12vw; background: radial-gradient(circle at center, rgba(255,107,53,0.26), rgba(255,107,53,0) 68%); animation: sfAur1 24s ease-in-out infinite alternate; }
+        .sf-aurora .a2 { width: 62vw; height: 62vw; bottom: -16vw; inset-inline-end: -10vw; background: radial-gradient(circle at center, rgba(255,150,70,0.20), rgba(255,150,70,0) 68%); animation: sfAur2 30s ease-in-out infinite alternate; }
+        .sf-aurora .a3 { width: 50vw; height: 50vw; top: 26vw; inset-inline-start: 30vw; background: radial-gradient(circle at center, rgba(255,90,40,0.16), rgba(255,90,40,0) 70%); animation: sfAur3 34s ease-in-out infinite alternate; }
         @keyframes sfAur1 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(8vw,6vw,0) scale(1.15); } }
         @keyframes sfAur2 { from { transform: translate3d(0,0,0) scale(1.05); } to { transform: translate3d(-7vw,-5vw,0) scale(1.2); } }
         @keyframes sfAur3 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(5vw,-7vw,0) scale(1.1); } }
@@ -10533,8 +10533,12 @@ export default function App() {
         .footer-contact-link { color: inherit; text-decoration: none; transition: color 0.25s ease; }
         .footer-contact-link:hover { color: #FF6B35; }
       `}</style>
-      {page === "home" && !reduceMotion && (
-        <div className="sf-aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>
+      {page === "home" && !reduceMotion && typeof document !== "undefined" && createPortal(
+        // Portaled to <body> (OUTSIDE #root) so the a11y CSS `zoom` on #root can't
+        // scale this fixed layer into horizontal overflow. z-index:-1 keeps it
+        // behind the (transparent) #root content, above the body backdrop.
+        <div className="sf-aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>,
+        document.body
       )}
       {!reduceMotion && <ParticlesBackground />}
       {!reduceMotion && <CursorGlow />}
