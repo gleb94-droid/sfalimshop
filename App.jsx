@@ -10365,9 +10365,9 @@ export default function App() {
            where the particle canvas bails. Gated by !reduceMotion in JS too. */
         .sf-aurora { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
         .sf-aurora > span { position: absolute; display: block; border-radius: 50%; will-change: transform; }
-        .sf-aurora .a1 { width: 72vw; height: 72vw; top: -18vw; inset-inline-start: -12vw; background: radial-gradient(circle at center, rgba(255,107,53,0.26), rgba(255,107,53,0) 68%); animation: sfAur1 24s ease-in-out infinite alternate; }
-        .sf-aurora .a2 { width: 62vw; height: 62vw; bottom: -16vw; inset-inline-end: -10vw; background: radial-gradient(circle at center, rgba(255,150,70,0.20), rgba(255,150,70,0) 68%); animation: sfAur2 30s ease-in-out infinite alternate; }
-        .sf-aurora .a3 { width: 50vw; height: 50vw; top: 26vw; inset-inline-start: 30vw; background: radial-gradient(circle at center, rgba(255,90,40,0.16), rgba(255,90,40,0) 70%); animation: sfAur3 34s ease-in-out infinite alternate; }
+        .sf-aurora .a1 { width: 90vw; height: 90vw; top: -34vw; inset-inline-start: -22vw; background: radial-gradient(circle at center, rgba(255,107,53,0.42), rgba(255,107,53,0) 66%); animation: sfAur1 24s ease-in-out infinite alternate; }
+        .sf-aurora .a2 { width: 80vw; height: 80vw; bottom: -30vw; inset-inline-end: -20vw; background: radial-gradient(circle at center, rgba(255,140,60,0.34), rgba(255,140,60,0) 66%); animation: sfAur2 30s ease-in-out infinite alternate; }
+        .sf-aurora .a3 { width: 66vw; height: 66vw; bottom: 8vw; inset-inline-start: -16vw; background: radial-gradient(circle at center, rgba(255,80,30,0.28), rgba(255,80,30,0) 68%); animation: sfAur3 34s ease-in-out infinite alternate; }
         @keyframes sfAur1 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(8vw,6vw,0) scale(1.15); } }
         @keyframes sfAur2 { from { transform: translate3d(0,0,0) scale(1.05); } to { transform: translate3d(-7vw,-5vw,0) scale(1.2); } }
         @keyframes sfAur3 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(5vw,-7vw,0) scale(1.1); } }
