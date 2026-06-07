@@ -8323,7 +8323,7 @@ function EventOrdersSection({ lang }) {
 
   return (
     <section aria-labelledby="event-orders-title" dir={dir} style={{ background: COLORS.bg, padding: `8px 24px 72px` }}>
-      <div style={{ maxWidth: 860, margin: `0 auto`, background: `linear-gradient(180deg, rgba(255,107,53,0.08) 0%, rgba(255,107,53,0.03) 100%)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 20, padding: isRTL ? `40px 28px` : `40px 28px`, textAlign: `center` }}>
+      <div style={{ maxWidth: 860, margin: `0 auto`, background: `linear-gradient(180deg, ${COLORS.bgCard} 0%, rgba(26,26,26,0.6) 100%)`, border: `1px solid ${COLORS.border}`, borderRadius: 20, padding: isRTL ? `40px 28px` : `40px 28px`, textAlign: `center` }}>
         <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>{eyebrow}</span>
         <h2 id="event-orders-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(28px,5vw,42px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 16px` }}>{heading}</h2>
         <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15.5, lineHeight: 1.7, maxWidth: 640, margin: `0 auto 26px` }}>{copy}</p>
