@@ -11660,8 +11660,10 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         </a>
       </section>
 
-      {/* ===== FROM OUR BLOG stripe (Slice 3) — only when 3+ published posts ===== */}
-      {blogPosts.length >= 3 && (
+      {/* ===== FROM OUR BLOG stripe (Slice 3) — only when 3+ published posts.
+              Hidden in the pre-launch public preview (we don't surface blog posts
+              to maintenance visitors); returns for the full post-launch site. ===== */}
+      {!preview && blogPosts.length >= 3 && (
         <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "16px 16px 0" : "24px 40px 0" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
             <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.4rem" : "1.9rem", color: COLORS.white, margin: 0 }}>{(LANGS[lang] || LANGS.he).blogHeroTitle}</h2>
