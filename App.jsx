@@ -6861,8 +6861,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     </div>
                     </>)}
                     <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: `12px 14px`, fontSize: 12.5, lineHeight: 1.7, color: COLORS.gray }}>
+                      <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13, marginBottom: 5 }}>{lang === `he` ? `איך זה עובד אחרי התשלום:` : lang === `ru` ? `Как это работает после оплаты:` : `How it works after you pay:`}</div>
                       <div>📸 {commissionType === `pet` ? t.commission.microHow : t.commission.customHow}</div>
-                      <div>🔁 {t.commission.microRevisions}</div>
+                      <div style={{ color: COLORS.white }}>🔁 <b>{t.commission.microRevisions}</b></div>
                       <div>⏱️ {t.commission.microTime}</div>
                       <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
                     </div>
@@ -9912,7 +9913,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               <span>{tr.shipping}</span><span>{tr.shipAtCheckout}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 11, borderTop: `1px solid ${COLORS.border}`, marginBottom: 4 }}>
-              <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{tr.total}</span>
+              <span style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{lang === "he" ? "סה״כ (לפני משלוח)" : lang === "ru" ? "Итого (до доставки)" : "Total (before shipping)"}</span>
               <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{`₪${total}`}</span>
             </div>
             <div style={{ color: COLORS.gray, fontSize: 11, textAlign: lang === "he" ? "right" : "left", marginBottom: 15 }}>{lang === "he" ? "+ משלוח מ-₪27 · איסוף עצמי בבאר שבע ללא עלות" : lang === "ru" ? "+ доставка от ₪27 · самовывоз в Беэр-Шеве без доплаты" : "+ shipping from ₪27 · pickup in Be'er Sheva at no charge"}</div>
