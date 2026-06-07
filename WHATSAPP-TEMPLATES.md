@@ -68,23 +68,23 @@ Brand voice: warm, personal, "printed by hand with love in Be'er Sheva." Keep th
 **he**
 > איזה כיף שבחרתם דיוקן BLOOM של החיה שלכם! 🐾 ככה זה עובד:
 > 1) שולחים 2–4 תמונות מזוויות שונות (פנים, פרופיל, גוף מלא, באור טוב)
-> 2) אנחנו מציירים ביד — תצוגה מקדימה תוך 3–5 ימי עסקים
+> 2) אנחנו מעצבים — תצוגה מקדימה תוך 3–5 ימי עסקים
 > 3) עד 3 סבבי תיקונים, עד שתהיו מרוצים 🙂
-> אפשר על חולצה (₪189) או על ספל (₪149). מתחילים לצייר אחרי קבלת התמונות והתשלום 🧡
+> אפשר על חולצה (₪189) או על ספל (₪149). מתחילים לעצב אחרי קבלת התמונות והתשלום 🧡
 
 **en**
 > So glad you chose a BLOOM portrait of your pet! 🐾 Here's how it works:
 > 1) Send 2–4 photos from different angles (face, profile, full body, good light)
-> 2) We hand-draw it — a preview within 3–5 business days
+> 2) We design it — a preview within 3–5 business days
 > 3) Up to 3 rounds of revisions, until you're happy 🙂
-> Available on a shirt (₪189) or a mug (₪149). We start drawing once we have your photos and payment 🧡
+> Available on a shirt (₪189) or a mug (₪149). We start designing once we have your photos and payment 🧡
 
 **ru**
 > Здорово, что выбрали BLOOM-портрет питомца! 🐾 Как это работает:
 > 1) Пришлите 2–4 фото с разных ракурсов (анфас, профиль, в полный рост, при хорошем свете)
-> 2) Мы рисуем вручную — превью в течение 3–5 рабочих дней
+> 2) Мы создаём дизайн — превью в течение 3–5 рабочих дней
 > 3) До 3 раундов правок, пока вам не понравится 🙂
-> Доступно на футболке (₪189) или кружке (₪149). Начинаем рисовать после получения фото и оплаты 🧡
+> Доступно на футболке (₪189) или кружке (₪149). Начинаем создавать после получения фото и оплаты 🧡
 
 ---
 

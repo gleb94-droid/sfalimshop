@@ -1905,10 +1905,10 @@ const LANGS = {
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
     product: { title: "בחר מוצר", sub: "מה תרצה להתאים אישית?", options: "אפשרויות", from: "החל מ-₪", continue: "המשך ←" },
     commission: {
-      choiceTitle: `יש לכם עיצוב מוכן, או שנצייר אחד מהתמונות?`,
+      choiceTitle: `יש לכם עיצוב מוכן, או שנעצב אחד מהתמונות?`,
       choiceUpload: `יש לי עיצוב — אעלה אותו`,
       choiceUploadSub: `קובץ מוכן להדפסה`,
-      choiceCommission: `ציירו לי דיוקן BLOOM של החיה שלי`,
+      choiceCommission: `עצבו לי דיוקן BLOOM של החיה שלי`,
       choiceCommissionSub: `שולחים תמונות, ואנחנו מעצבים`,
       choiceCustom: `צרו לי עיצוב משלי (טקסט / לוגו / רעיון)`,
       choiceCustomSub: `מתארים רעיון — ואנחנו מעצבים`,
@@ -1917,18 +1917,18 @@ const LANGS = {
       customPostPrefill: (id) => `היי! ביצעתי הזמנת עיצוב אישי מספר ${id} — הנה הרעיון שלי:`,
       badge: `BLOOM לפי הזמנה`,
       heading: `דיוקן BLOOM אישי של החיה שלכם`,
-      price: `₪189 · עיצוב בעבודת יד`,
-      microHow: `אחרי התשלום ייפתח וואטסאפ — שולחים 2–4 תמונות של החיה מזוויות שונות, ואנחנו מציירים.`,
+      price: `₪189 · עיצוב אישי`,
+      microHow: `אחרי התשלום ייפתח וואטסאפ — שולחים 2–4 תמונות של החיה מזוויות שונות, ואנחנו מעצבים.`,
       microRevisions: `עד 3 סבבי תיקונים, עד שתהיו מרוצים.`,
       microTime: `תצוגה מקדימה תוך 3–5 ימי עסקים.`,
       microRefund: `עבודה בהזמנה אישית — אין החזר כספי לאחר אישור העיצוב (אבל מתקנים עד שאתם מרוצים).`,
       addBtn: `המשך לתשלום ←`,
       postHeading: `קיבלנו את ההזמנה! 🎨`,
-      postSub: `עכשיו שלחו לנו בוואטסאפ 2–4 תמונות של החיה מזוויות שונות (פנים, פרופיל, גוף מלא), ונתחיל לצייר.`,
+      postSub: `עכשיו שלחו לנו בוואטסאפ 2–4 תמונות של החיה מזוויות שונות (פנים, פרופיל, גוף מלא), ונתחיל לעצב.`,
       postCta: `שליחת תמונות בוואטסאפ`,
       postPrefill: (id) => `היי! ביצעתי הזמנת BLOOM אישית מספר ${id} — הנה תמונות של החיה שלי:`,
-      cartNotePet: `🎨 דיוקן בעבודת יד — נצייר מהתמונות שתשלחו בוואטסאפ אחרי התשלום`,
-      cartNoteCustom: `🎨 עיצוב בעבודת יד — נעצב לפי הרעיון שתשלחו בוואטסאפ אחרי התשלום`,
+      cartNotePet: `🎨 דיוקן אישי — נעצב מהתמונות שתשלחו בוואטסאפ אחרי התשלום`,
+      cartNoteCustom: `🎨 עיצוב אישי — נעצב לפי הרעיון שתשלחו בוואטסאפ אחרי התשלום`,
       adminBadge: `קומישן BLOOM — ממתין לתמונות`,
     },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
@@ -1976,10 +1976,10 @@ const LANGS = {
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
     product: { title: "Choose your product", sub: "What would you like to customize?", options: "options", from: "from ₪", continue: "Continue →" },
     commission: {
-      choiceTitle: `Have a design ready, or should we draw one from photos?`,
+      choiceTitle: `Have a design ready, or should we design one from photos?`,
       choiceUpload: `I have a design — I'll upload it`,
       choiceUploadSub: `A print-ready file`,
-      choiceCommission: `Draw a BLOOM portrait of my pet`,
+      choiceCommission: `Design a BLOOM portrait of my pet`,
       choiceCommissionSub: `You send photos, we design it`,
       choiceCustom: `Create a custom design for me (text / logo / idea)`,
       choiceCustomSub: `Describe the idea — we design it`,
@@ -1988,18 +1988,18 @@ const LANGS = {
       customPostPrefill: (id) => `Hi! I placed a custom design order #${id} — here's my design idea:`,
       badge: `BLOOM made to order`,
       heading: `A personalized BLOOM portrait of your pet`,
-      price: `₪189 · hand-made design`,
-      microHow: `After payment, WhatsApp opens — send 2–4 photos of your pet from different angles, and we'll draw it.`,
+      price: `₪189 · custom design`,
+      microHow: `After payment, WhatsApp opens — send 2–4 photos of your pet from different angles, and we'll design it.`,
       microRevisions: `Up to 3 rounds of revisions, until you're happy.`,
       microTime: `Preview within 3–5 business days.`,
       microRefund: `Made to order — no cash refund after you approve the design (but we revise until you're happy).`,
       addBtn: `Continue to payment →`,
       postHeading: `We've got your order! 🎨`,
-      postSub: `Now send us 2–4 photos of your pet from different angles (face, profile, full body) on WhatsApp, and we'll start drawing.`,
+      postSub: `Now send us 2–4 photos of your pet from different angles (face, profile, full body) on WhatsApp, and we'll start designing.`,
       postCta: `Send photos on WhatsApp`,
       postPrefill: (id) => `Hi! I placed a custom BLOOM order #${id} — here are photos of my pet:`,
-      cartNotePet: `🎨 Hand-drawn portrait — we'll draw it from the photos you send on WhatsApp after payment`,
-      cartNoteCustom: `🎨 Hand-made design — we'll design it from the idea you send on WhatsApp after payment`,
+      cartNotePet: `🎨 Custom portrait — we'll design it from the photos you send on WhatsApp after payment`,
+      cartNoteCustom: `🎨 Custom design — we'll design it from the idea you send on WhatsApp after payment`,
       adminBadge: `BLOOM commission — awaiting photos`,
     },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
@@ -2047,30 +2047,30 @@ const LANGS = {
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
     product: { title: "Выберите товар", sub: "Что хотите настроить?", options: "варианта", from: "от ₪", continue: "Продолжить →" },
     commission: {
-      choiceTitle: `Есть готовый дизайн или нарисовать по фото?`,
+      choiceTitle: `Есть готовый дизайн или оформить по фото?`,
       choiceUpload: `У меня есть дизайн — загружу`,
       choiceUploadSub: `Готовый файл для печати`,
-      choiceCommission: `Нарисуйте BLOOM-портрет моего питомца`,
-      choiceCommissionSub: `Вы присылаете фото — мы рисуем`,
+      choiceCommission: `Создайте BLOOM-портрет моего питомца`,
+      choiceCommissionSub: `Вы присылаете фото — мы создаём`,
       choiceCustom: `Создайте мне свой дизайн (текст / лого / идея)`,
-      choiceCustomSub: `Опишите идею — мы нарисуем`,
-      customHow: `После оплаты откроется WhatsApp — пришлите идею: текст, логотип, картинку или описание, и мы нарисуем.`,
+      choiceCustomSub: `Опишите идею — мы создадим`,
+      customHow: `После оплаты откроется WhatsApp — пришлите идею: текст, логотип, картинку или описание, и мы создадим.`,
       customPostSub: `Теперь пришлите идею в WhatsApp: текст, логотип, картинку-референс или описание — и мы начнём.`,
       customPostPrefill: (id) => `Здравствуйте! Я оформил заказ на дизайн №${id} — вот моя идея:`,
       badge: `BLOOM на заказ`,
       heading: `Персональный BLOOM-портрет вашего питомца`,
-      price: `₪189 · ручная работа`,
-      microHow: `После оплаты откроется WhatsApp — пришлите 2–4 фото питомца с разных ракурсов, и мы нарисуем.`,
+      price: `₪189 · индивидуальный дизайн`,
+      microHow: `После оплаты откроется WhatsApp — пришлите 2–4 фото питомца с разных ракурсов, и мы создадим.`,
       microRevisions: `До 3 раундов правок, пока не понравится.`,
       microTime: `Превью в течение 3–5 рабочих дней.`,
       microRefund: `Изготовление под заказ — возврата денег нет после утверждения дизайна (но правим, пока вы не довольны).`,
       addBtn: `Перейти к оплате →`,
       postHeading: `Заказ принят! 🎨`,
-      postSub: `Теперь пришлите нам 2–4 фото питомца с разных ракурсов (анфас, профиль, в полный рост) в WhatsApp, и мы начнём рисовать.`,
+      postSub: `Теперь пришлите нам 2–4 фото питомца с разных ракурсов (анфас, профиль, в полный рост) в WhatsApp, и мы начнём создавать.`,
       postCta: `Отправить фото в WhatsApp`,
       postPrefill: (id) => `Здравствуйте! Я оформил персональный BLOOM-заказ №${id} — вот фото моего питомца:`,
-      cartNotePet: `🎨 Портрет вручную — нарисуем по фото, которые пришлёте в WhatsApp после оплаты`,
-      cartNoteCustom: `🎨 Дизайн вручную — нарисуем по идее, которую пришлёте в WhatsApp после оплаты`,
+      cartNotePet: `🎨 Индивидуальный портрет — создадим по фото, которые пришлёте в WhatsApp после оплаты`,
+      cartNoteCustom: `🎨 Индивидуальный дизайн — создадим по идее, которую пришлёте в WhatsApp после оплаты`,
       adminBadge: `Комиссия BLOOM — ждёт фото`,
     },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
@@ -5772,10 +5772,10 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // drawer / order summary code that reads them never crashes. Pet name is taken
   // in the WhatsApp brief (free) — no surcharge here.
   const mixMsg = lang === `he`
-    ? `אי אפשר לשלב באותה עגלה דיוקן בעבודת יד (תשלום מיידי) והעלאת קובץ משלכם (הממתינה לאישור) — אלו תהליכים שונים. השלימו הזמנה אחת, ואז התחילו את השנייה.`
+    ? `אי אפשר לשלב באותה עגלה דיוקן אישי (תשלום מיידי) והעלאת קובץ משלכם (הממתינה לאישור) — אלו תהליכים שונים. השלימו הזמנה אחת, ואז התחילו את השנייה.`
     : lang === `ru`
-    ? `Нельзя объединить в одной корзине портрет ручной работы (оплата сразу) и загруженный свой файл (ждёт одобрения) — это разные процессы. Оформите один заказ, затем начните второй.`
-    : `A hand-made portrait (paid now) and your own uploaded file (awaits approval) can't share one cart — they're different flows. Complete one order, then start the other.`;
+    ? `Нельзя объединить в одной корзине индивидуальный портрет (оплата сразу) и загруженный свой файл (ждёт одобрения) — это разные процессы. Оформите один заказ, затем начните второй.`
+    : `A custom portrait (paid now) and your own uploaded file (awaits approval) can't share one cart — they're different flows. Complete one order, then start the other.`;
 
   const addCommissionToCart = () => {
     if (!product || !variant) return false;
@@ -8339,10 +8339,10 @@ function EventMugsSection({ lang }) {
   const eyebrow = lang === `he` ? `מתנה לאירוע` : lang === `ru` ? `Подарок к событию` : `Event keepsake`;
   const heading = lang === `he` ? `ספלים מעוצבים לחתונה ולאירועי חברה` : lang === `ru` ? `Дизайнерские кружки для свадьбы и корпоратива` : `Designed mugs for weddings & company events`;
   const copy = lang === `he`
-    ? `מזכרת אמיתית מהיום הגדול — אנחנו מעצבים ביד ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם. קרמיקה, עמיד במדיח, מודפס אישית בבאר שבע. מומלץ להזמין כ-3 שבועות לפני האירוע.`
+    ? `מזכרת אמיתית מהיום הגדול — אנחנו מעצבים ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם. קרמיקה, עמיד במדיח, מודפס אישית בבאר שבע. מומלץ להזמין כ-3 שבועות לפני האירוע.`
     : lang === `ru`
-    ? `Настоящая память о большом дне — мы вручную составляем красивый дизайн с вашими именами и датой, фото и даже портретом вашего питомца в стиле BLOOM. Керамика, можно в посудомойку, печатаем сами в Беэр-Шеве. Закажите примерно за 3 недели до события.`
-    : `A real keepsake from the big day — we hand-design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet. Ceramic, dishwasher-safe, printed by us in Be'er Sheva. Order about 3 weeks before your event.`;
+    ? `Настоящая память о большом дне — мы создаём красивый дизайн с вашими именами и датой, фото и даже портретом вашего питомца в стиле BLOOM. Керамика, можно в посудомойку, печатаем сами в Беэр-Шеве. Закажите примерно за 3 недели до события.`
+    : `A real keepsake from the big day — we design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet. Ceramic, dishwasher-safe, printed by us in Be'er Sheva. Order about 3 weeks before your event.`;
   const canAddLine = lang === `he`
     ? `אפשר להוסיף: שמות · תאריך · משפט או האשטאג · תמונה או איור`
     : lang === `ru`
@@ -8706,7 +8706,7 @@ function MugsPage({ lang, setPage }) {
       ways: [
         { icon: `paw`, title: `החיה שלכם על ספל`, price: `₪59`, desc: `בחרו דמות מאוסף BLOOM`, cta: `לאוסף`, go: () => setPage(`pets`) },
         { icon: `upload`, title: `העיצוב שלכם`, price: `₪69`, desc: `העלו תמונה או לוגו משלכם`, cta: `התחילו`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `נצייר לכם`, price: `החל מ-₪109`, desc: `שלחו רעיון או תמונה — ונעצב ביד`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספל עם עיצוב בעבודת יד`) : null },
+        { icon: `brush`, title: `נעצב לכם`, price: `החל מ-₪109`, desc: `שלחו רעיון או תמונה — ונעצב לכם עיצוב ייחודי`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספל עם עיצוב מותאם אישית`) : null },
         { icon: `rings`, title: `חתונה ואירועים`, price: `סט זוגי מ-₪149`, desc: `שמות · תאריך · תמונה · סטים לשולחן`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספלים מעוצבים לאירוע (חתונה / חברה)`) : null },
       ],
       whyTitle: `למה הספלים שלנו`,
@@ -8721,13 +8721,13 @@ function MugsPage({ lang, setPage }) {
       sub: `"Sfalim" literally means "mugs" — and it's what we do best. A quality ceramic mug with the design you love, printed by hand with love in Be'er Sheva.`,
       badges: [`11oz ceramic`, `Dishwasher-safe`, `Sublimation print`, `Hand-printed in Be'er Sheva`],
       bloomTitle: `Every BLOOM character — on a mug too`,
-      bloomSub: `70 hand-illustrated pet portraits. Pick your breed and print it on a mug.`,
+      bloomSub: `70 illustrated pet portraits. Pick your breed and print it on a mug.`,
       bloomCta: `Browse the BLOOM collection`,
       waysTitle: `Ways to order a mug`,
       ways: [
         { icon: `paw`, title: `Your pet on a mug`, price: `₪59`, desc: `Choose a BLOOM character`, cta: `Browse`, go: () => setPage(`pets`) },
         { icon: `upload`, title: `Your own design`, price: `₪69`, desc: `Upload a photo or your logo`, cta: `Start`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `We design it`, price: `from ₪109`, desc: `Send an idea or photo — we'll design it by hand`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in a mug with a hand-made design`) : null },
+        { icon: `brush`, title: `We design it`, price: `from ₪109`, desc: `Send an idea or photo — we'll create a custom design for you`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in a mug with a custom design`) : null },
         { icon: `rings`, title: `Weddings & events`, price: `pair from ₪149`, desc: `Names · date · photo · table sets`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in designed mugs for an event (wedding / company)`) : null },
       ],
       whyTitle: `Why our mugs`,
@@ -8748,7 +8748,7 @@ function MugsPage({ lang, setPage }) {
       ways: [
         { icon: `paw`, title: `Питомец на кружке`, price: `₪59`, desc: `Выберите персонажа BLOOM`, cta: `В каталог`, go: () => setPage(`pets`) },
         { icon: `upload`, title: `Свой дизайн`, price: `₪69`, desc: `Загрузите фото или логотип`, cta: `Начать`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `Нарисуем за вас`, price: `от ₪109`, desc: `Пришлите идею или фото — нарисуем вручную`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересует кружка с дизайном ручной работы`) : null },
+        { icon: `brush`, title: `Создадим для вас`, price: `от ₪109`, desc: `Пришлите идею или фото — создадим уникальный дизайн`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересует кружка с индивидуальным дизайном`) : null },
         { icon: `rings`, title: `Свадьба и события`, price: `пара от ₪149`, desc: `Имена · дата · фото · наборы на стол`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересуют дизайнерские кружки для события (свадьба / компания)`) : null },
       ],
       whyTitle: `Почему наши кружки`,
@@ -13168,7 +13168,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       lang === `ru` ? `${name} · Портрет BLOOM · Sfalim Shop` :
       `${name} · דיוקן BLOOM · ספלים שופ`;
     const base =
-      lang === `en` ? `${name} in BLOOM style — a hand-illustrated pet portrait on premium shirts, mugs & stickers.` :
+      lang === `en` ? `${name} in BLOOM style — a illustrated pet portrait on premium shirts, mugs & stickers.` :
       lang === `ru` ? `${name} в стиле BLOOM — рисованный портрет питомца на премиальных футболках, кружках и стикерах.` :
       `${name} בסגנון BLOOM — דיוקן חיה מאויר על חולצות, ספלים ומדבקות איכותיים.`;
     const desc = `${base}${origin ? ` ${origin}` : (tagline ? ` ${tagline}` : ``)}`.slice(0, 300);
@@ -13838,9 +13838,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `אפשר ספלים מעוצבים לחתונה או לאירוע חברה?`, en: `Can you make designed mugs for a wedding or company event?`, ru: `Можно дизайнерские кружки на свадьбу или корпоратив?` },
         a: {
-          he: `בהחלט — אנחנו מעצבים ביד ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם; לחברות אפשר לוגו ותאריך האירוע. סט זוגי (הוא/היא) מ-₪149, ולסט של 10 (לשולחן אורחים) או לכמות לחברה — נכין הצעת מחיר. מומלץ להזמין כ-3 שבועות לפני האירוע. כתבו לנו בוואטסאפ עם הפרטים.`,
-          en: `Absolutely — we hand-design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet; for companies we can add a logo and the event date. A His & Hers pair starts at ₪149, and for a set of 10 (a guest table) or company quantity we'll prepare a quote. Order about 3 weeks before the event. Message us on WhatsApp with the details.`,
-          ru: `Конечно — мы вручную составляем красивый дизайн с вашими именами и датой, фото и даже портретом питомца в стиле BLOOM; для компаний можем добавить логотип и дату события. Парный сет (его/её) от ₪149, а на набор из 10 (на стол гостей) или количество для компании подготовим предложение. Закажите примерно за 3 недели до события. Напишите нам в WhatsApp с деталями.`,
+          he: `בהחלט — אנחנו מעצבים ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם; לחברות אפשר לוגו ותאריך האירוע. סט זוגי (הוא/היא) מ-₪149, ולסט של 10 (לשולחן אורחים) או לכמות לחברה — נכין הצעת מחיר. מומלץ להזמין כ-3 שבועות לפני האירוע. כתבו לנו בוואטסאפ עם הפרטים.`,
+          en: `Absolutely — we design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet; for companies we can add a logo and the event date. A His & Hers pair starts at ₪149, and for a set of 10 (a guest table) or company quantity we'll prepare a quote. Order about 3 weeks before the event. Message us on WhatsApp with the details.`,
+          ru: `Конечно — мы создаём красивый дизайн с вашими именами и датой, фото и даже портретом питомца в стиле BLOOM; для компаний можем добавить логотип и дату события. Парный сет (его/её) от ₪149, а на набор из 10 (на стол гостей) или количество для компании подготовим предложение. Закажите примерно за 3 недели до события. Напишите нам в WhatsApp с деталями.`,
         },
       },
     ],
@@ -14087,7 +14087,7 @@ const VIEW_SEO_DESC = {
   en: {
     order: `Design your own — upload a photo, pick a shirt/mug/sticker, colour and size; printed in Israel and shipped to your door.`,
     mugs: `Our mugs — an 11oz ceramic mug with a BLOOM portrait, your own design, or a designed mug for weddings & events. Hand-printed in Be'er Sheva.`,
-    pets: `The BLOOM collection — 70 hand-illustrated dog & cat portraits on shirts, mugs and stickers. Find your breed.`,
+    pets: `The BLOOM collection — 70 illustrated dog & cat portraits on shirts, mugs and stickers. Find your breed.`,
     about: `The Sfalim Shop story — printed locally in Be'er Sheva with care, shipped anywhere in Israel.`,
     track: `Track your Sfalim Shop order.`,
   },
