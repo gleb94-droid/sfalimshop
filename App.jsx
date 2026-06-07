@@ -1243,6 +1243,18 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     en: `Our stars`,
     ru: `Наши звёзды`,
   };
+  // First-screen headline + value line (above the rotating card) so a visitor
+  // immediately gets WHAT this is — the page's <h1> (Hero below is demoted to h2).
+  const headlineByLang = {
+    he: `70 דמויות BLOOM. אחת מהן שלכם.`,
+    en: `70 BLOOM characters. One of them is yours.`,
+    ru: `70 персонажей BLOOM. Один из них — ваш.`,
+  };
+  const subByLang = {
+    he: `דיוקנאות חיות מאוירים על ספלים, חולצות ומדבקות — מודפס באהבה בישראל.`,
+    en: `Illustrated pet portraits on mugs, shirts & stickers — printed with love in Israel.`,
+    ru: `Рисованные портреты питомцев на кружках, футболках и стикерах — печать с любовью в Израиле.`,
+  };
 
   // Defensive name → slug fallback. pet_designs.slug is the canonical
   // identifier (single source of truth); this only kicks in if a row is
@@ -1298,6 +1310,13 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
         }}>
         {`✦ ${eyebrowByLang[lang] || eyebrowByLang.he} ✦`}
       </div>
+
+      <h1 className="reveal" data-delay="1" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(28px,5.6vw,54px)`, lineHeight: 1.08, letterSpacing: `-0.5px`, color: COLORS.white, textAlign: `center`, margin: `0 0 14px`, maxWidth: 760 }}>
+        {headlineByLang[lang] || headlineByLang.he}
+      </h1>
+      <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.6, textAlign: `center`, margin: `0 auto 30px`, maxWidth: 540 }}>
+        {subByLang[lang] || subByLang.he}
+      </p>
 
       {/* Image-load-driven reveal wrapper for the entire showcase (carousel +
           dots). Lives OUTSIDE FloatingProductCard's tilt transform so the
@@ -8593,7 +8612,7 @@ function Hero({ setPage, lang }) {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
       <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Heebo',sans-serif" }}>{t.hero.badge}</div>
-      <h1 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
+      <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
         {(() => {
           let i = 0;
           const renderWords = (text, accent) => {
@@ -8611,7 +8630,7 @@ function Hero({ setPage, lang }) {
           };
           return <>{renderWords(t.hero.h1line1, false)}<br />{renderWords(t.hero.h1line2, true)}</>;
         })()}
-      </h1>
+      </h2>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Heebo',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
       <span className="reveal" data-delay="3" style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
         <MagneticButton onClick={() => setPage("order")} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", padding: "16px 36px", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'Heebo',sans-serif", transition: "background 0.2s, box-shadow 0.3s" }} onMouseOver={e => e.target.style.background = COLORS.accentBtnHover} onMouseOut={e => e.target.style.background = COLORS.accentBtn}>{t.hero.cta}</MagneticButton>
