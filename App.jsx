@@ -8320,10 +8320,10 @@ function EventMugsSection({ lang }) {
     ? `Можно добавить: имена · дату · фразу или хэштег · фото или иллюстрацию`
     : `Add any of: names · date · a phrase or hashtag · a photo or illustration`;
   const tiersLine = lang === `he`
-    ? `סט זוגי (הוא/היא) מ-₪149 · שולחן קטן (10) · כמות לחברה — לפי הצעת מחיר`
+    ? `סט זוגי (הוא/היא) מ-₪149 · סט של 10 (לשולחן אורחים) · כמות לחברה — לפי הצעת מחיר`
     : lang === `ru`
-    ? `Парный сет (его/её) от ₪149 · малый стол (10) · количество для компании — по запросу`
-    : `His & Hers pair from ₪149 · small table (10) · company quantity — by quote`;
+    ? `Парный сет (его/её) от ₪149 · набор из 10 (на стол гостей) · количество для компании — по запросу`
+    : `His & Hers pair from ₪149 · set of 10 (a guest table) · company quantity — by quote`;
   const ctaLabel = lang === `he` ? `דברו איתנו בוואטסאפ` : lang === `ru` ? `Напишите нам в WhatsApp` : `Chat with us on WhatsApp`;
   const prefill = lang === `he`
     ? `היי! אני מעוניין/ת בספלים מעוצבים לאירוע (חתונה / חברה). הנה הפרטים: סוג האירוע, שמות / שם החברה, תאריך, וכמות.`
@@ -13548,9 +13548,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `אפשר ספלים מעוצבים לחתונה או לאירוע חברה?`, en: `Can you make designed mugs for a wedding or company event?`, ru: `Можно дизайнерские кружки на свадьбу или корпоратив?` },
         a: {
-          he: `בהחלט — אנחנו מעצבים ביד ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם; לחברות אפשר לוגו ותאריך האירוע. סט זוגי (הוא/היא) מ-₪149, ולשולחן שלם או לכמות לחברה — נכין הצעת מחיר. מומלץ להזמין כ-3 שבועות לפני האירוע. כתבו לנו בוואטסאפ עם הפרטים.`,
-          en: `Absolutely — we hand-design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet; for companies we can add a logo and the event date. A His & Hers pair starts at ₪149, and for a full table or company quantity we'll prepare a quote. Order about 3 weeks before the event. Message us on WhatsApp with the details.`,
-          ru: `Конечно — мы вручную составляем красивый дизайн с вашими именами и датой, фото и даже портретом питомца в стиле BLOOM; для компаний можем добавить логотип и дату события. Парный сет (его/её) от ₪149, а на целый стол или количество для компании подготовим предложение. Закажите примерно за 3 недели до события. Напишите нам в WhatsApp с деталями.`,
+          he: `בהחלט — אנחנו מעצבים ביד ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם; לחברות אפשר לוגו ותאריך האירוע. סט זוגי (הוא/היא) מ-₪149, ולסט של 10 (לשולחן אורחים) או לכמות לחברה — נכין הצעת מחיר. מומלץ להזמין כ-3 שבועות לפני האירוע. כתבו לנו בוואטסאפ עם הפרטים.`,
+          en: `Absolutely — we hand-design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet; for companies we can add a logo and the event date. A His & Hers pair starts at ₪149, and for a set of 10 (a guest table) or company quantity we'll prepare a quote. Order about 3 weeks before the event. Message us on WhatsApp with the details.`,
+          ru: `Конечно — мы вручную составляем красивый дизайн с вашими именами и датой, фото и даже портретом питомца в стиле BLOOM; для компаний можем добавить логотип и дату события. Парный сет (его/её) от ₪149, а на набор из 10 (на стол гостей) или количество для компании подготовим предложение. Закажите примерно за 3 недели до события. Напишите нам в WhatsApp с деталями.`,
         },
       },
     ],
