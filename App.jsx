@@ -8301,6 +8301,82 @@ function EventOrdersSection({ lang }) {
   );
 }
 
+// Wedding & company/branded event MUGS — a keepsake/gift angle (distinct from the
+// shirt-focused group orders above). MVP: WhatsApp-quote only, no cart/payment.
+// Mirrors EventOrdersSection's styling. Includes the on-brand pet-portrait angle.
+function EventMugsSection({ lang }) {
+  const isRTL = lang === `he`;
+  const dir = isRTL ? `rtl` : `ltr`;
+  const eyebrow = lang === `he` ? `מתנה לאירוע` : lang === `ru` ? `Подарок к событию` : `Event keepsake`;
+  const heading = lang === `he` ? `ספלים מעוצבים לחתונה ולאירועי חברה` : lang === `ru` ? `Дизайнерские кружки для свадьбы и корпоратива` : `Designed mugs for weddings & company events`;
+  const copy = lang === `he`
+    ? `מזכרת אמיתית מהיום הגדול — אנחנו מעצבים ביד ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם. קרמיקה, עמיד במדיח, מודפס אישית בבאר שבע. מומלץ להזמין כ-3 שבועות לפני האירוע.`
+    : lang === `ru`
+    ? `Настоящая память о большом дне — мы вручную составляем красивый дизайн с вашими именами и датой, фото и даже портретом вашего питомца в стиле BLOOM. Керамика, можно в посудомойку, печатаем сами в Беэр-Шеве. Закажите примерно за 3 недели до события.`
+    : `A real keepsake from the big day — we hand-design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet. Ceramic, dishwasher-safe, printed by us in Be'er Sheva. Order about 3 weeks before your event.`;
+  const canAddLine = lang === `he`
+    ? `אפשר להוסיף: שמות · תאריך · משפט או האשטאג · תמונה או איור`
+    : lang === `ru`
+    ? `Можно добавить: имена · дату · фразу или хэштег · фото или иллюстрацию`
+    : `Add any of: names · date · a phrase or hashtag · a photo or illustration`;
+  const tiersLine = lang === `he`
+    ? `סט זוגי (הוא/היא) מ-₪149 · שולחן קטן (10) · כמות לחברה — לפי הצעת מחיר`
+    : lang === `ru`
+    ? `Парный сет (его/её) от ₪149 · малый стол (10) · количество для компании — по запросу`
+    : `His & Hers pair from ₪149 · small table (10) · company quantity — by quote`;
+  const ctaLabel = lang === `he` ? `דברו איתנו בוואטסאפ` : lang === `ru` ? `Напишите нам в WhatsApp` : `Chat with us on WhatsApp`;
+  const prefill = lang === `he`
+    ? `היי! אני מעוניין/ת בספלים מעוצבים לאירוע (חתונה / חברה). הנה הפרטים: סוג האירוע, שמות / שם החברה, תאריך, וכמות.`
+    : lang === `ru`
+    ? `Здравствуйте! Меня интересуют дизайнерские кружки для события (свадьба / компания). Детали: тип события, имена / название компании, дата и количество.`
+    : `Hi! I'm interested in designed mugs for an event (wedding / company). Here are the details: event type, names / company name, date, and quantity.`;
+  const waValid = /^\d{6,15}$/.test(WHATSAPP_NUMBER || ``);
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(prefill)}`;
+
+  const iconProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  const chips = [
+    { key: `wedding`, label: lang === `he` ? `חתונה — שמות · תאריך · תמונה` : lang === `ru` ? `Свадьба — имена · дата · фото` : `Wedding — names · date · photo`,
+      icon: <svg {...iconProps}><circle cx="9" cy="14" r="6" /><circle cx="15" cy="14" r="6" /><path d="M9 4l3 3 3-3" /></svg> },
+    { key: `company`, label: lang === `he` ? `חברה / מיתוג — לוגו · תאריך` : lang === `ru` ? `Компания / брендинг — лого · дата` : `Company / branded — logo · date`,
+      icon: <svg {...iconProps}><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg> },
+    { key: `pet`, label: lang === `he` ? `דיוקן החיה שלכם בסגנון BLOOM` : lang === `ru` ? `Портрет питомца в стиле BLOOM` : `Your pet as a BLOOM portrait`,
+      icon: <svg {...iconProps}><circle cx="5.5" cy="12.5" r="1.6" /><circle cx="9.5" cy="8.5" r="1.6" /><circle cx="14.5" cy="8.5" r="1.6" /><circle cx="18.5" cy="12.5" r="1.6" /><path d="M8.5 16.5c0-2 1.6-3 3.5-3s3.5 1 3.5 3-1.6 3.5-3.5 3.5-3.5-1.5-3.5-3.5z" /></svg> },
+    { key: `gift`, label: lang === `he` ? `מוכן למתנה` : lang === `ru` ? `Готово к подарку` : `Gift-ready`,
+      icon: <svg {...iconProps}><rect x="3" y="9" width="18" height="12" rx="1" /><path d="M3 13h18" /><path d="M12 9v12" /><path d="M12 9C12 6.5 10 5 8.5 6S9.5 9 12 9z" /><path d="M12 9c0-2.5 2-4 3.5-3S14.5 9 12 9z" /></svg> },
+  ];
+
+  return (
+    <section aria-labelledby="event-mugs-title" dir={dir} style={{ background: COLORS.bg, padding: `0 24px 72px` }}>
+      <div style={{ maxWidth: 860, margin: `0 auto`, background: `linear-gradient(180deg, rgba(255,107,53,0.08) 0%, rgba(255,107,53,0.03) 100%)`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 20, padding: `40px 28px`, textAlign: `center` }}>
+        <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>{eyebrow}</span>
+        <h2 id="event-mugs-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(28px,5vw,42px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 16px` }}>{heading}</h2>
+        <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15.5, lineHeight: 1.7, maxWidth: 640, margin: `0 auto 14px` }}>{copy}</p>
+        <p style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 14, lineHeight: 1.6, maxWidth: 640, margin: `0 auto 8px`, fontWeight: 500 }}>{canAddLine}</p>
+        <p style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, lineHeight: 1.6, maxWidth: 640, margin: `0 auto 26px`, fontWeight: 700 }}>{tiersLine}</p>
+
+        <ul role="list" style={{ listStyle: `none`, margin: `0 0 30px`, padding: 0, display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 10 }}>
+          {chips.map((c) => (
+            <li key={c.key} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, padding: `9px 15px`, borderRadius: 999, border: `1px solid rgba(255,107,53,0.25)`, background: `rgba(255,107,53,0.06)`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, fontWeight: 500, whiteSpace: `nowrap` }}>
+              <span style={{ display: `inline-flex`, color: COLORS.accent, flexShrink: 0 }}>{c.icon}</span>
+              <span>{c.label}</span>
+            </li>
+          ))}
+        </ul>
+
+        {waValid && (
+          <a href={href} target="_blank" rel="noopener noreferrer" aria-label={ctaLabel}
+            style={{ display: `inline-flex`, alignItems: `center`, gap: 10, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, transition: `background 0.2s, box-shadow 0.3s`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)` }}
+            onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accentBtn; }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.892c0 2.096.549 4.142 1.595 5.945L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.582 0 11.94-5.335 11.944-11.893a11.821 11.821 0 0 0-3.487-8.46z" /></svg>
+            <span>{ctaLabel}</span>
+          </a>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // Star rating row — small Playfair-styled stars. role="img" gives screen readers the rating.
 function ReviewStars({ rating, label }) {
   const full = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
@@ -10424,7 +10500,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><Reviews lang={lang} /></>}
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
@@ -13467,6 +13543,14 @@ const FAQ_GROUPS = [
           he: `כן! אנחנו מתמחים בחולצות מותאמות לאירועים — מסיבות רווקים/רווקות, חתונות, ימי הולדת, גיבושים וצוותים. אפשר עיצוב אישי, שמות, ומחיר מיוחד להזמנות כמות (5 חולצות ומעלה), עם מבחר צבעים רחב יותר. כתבו לנו בוואטסאפ ונכין לכם הצעת מחיר אישית.`,
           en: `Yes! We specialize in custom shirts for events — bachelor/ette parties, weddings, birthdays, and team/company events. Personalized designs, names, and special pricing for quantity orders (5+ shirts), with a wider color range. Message us on WhatsApp for a personal quote.`,
           ru: `Да! Мы делаем футболки на заказ для мероприятий — девичники/мальчишники, свадьбы, дни рождения, корпоративы. Персональный дизайн, имена и специальные цены на количество (от 5 футболок), с расширенным выбором цветов. Напишите нам в WhatsApp — подготовим индивидуальное предложение.`,
+        },
+      },
+      {
+        q: { he: `אפשר ספלים מעוצבים לחתונה או לאירוע חברה?`, en: `Can you make designed mugs for a wedding or company event?`, ru: `Можно дизайнерские кружки на свадьбу или корпоратив?` },
+        a: {
+          he: `בהחלט — אנחנו מעצבים ביד ספל יפהפה עם השמות והתאריך שלכם, תמונה, ואפילו דיוקן BLOOM של החיה שלכם; לחברות אפשר לוגו ותאריך האירוע. סט זוגי (הוא/היא) מ-₪149, ולשולחן שלם או לכמות לחברה — נכין הצעת מחיר. מומלץ להזמין כ-3 שבועות לפני האירוע. כתבו לנו בוואטסאפ עם הפרטים.`,
+          en: `Absolutely — we hand-design a beautiful mug with your names and date, a photo, even a BLOOM portrait of your pet; for companies we can add a logo and the event date. A His & Hers pair starts at ₪149, and for a full table or company quantity we'll prepare a quote. Order about 3 weeks before the event. Message us on WhatsApp with the details.`,
+          ru: `Конечно — мы вручную составляем красивый дизайн с вашими именами и датой, фото и даже портретом питомца в стиле BLOOM; для компаний можем добавить логотип и дату события. Парный сет (его/её) от ₪149, а на целый стол или количество для компании подготовим предложение. Закажите примерно за 3 недели до события. Напишите нам в WhatsApp с деталями.`,
         },
       },
     ],
