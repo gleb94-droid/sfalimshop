@@ -1098,6 +1098,29 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
     };
   }, [reduceFx]);
 
+  // #2 — gentle device-tilt on the active mobile card: on Android the card
+  // tilts to the phone in your hand; on iOS it stays still unless motion access
+  // is already granted globally (we deliberately do NOT show the intrusive iOS
+  // permission prompt for a subtle effect). Disabled under reduced-motion.
+  // rAF-throttled, clamped to a small angle. Desktop keeps its cursor tilt.
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
+  useEffect(() => {
+    if (typeof window === `undefined` || !isMobile) return;
+    let reduced = false;
+    try { reduced = window.matchMedia(`(prefers-reduced-motion: reduce)`).matches; } catch { /* noop */ }
+    if (reduced) return;
+    let raf = 0;
+    let pending = null;
+    const clamp = (n, lim) => Math.max(-lim, Math.min(lim, n));
+    const onOrient = (e) => {
+      if (e.beta == null || e.gamma == null) return;
+      pending = { rx: clamp(-(e.beta - 45) * 0.18, 8), ry: clamp(e.gamma * 0.4, 8) };
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (pending) setTilt(pending); });
+    };
+    window.addEventListener(`deviceorientation`, onOrient);
+    return () => { window.removeEventListener(`deviceorientation`, onOrient); if (raf) cancelAnimationFrame(raf); };
+  }, [isMobile]);
+
   // Refs mirror the latest state so the click handler can read activeIdx/designs
   // at click time — not at render time. Without this, each card captures its own
   // slug in a closure and which-button-actually-fires depends on z-stacking quirks
@@ -1328,7 +1351,13 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 left: 0,
                 right: 0,
                 opacity: isActive ? 1 : 0,
-                transition: `opacity 0.3s ease`,
+                transition: `opacity 0.3s ease, transform 0.18s ease-out`,
+                // Device-tilt only the active LIGHT (mobile) card; desktop keeps
+                // FloatingProductCard's own cursor tilt, so leave it untransformed.
+                transform: (reduceFx && isActive && (tilt.rx || tilt.ry))
+                  ? `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`
+                  : undefined,
+                willChange: reduceFx && isActive ? `transform` : undefined,
               }}>
               {/* mockup_shirt_url is the new product-on-shirt photo; it
                   rolls out gradually per character. Fall back to mockup_url
@@ -8562,8 +8591,24 @@ function Hero({ setPage, lang }) {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
       <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Heebo',sans-serif" }}>{t.hero.badge}</div>
-      <h1 className="reveal" data-delay="1" style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
-        {t.hero.h1line1}<br /><span style={{ color: COLORS.accent, fontStyle: "italic" }}>{t.hero.h1line2}</span>
+      <h1 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
+        {(() => {
+          let i = 0;
+          const renderWords = (text, accent) => {
+            const words = String(text).split(/\s+/).filter(Boolean);
+            return words.map((w, wi) => {
+              const delay = (0.1 + i * 0.12).toFixed(2);
+              i += 1;
+              return (
+                <React.Fragment key={`${accent ? "b" : "a"}-${wi}`}>
+                  <span className="sf-hero-word" style={{ animationDelay: `${delay}s`, ...(accent ? { color: COLORS.accent, fontStyle: "italic" } : {}) }}>{w}</span>
+                  {wi < words.length - 1 ? " " : ""}
+                </React.Fragment>
+              );
+            });
+          };
+          return <>{renderWords(t.hero.h1line1, false)}<br />{renderWords(t.hero.h1line2, true)}</>;
+        })()}
       </h1>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontSize: 18, maxWidth: 480, lineHeight: 1.7, marginBottom: 40, fontFamily: "'Heebo',sans-serif", fontWeight: 300 }}>{t.hero.sub}</p>
       <span className="reveal" data-delay="3" style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
@@ -10314,6 +10359,25 @@ export default function App() {
         body.sf-hc #root, body.sf-hc [data-sf-zoom] { filter: contrast(1.4) brightness(1.1); }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1a1a1a; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
+        /* Aurora entrance glow — soft drifting warm blobs behind the particles.
+           radial-gradient is inherently soft (NO live filter:blur → mobile-safe);
+           animates transform only (compositor). Especially valuable on phones,
+           where the particle canvas bails. Gated by !reduceMotion in JS too. */
+        .sf-aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .sf-aurora > span { position: absolute; display: block; border-radius: 50%; will-change: transform; }
+        .sf-aurora .a1 { width: 70vw; height: 70vw; top: -18vw; inset-inline-start: -12vw; background: radial-gradient(circle at center, rgba(255,107,53,0.20), rgba(255,107,53,0) 68%); animation: sfAur1 24s ease-in-out infinite alternate; }
+        .sf-aurora .a2 { width: 60vw; height: 60vw; bottom: -16vw; inset-inline-end: -10vw; background: radial-gradient(circle at center, rgba(255,150,70,0.16), rgba(255,150,70,0) 68%); animation: sfAur2 30s ease-in-out infinite alternate; }
+        .sf-aurora .a3 { width: 48vw; height: 48vw; top: 26vw; inset-inline-start: 30vw; background: radial-gradient(circle at center, rgba(255,90,40,0.13), rgba(255,90,40,0) 70%); animation: sfAur3 34s ease-in-out infinite alternate; }
+        @keyframes sfAur1 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(8vw,6vw,0) scale(1.15); } }
+        @keyframes sfAur2 { from { transform: translate3d(0,0,0) scale(1.05); } to { transform: translate3d(-7vw,-5vw,0) scale(1.2); } }
+        @keyframes sfAur3 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(5vw,-7vw,0) scale(1.1); } }
+        @media (prefers-reduced-motion: reduce) { .sf-aurora > span { animation: none; } }
+
+        /* Staggered hero headline — words fade/rise in sequence on load. */
+        .sf-hero-word { display: inline-block; opacity: 0; transform: translateY(0.5em); animation: sfWordIn 0.6s cubic-bezier(.2,.8,.25,1) forwards; }
+        @keyframes sfWordIn { to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { .sf-hero-word { animation: none; opacity: 1; transform: none; } }
+
         /* WCAG 2.4.7 — visible keyboard focus. Mouse clicks suppressed via :focus-visible. */
         :focus { outline: none; }
         :focus-visible { outline: 2px solid #FF6B35 !important; outline-offset: 2px !important; }
@@ -10469,6 +10533,9 @@ export default function App() {
         .footer-contact-link { color: inherit; text-decoration: none; transition: color 0.25s ease; }
         .footer-contact-link:hover { color: #FF6B35; }
       `}</style>
+      {page === "home" && !reduceMotion && (
+        <div className="sf-aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>
+      )}
       {!reduceMotion && <ParticlesBackground />}
       {!reduceMotion && <CursorGlow />}
       {(() => {
