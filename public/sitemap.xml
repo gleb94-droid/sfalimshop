@@ -6,6 +6,16 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://www.sfalimshop.com/mugs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.sfalimshop.com/faq</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://www.sfalimshop.com/breed/01_golden_retriever</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

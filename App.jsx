@@ -1624,7 +1624,6 @@ const commissionPrice = (ctype, pid) => {
   return pid === `mug` ? tier.mug : tier.shirt;
 };
 const hasHebrew = (s) => /[֐-׿]/.test(s || ``);
-const ADMIN_EMAIL = "gleb2009@gmail.com";
 // Single source of truth for social links — referenced anywhere the Instagram
 // profile is linked (Nav, mobile menu, BLOOM page CTA, Footer).
 const SOCIAL = { instagram: `https://www.instagram.com/sfalimshop/` };
@@ -2163,7 +2162,7 @@ const POLICIES = {
     ],
     privacy: [
       { type: "h", text: "איזה מידע אנחנו אוספים" },
-      { type: "l", items: ["מידע אישי: שם מלא, אימייל, טלפון, כתובת למשלוח", "מידע על ההזמנה: מוצרים, עיצובים, הערות", "מידע טכני (אוטומטי): IP, סוג דפדפן, Cookies בסיסיים"] },
+      { type: "l", items: ["מידע אישי: שם מלא, אימייל, טלפון, כתובת למשלוח", "מידע על ההזמנה: מוצרים, הערות, וקבצי עיצוב שהעלית (PNG/JPG/SVG) או תמונות שנשלחו בוואטסאפ — לצורך ביצוע ההזמנה בלבד", "מידע טכני (אוטומטי): IP, סוג דפדפן, Cookies בסיסיים"] },
       { type: "h", text: "מטרת איסוף המידע" },
       { type: "l", items: ["ביצוע ההזמנה והאספקה", "תקשורת עם הלקוח", "תמיכה ופניות", "שיפור השירות", "עמידה בדרישות חוק"] },
       { type: "p", text: "מסירת המידע תלויה ברצונך, אך ללא הפרטים הנדרשים (שם, כתובת, פרטי קשר) לא נוכל לעבד ולשלוח את הזמנתך." },
@@ -2198,8 +2197,8 @@ const POLICIES = {
       { type: "p", text: "כל העיצובים, האיורים, הדמויות (לרבות קולקציית BLOOM), הלוגו, הטקסטים והתכנים המקוריים באתר הם קניין רוחני בלעדי של ספלים שופ ומוגנים בזכויות יוצרים. אין להעתיק, לשכפל, להפיץ, למכור או לעשות שימוש מסחרי בעיצובים או בתכנים, כולם או חלקם, ללא אישור מראש ובכתב מספלים שופ." },
       { type: "h", text: "הגבלת אחריות" },
       { type: "p", text: "ספלים שופ אינה אחראית לנזקים עקיפים, שינויי גוון מינוריים בין מסך להדפסה בפועל, או כישלון אספקה כתוצאה מ-Force Majeure." },
-      { type: "h", text: "סמכות שיפוט" },
-      { type: "p", text: "בכל מחלוקת — הסמכות הבלעדית לבתי המשפט המוסמכים במחוז הדרום (באר שבע)." },
+      { type: "h", text: "הדין החל וסמכות שיפוט" },
+      { type: "p", text: `על הסכם זה יחולו דיני מדינת ישראל בלבד, לרבות חוק הגנת הצרכן, תשמ"א-1981. בכל מחלוקת — הסמכות הבלעדית נתונה לבתי המשפט המוסמכים במחוז הדרום (באר שבע).` },
       { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
     ],
     accessibility: [
@@ -2249,7 +2248,7 @@ const POLICIES = {
     ],
     privacy: [
       { type: "h", text: "Information We Collect" },
-      { type: "l", items: ["Personal: full name, email, phone, shipping address", "Order data: products, designs, notes", "Technical (automatic): IP, browser type, basic cookies"] },
+      { type: "l", items: ["Personal: full name, email, phone, shipping address", "Order data: products, notes, and design files you upload (PNG/JPG/SVG) or photos sent via WhatsApp — used solely to fulfill your order", "Technical (automatic): IP, browser type, basic cookies"] },
       { type: "h", text: "Purpose of Collection" },
       { type: "l", items: ["Order fulfillment and delivery", "Customer communication", "Support and inquiries", "Service improvement", "Legal compliance"] },
       { type: "p", text: "Providing your information is voluntary, but without the required details (name, address, contact) we cannot process and ship your order." },
@@ -2284,8 +2283,8 @@ const POLICIES = {
       { type: "p", text: "All designs, illustrations, characters (including the BLOOM collection), logo, texts, and original content on the site are the exclusive intellectual property of Sfalim Shop and are protected by copyright. You may not copy, reproduce, distribute, sell, or make commercial use of the designs or content, in whole or in part, without prior written permission from Sfalim Shop." },
       { type: "h", text: "Limitation of Liability" },
       { type: "p", text: "Sfalim Shop is not responsible for indirect damages, minor color variations between screen and actual print, or delivery failures due to Force Majeure." },
-      { type: "h", text: "Jurisdiction" },
-      { type: "p", text: "Any dispute — exclusive jurisdiction to courts in Southern District (Be'er Sheva), Israel." },
+      { type: "h", text: "Governing Law & Jurisdiction" },
+      { type: "p", text: "This agreement is governed exclusively by the laws of the State of Israel, including the Consumer Protection Law 5741-1981. Any dispute is subject to the exclusive jurisdiction of the competent courts in the Southern District (Be'er Sheva), Israel." },
       { type: "p", text: "Last updated: June 2, 2026" },
     ],
     accessibility: [
@@ -2335,7 +2334,7 @@ const POLICIES = {
     ],
     privacy: [
       { type: "h", text: "Какую информацию собираем" },
-      { type: "l", items: ["Личные данные: имя, email, телефон, адрес доставки", "Данные заказа: товары, дизайны, заметки", "Технические (автоматически): IP, тип браузера, базовые cookies"] },
+      { type: "l", items: ["Личные данные: имя, email, телефон, адрес доставки", "Данные заказа: товары, заметки, а также файлы дизайна, которые вы загрузили (PNG/JPG/SVG), или фото, отправленные в WhatsApp — используются только для выполнения заказа", "Технические (автоматически): IP, тип браузера, базовые cookies"] },
       { type: "h", text: "Цель сбора" },
       { type: "l", items: ["Выполнение заказа и доставка", "Связь с клиентом", "Поддержка и запросы", "Улучшение сервиса", "Соблюдение закона"] },
       { type: "p", text: "Предоставление данных добровольно, но без необходимых данных (имя, адрес, контакты) мы не сможем обработать и отправить ваш заказ." },
@@ -2370,8 +2369,8 @@ const POLICIES = {
       { type: "p", text: "Все дизайны, иллюстрации, персонажи (включая коллекцию BLOOM), логотип, тексты и оригинальный контент на сайте являются исключительной интеллектуальной собственностью Sfalim Shop и защищены авторским правом. Запрещено копировать, воспроизводить, распространять, продавать или использовать в коммерческих целях дизайны или контент полностью или частично без предварительного письменного разрешения Sfalim Shop." },
       { type: "h", text: "Ограничение ответственности" },
       { type: "p", text: "Sfalim Shop не несёт ответственности за косвенный ущерб, незначительные отличия цвета между экраном и печатью, сбои доставки из-за форс-мажора." },
-      { type: "h", text: "Подсудность" },
-      { type: "p", text: "Любые споры — исключительная подсудность судов Южного округа Израиля (Беэр-Шева)." },
+      { type: "h", text: "Применимое право и подсудность" },
+      { type: "p", text: "К настоящему соглашению применяется исключительно право Государства Израиль, включая Закон о защите прав потребителей 5741-1981. Любые споры — исключительная подсудность компетентных судов Южного округа Израиля (Беэр-Шева)." },
       { type: "p", text: "Последнее обновление: 02.06.2026" },
     ],
     accessibility: [
@@ -10631,9 +10630,13 @@ export default function App() {
     setUser(null); setIsAdmin(false); setPage("home");
   };
 
-  const handleAuth = (u) => {
-    setUser(u); checkAdmin(u);
-    setPage(u.email === ADMIN_EMAIL ? "admin" : "track");
+  const handleAuth = async (u) => {
+    setUser(u);
+    // Authoritative admin decision from the DB (admins table) — no hardcoded
+    // email in the bundle. Real access is still gated by isAdmin + RLS.
+    const { data } = await supabase.from("admins").select("id").eq("id", u.id).single();
+    setIsAdmin(!!data);
+    setPage(data ? "admin" : "track");
   };
 
   return (

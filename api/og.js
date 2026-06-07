@@ -266,6 +266,64 @@ ${ld}
 </html>`;
 }
 
+// ---- Mugs hub crawler HTML (/mugs) — static, no DB lookup. The brand's
+// namesake/core page, so it gets its own share preview instead of the generic
+// home OG. Humans are redirected to the SPA hash route /#mugs.
+function buildMugsHtml() {
+  const title = escapeHtml(`הספלים שלנו · ספלים שופ`);
+  const description = escapeHtml(`ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס ביד בבאר שבע.`);
+  const canonical = escapeHtml(`${SITE_ORIGIN}/mugs`);
+  const image = escapeHtml(DEFAULT_OG_IMAGE);
+  const robots = escapeHtml(MAINTENANCE ? `noindex, nofollow` : `index, follow`);
+
+  const ld = jsonLdScript({
+    "@context": `https://schema.org`,
+    "@type": `Product`,
+    name: `ספל מותאם אישית · ספלים שופ`,
+    image: [DEFAULT_OG_IMAGE],
+    description: `ספל קרמי 11oz עם דיוקן BLOOM או העיצוב שלכם — מודפס ביד בבאר שבע.`,
+    brand: { "@type": `Brand`, name: `Sfalim Shop` },
+    url: `${SITE_ORIGIN}/mugs`,
+    offers: {
+      "@type": `AggregateOffer`,
+      priceCurrency: `ILS`,
+      lowPrice: 59,
+      highPrice: 149,
+      availability: `https://schema.org/InStock`,
+    },
+  });
+
+  return `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>${title}</title>
+<meta name="description" content="${description}" />
+<meta name="robots" content="${robots}" />
+<link rel="canonical" href="${canonical}" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ספלים שופ" />
+<meta property="og:url" content="${canonical}" />
+<meta property="og:title" content="${title}" />
+<meta property="og:description" content="${description}" />
+<meta property="og:image" content="${image}" />
+<meta property="og:image:secure_url" content="${image}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:alt" content="${title}" />
+<meta property="og:locale" content="he_IL" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="${canonical}" />
+<meta name="twitter:title" content="${title}" />
+<meta name="twitter:description" content="${description}" />
+<meta name="twitter:image" content="${image}" />
+${ld}
+</head>
+<body></body>
+</html>`;
+}
+
 module.exports = async function handler(req, res) {
   // Resolve handle. vercel.json rewrite passes it as ?handle=<slug>; fall back
   // to scraping the path for local dev / direct calls.
@@ -304,7 +362,7 @@ module.exports = async function handler(req, res) {
   // Branch decision is appended below after the lookup so we log it once.
   console.log(`[og] method=${req.method} url=${req.url} handle=${handle} ua=${String(ua).slice(0, 120)}`);
 
-  if (!handle) {
+  if (!handle && type !== `mugs`) {
     console.log(`[og] branch=notfound reason=empty-handle`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/`);
@@ -335,6 +393,12 @@ module.exports = async function handler(req, res) {
     res.end(html);
   };
   const enc = encodeURIComponent(handle);
+
+  if (type === `mugs`) {
+    if (!crawler) { console.log(`[og] branch=human type=mugs → /#mugs`); return redirectHuman(`/#mugs`); }
+    console.log(`[og] branch=crawler type=mugs`);
+    return serveHtml(buildMugsHtml());
+  }
 
   if (type === `blog`) {
     const post = await lookupBlogPost(handle);

@@ -17,6 +17,10 @@
       "destination": "/api/og?type=blog&handle=:slug"
     },
     {
+      "source": "/mugs",
+      "destination": "/api/og?type=mugs"
+    },
+    {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
