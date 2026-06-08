@@ -912,7 +912,7 @@ const FloatingProductCardComponent = ({
           <div className="fpc-user-info">
             <div className="fpc-user-details">
               <div className="fpc-user-text">
-                <div className="fpc-handle"><bdi dir="ltr">{price}</bdi></div>
+                {price && <div className="fpc-handle"><bdi dir="ltr">{price}</bdi></div>}
                 <div className="fpc-status">
                   <span className="fpc-status-dot" aria-hidden="true" />
                   {status}
@@ -1012,7 +1012,7 @@ const BloomCardLite = React.memo(function BloomCardLite({
         marginTop: 2,
       }}>
         <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-          <div style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 18 }}><bdi dir="ltr">{price}</bdi></div>
+          {price && <div style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 18 }}><bdi dir="ltr">{price}</bdi></div>}
           <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 10, letterSpacing: `0.05em`, textTransform: `uppercase` }}>{status}</div>
         </div>
         <button
@@ -1389,7 +1389,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                   imageUrl={transformImage(d.mockup_shirt_url || d.mockup_url, { width: 1080 })}
                   name={displayName}
                   description={description}
-                  price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
+                  price={``}
                   status={statusByLang[lang] || statusByLang.he}
                   buttonText={buttonByLang[lang] || buttonByLang.he}
                   onClick={handleViewActiveCharacter}
@@ -1399,7 +1399,7 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                   imageUrl={transformImage(d.mockup_shirt_url || d.mockup_url, { width: 1080 })}
                   name={displayName}
                   description={description}
-                  price={`₪${Number(d.price_shirt_basic) || Number(d.price_shirt) || 99}`}
+                  price={``}
                   status={statusByLang[lang] || statusByLang.he}
                   buttonText={buttonByLang[lang] || buttonByLang.he}
                   onAddToCart={handleViewActiveCharacter}
