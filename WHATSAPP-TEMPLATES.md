@@ -4,8 +4,8 @@ Ready-to-paste replies for incoming WhatsApp inquiries (`hello@sfalimshop.com` /
 Each block has **Hebrew (he)** primary + **English (en)** + **Russian (ru)**. Copy, tweak names/prices, send.
 Brand voice: warm, personal, "printed by hand with love in Be'er Sheva." Keep the 🧡.
 
-> Prices reflect the current catalog (2026-06): custom shirt ₪149 · mug ₪69 · BLOOM shirt ₪99 / mug ₪59 ·
-> pet portrait commission shirt ₪189 / mug ₪149 · custom-design shirt ₪149 / mug ₪109 · **event mug pair from ₪149** ·
+> Prices reflect the current catalog (2026-06): custom shirt ₪149 · mug ₪69 · BLOOM shirt ₪119 (Oversize) / mug ₪59 ·
+> pet portrait commission shirt ₪189 / mug ₪119 · custom-design shirt ₪149 / mug ₪89 · **event mug pair from ₪149** ·
 > delivery: personal Be'er Sheva ₪0 · UPS point ₪27 · UPS home ₪55. Update here if prices change.
 
 ---
@@ -70,21 +70,21 @@ Brand voice: warm, personal, "printed by hand with love in Be'er Sheva." Keep th
 > 1) שולחים 2–4 תמונות מזוויות שונות (פנים, פרופיל, גוף מלא, באור טוב)
 > 2) אנחנו מעצבים — תצוגה מקדימה תוך 3–5 ימי עסקים
 > 3) עד 3 סבבי תיקונים, עד שתהיו מרוצים 🙂
-> אפשר על חולצה (₪189) או על ספל (₪149). מתחילים לעצב אחרי קבלת התמונות והתשלום 🧡
+> אפשר על חולצה (₪189) או על ספל (₪119). מתחילים לעצב אחרי קבלת התמונות והתשלום 🧡
 
 **en**
 > So glad you chose a BLOOM portrait of your pet! 🐾 Here's how it works:
 > 1) Send 2–4 photos from different angles (face, profile, full body, good light)
 > 2) We design it — a preview within 3–5 business days
 > 3) Up to 3 rounds of revisions, until you're happy 🙂
-> Available on a shirt (₪189) or a mug (₪149). We start designing once we have your photos and payment 🧡
+> Available on a shirt (₪189) or a mug (₪119). We start designing once we have your photos and payment 🧡
 
 **ru**
 > Здорово, что выбрали BLOOM-портрет питомца! 🐾 Как это работает:
 > 1) Пришлите 2–4 фото с разных ракурсов (анфас, профиль, в полный рост, при хорошем свете)
 > 2) Мы создаём дизайн — превью в течение 3–5 рабочих дней
 > 3) До 3 раундов правок, пока вам не понравится 🙂
-> Доступно на футболке (₪189) или кружке (₪149). Начинаем создавать после получения фото и оплаты 🧡
+> Доступно на футболке (₪189) или кружке (₪119). Начинаем создавать после получения фото и оплаты 🧡
 
 ---
 
@@ -92,15 +92,15 @@ Brand voice: warm, personal, "printed by hand with love in Be'er Sheva." Keep th
 
 **he**
 > מעולה! נעצב לכם בדיוק מה שבא לכם 🙂 שלחו לי את הרעיון: טקסט, לוגו, תמונה או תיאור — ונכין עיצוב.
-> מקבלים תצוגה מקדימה, ואפשר לבקש תיקונים עד שתהיו מרוצים. חולצה ₪149 / ספל ₪109.
+> מקבלים תצוגה מקדימה, ואפשר לבקש תיקונים עד שתהיו מרוצים. חולצה ₪149 / ספל ₪89.
 
 **en**
 > Great! We'll design exactly what you have in mind 🙂 Send me the idea: text, a logo, an image or a description — and we'll create a design.
-> You'll get a preview and can request changes until you're happy. Shirt ₪149 / mug ₪109.
+> You'll get a preview and can request changes until you're happy. Shirt ₪149 / mug ₪89.
 
 **ru**
 > Отлично! Сделаем дизайн ровно под вашу идею 🙂 Пришлите идею: текст, логотип, картинку или описание — и мы создадим дизайн.
-> Вы получите превью и сможете попросить правки, пока не понравится. Футболка ₪149 / кружка ₪109.
+> Вы получите превью и сможете попросить правки, пока не понравится. Футболка ₪149 / кружка ₪89.
 
 ---
 

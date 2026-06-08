@@ -1908,7 +1908,7 @@ const LANGS = {
     nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה ←', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון ←', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו ←', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון ←", nav: "חידון" },
-    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "חולצות, ספלים, מדבקות — מותאמים אישית עם העיצוב שלך.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
+    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס ביד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח מ-₪27", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
@@ -1979,7 +1979,7 @@ const LANGS = {
     nav: { home: "Home", mugs: "Mugs", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
-    hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "T-shirts, mugs, stickers — fully customized with your design.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
+    hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "Mugs, shirts & BLOOM pet portraits — personalized with your design, hand-printed in Be'er Sheva.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping from ₪27", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
     badges: { bestseller: "Bestseller", new: "New" },
     reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
@@ -2050,7 +2050,7 @@ const LANGS = {
     nav: { home: "Главная", mugs: "Кружки", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
-    hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Футболки, кружки, стикеры — с вашим дизайном.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
+    hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Кружки, футболки и портреты BLOOM — с вашим дизайном, печать вручную в Беэр-Шеве.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка от ₪27", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
     reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
@@ -8727,6 +8727,7 @@ function HomeMugsBanner({ lang, setPage }) {
             onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
             <span aria-hidden="true">☕</span> {T.cta} {isRTL ? `←` : `→`}
           </button>
+          <div style={{ marginTop: 10, color: COLORS.accent, fontSize: 13, fontWeight: 700, fontFamily: `'Heebo',sans-serif` }}>{lang === `he` ? `החל מ-₪59` : lang === `ru` ? `от ₪59` : `from ₪59`}</div>
         </div>
         {imgs.length > 0 && (
           <div style={{ display: `grid`, gridTemplateColumns: `repeat(2, 1fr)`, gap: 10, flexShrink: 0, width: isMobile ? `100%` : 280, maxWidth: 320 }}>
@@ -8970,6 +8971,9 @@ function MugsPage({ lang, setPage }) {
           </div>
         </div>
       </section>
+
+      {/* SOCIAL PROOF — reuses the home Reviews block; self-hides when there are no active testimonials. */}
+      <Reviews lang={lang} />
 
       {/* FINAL CTA */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 32 : 52, textAlign: `center` }}>
@@ -9959,7 +9963,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   <span aria-hidden="true" style={{ fontSize: 15 }}>☕</span>
                   <span style={{ flex: 1 }}>{lang === `he` ? `ספלים מושלמים כזוג או כסט 🎁` : lang === `ru` ? `Кружки идеальны парой или набором 🎁` : `Mugs are perfect as a pair or a set 🎁`}</span>
                   {onAddMore && (
-                    <button type="button" onClick={onAddMore} style={{ flexShrink: 0, background: `transparent`, border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 8, padding: `5px 10px`, fontSize: 11.5, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, whiteSpace: `nowrap` }}>{lang === `he` ? `+ עוד ספל` : lang === `ru` ? `+ ещё` : `+ Add`}</button>
+                    <button type="button" onClick={onAddMore} aria-label={lang === `he` ? `הוסיפו ספל נוסף` : lang === `ru` ? `Добавить ещё кружку` : `Add another mug`} style={{ flexShrink: 0, background: `transparent`, border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 8, padding: `5px 10px`, fontSize: 11.5, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, whiteSpace: `nowrap` }}>{lang === `he` ? `+ עוד ספל` : lang === `ru` ? `+ кружку` : `+ Add mug`}</button>
                   )}
                 </div>
               );
