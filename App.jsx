@@ -8717,7 +8717,11 @@ function HomeMugsBanner({ lang, setPage }) {
         <div style={{ flex: 1, textAlign: isMobile ? `center` : (isRTL ? `right` : `left`) }}>
           <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `5px 15px`, marginBottom: 12, color: COLORS.accent, fontSize: 11, fontWeight: 700, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>☕ {T.eyebrow}</span>
           <h2 id="home-mugs-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(26px,4.5vw,40px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 12px` }}>{T.heading}</h2>
-          <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 20px` : `0 0 20px` }}>{T.sub}</p>
+          <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 10px` : `0 0 10px` }}>{T.sub}</p>
+          <div style={{ display: `flex`, alignItems: `center`, justifyContent: isMobile ? `center` : (isRTL ? `flex-end` : `flex-start`), gap: 7, marginBottom: 20, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600 }}>
+            <span aria-hidden="true">☕</span>
+            <span>{lang === `he` ? `מודפס ביד בבאר שבע · מוכן תוך 2–3 ימים` : lang === `ru` ? `Печать вручную в Беэр-Шеве · готово за 2–3 дня` : `Hand-printed in Be'er Sheva · ready in 2–3 days`}</span>
+          </div>
           <button type="button" onClick={() => setPage(`mugs`)} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` }}
             onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
             onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
@@ -9746,7 +9750,7 @@ function CartToast({ message, lang, onClose, onViewCart, actionLabel, onAction }
 }
 
 // ============ CART DRAWER — slide-out cart, openable from anywhere ============
-function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheckout }) {
+function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheckout, onAddMore }) {
   const isRTL = lang === "he";
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
 
@@ -9953,7 +9957,10 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               return (
                 <div style={{ display: `flex`, alignItems: `center`, gap: 8, marginBottom: 13, padding: `9px 12px`, background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 9, color: COLORS.gray, fontSize: 12, lineHeight: 1.5, fontFamily: `'Heebo',sans-serif` }}>
                   <span aria-hidden="true" style={{ fontSize: 15 }}>☕</span>
-                  <span>{lang === `he` ? `ספלים מושלמים כזוג או כסט — הוסיפו עוד לפני התשלום 🎁` : lang === `ru` ? `Кружки идеальны парой или набором — добавьте ещё до оплаты 🎁` : `Mugs are perfect as a pair or a set — add more before checkout 🎁`}</span>
+                  <span style={{ flex: 1 }}>{lang === `he` ? `ספלים מושלמים כזוג או כסט 🎁` : lang === `ru` ? `Кружки идеальны парой или набором 🎁` : `Mugs are perfect as a pair or a set 🎁`}</span>
+                  {onAddMore && (
+                    <button type="button" onClick={onAddMore} style={{ flexShrink: 0, background: `transparent`, border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 8, padding: `5px 10px`, fontSize: 11.5, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, whiteSpace: `nowrap` }}>{lang === `he` ? `+ עוד ספל` : lang === `ru` ? `+ ещё` : `+ Add`}</button>
+                  )}
                 </div>
               );
             })()}
@@ -10965,7 +10972,7 @@ export default function App() {
             {showCookieBanner && cookieConsent === null && (
               <div aria-hidden="true" style={{ height: 200 }} />
             )}
-            <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} />
+            <CartDrawer lang={lang} open={cartOpen} cart={cart} setCart={setCart} updateCartQty={updateCartQty} onClose={closeCart} onCheckout={goToCheckout} onAddMore={() => { closeCart(); setPage(`pets`); }} />
             {/* "Added to cart" toast — 3s, bottom-sheet style on mobile,
                 top-corner pill on desktop. Action button opens the cart drawer. */}
             {cartToast && <CartToast
@@ -12635,6 +12642,13 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} />
               <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
             </div>
+            {/* Gift framing — mugs are the #1 gift item; reinforce it right where the mug is chosen. */}
+            {previewProduct === `mug` && (
+              <div style={{ display: `flex`, alignItems: `center`, gap: 7, marginBottom: 12, color: COLORS.gray, fontSize: 12.5, fontFamily: `'Heebo',sans-serif` }}>
+                <span aria-hidden="true">🎁</span>
+                <span>{lang === `he` ? `מתנה מושלמת — קל לארוז ולתת` : lang === `ru` ? `Идеальный подарок — легко упаковать и подарить` : `A perfect gift — easy to wrap and give`}</span>
+              </div>
+            )}
             {/* Add to cart — appears only after a product is selected; adds the
                 currently-previewed product (color-aware for shirts). */}
             {previewProduct && (
@@ -12656,7 +12670,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginBottom: 24, padding: `10px 12px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8 }}>
                 <AboutIcon name="truck" size={18} color={COLORS.accent} style={{ marginTop: 1 }} />
                 <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-                  {(() => { const ml = previewProduct === `mug` ? (lang === `he` ? `⚡ מוכן תוך 2–3 ימים` : lang === `ru` ? `⚡ Готово за 2–3 дня` : `⚡ Ready in 2–3 days`) : t.madeToOrder; return ml ? <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, letterSpacing: `0.04em` }}>{ml}</span> : null; })()}
+                  {(() => { const ml = previewProduct === `mug` ? (lang === `he` ? `⚡ מוכן תוך 2–3 ימים` : lang === `ru` ? `⚡ Готово за 2–3 дня` : `⚡ Ready in 2–3 days`) : previewProduct === `shirt` ? (lang === `he` ? `👕 הכנה ומשלוח 5–7 ימי עסקים` : lang === `ru` ? `👕 Изготовление и доставка 5–7 раб. дней` : `👕 Made & shipped in 5–7 business days`) : t.madeToOrder; return ml ? <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, letterSpacing: `0.04em` }}>{ml}</span> : null; })()}
                   {t.shipFlat && <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif`, lineHeight: 1.5 }}>{t.shipFlat}</span>}
                 </div>
               </div>
