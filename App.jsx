@@ -1636,8 +1636,12 @@ const PET_NAME_COLOR_DEFAULT = `#FF6B35`;
 const PET_NAME_SURCHARGE = 20;
 // Custom commission (we draw the design). Two services × two products.
 // Pay-first; the customer sends photos (pet) or an idea (custom) on WhatsApp.
-// KEEP IN SYNC with create-payment's commission branch.
-const COMMISSION_PRICE = { pet: { shirt: 189, mug: 149 }, custom: { shirt: 149, mug: 109 } };
+// KEEP IN SYNC with create-payment's commission branch. NOTE: the live create-payment
+// edge fn still carries the OLD mug tiers (pet 149 / custom 109). Mug commission is NOT
+// exposed in the UI (the choice box renders for non-mug products only), so there is no
+// live price mismatch today — but sync the edge fn to these values BEFORE ever exposing
+// mug commission, or the server would re-price the mug to the old (higher) amount.
+const COMMISSION_PRICE = { pet: { shirt: 189, mug: 119 }, custom: { shirt: 149, mug: 89 } };
 const commissionPrice = (ctype, pid) => {
   const tier = COMMISSION_PRICE[ctype] || COMMISSION_PRICE.pet;
   return pid === `mug` ? tier.mug : tier.shirt;
@@ -1709,21 +1713,6 @@ const FABRIC_GUIDE = [
     good: { he: "רכה ונושמת, מראה נקי ואחיד, וכמעט ללא פלומה — משטח חלק להדפסת DTF חדה.", en: "Soft and breathable, a clean even look, almost no lint — a smooth surface for a crisp DTF print.", ru: "Мягкий и дышащий, чистый ровный вид, почти без ворса — гладкая поверхность для чёткой DTF-печати." },
   },
   {
-    name: { he: "תערובת כותנה-פוליאסטר (84/16)", en: "Cotton-Polyester Blend (84/16)", ru: "Хлопок-полиэстер (84/16)" },
-    make: { he: "חוטי כותנה ופוליאסטר נארגים יחד לבד אחד שמשלב את התכונות של שני החומרים.", en: "Cotton and polyester threads are woven together into one fabric that combines the best of both.", ru: "Нити хлопка и полиэстера сплетаются в одну ткань, объединяя свойства обоих материалов." },
-    good: { he: "שומר על הצורה, מתכווץ ומתקמט פחות, מתייבש מהר ועמיד — עם רוב רכות הכותנה.", en: "Holds its shape, shrinks and wrinkles less, dries fast and lasts — with most of cotton's softness.", ru: "Держит форму, меньше садится и мнётся, быстро сохнет и долговечен — с мягкостью хлопка." },
-  },
-  {
-    name: { he: "כותנה-לייקרה (95/5)", en: "Cotton-Lycra (95/5)", ru: "Хлопок-лайкра (95/5)" },
-    make: { he: "לחוט הכותנה משולב חוט אלסטן (לייקרה) גמיש שמעניק לבד יכולת מתיחה.", en: "An elastic elastane (lycra) thread is blended into the cotton, giving the fabric stretch.", ru: "В хлопковую пряжу вплетается эластичная нить эластана (лайкры), придавая ткани растяжимость." },
-    good: { he: "נמתח וחוזר לצורתו, גזרה צמודה ומחמיאה שלא מתעוותת, ונוחות תנועה גבוהה.", en: "Stretches and springs back, a flattering fitted cut that won't deform, and great freedom of movement.", ru: "Тянется и возвращается в форму, приталенный крой не деформируется, высокая свобода движения." },
-  },
-  {
-    name: { he: "פוליאסטר (100%) — דרייפיט", en: "Polyester (100%) — Dri-Fit", ru: "Полиэстер (100%) — Dri-Fit" },
-    make: { he: "סיב סינתטי (PET) הנארג כך שמעביר לחות אל פני הבד ומאפשר ייבוש מהיר.", en: "A synthetic fibre (PET) woven to wick moisture to the surface for fast drying.", ru: "Синтетическое волокно (PET), сплетённое так, что отводит влагу на поверхность для быстрого высыхания." },
-    good: { he: "קל מאוד, מנדף זיעה, מתייבש מהר ולא מתכווץ. מצוין לסובלימציה — הצבע נטמע בסיב.", en: "Very light, wicks sweat, dries fast and doesn't shrink. Great for sublimation — the colour fuses into the fibre.", ru: "Очень лёгкий, отводит пот, быстро сохнет и не садится. Отлично для сублимации — цвет впитывается в волокно." },
-  },
-  {
     name: { he: "גימור סטון-ווש", en: "Stone-Wash Finish", ru: "Отделка стоунвош" },
     make: { he: "לא בד אלא תהליך גימור: בד הכותנה נכבס עם אבני פומיס ששוחקות מעט את פני השטח.", en: "Not a fabric but a finish: the cotton is washed with pumice stones that lightly abrade the surface.", ru: "Это не ткань, а отделка: хлопок стирают с пемзой, слегка обрабатывая поверхность." },
     good: { he: "מרכך את הבד עוד לפני הלבישה, יוצר מראה וינטג' עם גוונים עמוקים, ומפחית כיווץ.", en: "Softens the fabric before you even wear it, creates a vintage look with deep tones, and reduces shrinkage.", ru: "Смягчает ткань ещё до носки, создаёт винтажный вид с глубокими тонами и уменьшает усадку." },
@@ -1734,8 +1723,11 @@ const FABRIC_GUIDE = [
 // shirt type/size picker stays identical in the quick-look modal and the full
 // breed page. productId maps the shirt type to its OrderPage product; sizes
 // match the PRODUCTS variant ids.
+// Launch focus: BLOOM characters print on Oversize only (₪119, price_shirt_oversized).
+// Basic was dropped with the rest of the narrowed shirt line. The single-entry array keeps
+// the shared picker working; the type toggle auto-hides when length <= 1 (see BloomShirtOptions).
+// To re-enable Basic later, restore its { id:`basic`, productId:`tshirt`, ... } row here.
 const BLOOM_SHIRT_TYPES = [
-  { id: `basic`,     productId: `tshirt`,    label: { he: `בייסיק`,   en: `Basic`,     ru: `Базовая` } },
   { id: `oversized`, productId: `oversized`, label: { he: `אוברסייז`, en: `Oversize`, ru: `Оверсайз` } },
 ];
 const BLOOM_SHIRT_SIZES = [`s`, `m`, `l`, `xl`, `xxl`];
@@ -2456,8 +2448,14 @@ const PRODUCTS = (t) => [
 // untouched so internal lookups by id (BLOOM sticker orders, admin history
 // re-renders, localizeProduct) keep functioning.
 const CUSTOM_STICKER_IDS = ['sticker', 'sticker_sq'];
+// Launch focus: only Oversize + Stone-wash shirts are offered (Gleb holds a small stock
+// of just these two). Basic / Lycra / Look / Dri-fit are hidden from the customer wizard
+// at the DISPLAY layer only — the full PRODUCTS array stays intact so internal lookups
+// (cart re-render, localizeProduct, order history) keep working. Re-enable a model by
+// removing its id from this list.
+const LAUNCH_HIDDEN_SHIRT_IDS = ['tshirt', 'lycra', 'look', 'dryfit'];
 const getCustomProducts = (t) => {
-  let all = PRODUCTS(t);
+  let all = PRODUCTS(t).filter(p => !LAUNCH_HIDDEN_SHIRT_IDS.includes(p.id));
   if (!STONEWASH_ENABLED) all = all.filter(p => p.id !== `stonewash`);
   if (CUSTOM_STICKERS_ENABLED) return all;
   return all.filter(p => !CUSTOM_STICKER_IDS.includes(p.id));
@@ -6823,7 +6821,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                                 <span style={{ color: COLORS.white, fontWeight: 600, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 16 : 18 }}>{lang === "he" ? "אוברסייז" : lang === "ru" ? "Оверсайз" : "Oversize"}</span>
                                 <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{subs.length} {lang === "he" ? "דגמים" : lang === "ru" ? "модели" : "styles"}</span>
                               </div>
-                              <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{lang === "he" ? "קלאסיק · לוק · סטון-ווש — לחצו לבחירה" : lang === "ru" ? "Classic · Look · Stone-wash — нажмите для выбора" : "Classic · Look · Stone-wash — tap to choose"}</div>
+                              <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{lang === "he" ? "קלאסיק · סטון-ווש — לחצו לבחירה" : lang === "ru" ? "Classic · Stone-wash — нажмите для выбора" : "Classic · Stone-wash — tap to choose"}</div>
                               <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>₪149</div>
                             </div>
                           </div>
@@ -8801,6 +8799,7 @@ function MugsPage({ lang, setPage }) {
       heading: `הספלים שלנו`,
       sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. ספל קרמי איכותי עם העיצוב שאתם אוהבים, מודפס באהבה ביד בבאר שבע.`,
       badges: [`קרמיקה 11oz`, `עמיד במדיח`, `הדפסת סובלימציה`, `מודפס ביד בבאר שבע`],
+      giftStrip: [`🎁 מתנה מושלמת`, `⚡ מוכן תוך 2–3 ימים`, `✍️ הוסיפו שם או תאריך`],
       bloomTitle: `כל דמות BLOOM — גם על ספל`,
       bloomSub: `70 דיוקנאות חיות מצוירים. בחרו את הגזע שלכם והדפיסו אותו על ספל.`,
       bloomCta: `עיין באוסף BLOOM`,
@@ -8808,7 +8807,7 @@ function MugsPage({ lang, setPage }) {
       ways: [
         { icon: `paw`, title: `החיה שלכם על ספל`, price: `₪59`, desc: `בחרו דמות מאוסף BLOOM`, cta: `לאוסף`, go: () => setPage(`pets`) },
         { icon: `upload`, title: `העיצוב שלכם`, price: `₪69`, desc: `העלו תמונה או לוגו משלכם`, cta: `התחילו`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `נעצב לכם`, price: `החל מ-₪109`, desc: `שלחו רעיון או תמונה — ונעצב לכם עיצוב ייחודי`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספל עם עיצוב מותאם אישית`) : null },
+        { icon: `brush`, title: `נעצב לכם`, price: `החל מ-₪89`, desc: `שלחו רעיון או תמונה — ונעצב לכם עיצוב ייחודי`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספל עם עיצוב מותאם אישית`) : null },
         { icon: `rings`, title: `חתונה ואירועים`, price: `סט זוגי מ-₪149`, desc: `שמות · תאריך · תמונה · סטים לשולחן`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספלים מעוצבים לאירוע (חתונה / חברה)`) : null },
       ],
       whyTitle: `למה הספלים שלנו`,
@@ -8822,6 +8821,7 @@ function MugsPage({ lang, setPage }) {
       heading: `Our Mugs`,
       sub: `"Sfalim" literally means "mugs" — and it's what we do best. A quality ceramic mug with the design you love, printed by hand with love in Be'er Sheva.`,
       badges: [`11oz ceramic`, `Dishwasher-safe`, `Sublimation print`, `Hand-printed in Be'er Sheva`],
+      giftStrip: [`🎁 Perfect gift`, `⚡ Ready in 2–3 days`, `✍️ Add a name or date`],
       bloomTitle: `Every BLOOM character — on a mug too`,
       bloomSub: `70 illustrated pet portraits. Pick your breed and print it on a mug.`,
       bloomCta: `Browse the BLOOM collection`,
@@ -8829,7 +8829,7 @@ function MugsPage({ lang, setPage }) {
       ways: [
         { icon: `paw`, title: `Your pet on a mug`, price: `₪59`, desc: `Choose a BLOOM character`, cta: `Browse`, go: () => setPage(`pets`) },
         { icon: `upload`, title: `Your own design`, price: `₪69`, desc: `Upload a photo or your logo`, cta: `Start`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `We design it`, price: `from ₪109`, desc: `Send an idea or photo — we'll create a custom design for you`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in a mug with a custom design`) : null },
+        { icon: `brush`, title: `We design it`, price: `from ₪89`, desc: `Send an idea or photo — we'll create a custom design for you`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in a mug with a custom design`) : null },
         { icon: `rings`, title: `Weddings & events`, price: `pair from ₪149`, desc: `Names · date · photo · table sets`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in designed mugs for an event (wedding / company)`) : null },
       ],
       whyTitle: `Why our mugs`,
@@ -8843,6 +8843,7 @@ function MugsPage({ lang, setPage }) {
       heading: `Наши кружки`,
       sub: `«Сфалим» и означает «кружки» — и это то, что мы делаем лучше всего. Качественная керамическая кружка с дизайном, который вам нравится, напечатана вручную с любовью в Беэр-Шеве.`,
       badges: [`Керамика 11oz`, `Можно в посудомойку`, `Сублимационная печать`, `Печать вручную в Беэр-Шеве`],
+      giftStrip: [`🎁 Идеальный подарок`, `⚡ Готово за 2–3 дня`, `✍️ Добавьте имя или дату`],
       bloomTitle: `Любой персонаж BLOOM — и на кружке`,
       bloomSub: `70 рисованных портретов питомцев. Выберите породу и напечатайте на кружке.`,
       bloomCta: `Каталог BLOOM`,
@@ -8850,7 +8851,7 @@ function MugsPage({ lang, setPage }) {
       ways: [
         { icon: `paw`, title: `Питомец на кружке`, price: `₪59`, desc: `Выберите персонажа BLOOM`, cta: `В каталог`, go: () => setPage(`pets`) },
         { icon: `upload`, title: `Свой дизайн`, price: `₪69`, desc: `Загрузите фото или логотип`, cta: `Начать`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `Создадим для вас`, price: `от ₪109`, desc: `Пришлите идею или фото — создадим уникальный дизайн`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересует кружка с индивидуальным дизайном`) : null },
+        { icon: `brush`, title: `Создадим для вас`, price: `от ₪89`, desc: `Пришлите идею или фото — создадим уникальный дизайн`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересует кружка с индивидуальным дизайном`) : null },
         { icon: `rings`, title: `Свадьба и события`, price: `пара от ₪149`, desc: `Имена · дата · фото · наборы на стол`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересуют дизайнерские кружки для события (свадьба / компания)`) : null },
       ],
       whyTitle: `Почему наши кружки`,
@@ -8879,6 +8880,13 @@ function MugsPage({ lang, setPage }) {
             </li>
           ))}
         </ul>
+        {c.giftStrip && (
+          <div className="reveal" data-delay="4" style={{ display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 10, marginTop: 16 }}>
+            {c.giftStrip.map((g, i) => (
+              <span key={i} style={{ display: `inline-flex`, alignItems: `center`, padding: `7px 15px`, borderRadius: 999, background: COLORS.accentBtn, color: `#fff`, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 700, boxShadow: `0 4px 14px rgba(255,107,53,0.22)` }}>{g}</span>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* BLOOM MUG SHOWCASE — real product photos */}
@@ -9936,6 +9944,19 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{`₪${total}`}</span>
             </div>
             <div style={{ color: COLORS.gray, fontSize: 11, textAlign: lang === "he" ? "right" : "left", marginBottom: 15 }}>{lang === "he" ? "+ משלוח מ-₪27 · איסוף עצמי בבאר שבע ללא עלות" : lang === "ru" ? "+ доставка от ₪27 · самовывоз в Беэр-Шеве без доплаты" : "+ shipping from ₪27 · pickup in Be'er Sheva at no charge"}</div>
+            {/* Mug pair/set upsell — full price per mug, NO discount (the server re-prices
+                each line from the catalog, so a client discount wouldn't survive). Shows only
+                when 1–2 mugs are in the cart; lifts average order value via quantity. */}
+            {(() => {
+              const mugQty = cart.filter(it => it.productId === `mug`).reduce((n, it) => n + (Number(it.qty) || 1), 0);
+              if (mugQty < 1 || mugQty >= 3) return null;
+              return (
+                <div style={{ display: `flex`, alignItems: `center`, gap: 8, marginBottom: 13, padding: `9px 12px`, background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 9, color: COLORS.gray, fontSize: 12, lineHeight: 1.5, fontFamily: `'Heebo',sans-serif` }}>
+                  <span aria-hidden="true" style={{ fontSize: 15 }}>☕</span>
+                  <span>{lang === `he` ? `ספלים מושלמים כזוג או כסט — הוסיפו עוד לפני התשלום 🎁` : lang === `ru` ? `Кружки идеальны парой или набором — добавьте ещё до оплаты 🎁` : `Mugs are perfect as a pair or a set — add more before checkout 🎁`}</span>
+                </div>
+              );
+            })()}
             {/* Trust strip — supports the buying decision right by the checkout CTA */}
             <div style={{ marginBottom: 15 }}><TrustStrip lang={lang} /></div>
             <button onClick={onCheckout} style={{
@@ -10895,7 +10916,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><HomeMugsBanner lang={lang} setPage={setPage} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
@@ -11453,6 +11474,23 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
     return list;
   }, [designs, speciesFilter, breedQuery, favOnly, favorites]);
 
+  // "Start here" curated shortlist — the characters Gleb flags as is_bestseller in the
+  // admin editor (dog+cat interleaved so it's never all dogs). Gives first-time visitors
+  // a handful of picks instead of all 70 at once. Empty when nothing is flagged → the
+  // whole section hides; add more by ticking "bestseller" on a character in admin.
+  const bestsellers = React.useMemo(() => {
+    const flagged = designs.filter(d => d.is_bestseller);
+    const dogs = flagged.filter(d => d.species === `dog`);
+    const cats = flagged.filter(d => d.species === `cat`);
+    const mix = [];
+    let di = 0, ci = 0;
+    while (mix.length < 10 && (di < dogs.length || ci < cats.length)) {
+      if (di < dogs.length) mix.push(dogs[di++]);
+      if (mix.length < 10 && ci < cats.length) mix.push(cats[ci++]);
+    }
+    return mix.length ? mix : flagged.slice(0, 10);
+  }, [designs]);
+
   // Translations
   const t = {
     he: {
@@ -11690,6 +11728,32 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 16 : 20 }}>
             {blogPosts.map((p) => <BlogCard key={p.slug} post={p} lang={lang} goToBlog={goToBlog} compact />)}
+          </div>
+        </section>
+      )}
+
+      {/* ===== START HERE — curated bestsellers band. Gleb ticks "bestseller" on a
+              character in the admin editor to feature it here; gives first-time visitors a
+              short shortlist instead of all 70 at once. Hidden when <3 are flagged. Opens the
+              same PetModal as the grid (openPet). ===== */}
+      {!loading && bestsellers.length >= 3 && (
+        <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "8px 16px 0" : "16px 40px 0" }}>
+          <div style={{ background: "linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,107,53,0.02))", border: "1px solid rgba(255,107,53,0.2)", borderRadius: 18, padding: isMobile ? "18px 14px" : "24px 28px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+              <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.4rem" : "1.8rem", color: COLORS.white, margin: 0 }}>
+                {lang === "he" ? "⭐ התחילו מכאן" : lang === "ru" ? "⭐ Начните отсюда" : "⭐ Start here"}
+              </h2>
+              <span style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 14 }}>
+                {lang === "he" ? "המועדפים שלנו" : lang === "ru" ? "наши любимцы" : "our favorites"}
+              </span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(200px, 1fr))", gap: isMobile ? 12 : 18 }}>
+              {bestsellers.map((d, i) => (
+                <div key={d.id} className="reveal" data-delay={String((i % 6) + 1)}>
+                  <PetCard design={d} lang={lang} index={i} name={getDesignName(d)} animal={getAnimal(d)} tagline={getTagline(d)} priceFrom={t.priceFrom} preview={preview} onClick={() => openPet(d)} isMobile={isMobile} />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -12187,10 +12251,10 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
 function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, onClose, isMobile, onOrderBloom, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
-  const [shirtType, setShirtType] = useState("basic");
+  const [shirtType, setShirtType] = useState("oversized"); // BLOOM prints on Oversize only (₪119)
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
-  const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
+  const [previewProduct, setPreviewProduct] = useState(`mug`); // mug-first: opens on the mug (cheapest, sizeless entry); portrait stays view #0 in the carousel. null=portrait | `mug` | `shirt`
   const [petName, setPetName] = useState(``); // optional personalization (free)
   const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
   const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
@@ -12568,8 +12632,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 — now they're a free gift only, and customers who want stickers
                 buy a bundled pack from the PetsPage packs section instead. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
-              <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
               <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} />
+              <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
             </div>
             {/* Add to cart — appears only after a product is selected; adds the
                 currently-previewed product (color-aware for shirts). */}
@@ -12592,7 +12656,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginBottom: 24, padding: `10px 12px`, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.18)`, borderRadius: 8 }}>
                 <AboutIcon name="truck" size={18} color={COLORS.accent} style={{ marginTop: 1 }} />
                 <div style={{ display: `flex`, flexDirection: `column`, gap: 2 }}>
-                  {t.madeToOrder && <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, letterSpacing: `0.04em` }}>{t.madeToOrder}</span>}
+                  {(() => { const ml = previewProduct === `mug` ? (lang === `he` ? `⚡ מוכן תוך 2–3 ימים` : lang === `ru` ? `⚡ Готово за 2–3 дня` : `⚡ Ready in 2–3 days`) : t.madeToOrder; return ml ? <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, letterSpacing: `0.04em` }}>{ml}</span> : null; })()}
                   {t.shipFlat && <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif`, lineHeight: 1.5 }}>{t.shipFlat}</span>}
                 </div>
               </div>
@@ -13005,7 +13069,8 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
         </div>
       </div>
 
-      {/* Shirt type — Basic / Oversized */}
+      {/* Shirt type — hidden at launch (BLOOM = Oversize only). Renders only if >1 type is enabled. */}
+      {BLOOM_SHIRT_TYPES.length > 1 && (
       <div style={{ marginBottom: 20 }}>
         <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>
           {lang === "he" ? "סוג חולצה" : lang === "ru" ? "Тип футболки" : "Shirt type"}
@@ -13030,6 +13095,7 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
           ))}
         </div>
       </div>
+      )}
 
       {/* Shirt size — S / M / L / XL / XXL */}
       <div style={{ marginBottom: 20 }}>
@@ -13198,7 +13264,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [reloadKey, setReloadKey] = useState(0);
   // Buy state — mirrors PetModal so the hero image reacts to the selection.
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
-  const [shirtType, setShirtType] = useState(`basic`);
+  const [shirtType, setShirtType] = useState(`oversized`); // BLOOM prints on Oversize only (₪119)
   const [shirtSize, setShirtSize] = useState(`m`);
   const [previewProduct, setPreviewProduct] = useState(null); // null | `mug` | `shirt`
   const [petName, setPetName] = useState(``); // optional personalization (free)
@@ -13235,7 +13301,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   useEffect(() => {
     let cancelled = false;
     setLoading(true); setNotFound(false); setLoadError(false); setDesign(null); setRelated([]);
-    setPreviewProduct(null); setSelectedColor(BLOOM_SHIRT_COLORS[0]); setShirtType(`basic`); setShirtSize(`m`); setPetName(``);
+    setPreviewProduct(null); setSelectedColor(BLOOM_SHIRT_COLORS[0]); setShirtType(`oversized`); setShirtSize(`m`); setPetName(``);
     window.scrollTo(0, 0);
     if (!slug) { setNotFound(true); setLoading(false); return; }
     (async () => {
@@ -13479,8 +13545,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                   />
                 )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
-                  <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
                   <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} />
+                  <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
                 </div>
                 {previewProduct && (
                   <div style={{ position: isMobile ? `sticky` : `static`, bottom: isMobile ? 8 : `auto`, zIndex: 6, marginBottom: 16 }}>
