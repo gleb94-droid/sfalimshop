@@ -14546,10 +14546,10 @@ function BlogCard({ post, lang, goToBlog, compact = false }) {
         transform: hover ? `translateY(-4px)` : `translateY(0)`,
         boxShadow: hover ? `0 16px 40px rgba(0,0,0,0.35)` : `none`,
       }}>
-      <div style={{ width: `100%`, aspectRatio: `4 / 3`, background: `#0d0d0d`, overflow: `hidden`, flexShrink: 0 }}>
+      <div style={{ width: `100%`, aspectRatio: `1200 / 630`, background: `#0d0d0d`, overflow: `hidden`, flexShrink: 0 }}>
         {post.cover_image_url && (
           <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title}
-            style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center 15%`, display: `block`, transition: `transform 0.5s cubic-bezier(.2,.6,.2,1)`, transform: hover ? `scale(1.05)` : `scale(1)` }} />
+            style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center`, display: `block`, transition: `transform 0.5s cubic-bezier(.2,.6,.2,1)`, transform: hover ? `scale(1.05)` : `scale(1)` }} />
         )}
       </div>
       <div style={{ padding: compact ? `16px 18px` : `20px 22px`, display: `flex`, flexDirection: `column`, gap: 8, flex: 1 }}>
@@ -14841,8 +14841,8 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
 
         {/* Cover */}
         {post.cover_image_url && (
-          <div style={{ width: `100%`, aspectRatio: `4 / 3`, overflow: `hidden`, borderRadius: 16, marginBottom: 32, background: `#0d0d0d` }}>
-            <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title} style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center 15%`, display: `block` }} />
+          <div style={{ width: `100%`, aspectRatio: `1200 / 630`, overflow: `hidden`, borderRadius: 16, marginBottom: 32, background: `#0d0d0d` }}>
+            <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title} style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center`, display: `block` }} />
           </div>
         )}
 
