@@ -2193,7 +2193,7 @@ const LANGS = {
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה ←', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון ←', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו ←', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון ←", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס ביד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
-    trust: { shipping: "משלוח מ-₪27", delivery: "אספקה 3–10 ימי עסקים", secure: "תשלום מאובטח", returns: "החזרים והחלפות בקלות" },
+    trust: { shipping: "משלוח מ-₪27", delivery: "מוכן בימים ספורים", secure: "תשלום מאובטח", returns: "אחריות פגם — נתקן או נחזיר" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
     steps: ["מוצר", "עיצוב", "פרטים", "תשלום", "סיום"],
@@ -2264,7 +2264,7 @@ const LANGS = {
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "Mugs, shirts & BLOOM pet portraits — personalized with your design, hand-printed in Be'er Sheva.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
-    trust: { shipping: "Shipping from ₪27", delivery: "Delivery 3–10 business days", secure: "Secure payment", returns: "Easy returns & exchanges" },
+    trust: { shipping: "Shipping from ₪27", delivery: "Ready in a few days", secure: "Secure payment", returns: "Defect guarantee — we fix or refund" },
     badges: { bestseller: "Bestseller", new: "New" },
     reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
     steps: ["Product", "Customize", "Details", "Payment", "Done"],
@@ -2335,7 +2335,7 @@ const LANGS = {
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Кружки, футболки и портреты BLOOM — с вашим дизайном, печать вручную в Беэр-Шеве.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
-    trust: { shipping: "Доставка от ₪27", delivery: "Срок 3–10 рабочих дней", secure: "Безопасная оплата", returns: "Лёгкий возврат и обмен" },
+    trust: { shipping: "Доставка от ₪27", delivery: "Готово за несколько дней", secure: "Безопасная оплата", returns: "Гарантия при браке — починим или вернём" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
     reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
     steps: ["Товар", "Дизайн", "Детали", "Оплата", "Готово"],
@@ -2429,7 +2429,7 @@ const POLICIES = {
       { type: "h", text: "1. זכות ביטול כללית" },
       { type: "p", text: "לקוח רשאי לבטל עסקה תוך 14 ימים מיום קבלת המוצר, ובלבד שלא נעשה במוצר שימוש ולא נפגם. סעיף זה חל על פריטים מוכנים בלבד — פריטי הדפסה ובהתאמה אישית מיוצרים לפי הזמנה ואינם ניתנים לביטול לאחר אישור העיצוב." },
       { type: "h", text: "2. ⚠️ מוצרים בעיצוב אישי — אין זכות ביטול" },
-      { type: "p", text: "על פי תקנה 6(ב)(1) לחוק הגנת הצרכן, לא ניתן לבטל עסקה עבור חולצות, ספלים, מדבקות ומוצרים אחרים שעוצבו בהתאמה אישית ללקוח (Print-on-Demand). ברגע שהזמנת מוצר עם עיצוב משלך — אין ביטול ואין החזר כספי." },
+      { type: "p", text: "על פי תקנה 6(א)(2) לתקנות הגנת הצרכן (ביטול עסקה), התשע\"א-2010, לא ניתן לבטל עסקה עבור חולצות, ספלים, מדבקות ומוצרים אחרים שעוצבו בהתאמה אישית ללקוח (Print-on-Demand). ברגע שהזמנת מוצר עם עיצוב משלך — אין ביטול ואין החזר כספי." },
       { type: "h", text: "3. החזר במקרים מיוחדים" },
       { type: "p", text: "נחזיר תמורה גם למוצרים בעיצוב אישי במקרים אלה:" },
       { type: "l", items: ["פגם במוצר או באיכות ההדפסה", "טעות בהזמנה מצדנו", "מוצר שלא הגיע תוך 21 ימי עסקים"] },
@@ -2473,6 +2473,10 @@ const POLICIES = {
       { type: "p", text: `בנוסף, אנו עושים שימוש ב-Google Analytics (ניתוח תנועה ושימוש) וב-Meta/Facebook Pixel (פרסום ושיווק מותאם, לרבות רימרקטינג). שירותים אלה של Google ו-Meta מציבים עוגיות ועשויים לאסוף ולעבד מידע מחוץ לישראל (בין היתר בארה"ב). הם נטענים אך ורק לאחר מתן הסכמה ("אישור הכל") בבאנר העוגיות, וניתן לדחות אותם בכל עת באמצעות "חיוניים בלבד" בבאנר.` },
       { type: "h", text: "שיתוף מידע עם צדדים שלישיים" },
       { type: "p", text: "המידע האישי שלך (פרטי ההזמנה) ישותף אך ורק עם חברת השליחים (לאספקה), Tranzila (לתשלום), ורשויות החוק אם נדרש בצו." },
+      { type: "h", text: "עוזר ה-AI (Sfali)" },
+      { type: "p", text: "אם תבחרו לשוחח עם עוזר ה-AI שלנו (Sfali), תוכן ההודעה נשלח לספק מודל השפה Anthropic (ארה\"ב) לצורך יצירת התשובה בלבד, ונשמר אצלנו ביומן אנונימי (ללא שם/אימייל/IP מזהה) לשיפור השירות. אין צורך למסור פרטים אישיים בצ'אט." },
+      { type: "h", text: "תקופת שמירת המידע" },
+      { type: "p", text: "פרטי הזמנה ומסמכי חשבונאות נשמרים כ-7 שנים כנדרש בדין. קבצי עיצוב שהעליתם נמחקים כ-90 יום לאחר השלמת ההזמנה. ניתן לבקש מחיקה מוקדמת בכתובת hello@sfalimshop.com, בכפוף לחובות חוקיות." },
       { type: "h", text: "הזכויות שלך" },
       { type: "p", text: "יש לך זכות לעיין, לתקן, למחוק ולקבל את המידע שלך. לבקשה — שלח אימייל ל-hello@sfalimshop.com." },
       { type: "p", text: "עודכן לאחרונה: 02.06.2026" },
@@ -2515,7 +2519,7 @@ const POLICIES = {
       { type: "h", text: "1. General Cancellation Right" },
       { type: "p", text: "Customers may cancel an order within 14 days of receiving the product, provided it has not been used or damaged. This applies to ready-made items only — printed and personalized items are made to order and cannot be cancelled once the design is approved." },
       { type: "h", text: "2. ⚠️ Personalized Items — No Cancellation Right" },
-      { type: "p", text: "Per Regulation 6(b)(1), custom-designed items (Print-on-Demand t-shirts, mugs, stickers, etc.) cannot be cancelled. Once you order a product with your own design, no refund or return is available." },
+      { type: "p", text: "Per Regulation 6(a)(2) of the Consumer Protection (Cancellation of Transaction) Regulations 5771-2010, custom-designed items (Print-on-Demand t-shirts, mugs, stickers, etc.) cannot be cancelled. Once you order a product with your own design, no refund or return is available." },
       { type: "h", text: "3. Refunds in Special Cases" },
       { type: "p", text: "We will refund custom items in these cases:" },
       { type: "l", items: ["Product defect or print quality issue", "Our mistake (wrong size, wrong item)", "Item not arrived within 21 business days"] },
@@ -2559,6 +2563,10 @@ const POLICIES = {
       { type: "p", text: "In addition, we use Google Analytics (traffic and usage analytics) and the Meta/Facebook Pixel (advertising and marketing, including remarketing). These Google and Meta services set cookies and may collect and process data outside Israel (including in the United States). They load only after you give consent (\"Accept all\") in the cookie banner, and you can decline them at any time via \"Essential only\" in the banner." },
       { type: "h", text: "Third-Party Sharing" },
       { type: "p", text: "Your personal/order information is shared only with: the shipping company (delivery), Tranzila (payment), and authorities if legally required." },
+      { type: "h", text: "AI Assistant (Sfali)" },
+      { type: "p", text: "If you choose to chat with our AI assistant (Sfali), your message text is sent to our language-model provider Anthropic (USA) solely to generate the reply, and stored by us in an anonymized log (no name/email/identifying IP) to improve the service. You do not need to share personal details in the chat." },
+      { type: "h", text: "Data Retention" },
+      { type: "p", text: "Order and accounting records are kept for ~7 years as required by law. Design files you upload are deleted ~90 days after the order is completed. You may request earlier deletion at hello@sfalimshop.com, subject to legal obligations." },
       { type: "h", text: "Your Rights" },
       { type: "p", text: "You have the right to access, correct, delete, and receive your data. Email hello@sfalimshop.com to request." },
       { type: "p", text: "Last updated: June 2, 2026" },
@@ -2601,7 +2609,7 @@ const POLICIES = {
       { type: "h", text: "1. Право отмены" },
       { type: "p", text: "Клиент имеет право отменить заказ в течение 14 дней с момента получения товара, при условии что товар не использовался и не повреждён. Это касается только готовых изделий — печатные и персонализированные изделия изготавливаются под заказ и не подлежат отмене после утверждения дизайна." },
       { type: "h", text: "2. ⚠️ Персонализированные товары — без права отмены" },
-      { type: "p", text: "Согласно правилу 6(б)(1), персонализированные товары (футболки, кружки, наклейки с индивидуальным дизайном) не подлежат отмене. После заказа товара с вашим дизайном — возврат невозможен." },
+      { type: "p", text: "Согласно правилу 6(а)(2) Правил защиты потребителя (отмена сделки) 5771-2010, персонализированные товары (футболки, кружки, наклейки с индивидуальным дизайном) не подлежат отмене. После заказа товара с вашим дизайном — возврат невозможен." },
       { type: "h", text: "3. Возврат в особых случаях" },
       { type: "p", text: "Мы вернём деньги за персонализированные товары в случаях:" },
       { type: "l", items: ["Дефект товара или качества печати", "Ошибка с нашей стороны (неверный размер, не тот товар)", "Товар не прибыл в течение 21 рабочего дня"] },
@@ -2645,6 +2653,10 @@ const POLICIES = {
       { type: "p", text: "Кроме того, мы используем Google Analytics (аналитика трафика и использования) и Meta/Facebook Pixel (реклама и маркетинг, включая ремаркетинг). Эти сервисы Google и Meta устанавливают cookie и могут собирать и обрабатывать данные за пределами Израиля (в том числе в США). Они загружаются только после вашего согласия («Принять всё») в баннере cookie, и вы можете отказаться от них в любой момент через «Только необходимые» в баннере." },
       { type: "h", text: "Передача третьим лицам" },
       { type: "p", text: "Ваши личные данные (данные заказа) передаются только: курьерской службе (доставка), Tranzila (оплата) и властям при законном требовании." },
+      { type: "h", text: "AI-ассистент (Сфали)" },
+      { type: "p", text: "Если вы решите пообщаться с нашим AI-ассистентом (Сфали), текст сообщения отправляется провайдеру языковой модели Anthropic (США) только для формирования ответа и сохраняется у нас в анонимном журнале (без имени/email/идентифицирующего IP) для улучшения сервиса. Сообщать личные данные в чате не нужно." },
+      { type: "h", text: "Срок хранения данных" },
+      { type: "p", text: "Данные заказа и бухгалтерские документы хранятся ~7 лет согласно закону. Загруженные вами файлы дизайна удаляются ~90 дней после выполнения заказа. Вы можете запросить досрочное удаление по адресу hello@sfalimshop.com с учётом юридических обязательств." },
       { type: "h", text: "Ваши права" },
       { type: "p", text: "Вы имеете право на доступ, исправление, удаление и получение ваших данных. Запросы на hello@sfalimshop.com." },
       { type: "p", text: "Последнее обновление: 02.06.2026" },
@@ -6038,6 +6050,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // (pay-first, no upload) instead of the normal upload customizer.
   const [commissionMode, setCommissionMode] = useState(false);
   const [commissionType, setCommissionType] = useState(`pet`); // 'pet' | 'custom'
+  const [commissionAck, setCommissionAck] = useState(false); // required "made-to-order, non-refundable after approval" acknowledgement
   const commissionRef = useRef(null);
   // When a shirt is picked, scroll the "upload vs draw-from-photos" choice into
   // view (it sits below the product list) so it's noticed — especially on mobile.
@@ -7136,11 +7149,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>📁 {t.commission.choiceUpload}</div>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceUploadSub}</div>
                   </button>
-                  <button onClick={() => { setCommissionMode(true); setCommissionType(`pet`); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `pet`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `pet`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                  <button onClick={() => { setCommissionMode(true); setCommissionType(`pet`); setCommissionAck(false); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `pet`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `pet`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>🐾 {t.commission.choiceCommission}</div>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCommissionSub}</div>
                   </button>
-                  <button onClick={() => { setCommissionMode(true); setCommissionType(`custom`); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `custom`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `custom`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                  <button onClick={() => { setCommissionMode(true); setCommissionType(`custom`); setCommissionAck(false); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `custom`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `custom`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>✏️ {t.commission.choiceCustom}</div>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCustomSub}</div>
                   </button>
@@ -7168,12 +7181,16 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                       <div>⏱️ {t.commission.microTime}</div>
                       <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
                     </div>
+                    <label style={{ display: `flex`, alignItems: `flex-start`, gap: 8, marginTop: 12, cursor: `pointer`, color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5 }}>
+                      <input type="checkbox" checked={commissionAck} onChange={(e) => setCommissionAck(e.target.checked)} style={{ marginTop: 2, accentColor: COLORS.accent, width: 16, height: 16, flexShrink: 0, cursor: `pointer` }} />
+                      <span>{lang === `he` ? `אני מבין/ה שזו עבודה בהזמנה אישית — נתקן עד שאהיה מרוצה, אך אין החזר כספי לאחר אישור העיצוב.` : lang === `ru` ? `Я понимаю, что это изготовление под заказ — правим, пока не буду доволен/льна, но возврата нет после утверждения дизайна.` : `I understand this is made to order — we revise until I'm happy, but it's non-refundable once I approve the design.`}</span>
+                    </label>
                   </div>
                 )}
               </div>
             )}
             {commissionMode && BLOOM_COMMISSION_ENABLED ? (
-              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setSelectedProduct(null); setStep(3); } }} disabled={!selectedProduct || !selectedVariant} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{commissionPrice(commissionType, selectedProduct)}</button>
+              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setCommissionAck(false); setSelectedProduct(null); setStep(3); } }} disabled={!selectedProduct || !selectedVariant || !commissionAck} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: (!selectedProduct || !selectedVariant || !commissionAck) ? `not-allowed` : `pointer`, opacity: (!selectedProduct || !selectedVariant || !commissionAck) ? 0.55 : 1, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{commissionPrice(commissionType, selectedProduct)}</button>
             ) : (
               <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>{t.product.continue}</button>
             )}
@@ -7285,7 +7302,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                             </div>
                           )}
                         </div>
-                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "גודל" : "Size"}</label>
+                        <label style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{lang === "he" ? "גודל" : lang === "ru" ? "Размер" : "Size"}</label>
                         <div style={{ display: "flex", gap: 6 }}>
                           {(SIZE_OPTIONS[product.id] || SIZE_OPTIONS.tshirt).map(sz => (
                             <button key={sz.id} onClick={() => handleSelectSize(sz.id)}
@@ -11835,7 +11852,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "הוסף לסל",
       madeToOrder: "נוצר בהזמנה",
       dispatchTime: "זמן ייצור 3-5 ימי עסקים",
-      shipFlat: "משלוח מ-₪27 · או מסירה אישית בבאר שבע · הכנה ומשלוח 3–7 ימי עסקים",
+      shipFlat: "משלוח מ-₪27 · או מסירה אישית בבאר שבע",
       petNameTitle: "התאמה אישית",
       petNameLabel: "שם חיית המחמד (אופציונלי)",
       petNamePlaceholder: "למשל: רקסי",
@@ -11883,7 +11900,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "Add to cart",
       madeToOrder: "Made to order",
       dispatchTime: "Production 3-5 business days",
-      shipFlat: "Shipping from ₪27 · or personal handoff in Be'er Sheva · Made & shipped in 3–7 business days",
+      shipFlat: "Shipping from ₪27 · or personal handoff in Be'er Sheva",
       petNameTitle: "Personalization",
       petNameLabel: "Pet name (optional)",
       petNamePlaceholder: "e.g. Rex",
@@ -11931,7 +11948,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       packAddToCart: "В корзину",
       madeToOrder: "Сделано на заказ",
       dispatchTime: "Производство 3-5 рабочих дней",
-      shipFlat: "Доставка от ₪27 · или личная передача в Беэр-Шеве · Изготовление и доставка 3–7 рабочих дней",
+      shipFlat: "Доставка от ₪27 · или личная передача в Беэр-Шеве",
       petNameTitle: "Персонализация",
       petNameLabel: "Имя питомца (необязательно)",
       petNamePlaceholder: "напр. Рекс",
@@ -14195,9 +14212,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `כמה זמן לוקח לקבל את ההזמנה?`, en: `How long does it take to get my order?`, ru: `Сколько времени занимает получение заказа?` },
         a: {
-          he: `כל פריט מודפס במיוחד עבורכם, אז אנחנו מכינים ושולחים תוך 2–4 ימי עסקים. המשלוח מגיע עם UPS תוך 2–4 ימי עסקים נוספים — סה״כ כ-4–8 ימי עסקים מההזמנה ועד הדלת, עם מספר מעקב.`,
-          en: `Every item is printed especially for you, so we prepare and ship within 2–4 business days. Delivery is by UPS within another 2–4 business days — about 4–8 business days in total from order to doorstep, with a tracking number.`,
-          ru: `Каждое изделие печатается специально для вас, поэтому мы изготавливаем и отправляем его в течение 2–4 рабочих дней. Доставка осуществляется службой UPS ещё за 2–4 рабочих дня — всего около 4–8 рабочих дней от заказа до двери, с номером для отслеживания.`,
+          he: `כל פריט מודפס במיוחד עבורכם: ספלים מוכנים תוך 2–3 ימי עסקים, חולצות מודפסות תוך 5–7 ימי עסקים. למשלוח מוסיפים את זמן ה-UPS (כ-2–4 ימי עסקים), או בוחרים מסירה אישית בבאר שבע ללא עלות. כל חבילה מגיעה עם מספר מעקב.`,
+          en: `Every item is printed especially for you: mugs are ready in 2–3 business days, printed shirts in 5–7 business days. Add UPS transit on top (about 2–4 business days), or choose personal handoff in Be'er Sheva at no cost. Every package comes with a tracking number.`,
+          ru: `Каждое изделие печатается специально для вас: кружки готовы за 2–3 рабочих дня, печатные футболки — за 5–7 рабочих дней. К этому добавляется доставка UPS (около 2–4 рабочих дней), или выберите личную передачу в Беэр-Шеве без оплаты. Каждая посылка идёт с номером отслеживания.`,
         },
       },
       {
@@ -14277,9 +14294,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `מה מדיניות הביטולים וההחזרות?`, en: `What is your cancellation and return policy?`, ru: `Какова политика отмены и возврата?` },
         a: {
-          he: `מוצרי BLOOM רגילים ניתנים לביטול/החזרה בהתאם לחוק הגנת הצרכן. מוצרים בעיצוב אישי (תמונה שלכם) מיוצרים במיוחד עבורכם ולכן אינם ניתנים להחזרה — אלא במקרה של פגם בהדפסה, שאותו נתקן או נחליף.`,
-          en: `Standard BLOOM products can be cancelled/returned in accordance with the Israeli Consumer Protection Law. Custom-design products (made from your photo) are produced especially for you and therefore cannot be returned — except in the case of a printing defect, which we will fix or replace.`,
-          ru: `Стандартные товары BLOOM можно отменить/вернуть в соответствии с израильским Законом о защите прав потребителей. Товары с индивидуальным дизайном (по вашему фото) изготавливаются специально для вас и поэтому возврату не подлежат — за исключением случая дефекта печати, который мы исправим или заменим.`,
+          he: `כל המוצרים שלנו מודפסים לפי הזמנה (Print-on-Demand) — כולל דמויות BLOOM ומוצרים בעיצוב אישי — ולכן אינם ניתנים לביטול או החזר כספי לאחר תחילת ההפקה. במקרה של פגם בהדפסה או טעות מצדנו נתקן, נחליף או נחזיר את הכסף. פריטים מוכנים מראש (ככל שיוצעו) ניתנים לביטול תוך 14 יום לפי חוק הגנת הצרכן.`,
+          en: `All our products are printed to order (Print-on-Demand) — including BLOOM characters and custom-design items — so they cannot be cancelled or refunded once production begins. If there's a printing defect or a mistake on our side, we'll fix, replace, or refund. Any ready-made items (if offered) can be cancelled within 14 days under the Consumer Protection Law.`,
+          ru: `Все наши товары печатаются под заказ (Print-on-Demand) — включая персонажей BLOOM и товары с индивидуальным дизайном — поэтому после начала производства они не подлежат отмене или возврату. При дефекте печати или ошибке с нашей стороны мы починим, заменим или вернём деньги. Готовые изделия (если будут предлагаться) можно отменить в течение 14 дней по Закону о защите потребителя.`,
         },
       },
       {

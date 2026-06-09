@@ -22,7 +22,7 @@ const CORS_BASE: Record<string, string> = {
 function corsFor(req: Request): Record<string, string> {
   const o = req.headers.get("origin") || "";
   const ok = /^https:\/\/(www\.)?sfalimshop\.com$/.test(o)
-    || /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o)
+    || /^https:\/\/sfalimshop[a-z0-9-]*\.vercel\.app$/.test(o)
     || /^http:\/\/localhost(:\d+)?$/.test(o);
   return { ...CORS_BASE, "Access-Control-Allow-Origin": ok ? o : "https://www.sfalimshop.com" };
 }

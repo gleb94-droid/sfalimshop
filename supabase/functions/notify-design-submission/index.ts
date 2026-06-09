@@ -149,7 +149,7 @@ serve(async (req) => {
     const { data: orders, error: dbError } = await supabase
       .from("orders")
       .select(
-        "product, notes, customer_name, customer_email, customer_phone, design_url, mockup_url, requires_design_approval, created_at",
+        "product, notes, customer_name, customer_email, customer_phone, design_url, mockup_url, requires_design_approval, design_notified_at, created_at",
       )
       .eq("order_group", orderGroup)
       .order("created_at", { ascending: true });
@@ -171,6 +171,18 @@ serve(async (req) => {
     }
 
     const first = designOrders[0] as any;
+
+    // Send-once guard: an admin alert is sent at most ONCE per order_group.
+    // The endpoint is client-callable and the order_group UUID is client-readable,
+    // so this kills the replay/spam (inbox/Resend-quota DoS) vector without a
+    // client-held secret and without breaking the normal one-shot submit flow.
+    if (first.design_notified_at) {
+      return new Response(
+        JSON.stringify({ skipped: "already_notified" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const displayOrderId = `SXP-${String(orderGroup).slice(-8).toUpperCase()}`;
     const timestamp = new Date().toLocaleString("he-IL", {
       timeZone: "Asia/Jerusalem",
@@ -212,6 +224,12 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Mark sent so any re-call for this order_group is ignored (send-once).
+    await supabase
+      .from("orders")
+      .update({ design_notified_at: new Date().toISOString() })
+      .eq("order_group", orderGroup);
 
     return new Response(
       JSON.stringify({ success: true, id: result.id, designOrders: designOrders.length }),
