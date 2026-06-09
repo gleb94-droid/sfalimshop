@@ -196,6 +196,139 @@ function WhatsAppFab({ lang }) {
   );
 }
 
+// ============ Sfali — the on-site AI assistant widget ============
+// A friendly BLOOM-pup helper. FAB (above the WhatsApp button) → chat panel.
+// Trilingual, RTL-aware, portaled to <body> so the a11y CSS zoom on #root can't
+// scale/clip the fixed UI. Talks to the `assistant-chat` edge function, which is
+// grounded in the real shop facts (it can't invent prices). Gated by
+// ASSISTANT_ENABLED + hidden in the public preview; the FAB hides while another
+// overlay (cart/modal) is open.
+function AssistantWidget({ lang, page, setPage, hideFab }) {
+  const isRTL = lang === `he`;
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState(``);
+  const [messages, setMessages] = useState([]); // {role:'user'|'assistant', content}
+  const [loading, setLoading] = useState(false);
+  const [nudge, setNudge] = useState(false); // one-time proactive bubble on /mugs · /pets
+  const scrollRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const t = {
+    he: { name: `ספלי`, role: `העוזר של ספלים שופ`, greet: `היי, אני ספלי 🐶 איך אפשר לעזור? אפשר לשאול על מחירים, משלוח, או לבחור ספל או דמות BLOOM 🐾`, ph: `כתבו הודעה…`, send: `שליחה`, open: `שוחחו עם ספלי`, close: `סגירה`, mugs: `ספלים`, gallery: `אוסף BLOOM`, nudge: `לעזור לבחור מתנה? 🎁`, waGreet: `היי! יש לי שאלה 🐾`, chips: [`איך מזמינים?`, `מחירים ומשלוח`, `🎁 רעיון למתנה`, `עיצוב אישי`] },
+    en: { name: `Sfali`, role: `Sfalim Shop helper`, greet: `Hi, I'm Sfali 🐶 How can I help? Ask me about prices, shipping, or let's pick a mug or a BLOOM character 🐾`, ph: `Type a message…`, send: `Send`, open: `Chat with Sfali`, close: `Close`, mugs: `Mugs`, gallery: `BLOOM gallery`, nudge: `Help choosing a gift? 🎁`, waGreet: `Hi! I have a question 🐾`, chips: [`How to order?`, `Prices & shipping`, `🎁 Gift idea`, `Custom design`] },
+    ru: { name: `Сафали`, role: `помощник Sfalim Shop`, greet: `Привет, я Сафали 🐶 Чем помочь? Спросите про цены, доставку или давайте выберем кружку или персонажа BLOOM 🐾`, ph: `Напишите сообщение…`, send: `Отпр.`, open: `Чат со Сафали`, close: `Закрыть`, mugs: `Кружки`, gallery: `Каталог BLOOM`, nudge: `Помочь выбрать подарок? 🎁`, waGreet: `Здравствуйте! У меня вопрос 🐾`, chips: [`Как заказать?`, `Цены и доставка`, `🎁 Идея подарка`, `Свой дизайн`] },
+  }[lang] || {};
+
+  useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, loading, open]);
+  useEffect(() => { if (open && inputRef.current) inputRef.current.focus(); }, [open]);
+
+  // Proactive nudge: a one-time (per session), dismissible bubble on the mug / BLOOM pages.
+  useEffect(() => {
+    if (open || hideFab || (page !== `mugs` && page !== `pets`)) return;
+    try { if (sessionStorage.getItem(`sfali_nudge`)) return; } catch (_) {}
+    const id = setTimeout(() => setNudge(true), 6000);
+    return () => clearTimeout(id);
+  }, [page, open, hideFab]);
+  const dismissNudge = () => { setNudge(false); try { sessionStorage.setItem(`sfali_nudge`, `1`); } catch (_) {} };
+
+  const fallback = lang === `he` ? `אני כאן 🧡 לכל שאלה ספציפית או הזמנה כתבו לנו בוואטסאפ ונחזור מהר.` : lang === `ru` ? `Я рядом 🧡 По любому конкретному вопросу или заказу напишите в WhatsApp.` : `I'm here 🧡 For anything specific or to order, message us on WhatsApp.`;
+  const waValid = /^\d{6,15}$/.test(WHATSAPP_NUMBER || ``);
+  const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t.waGreet || ``)}`;
+  const actionBtn = { background: `transparent`, border: `1px solid ${COLORS.border}`, color: COLORS.gray, borderRadius: 999, padding: `6px 11px`, fontSize: 12, fontWeight: 600, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, display: `inline-flex`, alignItems: `center`, gap: 4, textDecoration: `none` };
+
+  const send = async (text) => {
+    const msg = (text != null ? text : input).trim();
+    if (!msg || loading) return;
+    setInput(``);
+    const next = [...messages, { role: `user`, content: msg }].slice(-12);
+    setMessages(next);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(`assistant-chat`, { body: { messages: next, lang, page } });
+      const reply = (data && data.reply) || (error ? fallback : fallback);
+      setMessages(m => [...m, { role: `assistant`, content: reply }]);
+    } catch (_) {
+      setMessages(m => [...m, { role: `assistant`, content: fallback }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (typeof document === `undefined`) return null;
+
+  const avatar = (size) => (
+    <div style={{ width: size, height: size, borderRadius: `50%`, background: `linear-gradient(135deg, #FF6B35, #C0501A)`, display: `flex`, alignItems: `center`, justifyContent: `center`, fontSize: size * 0.56, flexShrink: 0 }} aria-hidden="true">🐶</div>
+  );
+
+  const bubbleBot = { background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, borderEndStartRadius: 4, padding: `9px 12px`, color: COLORS.white, fontSize: 13.5, lineHeight: 1.55, maxWidth: `80%`, whiteSpace: `pre-wrap` };
+
+  const fab = !hideFab && createPortal(
+    <button type="button" onClick={() => setOpen(o => !o)} aria-label={open ? t.close : t.open} title={open ? t.close : t.open}
+      style={{ position: `fixed`, bottom: 86, insetInlineEnd: 24, zIndex: 941, width: 52, height: 52, borderRadius: `50%`, background: `linear-gradient(135deg, #FF6B35, #C0501A)`, border: `none`, display: `flex`, alignItems: `center`, justifyContent: `center`, boxShadow: `0 4px 20px rgba(255,107,53,0.5)`, cursor: `pointer`, transition: `transform 0.15s` }}
+      onMouseOver={e => { e.currentTarget.style.transform = `scale(1.1)`; }}
+      onMouseOut={e => { e.currentTarget.style.transform = `scale(1)`; }}>
+      <span style={{ fontSize: 26 }} aria-hidden="true">{open ? `✕` : `🐶`}</span>
+    </button>,
+    document.body
+  );
+
+  const panel = open && createPortal(
+    <div dir={isRTL ? `rtl` : `ltr`} role="dialog" aria-label={t.name}
+      style={{ position: `fixed`, bottom: 150, insetInlineEnd: 24, zIndex: 941, width: `min(360px, calc(100vw - 32px))`, height: `min(70vh, 560px)`, display: `flex`, flexDirection: `column`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: `0 18px 50px rgba(0,0,0,0.55)`, overflow: `hidden`, fontFamily: `'Heebo',sans-serif` }}>
+      <div style={{ display: `flex`, alignItems: `center`, gap: 10, padding: `12px 14px`, background: `linear-gradient(135deg, rgba(255,107,53,0.16), rgba(255,107,53,0.04))`, borderBottom: `1px solid ${COLORS.border}` }}>
+        {avatar(38)}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{t.name}</div>
+          <div style={{ color: COLORS.gray, fontSize: 11.5 }}>{t.role}</div>
+        </div>
+        <button type="button" onClick={() => setOpen(false)} aria-label={t.close} style={{ background: `transparent`, border: `none`, color: COLORS.gray, cursor: `pointer`, fontSize: 20, lineHeight: 1, padding: 4 }}>✕</button>
+      </div>
+      <div ref={scrollRef} style={{ flex: 1, overflowY: `auto`, padding: 14, display: `flex`, flexDirection: `column`, gap: 10 }}>
+        <div style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>{avatar(26)}<div style={bubbleBot}>{t.greet}</div></div>
+        {messages.map((m, i) => (
+          m.role === `user`
+            ? <div key={i} style={{ alignSelf: `flex-end`, background: COLORS.accentBtn, color: `#fff`, borderRadius: 14, borderEndEndRadius: 4, padding: `9px 12px`, fontSize: 13.5, lineHeight: 1.55, maxWidth: `82%`, whiteSpace: `pre-wrap` }}>{m.content}</div>
+            : <div key={i} style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>{avatar(26)}<div style={bubbleBot}>{m.content}</div></div>
+        ))}
+        {loading && <div style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>{avatar(26)}<div style={{ ...bubbleBot, color: COLORS.gray, letterSpacing: 2 }}>···</div></div>}
+        {messages.length === 0 && !loading && (
+          <div style={{ display: `flex`, flexWrap: `wrap`, gap: 7, marginTop: 4 }}>
+            {(t.chips || []).map((c, i) => (
+              <button key={i} type="button" onClick={() => send(c)} style={{ background: `transparent`, border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 999, padding: `6px 12px`, fontSize: 12.5, fontWeight: 600, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>{c}</button>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Quick actions — always available; route to the right place (concierge). */}
+      <div style={{ display: `flex`, gap: 6, padding: `8px 12px 0`, flexWrap: `wrap` }}>
+        <button type="button" onClick={() => { setOpen(false); if (setPage) setPage(`mugs`); }} style={actionBtn}>☕ {t.mugs}</button>
+        <button type="button" onClick={() => { setOpen(false); if (setPage) setPage(`pets`); }} style={actionBtn}>🐾 {t.gallery}</button>
+        {waValid && <a href={waLink} target="_blank" rel="noopener noreferrer" style={actionBtn}>💬 WhatsApp</a>}
+      </div>
+      <form onSubmit={e => { e.preventDefault(); send(); }} style={{ display: `flex`, gap: 8, padding: `10px 12px`, borderTop: `1px solid ${COLORS.border}`, background: COLORS.bgCard }}>
+        <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder={t.ph} aria-label={t.ph}
+          style={{ flex: 1, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `10px 14px`, color: COLORS.white, fontSize: 13.5, fontFamily: `'Heebo',sans-serif` }} />
+        <button type="submit" disabled={loading || !input.trim()} aria-label={t.send}
+          style={{ flexShrink: 0, width: 40, height: 40, borderRadius: `50%`, background: COLORS.accentBtn, border: `none`, color: `#fff`, cursor: loading || !input.trim() ? `not-allowed` : `pointer`, opacity: loading || !input.trim() ? 0.5 : 1, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+          <span aria-hidden="true" style={{ fontSize: 16, transform: isRTL ? `scaleX(-1)` : `none` }}>➤</span>
+        </button>
+      </form>
+    </div>,
+    document.body
+  );
+
+  // Proactive nudge bubble — sits above the FAB, opens the chat on click. One-time per session.
+  const nudgeBubble = nudge && !open && !hideFab && createPortal(
+    <div dir={isRTL ? `rtl` : `ltr`} style={{ position: `fixed`, bottom: 146, insetInlineEnd: 18, zIndex: 941, maxWidth: 230, display: `flex`, alignItems: `center`, gap: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.accent}`, borderRadius: 14, padding: `9px 12px`, boxShadow: `0 8px 24px rgba(0,0,0,0.45)` }}>
+      <button type="button" onClick={() => { dismissNudge(); setOpen(true); }} style={{ background: `transparent`, border: `none`, color: COLORS.white, fontSize: 13, fontWeight: 600, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, textAlign: `start`, padding: 0, lineHeight: 1.4 }}>{t.nudge}</button>
+      <button type="button" onClick={dismissNudge} aria-label={t.close} style={{ background: `transparent`, border: `none`, color: COLORS.gray, fontSize: 15, cursor: `pointer`, lineHeight: 1, padding: 2, flexShrink: 0 }}>✕</button>
+    </div>,
+    document.body
+  );
+
+  return (<>{fab}{nudgeBubble}{panel}</>);
+}
+
 // Compact trust strip — "Ships anywhere in Israel" always; "Secure payment"
 // ONLY when payments are live (PAYMENTS_ENABLED), so it never claims secure
 // checkout while payments are off. Subtle, on-brand (faint orange tint).
@@ -1758,6 +1891,11 @@ const ANALYTICS = {
 // sessionStorage flag). ?staff=1 only auto-opens that password field; it no
 // longer bypasses on its own.
 const MAINTENANCE_MODE = true;
+// Sfali AI assistant widget. Default OFF — flip to true once the `assistant-chat`
+// edge function is deployed AND the ANTHROPIC_API_KEY secret is set in Supabase.
+// Hidden in the public preview regardless; the edge fn has its own kill-switch
+// (ASSISTANT_ENABLED="false" secret) for an instant server-side off.
+const ASSISTANT_ENABLED = true;
 
 // 🔒 MUG STUDIO ACCESS — when false, the #mug-studio route is removed from
 // VALID_PAGES (so the hash router falls back to 'home'), the render block
@@ -8708,7 +8846,7 @@ function HomeMugsBanner({ lang, setPage }) {
   const T = {
     he: { eyebrow: `הליבה שלנו`, heading: `הספלים שלנו`, sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים.`, cta: `כל הספלים` },
     en: { eyebrow: `Our core`, heading: `Our Mugs`, sub: `"Sfalim" means mugs — and it's what we do best. A BLOOM portrait, your own design, or a designed mug for weddings & events.`, cta: `All mugs` },
-    ru: { eyebrow: `Наша основа`, heading: `Наши кружки`, sub: `«Сфалим» значит «кружки» — и это то, что мы делаем лучше всего. Портрет BLOOM, свой дизайн или дизайнерская кружка на свадьбу и события.`, cta: `Все кружки` },
+    ru: { eyebrow: `Наша основа`, heading: `Наши кружки`, sub: `«Сафалим» значит «кружки» — и это то, что мы делаем лучше всего. Портрет BLOOM, свой дизайн или дизайнерская кружка на свадьбу и события.`, cta: `Все кружки` },
   }[lang] || { eyebrow: `הליבה שלנו`, heading: `הספלים שלנו`, sub: ``, cta: `כל הספלים` };
 
   return (
@@ -8846,7 +8984,7 @@ function MugsPage({ lang, setPage }) {
     ru: {
       eyebrow: `Sfalim Shop`,
       heading: `Наши кружки`,
-      sub: `«Сфалим» и означает «кружки» — и это то, что мы делаем лучше всего. Качественная керамическая кружка с дизайном, который вам нравится, напечатана вручную с любовью в Беэр-Шеве.`,
+      sub: `«Сафалим» и означает «кружки» — и это то, что мы делаем лучше всего. Качественная керамическая кружка с дизайном, который вам нравится, напечатана вручную с любовью в Беэр-Шеве.`,
       badges: [`Керамика 11oz`, `Можно в посудомойку`, `Сублимационная печать`, `Печать вручную в Беэр-Шеве`],
       giftStrip: [`🎁 Идеальный подарок`, `⚡ Готово за 2–3 дня`, `✍️ Добавьте имя или дату`],
       bloomTitle: `Любой персонаж BLOOM — и на кружке`,
@@ -10928,6 +11066,7 @@ export default function App() {
             <div aria-live="polite" role="status" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap", border: 0 }}>{routeAnnounce}</div>
             <AccessibilityMenu lang={lang} cartOpen={cartOpen} overlayOpen={overlayOpen} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />
             {!overlayOpen && <WhatsAppFab lang={lang} />}
+            {ASSISTANT_ENABLED && !publicPreview && <AssistantWidget lang={lang} page={page} setPage={setPage} hideFab={overlayOpen} />}
             <header>
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
