@@ -8903,10 +8903,11 @@ function MugsPage({ lang, setPage }) {
           </div>
           <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(4, 1fr)`, gap: isMobile ? 12 : 16, marginBottom: 24 }}>
             {mugDesigns.map((d) => (
-              <button key={d.slug} type="button" onClick={() => setPage(`pets`)} aria-label={d[`name_${lang}`] || d.name_he}
-                style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: 10, cursor: `pointer`, transition: `border-color 0.2s, transform 0.2s`, overflow: `hidden` }}
+              <button key={d.slug} type="button" onClick={() => setPage(`pets`)} aria-label={`${d[`name_${lang}`] || d.name_he} · ₪59`}
+                style={{ position: `relative`, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: 10, cursor: `pointer`, transition: `border-color 0.2s, transform 0.2s`, overflow: `hidden` }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-4px)`; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
+                <span aria-hidden="true" style={{ position: `absolute`, top: 16, insetInlineStart: 16, zIndex: 2, background: COLORS.accentBtn, color: `#fff`, fontFamily: `'Heebo',sans-serif`, fontSize: 11, fontWeight: 700, padding: `2px 8px`, borderRadius: 6, boxShadow: `0 2px 8px rgba(0,0,0,0.35)` }}>₪59</span>
                 <div style={{ width: `100%`, aspectRatio: `1 / 1`, borderRadius: 10, overflow: `hidden`, background: COLORS.bg }}>
                   <SmartImage src={transformImage(d.mockup_mug_url, { width: 420 })} alt="" loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
                 </div>
@@ -9952,16 +9953,20 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               <span style={{ color: COLORS.accent, fontWeight: 700, fontSize: 22, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>{`₪${total}`}</span>
             </div>
             <div style={{ color: COLORS.gray, fontSize: 11, textAlign: lang === "he" ? "right" : "left", marginBottom: 15 }}>{lang === "he" ? "+ משלוח מ-₪27 · איסוף עצמי בבאר שבע ללא עלות" : lang === "ru" ? "+ доставка от ₪27 · самовывоз в Беэр-Шеве без доплаты" : "+ shipping from ₪27 · pickup in Be'er Sheva at no charge"}</div>
-            {/* Mug pair/set upsell — full price per mug, NO discount (the server re-prices
-                each line from the catalog, so a client discount wouldn't survive). Shows only
-                when 1–2 mugs are in the cart; lifts average order value via quantity. */}
+            {/* Mug upsell — full price per mug, NO discount (the server re-prices each line
+                from the catalog, so a client discount wouldn't survive). Shows for ANY cart with
+                0–2 mugs: cross-sells the cheap, giftable mug when there's none, or nudges a
+                pair/set when there are 1–2. Lifts average order value via quantity. */}
             {(() => {
               const mugQty = cart.filter(it => it.productId === `mug`).reduce((n, it) => n + (Number(it.qty) || 1), 0);
-              if (mugQty < 1 || mugQty >= 3) return null;
+              if (mugQty >= 3) return null;
+              const upsellMsg = mugQty === 0
+                ? (lang === `he` ? `הוסיפו ספל — מתנה מושלמת מ-₪59 🎁` : lang === `ru` ? `Добавьте кружку — идеальный подарок от ₪59 🎁` : `Add a mug — a perfect gift from ₪59 🎁`)
+                : (lang === `he` ? `ספלים מושלמים כזוג או כסט 🎁` : lang === `ru` ? `Кружки идеальны парой или набором 🎁` : `Mugs are perfect as a pair or a set 🎁`);
               return (
                 <div style={{ display: `flex`, alignItems: `center`, gap: 8, marginBottom: 13, padding: `9px 12px`, background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 9, color: COLORS.gray, fontSize: 12, lineHeight: 1.5, fontFamily: `'Heebo',sans-serif` }}>
                   <span aria-hidden="true" style={{ fontSize: 15 }}>☕</span>
-                  <span style={{ flex: 1 }}>{lang === `he` ? `ספלים מושלמים כזוג או כסט 🎁` : lang === `ru` ? `Кружки идеальны парой или набором 🎁` : `Mugs are perfect as a pair or a set 🎁`}</span>
+                  <span style={{ flex: 1 }}>{upsellMsg}</span>
                   {onAddMore && (
                     <button type="button" onClick={onAddMore} aria-label={lang === `he` ? `הוסיפו ספל נוסף` : lang === `ru` ? `Добавить ещё кружку` : `Add another mug`} style={{ flexShrink: 0, background: `transparent`, border: `1px solid ${COLORS.accent}`, color: COLORS.accent, borderRadius: 8, padding: `5px 10px`, fontSize: 11.5, fontWeight: 700, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, whiteSpace: `nowrap` }}>{lang === `he` ? `+ עוד ספל` : lang === `ru` ? `+ кружку` : `+ Add mug`}</button>
                   )}
@@ -12643,7 +12648,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 — now they're a free gift only, and customers who want stickers
                 buy a bundled pack from the PetsPage packs section instead. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
-              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} />
+              <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
               <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
             </div>
             {/* Gift framing — mugs are the #1 gift item; reinforce it right where the mug is chosen. */}
@@ -12711,7 +12716,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
 }
 
 // ============ Product option button inside modal ============
-function ProductOption({ label, price, onClick, disabled, selected }) {
+function ProductOption({ label, price, onClick, disabled, selected, badge }) {
   const [hovered, setHovered] = useState(false);
   const active = !disabled && (selected || hovered);
   return (
@@ -12735,7 +12740,10 @@ function ProductOption({ label, price, onClick, disabled, selected }) {
         width: "100%",
         textAlign: "inherit",
       }}>
-      <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <span style={{ color: active ? COLORS.accent : COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 15, fontWeight: 600, transition: "color 0.2s" }}>{label}</span>
+        {badge && <span style={{ background: COLORS.accentBtn, color: "#fff", fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "2px 7px", borderRadius: 4, whiteSpace: "nowrap" }}>{badge}</span>}
+      </span>
       <span style={{ color: COLORS.accent, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontSize: 24, fontWeight: 800, letterSpacing: "0.01em" }}>₪{price}</span>
     </button>
   );
@@ -13563,7 +13571,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                   />
                 )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
-                  <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} />
+                  <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
                   <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
                 </div>
                 {previewProduct && (
