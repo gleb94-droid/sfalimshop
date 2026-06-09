@@ -217,7 +217,7 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
   const t = {
     he: { name: `ספלי`, role: `העוזר של ספלים שופ`, greet: `היי, אני ספלי 🐶 איך אפשר לעזור? אפשר לשאול על מחירים, משלוח, או לבחור ספל או דמות BLOOM 🐾`, ph: `כתבו הודעה…`, send: `שליחה`, open: `שוחחו עם ספלי`, close: `סגירה`, mugs: `ספלים`, gallery: `אוסף BLOOM`, nudge: `לעזור לבחור מתנה? 🎁`, waGreet: `היי! יש לי שאלה 🐾`, chips: [`איך מזמינים?`, `מחירים ומשלוח`, `🎁 רעיון למתנה`, `עיצוב אישי`] },
     en: { name: `Sfali`, role: `Sfalim Shop helper`, greet: `Hi, I'm Sfali 🐶 How can I help? Ask me about prices, shipping, or let's pick a mug or a BLOOM character 🐾`, ph: `Type a message…`, send: `Send`, open: `Chat with Sfali`, close: `Close`, mugs: `Mugs`, gallery: `BLOOM gallery`, nudge: `Help choosing a gift? 🎁`, waGreet: `Hi! I have a question 🐾`, chips: [`How to order?`, `Prices & shipping`, `🎁 Gift idea`, `Custom design`] },
-    ru: { name: `Сафали`, role: `помощник Sfalim Shop`, greet: `Привет, я Сафали 🐶 Чем помочь? Спросите про цены, доставку или давайте выберем кружку или персонажа BLOOM 🐾`, ph: `Напишите сообщение…`, send: `Отпр.`, open: `Чат со Сафали`, close: `Закрыть`, mugs: `Кружки`, gallery: `Каталог BLOOM`, nudge: `Помочь выбрать подарок? 🎁`, waGreet: `Здравствуйте! У меня вопрос 🐾`, chips: [`Как заказать?`, `Цены и доставка`, `🎁 Идея подарка`, `Свой дизайн`] },
+    ru: { name: `Сфали`, role: `помощник Sfalim Shop`, greet: `Привет, я Сфали 🐶 Чем помочь? Спросите про цены, доставку или давайте выберем кружку или персонажа BLOOM 🐾`, ph: `Напишите сообщение…`, send: `Отпр.`, open: `Чат со Сфали`, close: `Закрыть`, mugs: `Кружки`, gallery: `Каталог BLOOM`, nudge: `Помочь выбрать подарок? 🎁`, waGreet: `Здравствуйте! У меня вопрос 🐾`, chips: [`Как заказать?`, `Цены и доставка`, `🎁 Идея подарка`, `Свой дизайн`] },
   }[lang] || {};
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, loading, open]);
@@ -8884,7 +8884,7 @@ function HomeMugsBanner({ lang, setPage }) {
   const T = {
     he: { eyebrow: `הליבה שלנו`, heading: `הספלים שלנו`, sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים.`, cta: `כל הספלים` },
     en: { eyebrow: `Our core`, heading: `Our Mugs`, sub: `"Sfalim" means mugs — and it's what we do best. A BLOOM portrait, your own design, or a designed mug for weddings & events.`, cta: `All mugs` },
-    ru: { eyebrow: `Наша основа`, heading: `Наши кружки`, sub: `«Сафалим» значит «кружки» — и это то, что мы делаем лучше всего. Портрет BLOOM, свой дизайн или дизайнерская кружка на свадьбу и события.`, cta: `Все кружки` },
+    ru: { eyebrow: `Наша основа`, heading: `Наши кружки`, sub: `«Сфалим» значит «кружки» — и это то, что мы делаем лучше всего. Портрет BLOOM, свой дизайн или дизайнерская кружка на свадьбу и события.`, cta: `Все кружки` },
   }[lang] || { eyebrow: `הליבה שלנו`, heading: `הספלים שלנו`, sub: ``, cta: `כל הספלים` };
 
   return (
@@ -9022,7 +9022,7 @@ function MugsPage({ lang, setPage }) {
     ru: {
       eyebrow: `Sfalim Shop`,
       heading: `Наши кружки`,
-      sub: `«Сафалим» и означает «кружки» — и это то, что мы делаем лучше всего. Качественная керамическая кружка с дизайном, который вам нравится, напечатана вручную с любовью в Беэр-Шеве.`,
+      sub: `«Сфалим» и означает «кружки» — и это то, что мы делаем лучше всего. Качественная керамическая кружка с дизайном, который вам нравится, напечатана вручную с любовью в Беэр-Шеве.`,
       badges: [`Керамика 11oz`, `Можно в посудомойку`, `Сублимационная печать`, `Печать вручную в Беэр-Шеве`],
       giftStrip: [`🎁 Идеальный подарок`, `⚡ Готово за 2–3 дня`, `✍️ Добавьте имя или дату`],
       bloomTitle: `Любой персонаж BLOOM — и на кружке`,
