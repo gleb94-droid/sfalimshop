@@ -878,7 +878,8 @@ const FloatingProductCardComponent = ({
   enableMobileTilt = false,
   mobileTiltSensitivity = 5,
   onAddToCart,
-  onImageLoad
+  onImageLoad,
+  eager = false
 }) => {
   const wrapRef = React.useRef(null);
   const cardRef = React.useRef(null);
@@ -1069,7 +1070,8 @@ const FloatingProductCardComponent = ({
               className="fpc-avatar"
               src={imageUrl}
               alt={name || `מוצר`}
-              loading="lazy"
+              loading={eager ? `eager` : `lazy`}
+              fetchpriority={eager ? `high` : undefined}
               decoding="async"
               onLoad={onImageLoad} />
           </div>
@@ -1107,13 +1109,35 @@ const FloatingProductCardComponent = ({
 
 const FloatingProductCard = React.memo(FloatingProductCardComponent);
 
+// Fixed positions for the mobile CSS specks layer (.sf-specks) — a lightweight
+// stand-in for the particle canvas on phones (the canvas bails there to avoid the
+// old reload loop). Hand-tuned so the drift looks organic, with no Math.random
+// (which would re-randomise on every render). {l,t}=% position, s=px size,
+// c=colour, d=drift duration (s), dl=delay (s).
+const MOBILE_SPECKS = [
+  { l: 8, t: 14, s: 3, c: `#FF6B35`, d: 7.5, dl: 0 },
+  { l: 22, t: 62, s: 2, c: `#ffffff`, d: 9, dl: 1.2 },
+  { l: 35, t: 28, s: 4, c: `#ff8c5a`, d: 8.5, dl: 0.6 },
+  { l: 48, t: 78, s: 2.5, c: `#ffffff`, d: 10, dl: 2.1 },
+  { l: 61, t: 18, s: 3, c: `#FF6B35`, d: 7, dl: 1.6 },
+  { l: 73, t: 52, s: 2, c: `#ffffff`, d: 9.5, dl: 0.3 },
+  { l: 86, t: 30, s: 3.5, c: `#ff8c5a`, d: 8, dl: 2.4 },
+  { l: 92, t: 70, s: 2, c: `#FF6B35`, d: 7.8, dl: 1 },
+  { l: 15, t: 88, s: 2.5, c: `#ffffff`, d: 10.5, dl: 1.8 },
+  { l: 42, t: 46, s: 1.8, c: `#ffffff`, d: 11, dl: 0.9 },
+  { l: 67, t: 84, s: 3, c: `#ff8c5a`, d: 8.2, dl: 2.7 },
+  { l: 79, t: 12, s: 2, c: `#ffffff`, d: 9.2, dl: 0.4 },
+  { l: 5, t: 44, s: 2.5, c: `#FF6B35`, d: 7.6, dl: 2 },
+  { l: 55, t: 8, s: 2, c: `#ffffff`, d: 10, dl: 1.4 },
+];
+
 // BloomCardLite — minimal mobile/reduced-motion variant of FloatingProductCard.
 // Same overall layout (image, name, description, price, CTA) but as a plain
 // <div> with no rAF tilt loop, no pointer listeners, no holographic shine, no
 // mount reveal. Used on screens < 768px to stop the home page flickering when
 // the carousel has 12 cards mounted at once.
 const BloomCardLite = React.memo(function BloomCardLite({
-  imageUrl, name, description, price, status, buttonText, onClick,
+  imageUrl, name, description, price, status, buttonText, onClick, eager,
 }) {
   return (
     <div
@@ -1150,10 +1174,16 @@ const BloomCardLite = React.memo(function BloomCardLite({
         <SmartImage
           src={imageUrl}
           alt={name || ``}
-          loading="lazy"
+          loading={eager ? `eager` : `lazy`}
+          fetchpriority={eager ? `high` : undefined}
           decoding="async"
           style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center`, display: `block` }}
         />
+        {/* Holographic sheen overlay — mobile parity with the desktop fpc-shine.
+            CSS-only / compositor-only; combined with the device-tilt it reads as
+            a holographic glint, with zero rAF/canvas (can't bring back the old
+            mobile reload-loop/flicker). */}
+        <div className="bloom-lite-sheen" aria-hidden="true" />
       </div>
       <div style={{ display: `flex`, flexDirection: `column`, gap: 4 }}>
         <div style={{
@@ -1530,6 +1560,14 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
           const description = tagline;
           const displayName = (d.name_en || d.name_he || ``).toUpperCase();
           const isActive = idx === activeIdx;
+          // Perf: only the active card + its immediate neighbours load the full
+          // image. The other ~9 stacked cards are invisible (opacity:0), so they
+          // render an empty box until they become a neighbour. This was the home
+          // page's biggest payload (12 × portrait @1080) and the main cause of the
+          // slow first paint / flicker on phones (the old mobile "loading problem").
+          const n = designs.length;
+          const isNear = isActive || (n > 1 && (idx === (activeIdx + 1) % n || idx === (activeIdx - 1 + n) % n));
+          const cardImg = isNear ? transformImage(d.mockup_shirt_url || d.mockup_url, { width: 800 }) : ``;
           return (
             <div
               key={d.id}
@@ -1558,7 +1596,8 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                   holographic shine, no pointer listeners, no mount reveal. */}
               {reduceFx ? (
                 <BloomCardLite
-                  imageUrl={transformImage(d.mockup_shirt_url || d.mockup_url, { width: 1080 })}
+                  imageUrl={cardImg}
+                  eager={isActive}
                   name={displayName}
                   description={description}
                   price={``}
@@ -1568,7 +1607,8 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
                 />
               ) : (
                 <FloatingProductCard
-                  imageUrl={transformImage(d.mockup_shirt_url || d.mockup_url, { width: 1080 })}
+                  imageUrl={cardImg}
+                  eager={isActive}
                   name={displayName}
                   description={description}
                   price={``}
@@ -11036,6 +11076,23 @@ export default function App() {
         @keyframes sfAur3 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(5vw,-7vw,0) scale(1.1); } }
         @media (prefers-reduced-motion: reduce) { .sf-aurora > span { animation: none; } }
 
+        /* Holographic sheen on the active mobile BLOOM card (BloomCardLite) —
+           CSS-only glint sweep, compositor-only (background-position). Paired with
+           the device-tilt it gives the desktop fpc-shine look with no rAF/canvas. */
+        .bloom-lite-sheen { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(115deg, rgba(255,255,255,0) 36%, rgba(255,255,255,0.10) 46%, rgba(255,214,170,0.24) 50%, rgba(255,255,255,0.10) 54%, rgba(255,255,255,0) 64%); background-size: 250% 250%; animation: sfSheen 6.5s ease-in-out infinite; }
+        @keyframes sfSheen { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @media (prefers-reduced-motion: reduce) { .bloom-lite-sheen { animation: none; opacity: 0.5; } }
+
+        /* Mobile-only floating specks — a light CSS substitute for the particle
+           canvas (which bails on phones to avoid the old reload loop). Pure
+           transform/opacity, no canvas, no JS loop. Hidden >=768px (desktop keeps
+           the real particle canvas). */
+        .sf-specks { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; display: none; }
+        .sf-specks > i { position: absolute; display: block; border-radius: 50%; will-change: transform, opacity; animation: sfSpeck linear infinite alternate; }
+        @keyframes sfSpeck { from { transform: translate3d(0,6px,0); opacity: 0.16; } to { transform: translate3d(0,-22px,0); opacity: 0.6; } }
+        @media (max-width: 767px) { .sf-specks { display: block; } }
+        @media (prefers-reduced-motion: reduce) { .sf-specks { display: none; } }
+
         /* Staggered hero headline — words fade/rise in sequence on load. */
         .sf-hero-word { display: inline-block; opacity: 0; transform: translateY(0.5em); animation: sfWordIn 0.6s cubic-bezier(.2,.8,.25,1) forwards; }
         @keyframes sfWordIn { to { opacity: 1; transform: translateY(0); } }
@@ -11200,7 +11257,12 @@ export default function App() {
         // Portaled to <body> (OUTSIDE #root) so the a11y CSS `zoom` on #root can't
         // scale this fixed layer into horizontal overflow. z-index:-1 keeps it
         // behind the (transparent) #root content, above the body backdrop.
-        <div className="sf-aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>,
+        <>
+          <div className="sf-aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>
+          {/* Mobile-only CSS specks (display:block <768px only); a light stand-in
+              for the particle canvas that bails on phones. */}
+          <div className="sf-specks" aria-hidden="true">{MOBILE_SPECKS.map((p, i) => (<i key={i} style={{ left: `${p.l}%`, top: `${p.t}%`, width: p.s, height: p.s, background: p.c, animationDuration: `${p.d}s`, animationDelay: `${p.dl}s` }} />))}</div>
+        </>,
         document.body
       )}
       {!reduceMotion && <ParticlesBackground />}
