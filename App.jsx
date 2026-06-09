@@ -1637,10 +1637,10 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
               style={{
                 position: `absolute`,
                 top: `50%`,
-                insetInlineStart: isMobile ? -38 : -52,
+                insetInlineStart: isMobile ? -40 : -54,
                 transform: `translateY(-50%)`,
                 zIndex: 4,
-                padding: isMobile ? 6 : 8,
+                padding: isMobile ? 8 : 11,
                 display: `flex`,
                 alignItems: `center`,
                 justifyContent: `center`,
@@ -1658,10 +1658,10 @@ function HomeFloatingBloomCarousel({ lang, setPage }) {
               style={{
                 position: `absolute`,
                 top: `50%`,
-                insetInlineEnd: isMobile ? -38 : -52,
+                insetInlineEnd: isMobile ? -40 : -54,
                 transform: `translateY(-50%)`,
                 zIndex: 4,
-                padding: isMobile ? 6 : 8,
+                padding: isMobile ? 8 : 11,
                 display: `flex`,
                 alignItems: `center`,
                 justifyContent: `center`,
@@ -14815,6 +14815,10 @@ function BlogIndex({ lang, goToBlog }) {
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, t.blogHeroTitle);
     setMeta(`twitter:description`, t.blogHeroSubtitle);
+    // og:image fallback so a breed portrait from a prior nav can't linger as the
+    // blog-index share image (the index has no single cover of its own).
+    setMeta(`og:image`, SITE_OG_IMAGE, `property`);
+    setMeta(`twitter:image`, SITE_OG_IMAGE);
     setCanonical(indexUrl);
     setHreflang(indexUrl);
     // Coming from a post → clear its Article block; from a breed → its Product.
