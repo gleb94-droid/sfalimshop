@@ -213,6 +213,7 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
   const [typing, setTyping] = useState(null); // { idx, shown } — typewriter reveal of the latest reply
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
+  const panelRef = useDialogFocus(open); // focus-trap + restore-to-FAB on close (a11y)
 
   const t = {
     he: { name: `ספלי`, role: `העוזר של ספלים שופ`, greet: `היי, אני ספלי 🐶 איך אפשר לעזור? אפשר לשאול על מחירים, משלוח, או לבחור ספל או דמות BLOOM 🐾`, ph: `כתבו הודעה…`, send: `שליחה`, open: `שוחחו עם ספלי`, close: `סגירה`, mugs: `ספלים`, gallery: `אוסף BLOOM`, nudge: `לעזור לבחור מתנה? 🎁`, waGreet: `היי! יש לי שאלה 🐾`, chips: [`איך מזמינים?`, `מחירים ומשלוח`, `🎁 רעיון למתנה`, `עיצוב אישי`] },
@@ -285,7 +286,7 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
   );
 
   const panel = open && createPortal(
-    <div dir={isRTL ? `rtl` : `ltr`} role="dialog" aria-label={t.name}
+    <div ref={panelRef} dir={isRTL ? `rtl` : `ltr`} role="dialog" aria-modal="true" aria-label={t.name} onKeyDown={e => { if (e.key === `Escape`) setOpen(false); }}
       style={{ position: `fixed`, bottom: 150, insetInlineEnd: 24, zIndex: 941, width: `min(360px, calc(100vw - 32px))`, height: `min(70vh, 560px)`, display: `flex`, flexDirection: `column`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: `0 18px 50px rgba(0,0,0,0.55)`, overflow: `hidden`, fontFamily: `'Heebo',sans-serif`, animation: `sfaliIn 0.22s ease` }}>
       <style>{"@keyframes sfaliIn{from{opacity:0;transform:translateY(14px) scale(0.97)}to{opacity:1;transform:none}}@keyframes sfaliBlink{0%,80%,100%{opacity:0.25}40%{opacity:1}}.sfali-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#9a9a9a;margin:0 2px;animation:sfaliBlink 1.2s infinite}.sfali-dot:nth-child(2){animation-delay:0.2s}.sfali-dot:nth-child(3){animation-delay:0.4s}"}</style>
       <div style={{ display: `flex`, alignItems: `center`, gap: 10, padding: `12px 14px`, background: `linear-gradient(135deg, rgba(255,107,53,0.16), rgba(255,107,53,0.04))`, borderBottom: `1px solid ${COLORS.border}` }}>
@@ -14548,7 +14549,7 @@ function BlogCard({ post, lang, goToBlog, compact = false }) {
       }}>
       <div style={{ width: `100%`, aspectRatio: `1200 / 630`, background: `#0d0d0d`, overflow: `hidden`, flexShrink: 0 }}>
         {post.cover_image_url && (
-          <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title}
+          <SmartImage src={post.cover_image_url} alt={post[`cover_image_alt_${lang}`] || post.cover_image_alt_he || title}
             style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center`, display: `block`, transition: `transform 0.5s cubic-bezier(.2,.6,.2,1)`, transform: hover ? `scale(1.05)` : `scale(1)` }} />
         )}
       </div>
@@ -14768,20 +14769,21 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     setMeta(`description`, seoDesc);
     setMeta(`og:title`, ogTitle, `property`);
     setMeta(`og:description`, ogDesc, `property`);
-    setMeta(`og:image`, post.cover_image_url, `property`);
+    const ogImage = post.cover_image_url || SITE_OG_IMAGE;
+    setMeta(`og:image`, ogImage, `property`);
     setMeta(`og:type`, `article`, `property`);
     setMeta(`og:url`, postUrl, `property`);
     setMeta(`og:locale`, ogLocale(lang), `property`);
     setMeta(`twitter:card`, `summary_large_image`);
     setMeta(`twitter:title`, ogTitle);
     setMeta(`twitter:description`, ogDesc);
-    if (post.cover_image_url) setMeta(`twitter:image`, post.cover_image_url);
+    setMeta(`twitter:image`, ogImage);
     setCanonical(postUrl);
     setHreflang(postUrl);
     removeJsonLd(`breed-product-ld`); // never both at once
     const ld = {
       "@context": `https://schema.org`, "@type": `Article`,
-      "headline": ogTitle, "image": [post.cover_image_url],
+      "headline": ogTitle, "image": [ogImage],
       "inLanguage": lang,
       "datePublished": post.published_at, "dateModified": post.updated_at || post.published_at,
       "author": { "@type": `Organization`, "name": `Sfalim Shop` },
@@ -14842,7 +14844,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         {/* Cover */}
         {post.cover_image_url && (
           <div style={{ width: `100%`, aspectRatio: `1200 / 630`, overflow: `hidden`, borderRadius: 16, marginBottom: 32, background: `#0d0d0d` }}>
-            <SmartImage src={post.cover_image_url} alt={post.cover_image_alt_he || title} style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center`, display: `block` }} />
+            <SmartImage src={post.cover_image_url} alt={post[`cover_image_alt_${lang}`] || post.cover_image_alt_he || title} style={{ width: `100%`, height: `100%`, objectFit: `cover`, objectPosition: `center`, display: `block` }} />
           </div>
         )}
 
