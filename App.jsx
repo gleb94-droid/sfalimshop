@@ -1777,7 +1777,7 @@ const SHIPPING_PRICE = 35;
 // personal_beersheva carries NO shipping fee. The amount charged is always the
 // SUM of orders.total (shipping is folded into the first row), so changing a
 // price here flows straight through to the Tranzila charge.
-const SHIPPING_OPTIONS = { personal_beersheva: 0, ups_home: 55, ups_point: 27 };
+const SHIPPING_OPTIONS = { personal_beersheva: 0, ups_home: 2, ups_point: 1 }; // ⚠️ TEMP TEST PRICING — REVERT to { ups_home: 55, ups_point: 27 } after the payment test
 const DELIVERY_METHODS = [
   { id: `personal_beersheva`, icon: `heart`,
     title: { he: `מסירה אישית · באר שבע`, en: `Personal handoff · Be'er Sheva`, ru: `Личная передача · Беэр-Шева` },
