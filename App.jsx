@@ -1904,6 +1904,113 @@ const BLOOM_SHIRT_TYPES = [
 ];
 const BLOOM_SHIRT_SIZES = [`s`, `m`, `l`, `xl`, `xxl`];
 
+// Oversize shirt measurements in cm. The supplier confirms these fit ALL our
+// oversize shirts (Oversize + Stone-wash). len = length (shoulder→hem),
+// wid = width (armpit→armpit). Source: Migvan/Sense oversize spec.
+const SIZE_CHART = [
+  { size: `S`, len: 70, wid: 53 },
+  { size: `M`, len: 74, wid: 56 },
+  { size: `L`, len: 78, wid: 58 },
+  { size: `XL`, len: 80, wid: 63 },
+  { size: `XXL`, len: 82, wid: 66 },
+];
+
+// Small on-brand schematic: a t-shirt outline with a width arrow (chest) and a
+// length arrow (side). No text inside the SVG so it stays language-safe.
+function shirtDiagram() {
+  return (
+    <svg viewBox="0 0 120 120" width="104" height="104" aria-hidden="true" style={{ display: `block`, margin: `0 auto` }}>
+      <defs>
+        <marker id="sgArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+          <path d="M0 0 L7 3.5 L0 7 Z" fill={COLORS.white} />
+        </marker>
+      </defs>
+      <path d="M44 16 L30 14 L10 28 L20 44 L34 38 L34 104 L86 104 L86 38 L100 44 L110 28 L90 14 L76 16 C66 26 54 26 44 16 Z"
+        fill="rgba(255,107,53,0.06)" stroke={COLORS.accent} strokeWidth="2" strokeLinejoin="round" />
+      <line x1="37" y1="64" x2="83" y2="64" stroke={COLORS.white} strokeWidth="1.6" markerStart="url(#sgArrow)" markerEnd="url(#sgArrow)" />
+      <line x1="94" y1="40" x2="94" y2="104" stroke={COLORS.white} strokeWidth="1.6" markerStart="url(#sgArrow)" markerEnd="url(#sgArrow)" />
+    </svg>
+  );
+}
+
+// Collapsible size guide — measurement table (cm) + how-to-measure + schematic +
+// the 285 gsm fabric note + the ≤5% deviation disclaimer. Trilingual, RTL-aware,
+// brand-styled. Mirrors the "Our Fabrics" collapsible. Used in the order flow,
+// PetModal/BreedPage shirt picker.
+function SizeGuide({ lang }) {
+  const [open, setOpen] = useState(false);
+  const isHe = lang === `he`, isRu = lang === `ru`;
+  const L = {
+    title: isHe ? `📏 טבלת מידות` : isRu ? `📏 Таблица размеров` : `📏 Size guide`,
+    hint: isHe ? `מדדו חולצה שמתאימה לכם והשוו — המידות בס"מ` : isRu ? `Измерьте свою футболку и сравните — размеры в см` : `Measure a shirt you own and compare — sizes in cm`,
+    size: isHe ? `מידה` : isRu ? `Размер` : `Size`,
+    length: isHe ? `אורך` : isRu ? `Длина` : `Length`,
+    width: isHe ? `רוחב` : isRu ? `Ширина` : `Width`,
+    how: isHe ? `איך מודדים בעצמכם` : isRu ? `Как замерить себя` : `How to measure yourself`,
+    howBody: isHe
+      ? `קחו חולצה שמתאימה לכם, הניחו אותה שטוחה ומדדו: רוחב — מבית שחי לבית שחי; אורך — מהכתף עד השוליים. השוו לטבלה.`
+      : isRu
+        ? `Возьмите футболку, которая хорошо на вас сидит, разложите её ровно и измерьте: ширину — от подмышки до подмышки; длину — от плеча до низа. Сравните с таблицей.`
+        : `Take a shirt that fits you well, lay it flat and measure: width — armpit to armpit; length — shoulder to hem. Compare to the table.`,
+    fit: isHe ? `גזרת אוברסייז — נוחה ורפויה. רוצים גזרה צמודה יותר? בחרו מידה אחת קטנה.` : isRu ? `Оверсайз — свободный крой. Хотите плотнее? Берите на размер меньше.` : `Oversize is a relaxed fit. Want it snugger? Pick one size down.`,
+    fabric: isHe ? `100% כותנה סרוקה · 285 גרם — בד כבד ואיכותי ששומר על הצורה.` : isRu ? `100% чёсаный хлопок · 285 г/м² — плотная качественная ткань, держит форму.` : `100% combed cotton · 285 gsm — a heavy, quality fabric that holds its shape.`,
+    note: isHe ? `ייתכן הפרש של עד 5% במידות (מדידה ידנית).` : isRu ? `Возможно отклонение до 5% (ручной замер).` : `Up to 5% variation is possible (measured by hand).`,
+  };
+  const th = { color: COLORS.gray, fontSize: 11.5, fontWeight: 700, textTransform: `uppercase`, letterSpacing: `0.04em`, padding: `7px 8px`, textAlign: `center` };
+  const td = { color: COLORS.white, fontSize: 13, padding: `7px 8px`, textAlign: `center`, fontFamily: `'Heebo',sans-serif` };
+  return (
+    <div style={{ marginTop: 18, borderTop: `1px solid ${COLORS.border}`, paddingTop: 18 }}>
+      <div role="button" tabIndex={0} aria-expanded={open} aria-controls="sizeguide-panel"
+        onClick={() => setOpen(s => !s)}
+        onKeyDown={(e) => { if (e.key === `Enter` || e.key === ` `) { e.preventDefault(); setOpen(s => !s); } }}
+        style={{ display: `flex`, justifyContent: `space-between`, alignItems: `center`, cursor: `pointer` }}>
+        <span style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontSize: 18 }}>{L.title}</span>
+        <span aria-hidden="true" style={{ color: COLORS.accent, fontSize: 14 }}>{open ? `▲` : `▼`}</span>
+      </div>
+      {!open && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6 }}>{L.hint}</div>}
+      {open && (
+        <div id="sizeguide-panel" style={{ marginTop: 14 }}>
+          <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 10, overflow: `hidden` }}>
+            <table style={{ width: `100%`, borderCollapse: `collapse` }}>
+              <thead>
+                <tr style={{ background: `rgba(255,107,53,0.10)` }}>
+                  <th style={th}>{L.size}</th>
+                  <th style={th}>{`${L.length} (cm)`}</th>
+                  <th style={th}>{`${L.width} (cm)`}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SIZE_CHART.map((r) => (
+                  <tr key={r.size} style={{ borderTop: `1px solid ${COLORS.border}` }}>
+                    <td style={{ ...td, color: COLORS.accent, fontWeight: 700 }}>{r.size}</td>
+                    <td style={td}>{r.len}</td>
+                    <td style={td}>{r.wid}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display: `flex`, gap: 12, alignItems: `flex-start`, marginTop: 12, flexWrap: `wrap` }}>
+            <div style={{ flexShrink: 0, textAlign: `center` }}>
+              {shirtDiagram()}
+              <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{`↔ ${L.width} · ↕ ${L.length}`}</div>
+            </div>
+            <div style={{ flex: `1 1 180px`, minWidth: 160 }}>
+              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{L.how}</div>
+              <div style={{ color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5 }}>{L.howBody}</div>
+            </div>
+          </div>
+          <div style={{ color: COLORS.gray, fontSize: 12.5, lineHeight: 1.6, marginTop: 12 }}>
+            <div>👕 {L.fit}</div>
+            <div>🧵 {L.fabric}</div>
+            <div style={{ color: `#8a8a8a`, fontSize: 11.5, marginTop: 4 }}>ℹ️ {L.note}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Resolve a saved hex colour to a readable name (falls back to the hex itself).
 const COLOR_BY_HEX = (() => {
   const m = new Map();
@@ -7094,6 +7201,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               )}
             </div>
+            <SizeGuide lang={lang} />
           </div>
         )}
 
@@ -13326,6 +13434,7 @@ function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, s
           ))}
         </div>
       </div>
+      <SizeGuide lang={lang} />
     </>
   );
 }
@@ -14146,9 +14255,9 @@ const FAQ_GROUPS = [
       {
         q: { he: `אילו מידות חולצות יש?`, en: `What shirt sizes are available?`, ru: `Какие размеры футболок есть?` },
         a: {
-          he: `מגוון מידות מ-S ועד XXL.`,
-          en: `A range of sizes from S to XXL.`,
-          ru: `Размеры в диапазоне от S до XXL.`,
+          he: `מידות מ-S עד XXL (גזרת אוברסייז, בס"מ — אורך / רוחב): S — 70 / 53 · M — 74 / 56 · L — 78 / 58 · XL — 80 / 63 · XXL — 82 / 66. טיפ: מדדו חולצה שמתאימה לכם (רוחב מבית-שחי לבית-שחי, אורך מהכתף עד השוליים) והשוו לטבלה. ייתכן הפרש של עד 5%. יש טבלת מידות גם בעמוד המוצר.`,
+          en: `Sizes S to XXL (oversize cut, in cm — length / width): S — 70 / 53 · M — 74 / 56 · L — 78 / 58 · XL — 80 / 63 · XXL — 82 / 66. Tip: measure a shirt that fits you well (width armpit-to-armpit, length shoulder-to-hem) and compare. Up to 5% variation is possible. There's a size guide on the product page too.`,
+          ru: `Размеры от S до XXL (оверсайз-крой, в см — длина / ширина): S — 70 / 53 · M — 74 / 56 · L — 78 / 58 · XL — 80 / 63 · XXL — 82 / 66. Совет: измерьте футболку, которая хорошо сидит (ширина от подмышки до подмышки, длина от плеча до низа), и сравните с таблицей. Возможно отклонение до 5%. На странице товара тоже есть таблица размеров.`,
         },
       },
       {
