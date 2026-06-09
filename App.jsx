@@ -14505,24 +14505,49 @@ function setGenericSeo(lang, title, descOverride) {
 // Defensive HTML sanitizer for admin-authored post bodies. Removes dangerous
 // tags, on* handlers and javascript: URLs. Content is trusted (admin-only) so
 // this is belt-and-suspenders; falls back to a crude script-strip if no parser.
+// Strict ALLOWLIST sanitizer for blog post bodies (rendered via dangerouslySetInnerHTML).
+// Defense-in-depth: posts come from the admin/content pipeline, but raw HTML is never trusted.
+// Only a fixed set of formatting tags + a few safe attributes survive; everything else is
+// stripped (dangerous tags removed entirely, unknown tags unwrapped to their text).
 function sanitizeBlogHtml(html) {
   if (!html || typeof html !== `string`) return ``;
   if (typeof window === `undefined` || !window.DOMParser) {
-    return html.replace(/<\/?(script|style|iframe|object|embed|link|meta|base|form)[^>]*>/gi, ``);
+    // SSR / no-DOM fallback: drop risky tags, on* handlers and javascript: URLs.
+    return html
+      .replace(/<\/?(script|style|iframe|object|embed|link|meta|base|form|svg|math|input|button|textarea|select|noscript|template|audio|video)[^>]*>/gi, ``)
+      .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, ``)
+      .replace(/(href|src)\s*=\s*("\s*javascript:[^"]*"|'\s*javascript:[^']*'|javascript:[^\s>]+)/gi, ``);
   }
+  const ALLOWED = { H2: 1, H3: 1, H4: 1, P: 1, UL: 1, OL: 1, LI: 1, STRONG: 1, EM: 1, B: 1, I: 1, A: 1, BLOCKQUOTE: 1, BR: 1, IMG: 1, CODE: 1, PRE: 1, SPAN: 1, HR: 1 };
+  const DANGEROUS = { SCRIPT: 1, STYLE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, LINK: 1, META: 1, BASE: 1, FORM: 1, SVG: 1, MATH: 1, INPUT: 1, BUTTON: 1, TEXTAREA: 1, SELECT: 1, NOSCRIPT: 1, TEMPLATE: 1, AUDIO: 1, VIDEO: 1 };
+  const ALLOWED_ATTR = { href: 1, src: 1, alt: 1, title: 1, width: 1, height: 1 };
+  const okLink = (v) => { const s = (v || ``).trim().toLowerCase(); return s.startsWith(`https://`) || s.startsWith(`http://`) || s.startsWith(`mailto:`) || s.startsWith(`/`) || s.startsWith(`#`); };
+  const okImg = (v) => { const s = (v || ``).trim().toLowerCase(); return s.startsWith(`https://`) || s.startsWith(`http://`) || s.startsWith(`/`) || s.startsWith(`data:image/`); };
   const doc = new DOMParser().parseFromString(`<div>${html}</div>`, `text/html`);
   const root = doc.body.firstChild;
-  const BAD = [`SCRIPT`, `STYLE`, `IFRAME`, `OBJECT`, `EMBED`, `LINK`, `META`, `BASE`, `FORM`];
-  root.querySelectorAll(`*`).forEach((el) => {
-    if (BAD.includes(el.tagName)) { el.remove(); return; }
-    Array.from(el.attributes).forEach((attr) => {
-      const n = attr.name.toLowerCase();
-      const v = (attr.value || ``).trim().toLowerCase();
-      if (n.startsWith(`on`)) el.removeAttribute(attr.name);
-      else if ((n === `href` || n === `src` || n === `xlink:href`) && v.indexOf(`javascript:`) === 0) el.removeAttribute(attr.name);
-      else if (n === `style` && /expression|javascript:/.test(v)) el.removeAttribute(attr.name);
+  const clean = (node) => {
+    Array.from(node.childNodes).forEach((child) => {
+      if (child.nodeType === 3) return;                                  // text node — keep
+      if (child.nodeType !== 1) { node.removeChild(child); return; }      // comment / other — drop
+      const tag = child.tagName;
+      if (DANGEROUS[tag]) { node.removeChild(child); return; }            // script/style/svg/... — remove
+      if (!ALLOWED[tag]) {                                                // unknown tag — unwrap to text/children
+        clean(child);
+        while (child.firstChild) node.insertBefore(child.firstChild, child);
+        node.removeChild(child);
+        return;
+      }
+      Array.from(child.attributes).forEach((attr) => {                   // allowed tag — strip non-allowlisted attrs
+        const n = attr.name.toLowerCase();
+        if (!ALLOWED_ATTR[n]) { child.removeAttribute(attr.name); return; }
+        if (n === `href` && !okLink(attr.value)) child.removeAttribute(attr.name);
+        if (n === `src` && !okImg(attr.value)) child.removeAttribute(attr.name);
+      });
+      if (tag === `A` && child.getAttribute(`href`)) child.setAttribute(`rel`, `noopener noreferrer nofollow`);
+      clean(child);
     });
-  });
+  };
+  clean(root);
   return root.innerHTML;
 }
 
