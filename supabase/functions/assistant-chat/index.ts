@@ -9,7 +9,7 @@
 // Security / cost:
 //   - The Anthropic key lives ONLY in the Supabase secret ANTHROPIC_API_KEY
 //     (never in the browser). Set it in Supabase → Edge Functions → Secrets.
-//   - Model: Claude Haiku 4.5 (cheap). System prompt is prompt-cached.
+//   - Model: Claude Sonnet 4.6 (fluent Hebrew). System prompt is prompt-cached.
 //   - max_tokens capped, conversation length capped, per-IP rate limit, and a
 //     kill-switch (ASSISTANT_ENABLED secret = "false" turns it off instantly).
 //   - On any error / no credit / bad key → a graceful WhatsApp fallback, never a crash.
@@ -34,7 +34,7 @@ const ENABLED = (Deno.env.get("ASSISTANT_ENABLED") || "true") !== "false";
 // Salt for hashing IPs (rate-limit only). Override with ASSISTANT_IP_SALT secret.
 const IP_SALT = Deno.env.get("ASSISTANT_IP_SALT") || "sfalim-assistant-v1";
 
-const MODEL = "claude-haiku-4-5";
+const MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 500;            // short, friendly replies
 const MAX_TURNS = 12;              // keep the last N messages only
 const MAX_CHARS = 1200;            // per-message cap
@@ -176,7 +176,7 @@ serve(async (req) => {
       } catch (_) { /* table may not exist yet — ignore */ }
     }
 
-    // Call Claude (Haiku) with a prompt-cached system prompt.
+    // Call Claude with a prompt-cached system prompt.
     let reply = "";
     try {
       const aRes = await fetch("https://api.anthropic.com/v1/messages", {
