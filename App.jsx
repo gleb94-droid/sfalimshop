@@ -14343,7 +14343,7 @@ const BLOG_LOGO_URL = `https://www.sfalimshop.com/exports/logo-mark-500.png`; //
 
 function blogCategoryLabel(lang, cat) {
   const t = LANGS[lang] || LANGS.he;
-  const map = { breeds: t.blogCategoryBreeds, gifts: t.blogCategoryGifts, culture: t.blogCategoryCulture, stories: t.blogCategoryStories };
+  const map = { breeds: t.blogCategoryBreeds, gifts: t.blogCategoryGifts, culture: t.blogCategoryCulture, stories: t.blogCategoryStories, guides: (lang === `he` ? `מדריכים` : lang === `ru` ? `Гайды` : `Guides`) };
   return map[cat] || cat || ``;
 }
 
@@ -14556,8 +14556,7 @@ function BlogCard({ post, lang, goToBlog, compact = false }) {
         <span style={{ alignSelf: isRTL ? `flex-end` : `flex-start`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 10, letterSpacing: `1.5px`, textTransform: `uppercase` }}>{blogCategoryLabel(lang, post.category)}</span>
         <h3 style={{ margin: 0, color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 700, fontSize: compact ? 19 : 22, lineHeight: 1.25 }}>{title}</h3>
         <p style={{ margin: 0, color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, lineHeight: 1.55, display: `-webkit-box`, WebkitLineClamp: 2, WebkitBoxOrient: `vertical`, overflow: `hidden` }}>{excerpt}</p>
-        <div style={{ marginTop: `auto`, paddingTop: 10, display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 10 }}>
-          <span style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 12 }}>{formatBlogDate(post.published_at, lang)}</span>
+        <div style={{ marginTop: `auto`, paddingTop: 10, display: `flex`, alignItems: `center`, justifyContent: `flex-end`, gap: 10 }}>
           <span style={{ color: hover ? COLORS.accent : COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 13, fontWeight: 700, transition: `color 0.2s` }}>{(LANGS[lang] || LANGS.he).blogReadMore}</span>
         </div>
       </div>
@@ -14838,8 +14837,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
         </nav>
 
         <span style={{ display: `inline-block`, color: COLORS.accent, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `2px`, textTransform: `uppercase`, marginBottom: 12 }}>{blogCategoryLabel(lang, post.category)}</span>
-        <h1 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.2rem` : `3rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 12px`, letterSpacing: `-0.01em` }}>{title}</h1>
-        <div style={{ color: COLORS.grayLight, fontFamily: `'Heebo',sans-serif`, fontSize: 13, marginBottom: 28 }}>{t.blogPublishedOn}{formatBlogDate(post.published_at, lang)}</div>
+        <h1 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 900, fontSize: isMobile ? `2.2rem` : `3rem`, lineHeight: 1.15, color: COLORS.white, margin: `0 0 28px`, letterSpacing: `-0.01em` }}>{title}</h1>
 
         {/* Cover */}
         {post.cover_image_url && (
@@ -14869,10 +14867,8 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
           </div>
         )}
 
-        {/* Quiz CTA */}
-        <a href="/quiz" style={{ display: `block`, marginTop: 32, textDecoration: `none` }}>
-          <div style={{ background: `linear-gradient(135deg, ${COLORS.accentDim}, rgba(255,107,53,0.04))`, border: `1px solid rgba(255,107,53,0.35)`, borderRadius: 16, padding: isMobile ? `20px 22px` : `22px 28px`, textAlign: `center`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: isMobile ? 15 : 17 }}>{t.blogQuizCta}</div>
-        </a>
+        {/* Quiz CTA removed — keep posts value-first, not promotional. The one
+            soft funnel is the (conditional) related-product card above. */}
 
         {/* Share */}
         <div style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${COLORS.border}` }}>
