@@ -81,6 +81,12 @@ ALWAYS answer the customer's actual question directly and FIRST, using the exact
 ## How ordering works
 Pick a BLOOM character or upload your own design → choose mug/shirt → add to cart → pay securely by card → we print in-house → ship. A receipt is issued automatically. For "we design it for you", you pay first, then send your photos/idea on WhatsApp.
 
+## Good to know (FAQ)
+- Care: mugs are dishwasher-safe (hand-washing keeps the print vivid longest). Shirts: wash inside-out in cold water on a gentle cycle, and avoid high-heat tumble-drying.
+- Payment: secure card payment (processed by Tranzila). A receipt is issued automatically — we are an exempt dealer (עוסק פטור), so no VAT is added.
+- Cancellation / returns: ready-made items can be cancelled under Israeli consumer law. Custom & personalized items (anything printed with your design, a chosen BLOOM character, or a pet name) are made-to-order, so once production starts they can't be cancelled or refunded. If anything arrives defective, message us on WhatsApp and we'll make it right.
+- Shirt sizes: S, M, L, XL, XXL. Oversize fits loose/relaxed.
+
 # HARD RULES (follow exactly)
 1. Answer ONLY from the facts above. If you don't know, or it's about a specific order, stock, a custom quote, timing for a special case, or anything not listed → say you'll connect them with the team on WhatsApp. NEVER guess or invent a price, date, or policy.
 2. The designs are custom-designed / illustrated — never call them "hand-drawn", "drawn by hand", or "hand-illustrated". BUT if a customer asks whether they are drawn/made by hand, answer the question naturally and honestly: the artwork is custom-designed, and every product is printed by hand in Be'er Sheva 🧡 — answer it, never dodge or deflect. ("Printed by hand" / "hand-printed in Be'er Sheva" IS true and good to say.)
@@ -89,7 +95,8 @@ Pick a BLOOM character or upload your own design → choose mug/shirt → add to
 5. Reply in the SAME language as the user's latest message — Hebrew, English, or Russian. If unclear, default to Hebrew.
 6. Be warm, personal, and concise (usually 2–4 short sentences). Light, tasteful emoji are welcome (🧡 🐾 ☕). The voice: "printed by hand with love in Be'er Sheva".
 7. Stay on topic (the shop, products, pets, gifts, orders). Politely decline anything unrelated and steer back.
-8. When recommending, lean into mugs (our core, cheapest, giftable) and the BLOOM characters. Suggest the customer browse the BLOOM gallery or the mugs page, or message on WhatsApp for anything custom.`;
+8. When recommending, lean into mugs (our core, cheapest, giftable) and the BLOOM characters. Suggest the customer browse the BLOOM gallery or the mugs page, or message on WhatsApp for anything custom.
+9. When you recommend specific pet breeds/characters from the BLOOM collection, add as the VERY LAST line, on its own line, exactly: "SUGGEST: <1-3 English breed names, comma-separated>" (e.g. "SUGGEST: Golden Retriever, Tuxedo Cat"). This line is hidden from the customer and is used to show clickable cards — only include real dog/cat breeds you actually recommended, and never write the word SUGGEST anywhere else.`;
 
 function jsonRes(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -202,6 +209,30 @@ serve(async (req) => {
     }
     if (!reply) reply = fallbackReply(lang);
 
+    // Optional trailing "SUGGEST: Breed1, Breed2" line → clickable product cards.
+    // The line is hidden from the customer; we look each breed up in the catalog.
+    let suggestions: Array<Record<string, unknown>> = [];
+    const sm = reply.match(/SUGGEST:\s*([^\n]+)\s*$/i);
+    if (sm) {
+      reply = reply.replace(/\n?\s*SUGGEST:[^\n]*$/i, "").trim();
+      if (admin) {
+        const names = sm[1].split(",").map((s) => s.replace(/[^a-zA-Z \-]/g, "").trim()).filter((s) => s.length >= 2).slice(0, 3);
+        for (const nm of names) {
+          try {
+            const { data } = await admin.from("pet_designs")
+              .select("slug, name_he, name_en, name_ru, mockup_url")
+              .eq("is_active", true)
+              .or(`breed_en.ilike.%${nm}%,name_en.ilike.%${nm}%`)
+              .limit(1);
+            const d = data && data[0];
+            if (d && !suggestions.find((s) => s.slug === d.slug)) {
+              suggestions.push({ slug: d.slug, name_he: d.name_he, name_en: d.name_en, name_ru: d.name_ru, image: d.mockup_url });
+            }
+          } catch (_) { /* ignore */ }
+        }
+      }
+    }
+
     // Log the user's question (best effort, anonymized).
     if (admin) {
       try {
@@ -213,7 +244,7 @@ serve(async (req) => {
       } catch (_) { /* ignore */ }
     }
 
-    return jsonRes({ reply });
+    return jsonRes({ reply, suggestions });
   } catch (err) {
     console.error("assistant-chat error:", String(err));
     return jsonRes({ reply: fallbackReply(lang) });

@@ -210,6 +210,7 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
   const [messages, setMessages] = useState([]); // {role:'user'|'assistant', content}
   const [loading, setLoading] = useState(false);
   const [nudge, setNudge] = useState(false); // one-time proactive bubble on /mugs · /pets
+  const [typing, setTyping] = useState(null); // { idx, shown } — typewriter reveal of the latest reply
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -221,6 +222,15 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
 
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, loading, open]);
   useEffect(() => { if (open && inputRef.current) inputRef.current.focus(); }, [open]);
+
+  // Typewriter reveal of the latest assistant reply — a lightweight "streaming" feel.
+  useEffect(() => {
+    if (!typing) return;
+    const full = (messages[typing.idx] && messages[typing.idx].content) || ``;
+    if (typing.shown >= full.length) { setTyping(null); return; }
+    const id = setTimeout(() => setTyping(tp => tp ? { idx: tp.idx, shown: Math.min(full.length, tp.shown + 3) } : null), 16);
+    return () => clearTimeout(id);
+  }, [typing, messages]);
 
   // Proactive nudge: a one-time (per session), dismissible bubble on the mug / BLOOM pages.
   useEffect(() => {
@@ -244,11 +254,13 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
     setMessages(next);
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke(`assistant-chat`, { body: { messages: next, lang, page } });
-      const reply = (data && data.reply) || (error ? fallback : fallback);
-      setMessages(m => [...m, { role: `assistant`, content: reply }]);
+      const { data } = await supabase.functions.invoke(`assistant-chat`, { body: { messages: next, lang, page } });
+      const reply = (data && data.reply) || fallback;
+      const suggestions = (data && Array.isArray(data.suggestions)) ? data.suggestions : [];
+      setMessages(m => [...m, { role: `assistant`, content: reply, suggestions }]);
+      setTyping({ idx: next.length, shown: 0 });
     } catch (_) {
-      setMessages(m => [...m, { role: `assistant`, content: fallback }]);
+      setMessages(m => [...m, { role: `assistant`, content: fallback, suggestions: [] }]);
     } finally {
       setLoading(false);
     }
@@ -274,9 +286,13 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
 
   const panel = open && createPortal(
     <div dir={isRTL ? `rtl` : `ltr`} role="dialog" aria-label={t.name}
-      style={{ position: `fixed`, bottom: 150, insetInlineEnd: 24, zIndex: 941, width: `min(360px, calc(100vw - 32px))`, height: `min(70vh, 560px)`, display: `flex`, flexDirection: `column`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: `0 18px 50px rgba(0,0,0,0.55)`, overflow: `hidden`, fontFamily: `'Heebo',sans-serif` }}>
+      style={{ position: `fixed`, bottom: 150, insetInlineEnd: 24, zIndex: 941, width: `min(360px, calc(100vw - 32px))`, height: `min(70vh, 560px)`, display: `flex`, flexDirection: `column`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: `0 18px 50px rgba(0,0,0,0.55)`, overflow: `hidden`, fontFamily: `'Heebo',sans-serif`, animation: `sfaliIn 0.22s ease` }}>
+      <style>{"@keyframes sfaliIn{from{opacity:0;transform:translateY(14px) scale(0.97)}to{opacity:1;transform:none}}@keyframes sfaliBlink{0%,80%,100%{opacity:0.25}40%{opacity:1}}.sfali-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#9a9a9a;margin:0 2px;animation:sfaliBlink 1.2s infinite}.sfali-dot:nth-child(2){animation-delay:0.2s}.sfali-dot:nth-child(3){animation-delay:0.4s}"}</style>
       <div style={{ display: `flex`, alignItems: `center`, gap: 10, padding: `12px 14px`, background: `linear-gradient(135deg, rgba(255,107,53,0.16), rgba(255,107,53,0.04))`, borderBottom: `1px solid ${COLORS.border}` }}>
-        {avatar(38)}
+        <div style={{ position: `relative`, flexShrink: 0 }}>
+          {avatar(38)}
+          <span style={{ position: `absolute`, bottom: 1, insetInlineEnd: 1, width: 10, height: 10, borderRadius: `50%`, background: `#22c55e`, border: `2px solid ${COLORS.bg}` }} aria-hidden="true" />
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15 }}>{t.name}</div>
           <div style={{ color: COLORS.gray, fontSize: 11.5 }}>{t.role}</div>
@@ -285,12 +301,34 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
       </div>
       <div ref={scrollRef} style={{ flex: 1, overflowY: `auto`, padding: 14, display: `flex`, flexDirection: `column`, gap: 10 }}>
         <div style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>{avatar(26)}<div style={bubbleBot}>{t.greet}</div></div>
-        {messages.map((m, i) => (
-          m.role === `user`
-            ? <div key={i} style={{ alignSelf: `flex-end`, background: COLORS.accentBtn, color: `#fff`, borderRadius: 14, borderEndEndRadius: 4, padding: `9px 12px`, fontSize: 13.5, lineHeight: 1.55, maxWidth: `82%`, whiteSpace: `pre-wrap` }}>{m.content}</div>
-            : <div key={i} style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>{avatar(26)}<div style={bubbleBot}>{m.content}</div></div>
-        ))}
-        {loading && <div style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>{avatar(26)}<div style={{ ...bubbleBot, color: COLORS.gray, letterSpacing: 2 }}>···</div></div>}
+        {messages.map((m, i) => {
+          if (m.role === `user`) return <div key={i} style={{ alignSelf: `flex-end`, background: COLORS.accentBtn, color: `#fff`, borderRadius: 14, borderEndEndRadius: 4, padding: `9px 12px`, fontSize: 13.5, lineHeight: 1.55, maxWidth: `82%`, whiteSpace: `pre-wrap` }}>{m.content}</div>;
+          const isTyping = typing && typing.idx === i;
+          const text = isTyping ? m.content.slice(0, typing.shown) : m.content;
+          return (
+            <div key={i} style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>
+              {avatar(26)}
+              <div style={{ minWidth: 0, maxWidth: `82%`, display: `flex`, flexDirection: `column`, gap: 8 }}>
+                <div style={{ ...bubbleBot, maxWidth: `100%` }}>{text}{isTyping && <span style={{ opacity: 0.55 }}>▍</span>}</div>
+                {!isTyping && m.suggestions && m.suggestions.length > 0 && (
+                  <div style={{ display: `flex`, flexDirection: `column`, gap: 6 }}>
+                    {m.suggestions.map((s, si) => (
+                      <button key={si} type="button" onClick={() => { setOpen(false); try { window.location.hash = `#pets/${s.slug}`; } catch (_) {} }}
+                        style={{ display: `flex`, alignItems: `center`, gap: 9, background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: 6, cursor: `pointer`, textAlign: `start`, fontFamily: `'Heebo',sans-serif` }}
+                        onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; }}
+                        onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; }}>
+                        <img src={s.image} alt="" width="40" height="40" style={{ width: 40, height: 40, borderRadius: 8, objectFit: `cover`, objectPosition: `center top`, flexShrink: 0, background: COLORS.bgCard }} />
+                        <span style={{ flex: 1, minWidth: 0, color: COLORS.white, fontSize: 13, fontWeight: 600, overflow: `hidden`, textOverflow: `ellipsis`, whiteSpace: `nowrap` }}>{s[`name_${lang}`] || s.name_he || s.name_en}</span>
+                        <span aria-hidden="true" style={{ color: COLORS.accent, flexShrink: 0 }}>{isRTL ? `←` : `→`}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {loading && <div style={{ display: `flex`, gap: 8, alignItems: `flex-end` }}>{avatar(26)}<div style={{ ...bubbleBot, color: COLORS.gray, display: `flex`, alignItems: `center` }}><span className="sfali-dot" /><span className="sfali-dot" /><span className="sfali-dot" /></div></div>}
         {messages.length === 0 && !loading && (
           <div style={{ display: `flex`, flexWrap: `wrap`, gap: 7, marginTop: 4 }}>
             {(t.chips || []).map((c, i) => (
