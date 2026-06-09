@@ -177,6 +177,9 @@ function buildBreedHtml(d, handle) {
 <meta property="og:description" content="${descAttr}" />
 <meta property="og:image" content="${imageAttr}" />
 <meta property="og:image:secure_url" content="${imageAttr}" />
+<meta property="og:image:width" content="${image === DEFAULT_OG_IMAGE ? `1200` : `1414`}" />
+<meta property="og:image:height" content="${image === DEFAULT_OG_IMAGE ? `630` : `2000`}" />
+<meta property="og:image:type" content="${image.endsWith(`.webp`) ? `image/webp` : `image/png`}" />
 <meta property="og:image:alt" content="${nameAttr}" />
 <meta property="og:locale" content="he_IL" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -253,6 +256,9 @@ function buildBlogHtml(p, handle) {
 <meta property="og:description" content="${descAttr}" />
 <meta property="og:image" content="${imageAttr}" />
 <meta property="og:image:secure_url" content="${imageAttr}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="${image.endsWith(`.webp`) ? `image/webp` : `image/png`}" />
 <meta property="og:image:alt" content="${ogTitleAttr}" />
 <meta property="og:locale" content="he_IL" />
 <meta name="twitter:card" content="summary_large_image" />

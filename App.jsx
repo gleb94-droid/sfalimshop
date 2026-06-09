@@ -8213,8 +8213,8 @@ function CookieConsent({ lang, onAccept, onReject }) {
           transition: "all 0.2s",
           letterSpacing: "0.3px",
         }}
-        onMouseOver={e => { e.currentTarget.style.background = "#ff8255"; }}
-        onMouseOut={e => { e.currentTarget.style.background = "#FF6B35"; }}
+        onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+        onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
         >{t.accept}</button>
       </div>
     </div>
