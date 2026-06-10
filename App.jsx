@@ -4630,13 +4630,17 @@ function AdminPage({ lang }) {
     g.approval === `pending` ||
     (g.paymentStatus === `succeeded` && ![`shipped`, `delivered`].includes(g.status))
   ).length;
+  // 'Needs action' = a design awaiting approval, OR a PAID order not yet shipped/
+  // delivered (still to fulfil). Powers the clickable 'Needs action' cockpit tile.
+  const orderNeedsAction = (o) => o.design_approval_status === `pending` || (o.payment_status === `succeeded` && ![`shipped`, `delivered`].includes(o.status));
+  const passesStatusFilter = (o) => filterStatus === `all` ? true : filterStatus === `needs_action` ? orderNeedsAction(o) : o.status === filterStatus;
   const summaryCards = [
     { he: `הזמנות היום`, en: `Orders today`, ru: `Заказы сегодня`, value: String(metricGroups.filter(g => g.created >= startOfToday).length) },
     { he: `הזמנות השבוע`, en: `Orders (7d)`, ru: `Заказы (7д)`, value: String(metricGroups.filter(g => g.created >= startOfWeek).length) },
     { he: `הכנסות היום`, en: `Revenue today`, ru: `Выручка сегодня`, value: fmtMoney(revenueSince(startOfToday)) },
     { he: `הכנסות השבוע`, en: `Revenue (7d)`, ru: `Выручка (7д)`, value: fmtMoney(revenueSince(startOfWeek)) },
     { he: `הכנסות החודש`, en: `Revenue (month)`, ru: `Выручка (мес.)`, value: fmtMoney(revenueSince(startOfMonth)) },
-    { he: `דרוש טיפול`, en: `Needs action`, ru: `Требует действий`, value: String(needsActionCount), alert: needsActionCount > 0 },
+    { he: `דרוש טיפול`, en: `Needs action`, ru: `Требует действий`, value: String(needsActionCount), alert: needsActionCount > 0, filterKey: `needs_action` },
   ];
 
   return (
@@ -4702,11 +4706,11 @@ function AdminPage({ lang }) {
         {!loading && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 }}>
             {summaryCards.map((c, i) => (
-              <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${c.alert ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "14px 16px", textAlign: "start" }}>
+              <div key={i} onClick={c.filterKey ? () => setFilterStatus(filterStatus === c.filterKey ? `all` : c.filterKey) : undefined} role={c.filterKey ? "button" : undefined} tabIndex={c.filterKey ? 0 : undefined} aria-pressed={c.filterKey ? filterStatus === c.filterKey : undefined} onKeyDown={c.filterKey ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFilterStatus(filterStatus === c.filterKey ? `all` : c.filterKey); } } : undefined} style={{ background: (c.filterKey && filterStatus === c.filterKey) ? "rgba(255,107,53,0.12)" : COLORS.bgCard, border: `1px solid ${(c.alert || (c.filterKey && filterStatus === c.filterKey)) ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: "14px 16px", textAlign: "start", cursor: c.filterKey ? "pointer" : "default" }}>
                 <div style={{ color: c.alert ? COLORS.accent : COLORS.white, fontWeight: 800, fontSize: 22, fontFamily: "'Heebo',sans-serif" }}>
                   <span dir="ltr" style={{ unicodeBidi: "isolate", display: "inline-block" }}>{c.value}</span>
                 </div>
-                <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{c[lang] || c.en}</div>
+                <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{c[lang] || c.en}{c.filterKey ? (filterStatus === c.filterKey ? ` ✓` : ` →`) : ``}</div>
               </div>
             ))}
           </div>
@@ -4781,7 +4785,7 @@ function AdminPage({ lang }) {
         )}
 
         {loading ? <div style={{ color: COLORS.gray, textAlign: "center", padding: 40 }}>Loading...</div> :
-          (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).filter(orderMatchesSearch).length === 0 ? (
+          orders.filter(passesStatusFilter).filter(orderMatchesSearch).length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: COLORS.gray }}>
               <div style={{ width: 48, height: 1, background: "rgba(255,107,53,0.4)", margin: "0 auto 20px" }}></div>
               <div style={{ fontSize: 22, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", color: "#8a8a8a", marginBottom: 8 }}>—</div>
@@ -4790,7 +4794,7 @@ function AdminPage({ lang }) {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {(() => {
-                const filtered = (filterStatus === "all" ? orders : orders.filter(o => o.status === filterStatus)).filter(orderMatchesSearch);
+                const filtered = orders.filter(passesStatusFilter).filter(orderMatchesSearch);
                 // Group orders by order_group (or treat individual orders as their own group)
                 const groupsMap = {};
                 for (const o of filtered) {
