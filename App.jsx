@@ -5808,11 +5808,13 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
 
   const breakdown = (
     <div style={{ marginTop: 12, fontSize: 13 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: COLORS.gray }}>
-        <span>{tr.subtotal}</span><span style={{ color: COLORS.white }}>{`₪${subtotal}`}</span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: COLORS.gray }}>
-        <span>{tr.shipping}</span><span style={{ color: COLORS.white, textAlign: isRTL ? "left" : "right" }}>{!deliveryMethod ? tr.choose : shippingLineLabel(deliveryMethod, lang)}</span>
+      <div style={{ background: "rgba(255,255,255,0.025)", borderRadius: 10, padding: "12px 14px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: COLORS.gray }}>
+          <span>{tr.subtotal}</span><span style={{ color: COLORS.white }}>{`₪${subtotal}`}</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", color: COLORS.gray }}>
+          <span>{tr.shipping}</span><span style={{ color: COLORS.white, textAlign: isRTL ? "left" : "right" }}>{!deliveryMethod ? tr.choose : shippingLineLabel(deliveryMethod, lang)}</span>
+        </div>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${COLORS.border}`, color: COLORS.accent, fontWeight: 700, fontSize: 17, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>
         <span>{tr.total}</span><span>{`₪${total}`}</span>
@@ -6984,7 +6986,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   };
 
   const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 16 };
-  const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", display: "block", marginBottom: 8 };
+  const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, ...(lang === "en" ? { letterSpacing: "0.08em", textTransform: "uppercase" } : {}), display: "block", marginBottom: 8 };
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, paddingTop: 80, fontFamily: "'Heebo',sans-serif", direction: t.dir }}>
@@ -7009,9 +7011,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         </div>
       )}
       <div style={{ maxWidth: step === 3 ? 1100 : 700, margin: "0 auto", padding: isMobile ? "16px 14px 48px" : "24px 24px 60px", transition: "max-width 0.25s ease" }}>
-        <div style={{ display: "flex", marginBottom: 40 }}>
+        <div style={{ position: "relative", display: "flex", marginBottom: 40 }}>
+          <div aria-hidden="true" style={{ position: "absolute", top: 15, insetInlineStart: "10%", insetInlineEnd: "10%", height: 2, background: COLORS.border, zIndex: 0 }} />
+          <div aria-hidden="true" style={{ position: "absolute", top: 15, insetInlineStart: "10%", height: 2, width: `${((Math.max(1, Math.min(step, t.steps.length)) - 1) / (t.steps.length - 1)) * 80}%`, background: COLORS.accent, zIndex: 0, transition: "width 0.3s ease" }} />
           {t.steps.map((s, i) => (
-            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0, position: "relative", zIndex: 1 }}>
               <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: step >= i + 1 ? COLORS.accentBtn : COLORS.bgCard, border: `2px solid ${step >= i + 1 ? COLORS.accent : COLORS.border}`, color: step >= i + 1 ? "#fff" : COLORS.gray, fontSize: 13, fontWeight: 600 }}>{step > i + 1 ? "✓" : i + 1}</div>
               {!isVeryNarrow && <div style={{ fontSize: isMobile ? 10 : 11, color: step === i + 1 ? COLORS.accent : COLORS.gray, marginTop: 6, textAlign: "center", lineHeight: 1.25 }}>{s}</div>}
             </div>
