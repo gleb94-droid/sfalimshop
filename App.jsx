@@ -9003,13 +9003,17 @@ function Hero({ setPage, lang }) {
             onTouchEnd={e => { e.currentTarget.style.transform = "translateY(0)"; }}
             onTouchCancel={e => { e.currentTarget.style.transform = "translateY(0)"; }}>
             <ProductBadges product={p} lang={lang} />
-            <div style={{ width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 320 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <div style={{ position: "relative", width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 56%, rgba(255,107,53,0.20) 0%, rgba(255,107,53,0) 62%)", pointerEvents: "none" }} />
+              <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 320 })} alt={p.name} loading="lazy" style={{ position: "relative", width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.45))" }} />
             </div>
             <div style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
             <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
             <div style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 12, lineHeight: 1.5, marginTop: 4, minHeight: 34 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
-            <div style={{ color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontWeight: 700, fontSize: 13, marginTop: 8 }}>{formatPriceRange(p.variants)}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+              <span style={{ color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontWeight: 800, fontSize: 17 }}>{formatPriceRange(p.variants)}</span>
+              <span style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 10.5, letterSpacing: "0.03em" }}>🎨 {lang === "he" ? "העיצוב שלכם" : lang === "ru" ? "ваш дизайн" : "your design"}</span>
+            </div>
           </div>
         ))}
       </div>
