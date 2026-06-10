@@ -7706,6 +7706,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </button>
             </div>
             </div>
+            {/* Mobile sticky 'place order' pill — keeps the CTA + live total in thumb
+                reach on the long form. Centered so it clears the corner FABs (WhatsApp
+                / a11y) without covering them. Triggers handleSubmit (creates the order
+                rows + advances to the pay step) — NOT the live payment. */}
+            {isMobile && createPortal(
+              <button onClick={handleSubmit} disabled={!checkoutReady || submitting} aria-busy={submitting} aria-label={`${t.form.place} · ₪${total}`}
+                style={{ position: "fixed", bottom: "calc(16px + env(safe-area-inset-bottom))", insetInlineStart: 86, insetInlineEnd: 86, zIndex: 60, background: checkoutReady ? `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)` : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 999, padding: "13px 16px", fontSize: 14, fontWeight: 800, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif", boxShadow: "0 12px 30px rgba(0,0,0,0.55), 0 4px 16px rgba(255,107,53,0.45)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submitting ? 0.9 : 1 }}>
+                {submitting ? (<><span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: "50%", border: "2.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff", animation: "sfPaySpin 0.8s linear infinite", display: "inline-block" }} />{lang === "he" ? "יוצרים…" : lang === "ru" ? "Создаём…" : "Creating…"}</>) : (<><span style={{ opacity: 0.9 }}>{t.form.place}</span><span>₪{total}</span></>)}
+              </button>,
+              document.body
+            )}
 
             {/* Desktop sticky summary column */}
             {!isMobile && (
