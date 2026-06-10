@@ -40,7 +40,7 @@ const MAX_CHARS = 1200;
 const RATE_WINDOW_SEC = 60;
 const RATE_MAX = 20;
 // Budget guards (env-tunable without a redeploy): cap requests per day.
-const DAILY_MAX = Number(Deno.env.get("ASSISTANT_DAILY_MAX") || "1200");      // global, all visitors
+const DAILY_MAX = Number(Deno.env.get("ASSISTANT_DAILY_MAX") || "1200");      // global, all visitors (env-tunable; per-IP caps below are the single-abuser guard)
 const IP_DAILY_MAX = Number(Deno.env.get("ASSISTANT_IP_DAILY_MAX") || "80");  // per visitor
 
 const SYSTEM_PROMPT = `You are the friendly customer assistant for **Sfalim Shop** (ספלים שופ, sfalimshop.com) — a Hebrew-first print-on-demand shop in Be'er Sheva, Israel. The owner prints everything by hand in-house. Instagram: @sfalimshop. Email: hello@sfalimshop.com.
