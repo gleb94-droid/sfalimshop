@@ -4081,6 +4081,36 @@ function TrackPage({ lang, user, clearCart }) {
   );
 }
 
+// Per-order internal admin note (cockpit). Additive: writes orders.admin_note for
+// the whole order_group. Not a payment field; admins are exempt from the protect
+// trigger, so the write is allowed. Customers never see this UI.
+function OrderNote({ order, lang }) {
+  const [text, setText] = useState(order.admin_note || ``);
+  const [baseline, setBaseline] = useState(order.admin_note || ``);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const dirty = (text || ``) !== (baseline || ``);
+  const save = async () => {
+    setSaving(true); setSaved(false);
+    try {
+      const q = supabase.from(`orders`).update({ admin_note: text || null });
+      const { error } = order.order_group ? await q.eq(`order_group`, order.order_group) : await q.eq(`id`, order.id);
+      if (!error) { setBaseline(text); setSaved(true); setTimeout(() => setSaved(false), 2200); }
+    } catch (_) {}
+    setSaving(false);
+  };
+  return (
+    <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${COLORS.border}` }}>
+      <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: `uppercase`, marginBottom: 8 }}>{lang === `he` ? `📝 הערה פנימית` : lang === `ru` ? `📝 Заметка (внутренняя)` : `📝 Internal note`}</div>
+      <textarea value={text} onChange={e => setText(e.target.value)} rows={2} placeholder={lang === `he` ? `למשל: מחכים לתמונות · הודפס · נארז ונשלח` : lang === `ru` ? `Напр.: ждём фото · напечатано · упаковано` : `e.g. waiting for photos · printed · packed`} style={{ width: `100%`, boxSizing: `border-box`, background: COLORS.bg, border: `1px solid ${COLORS.border}`, color: COLORS.white, borderRadius: 8, padding: `10px 12px`, fontSize: 13, fontFamily: `'Heebo',sans-serif`, resize: `vertical`, direction: LANGS[lang].dir }} />
+      <div style={{ display: `flex`, alignItems: `center`, gap: 10, marginTop: 6 }}>
+        <button onClick={save} disabled={!dirty || saving} style={{ background: dirty ? COLORS.accentBtn : COLORS.bgCard, color: dirty ? `#fff` : COLORS.gray, border: `none`, borderRadius: 8, padding: `7px 18px`, fontSize: 12, fontWeight: 700, cursor: (dirty && !saving) ? `pointer` : `default`, fontFamily: `'Heebo',sans-serif` }}>{saving ? `…` : (lang === `he` ? `שמור` : lang === `ru` ? `Сохранить` : `Save`)}</button>
+        {saved && <span style={{ color: `#25D366`, fontSize: 12, fontFamily: `'Heebo',sans-serif` }}>✓ {lang === `he` ? `נשמר` : lang === `ru` ? `Сохранено` : `Saved`}</span>}
+      </div>
+    </div>
+  );
+}
+
 // Admin Dashboard
 function AdminPage({ lang }) {
   const t = LANGS[lang];
@@ -5005,6 +5035,7 @@ function AdminPage({ lang }) {
                             </div>
                           </div>
                         </div>
+                        <OrderNote order={order} lang={lang} />
                       </div>
                     )}
                   </div>
