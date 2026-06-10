@@ -6983,7 +6983,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     setAccountBusy(false);
   };
 
-  const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 14 };
+  const inputStyle = { width: "100%", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 14px", color: COLORS.white, fontFamily: "'Heebo',sans-serif", fontSize: 16 };
   const labelStyle = { color: COLORS.gray, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", display: "block", marginBottom: 8 };
 
   return (
@@ -7587,14 +7587,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             {submitError && <div role="alert" style={{ color: "#f87171", fontSize: 14, margin: "8px 0 16px", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "12px 16px", borderRadius: 10 }}>{submitError}</div>}
             <p style={{ color: COLORS.gray, marginBottom: 32 }}>{t.form.sub}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <div><label htmlFor="order-name" style={labelStyle}>{t.form.name}</label><input id="order-name" type="text" value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); if (fieldErrors.name) setFieldErrors(fe => ({ ...fe, name: undefined })); }} placeholder={t.form.namePh} aria-invalid={!!fieldErrors.name} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.name && <div role="alert" style={fieldErrStyle}>{fieldErrors.name}</div>}</div>
-              <div><label htmlFor="order-email" style={labelStyle}>{t.form.email}</label><input id="order-email" type="email" value={form.email} onChange={e => { setForm(p => ({ ...p, email: e.target.value })); if (fieldErrors.email) setFieldErrors(fe => ({ ...fe, email: undefined })); }} placeholder={t.form.emailPh} aria-invalid={!!fieldErrors.email} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.email && <div role="alert" style={fieldErrStyle}>{fieldErrors.email}</div>}</div>
+              <div><label htmlFor="order-name" style={labelStyle}>{t.form.name}</label><input id="order-name" type="text" autoComplete="name" enterKeyHint="next" value={form.name} onChange={e => { setForm(p => ({ ...p, name: e.target.value })); if (fieldErrors.name) setFieldErrors(fe => ({ ...fe, name: undefined })); }} placeholder={t.form.namePh} aria-invalid={!!fieldErrors.name} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.name && <div role="alert" style={fieldErrStyle}>{fieldErrors.name}</div>}</div>
+              <div><label htmlFor="order-email" style={labelStyle}>{t.form.email}</label><input id="order-email" type="email" inputMode="email" autoComplete="email" enterKeyHint="next" value={form.email} onChange={e => { setForm(p => ({ ...p, email: e.target.value })); if (fieldErrors.email) setFieldErrors(fe => ({ ...fe, email: undefined })); }} placeholder={t.form.emailPh} aria-invalid={!!fieldErrors.email} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.email && <div role="alert" style={fieldErrStyle}>{fieldErrors.email}</div>}</div>
               <div>
                 <label htmlFor="order-phone" style={labelStyle}>{`${t.form.phone} *`}</label>
                 <div role="group" aria-label={t.form.phone} style={{ display: "flex", flexWrap: "wrap", gap: 6, direction: "ltr", marginBottom: 10 }}>
                   {IL_PREFIXES.map(pf => <button key={pf.value} type="button" aria-pressed={form.phonePrefix === pf.value} onClick={() => setForm(p => ({ ...p, phonePrefix: pf.value }))} style={{ background: form.phonePrefix === pf.value ? "rgba(255,107,53,0.15)" : "#1a1a1a", border: `1px solid ${form.phonePrefix === pf.value ? "#FF6B35" : "#2a2a2a"}`, color: form.phonePrefix === pf.value ? "#FF6B35" : "#888", borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Heebo',sans-serif", transition: "all 0.15s" }}>{pf.value}</button>)}
                 </div>
-                <input id="order-phone" type="tel" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-required="true" aria-invalid={!!fieldErrors.phone} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                <input id="order-phone" type="tel" inputMode="numeric" autoComplete="tel-national" enterKeyHint="next" placeholder={t.form.phonePh} value={form.phoneNumber} maxLength={7} onChange={e => { setForm(p => ({ ...p, phoneNumber: e.target.value.replace(/\D/g, "") })); if (fieldErrors.phone) setFieldErrors(fe => ({ ...fe, phone: undefined })); }} aria-required="true" aria-invalid={!!fieldErrors.phone} style={{ ...inputStyle, borderColor: form.phoneNumber.length === 7 ? "#25D366" : COLORS.border }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = form.phoneNumber.length === 7 ? "#25D366" : COLORS.border} />
+                {!fieldErrors.phone && <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>{form.phoneNumber.length === 7 && <span aria-hidden="true" style={{ color: "#25D366", fontSize: 13 }}>✓</span>}<span style={{ color: form.phoneNumber.length === 7 ? "#25D366" : COLORS.gray, fontSize: 11 }}>{form.phoneNumber.length === 7 ? (lang === "he" ? "מצוין!" : lang === "ru" ? "Отлично!" : "Looks good!") : (lang === "he" ? "7 ספרות אחרי הקידומת" : lang === "ru" ? "7 цифр после кода" : "7 digits after the prefix")}</span></div>}
                 {fieldErrors.phone && <div role="alert" style={fieldErrStyle}>{fieldErrors.phone}</div>}
               </div>
 
@@ -7654,11 +7655,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
                   <label htmlFor="order-city" style={labelStyle}>{lang === "he" ? "עיר" : lang === "ru" ? "Город" : "City"}</label>
-                  <input id="order-city" type="text" value={form.city} onChange={e => { setForm(p => ({ ...p, city: e.target.value })); if (fieldErrors.city) setFieldErrors(fe => ({ ...fe, city: undefined })); }} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} aria-invalid={!!fieldErrors.city} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.city && <div role="alert" style={fieldErrStyle}>{fieldErrors.city}</div>}
+                  <input id="order-city" type="text" autoComplete="address-level2" value={form.city} onChange={e => { setForm(p => ({ ...p, city: e.target.value })); if (fieldErrors.city) setFieldErrors(fe => ({ ...fe, city: undefined })); }} placeholder={lang === "he" ? "תל אביב" : lang === "ru" ? "Тель-Авив" : "Tel Aviv"} aria-invalid={!!fieldErrors.city} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.city && <div role="alert" style={fieldErrStyle}>{fieldErrors.city}</div>}
                 </div>
                 <div style={{ flex: "1 1 140px", minWidth: 140 }}>
                   <label htmlFor="order-postal" style={labelStyle}>{lang === "he" ? "מיקוד" : lang === "ru" ? "Индекс" : "Postal Code"}</label>
-                  <input id="order-postal" type="text" value={form.postalCode} maxLength={7} onChange={e => { setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") })); if (fieldErrors.postal) setFieldErrors(fe => ({ ...fe, postal: undefined })); }} placeholder="1234567" aria-invalid={!!fieldErrors.postal} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.postal && <div role="alert" style={fieldErrStyle}>{fieldErrors.postal}</div>}
+                  <input id="order-postal" type="text" inputMode="numeric" autoComplete="postal-code" value={form.postalCode} maxLength={7} onChange={e => { setForm(p => ({ ...p, postalCode: e.target.value.replace(/\D/g, "") })); if (fieldErrors.postal) setFieldErrors(fe => ({ ...fe, postal: undefined })); }} placeholder="1234567" aria-invalid={!!fieldErrors.postal} style={inputStyle} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />{fieldErrors.postal && <div role="alert" style={fieldErrStyle}>{fieldErrors.postal}</div>}
                 </div>
               </div>
               <div><label htmlFor="order-notes" style={labelStyle}>{t.form.notes}</label><textarea id="order-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
@@ -7693,10 +7694,11 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               );
             })()}
-            <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+            <div style={{ marginTop: 22 }}><TrustRow lang={lang} /></div>
+            <div style={{ display: "flex", gap: 12, marginTop: 18 }}>
               <button onClick={() => setStep(product ? 2 : 1)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.form.back}</button>
-              <button onClick={handleSubmit} disabled={!checkoutReady || submitting} style={{ flex: 1, background: checkoutReady ? COLORS.accent : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>
-                {submitting ? "..." : `${t.form.place} · ₪${total}`}
+              <button onClick={handleSubmit} disabled={!checkoutReady || submitting} aria-busy={submitting} style={{ flex: 1, background: checkoutReady ? `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)` : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 10, padding: "14px", fontSize: 15, fontWeight: 700, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif", boxShadow: checkoutReady ? "0 8px 24px rgba(255,107,53,0.35)" : "none", opacity: submitting ? 0.85 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                {submitting ? (<><span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: "50%", border: "2.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff", animation: "sfPaySpin 0.8s linear infinite", display: "inline-block" }} />{lang === "he" ? "יוצרים את ההזמנה…" : lang === "ru" ? "Создаём заказ…" : "Creating your order…"}</>) : `${t.form.place} · ₪${total}`}
               </button>
             </div>
             </div>
@@ -7877,7 +7879,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 display: "block",
               }}
             >
-              {paymentProcessing ? t.payment.processing : `${t.payment.payBtn}₪${pendingTotal}${t.payment.paySuffix}`}
+              {paymentProcessing ? t.payment.processing : (<>{t.payment.payBtn}<span style={{ fontWeight: 800 }}>₪{pendingTotal}</span>{t.payment.paySuffix}</>)}
             </MagneticButton>
 
             {/* Guest clarity — no forced signup, right under the pay CTA */}
@@ -11096,6 +11098,7 @@ export default function App() {
         /* Staggered hero headline — words fade/rise in sequence on load. */
         .sf-hero-word { display: inline-block; opacity: 0; transform: translateY(0.5em); animation: sfWordIn 0.6s cubic-bezier(.2,.8,.25,1) forwards; }
         @keyframes sfWordIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes sfPaySpin { to { transform: rotate(360deg); } }
         @media (prefers-reduced-motion: reduce) { .sf-hero-word { animation: none; opacity: 1; transform: none; } }
 
         /* WCAG 2.4.7 — visible keyboard focus. Mouse clicks suppressed via :focus-visible. */
