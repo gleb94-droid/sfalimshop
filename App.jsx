@@ -6043,6 +6043,18 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const pinchRef = useRef(null);
   // Refs for native touch handlers (needed for passive:false)
   const touchHandlersRef = useRef({});
+  // The sticky mobile 'place order' pill hides once the real inline submit button
+  // scrolls into view — avoids briefly showing two CTAs at the very bottom of step 3.
+  const submitBtnRef = useRef(null);
+  const [submitInView, setSubmitInView] = useState(false);
+  useEffect(() => {
+    if (!isMobile || step !== 3) { setSubmitInView(false); return; }
+    const el = submitBtnRef.current;
+    if (!el || typeof IntersectionObserver === `undefined`) return;
+    const io = new IntersectionObserver(([e]) => setSubmitInView(e.isIntersecting), { rootMargin: `0px 0px -32px 0px` });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isMobile, step]);
 
   useEffect(() => {
     const handle = () => {
@@ -7737,7 +7749,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             <div style={{ marginTop: 22 }}><TrustRow lang={lang} /></div>
             <div style={{ display: "flex", gap: 12, marginTop: 18 }}>
               <button onClick={() => setStep(product ? 2 : 1)} style={{ background: "transparent", color: COLORS.gray, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: "12px 20px", cursor: "pointer", fontFamily: "'Heebo',sans-serif" }}>{t.form.back}</button>
-              <button onClick={handleSubmit} disabled={!checkoutReady || submitting} aria-busy={submitting} style={{ flex: 1, background: checkoutReady ? `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)` : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 10, padding: "14px", fontSize: 15, fontWeight: 700, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif", boxShadow: checkoutReady ? "0 8px 24px rgba(255,107,53,0.35)" : "none", opacity: submitting ? 0.85 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+              <button ref={submitBtnRef} onClick={handleSubmit} disabled={!checkoutReady || submitting} aria-busy={submitting} style={{ flex: 1, background: checkoutReady ? `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)` : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 10, padding: "14px", fontSize: 15, fontWeight: 700, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif", boxShadow: checkoutReady ? "0 8px 24px rgba(255,107,53,0.35)" : "none", opacity: submitting ? 0.85 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
                 {submitting ? (<><span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: "50%", border: "2.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff", animation: "sfPaySpin 0.8s linear infinite", display: "inline-block" }} />{lang === "he" ? "יוצרים את ההזמנה…" : lang === "ru" ? "Создаём заказ…" : "Creating your order…"}</>) : `${t.form.place} · ₪${total}`}
               </button>
             </div>
@@ -7746,7 +7758,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 reach on the long form. Centered so it clears the corner FABs (WhatsApp
                 / a11y) without covering them. Triggers handleSubmit (creates the order
                 rows + advances to the pay step) — NOT the live payment. */}
-            {isMobile && createPortal(
+            {isMobile && !submitInView && createPortal(
               <button onClick={handleSubmit} disabled={!checkoutReady || submitting} aria-busy={submitting} aria-label={`${t.form.place} · ₪${total}`}
                 style={{ position: "fixed", bottom: "calc(16px + env(safe-area-inset-bottom))", insetInlineStart: 86, insetInlineEnd: 86, zIndex: 60, background: checkoutReady ? `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)` : COLORS.bgCard, color: checkoutReady ? "#fff" : COLORS.gray, border: "none", borderRadius: 999, padding: "13px 16px", fontSize: 14, fontWeight: 800, cursor: checkoutReady ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif", boxShadow: "0 12px 30px rgba(0,0,0,0.55), 0 4px 16px rgba(255,107,53,0.45)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submitting ? 0.9 : 1 }}>
                 {submitting ? (<><span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: "50%", border: "2.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff", animation: "sfPaySpin 0.8s linear infinite", display: "inline-block" }} />{lang === "he" ? "יוצרים…" : lang === "ru" ? "Создаём…" : "Creating…"}</>) : (<><span style={{ opacity: 0.9 }}>{t.form.place}</span><span>₪{total}</span></>)}
@@ -9340,7 +9352,7 @@ function MugsPage({ lang, setPage }) {
           </div>
           <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(4, 1fr)`, gap: isMobile ? 12 : 16, marginBottom: 24 }}>
             {mugDesigns.map((d) => (
-              <button key={d.slug} type="button" onClick={() => setPage(`pets`)} aria-label={`${d[`name_${lang}`] || d.name_he} · ₪59`}
+              <button key={d.slug} type="button" onClick={() => { try { window.location.hash = `#pets/${d.slug}`; } catch (_) { setPage(`pets`); } }} aria-label={`${d[`name_${lang}`] || d.name_he} · ₪59`}
                 style={{ position: `relative`, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: 10, cursor: `pointer`, transition: `border-color 0.2s, transform 0.2s`, overflow: `hidden` }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = `translateY(-4px)`; }}
                 onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = `translateY(0)`; }}>
@@ -13304,6 +13316,8 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
     previewProduct === `shirt` ? (selectedColor?.id === `black` ? `shirt-black` : `shirt-white`) :
     `portrait`;
   const viewIdx = Math.max(0, views.findIndex(v => v.key === currentViewKey));
+  const VIEW_NAMES = { portrait: { he: `דיוקן`, en: `Portrait`, ru: `Портрет` }, "shirt-white": { he: `חולצה לבנה`, en: `White tee`, ru: `Белая футболка` }, "shirt-black": { he: `חולצה שחורה`, en: `Black tee`, ru: `Чёрная футболка` }, mug: { he: `ספל`, en: `Mug`, ru: `Кружка` } };
+  const viewLabel = (() => { const vn = VIEW_NAMES[views[viewIdx]?.key]; return vn ? (vn[lang] || vn.en) : `${viewIdx + 1} / ${views.length}`; })();
   const goView = (dir) => { if (views.length < 2) return; const n = views.length; views[(viewIdx + dir + n) % n].apply(); };
 
   const touchStartX = useRef(null);
@@ -13362,8 +13376,8 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
                   <polyline points={lang === `he` ? `15 18 9 12 15 6` : `9 18 15 12 9 6`} />
                 </svg>
               </button>
-              <div aria-live="polite" style={{ position: `absolute`, bottom: 10, left: `50%`, transform: `translateX(-50%)`, direction: `ltr`, background: `rgba(0,0,0,0.55)`, color: `#fff`, borderRadius: 20, padding: `5px 14px`, fontSize: 11, fontFamily: "'IBM Plex Mono','Courier New',monospace", letterSpacing: `0.12em`, backdropFilter: `blur(6px)`, pointerEvents: `none` }}>
-                {viewIdx + 1} / {views.length}
+              <div aria-live="polite" style={{ position: `absolute`, bottom: 10, left: `50%`, transform: `translateX(-50%)`, direction: lang === `he` ? `rtl` : `ltr`, background: `rgba(0,0,0,0.55)`, color: `#fff`, borderRadius: 20, padding: `5px 14px`, fontSize: 11, fontWeight: 600, fontFamily: "'Heebo',sans-serif", letterSpacing: `0.04em`, whiteSpace: `nowrap`, backdropFilter: `blur(6px)`, pointerEvents: `none` }}>
+                {viewLabel}
               </div>
             </>
           )}
