@@ -9000,7 +9000,8 @@ function Hero({ setPage, lang }) {
     return () => window.removeEventListener("resize", handle);
   }, []);
   const isMobile = vw < 768;
-  const gridCols = vw >= 900 ? "repeat(4, 1fr)" : vw >= 600 ? "repeat(2, 1fr)" : "1fr";
+  const colCount = Math.min(products.length, 4);
+  const gridCols = vw >= 900 ? `repeat(${colCount}, 1fr)` : vw >= 600 ? "repeat(2, 1fr)" : "1fr";
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
@@ -9040,7 +9041,7 @@ function Hero({ setPage, lang }) {
         <TrustRow lang={lang} />
       </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 900 ? 900 : vw >= 600 ? 560 : 420, transform: `translateY(${pCards}px)`, willChange: "transform" }}>
+      <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 900 ? colCount * 224 : vw >= 600 ? 560 : 420, justifyContent: "center", transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
           <div key={p.id} onClick={() => setPage("order")}
             role="button" tabIndex={0}
