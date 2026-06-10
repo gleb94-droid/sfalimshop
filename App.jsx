@@ -8605,6 +8605,31 @@ function useScrollReveal(ref) {
   return visible;
 }
 
+// Gentle on-scroll reveal wrapper for home sections — fades + rises in as it enters
+// the viewport. Falls OPEN (visible) under reduced-motion / no IntersectionObserver,
+// so content can never get stuck hidden.
+function ScrollReveal({ children, y = 24 }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return true;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
+    return false;
+  });
+  useEffect(() => {
+    if (visible) return;
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.12 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [visible]);
+  return (
+    <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? "none" : `translateY(${y}px)`, transition: "opacity 0.7s ease, transform 0.7s cubic-bezier(.2,.6,.2,1)" }}>
+      {children}
+    </div>
+  );
+}
+
 // ============ PARALLAX HOOK — scroll-driven depth (desktop only) ============
 function useParallax(factor = 0.2) {
   const [offset, setOffset] = useState(0);
@@ -11229,6 +11254,11 @@ export default function App() {
         @keyframes sfPhraseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
         .sf-phrase { animation: sfPhraseIn 0.8s ease both; }
         @media (prefers-reduced-motion: reduce) { .sf-phrase { animation: none; } }
+        /* Tactile tap feedback — on touch devices, buttons & links gently press in. */
+        @media (hover: none) {
+          button:active, a:active { transform: scale(0.97); transition: transform 0.07s ease; }
+        }
+        @media (prefers-reduced-motion: reduce) { button:active, a:active { transform: none; } }
         @keyframes sfPaySpin { to { transform: rotate(360deg); } }
         @media (prefers-reduced-motion: reduce) { .sf-hero-word { animation: none; opacity: 1; transform: none; } }
 
@@ -11431,7 +11461,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><PhraseBand lang={lang} reduceMotion={reduceMotion} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
