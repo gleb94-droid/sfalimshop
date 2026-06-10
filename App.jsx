@@ -7621,6 +7621,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                           <span style={{ display: "block", color: COLORS.gray, fontSize: 11.5, marginTop: 2, lineHeight: 1.4 }}>{m.note[lang] || m.note.en}</span>
                         </span>
                         <span dir="ltr" style={{ flexShrink: 0, color: sel ? COLORS.accent : COLORS.grayLight, fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", unicodeBidi: "isolate" }}>{deliveryPriceLabel(m.id, lang)}</span>
+                        <span aria-hidden="true" style={{ flexShrink: 0, width: 18, height: 18, borderRadius: "50%", border: `2px solid ${sel ? COLORS.accent : COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center", marginInlineStart: 2 }}>{sel && <span style={{ width: 9, height: 9, borderRadius: "50%", background: COLORS.accent }} />}</span>
                       </button>
                     );
                   })}
@@ -13066,6 +13067,13 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               <div style={{ display: `flex`, alignItems: `center`, gap: 7, marginBottom: 12, color: COLORS.gray, fontSize: 12.5, fontFamily: `'Heebo',sans-serif` }}>
                 <span aria-hidden="true">🎁</span>
                 <span>{lang === `he` ? `מתנה מושלמת — קל לארוז ולתת` : lang === `ru` ? `Идеальный подарок — легко упаковать и подарить` : `A perfect gift — easy to wrap and give`}</span>
+              </div>
+            )}
+            {/* Shirt framing — reframes the mug→shirt price step (₪59→₪119) as quality, not a jump. */}
+            {previewProduct === `shirt` && (
+              <div style={{ display: `flex`, alignItems: `center`, gap: 7, marginBottom: 12, color: COLORS.gray, fontSize: 12.5, fontFamily: `'Heebo',sans-serif` }}>
+                <span aria-hidden="true">👕</span>
+                <span>{lang === `he` ? `אוברסייז · 100% כותנה סרוקה · גזרה רחבה ונעימה` : lang === `ru` ? `Оверсайз · 100% чёсаный хлопок · свободный удобный крой` : `Oversize · 100% combed cotton · relaxed comfy fit`}</span>
               </div>
             )}
             {/* Add to cart — appears only after a product is selected; adds the
