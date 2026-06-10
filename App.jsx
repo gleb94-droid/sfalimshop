@@ -2076,7 +2076,7 @@ const ANALYTICS = {
 // Staff bypass is password-gated on the maintenance page (VITE_STAFF_PASSWORD →
 // sessionStorage flag). ?staff=1 only auto-opens that password field; it no
 // longer bypasses on its own.
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 // Sfali AI assistant widget. Default OFF — flip to true once the `assistant-chat`
 // edge function is deployed AND the ANTHROPIC_API_KEY secret is set in Supabase.
 // Hidden in the public preview regardless; the edge fn has its own kill-switch
