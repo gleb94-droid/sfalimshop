@@ -9075,6 +9075,43 @@ function Hero({ setPage, lang }) {
 
 // HomeMugsBanner — surfaces the core product (mugs) high on the home page and
 // funnels to the /mugs hub. Compact promo: copy + a few real BLOOM-mug photos + CTA.
+// Home "phrase band" — a slow, calm rotation of warm, on-brand one-liners about the
+// pet bond + the BLOOM idea. Emoji-free by design (premium feel). Trilingual he/en/ru.
+// Content written by the content-writer agent (brand voice; honest — never "hand-drawn").
+const PHRASE_BAND = [
+  { he: `הבית מתחיל איפה שהזנב מתחיל לכשכש`, en: `Home is wherever the tail starts wagging`, ru: `Дом там, где начинает вилять хвост` },
+  { he: `אהבה היא מי שמחכה לך מאחורי הדלת`, en: `Love is whoever waits behind the door for you`, ru: `Любовь — это тот, кто ждёт тебя за дверью` },
+  { he: `הם נשארים איתנו רק רגע — אבל ממלאים את כל הבית`, en: `They stay a short while, yet fill the whole house`, ru: `Они с нами недолго, но заполняют весь дом` },
+  { he: `הרגע הכי טוב ביום הוא לחזור אליהם הביתה`, en: `The best part of the day is coming home to them`, ru: `Лучшая часть дня — вернуться домой к ним` },
+  { he: `כל חיה כזאת ראויה לדיוקן משלה`, en: `Every one of them deserves a portrait of their own`, ru: `Каждый из них достоин собственного портрета` },
+  { he: `להפוך את בן הבית האהוב ליצירת אמנות`, en: `Turn your favorite family member into art`, ru: `Превратите любимца в произведение искусства` },
+  { he: `מזכרת קטנה לחבר הכי נאמן שלך`, en: `A little keepsake of your most loyal friend`, ru: `Маленькая память о самом верном друге` },
+  { he: `כלבים אוהבים אותך כאילו אין מחר`, en: `Dogs love you like there's no tomorrow`, ru: `Собаки любят тебя так, будто завтра не будет` },
+  { he: `החתול שלך לא מתעלם ממך — הוא פשוט עסוק`, en: `Your cat isn't ignoring you — it's just busy`, ru: `Кот тебя не игнорирует — он просто занят` },
+  { he: `המקום הכי נוח בבית כבר תפוס על ידי החתול`, en: `The best seat in the house is already taken by the cat`, ru: `Лучшее место в доме уже занято котом` },
+];
+
+function PhraseBand({ lang, reduceMotion }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (reduceMotion) return; // hold on the first phrase when reduced motion is on
+    const id = setInterval(() => setI(n => (n + 1) % PHRASE_BAND.length), 5000);
+    return () => clearInterval(id);
+  }, [reduceMotion]);
+  const p = PHRASE_BAND[i];
+  const text = p[lang] || p.en;
+  return (
+    <div style={{ direction: lang === `he` ? `rtl` : `ltr`, padding: `8px 24px 40px`, display: `flex`, justifyContent: `center` }}>
+      <div style={{ display: `flex`, alignItems: `center`, gap: 14, maxWidth: 740, width: `100%`, justifyContent: `center`, minHeight: 64, borderTop: `1px solid ${COLORS.border}`, borderBottom: `1px solid ${COLORS.border}`, padding: `20px 18px` }}>
+        <span aria-hidden="true" style={{ color: COLORS.accent, flexShrink: 0, opacity: 0.85, display: `inline-flex` }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6.5" cy="9.5" rx="1.8" ry="2.3"/><ellipse cx="10.5" cy="6.8" rx="1.9" ry="2.5"/><ellipse cx="15" cy="6.8" rx="1.9" ry="2.5"/><ellipse cx="18.5" cy="9.5" rx="1.8" ry="2.3"/><path d="M12.5 11.3c3 0 5.2 2.2 5.2 4.6 0 2-1.7 3-3.3 2.6-.9-.2-1.3-.6-1.9-.6s-1 .4-1.9.6c-1.6.4-3.3-.6-3.3-2.6 0-2.4 2.2-4.6 5.2-4.6z"/></svg>
+        </span>
+        <span key={i} className="sf-phrase" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontWeight: 500, fontSize: `clamp(17px, 3.4vw, 23px)`, color: `#dccfbf`, lineHeight: 1.4, textAlign: `center` }} aria-live="polite">{text}</span>
+      </div>
+    </div>
+  );
+}
+
 function HomeMugsBanner({ lang, setPage }) {
   const isRTL = lang === `he`;
   const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
@@ -11177,6 +11214,9 @@ export default function App() {
         /* Staggered hero headline — words fade/rise in sequence on load. */
         .sf-hero-word { display: inline-block; opacity: 0; transform: translateY(0.5em); animation: sfWordIn 0.6s cubic-bezier(.2,.8,.25,1) forwards; }
         @keyframes sfWordIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes sfPhraseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .sf-phrase { animation: sfPhraseIn 0.8s ease both; }
+        @media (prefers-reduced-motion: reduce) { .sf-phrase { animation: none; } }
         @keyframes sfPaySpin { to { transform: rotate(360deg); } }
         @media (prefers-reduced-motion: reduce) { .sf-hero-word { animation: none; opacity: 1; transform: none; } }
 
@@ -11379,7 +11419,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
+            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><PhraseBand lang={lang} reduceMotion={reduceMotion} /><EventOrdersSection lang={lang} /><EventMugsSection lang={lang} /><Reviews lang={lang} /></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
