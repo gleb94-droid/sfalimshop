@@ -10174,6 +10174,20 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
   // A11y: trap focus in the drawer while open; restore to the cart button on close.
   const cartDialogRef = useDialogFocus(open);
 
+  // A touch of social proof at the cart decision point — the top active review.
+  // Hides gracefully if the testimonials table is empty/missing.
+  const [topReview, setTopReview] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data } = await supabase.from("testimonials").select("*").eq("is_active", true).order("sort_order", { ascending: true }).order("created_at", { ascending: false }).limit(1);
+        if (alive) setTopReview((data && data[0]) || null);
+      } catch (_) { if (alive) setTopReview(null); }
+    })();
+    return () => { alive = false; };
+  }, []);
+
   const TR = {
     he: { title: "סל הקניות", empty: "הסל ריק", emptySub: "הוסיפו מוצרים כדי להתחיל", subtotal: "סכום ביניים", shipping: "משלוח", shipAtCheckout: "נקבע בקופה", total: "סה״כ", checkout: "מעבר לתשלום מאובטח", remove: "הסר", close: "סגירה", guestNote: "תשלום כאורח · ללא צורך בהרשמה", trustReceipt: "תשלום מאובטח דרך Tranzila · קבלה תישלח למייל" },
     en: { title: "Your cart", empty: "Your cart is empty", emptySub: "Add products to get started", subtotal: "Subtotal", shipping: "Shipping", shipAtCheckout: "At checkout", total: "Total", checkout: "Secure checkout", remove: "Remove", close: "Close", guestNote: "Guest checkout · no account needed", trustReceipt: "Secure payment via Tranzila · receipt emailed" },
@@ -10337,6 +10351,15 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
               );
             })()}
             {/* Trust strip — supports the buying decision right by the checkout CTA */}
+            {topReview && (
+              <div style={{ marginBottom: 14, padding: "11px 13px", background: "rgba(255,255,255,0.025)", border: `1px solid ${COLORS.border}`, borderRadius: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5, flexWrap: "wrap" }}>
+                  <span aria-hidden="true" style={{ color: "#FFB800", fontSize: 12, letterSpacing: "1px" }}>{"★".repeat(Math.max(1, Math.min(5, Math.round(Number(topReview.rating) || 5))))}</span>
+                  <span style={{ color: COLORS.white, fontSize: 11.5, fontWeight: 700, fontFamily: "'Heebo',sans-serif" }}>{(topReview[`author_name_${lang}`] || topReview.author_name || "").trim()}{topReview.author_city ? ` · ${topReview.author_city}` : ""}</span>
+                </div>
+                <div style={{ color: COLORS.gray, fontSize: 11.5, lineHeight: 1.55, fontFamily: "'Heebo',sans-serif", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{`“${topReview[`body_${lang}`] || topReview.body_he || topReview.body_en || ""}”`}</div>
+              </div>
+            )}
             <div style={{ marginBottom: 15 }}><TrustStrip lang={lang} /></div>
             <button onClick={onCheckout} style={{
               width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none",
