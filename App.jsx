@@ -12632,7 +12632,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
           {/* Pre-launch: no price shown — the breed detail offers "Join the
               BLOOM Family" instead of a purchase. */}
           <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: "'Heebo',sans-serif" }}>{preview ? `` : ((Number(design.price_mug) || Number(design.price_sticker)) ? `${priceFrom}${Number(design.price_mug) || Number(design.price_sticker)}` : ``)}</span>
-          <span style={{ color: hovered ? COLORS.accent : COLORS.white, fontSize: 12, fontFamily: "'Heebo',sans-serif", fontWeight: 700, transition: "color 0.2s", letterSpacing: "0.3px" }}>{lang === "he" ? "←" : "→"}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: hovered ? COLORS.accentBtn : "rgba(255,107,53,0.12)", color: hovered ? "#fff" : COLORS.accent, fontSize: 11.5, fontFamily: "'Heebo',sans-serif", fontWeight: 700, padding: "5px 12px", borderRadius: 999, transition: "background 0.2s, color 0.2s", whiteSpace: "nowrap" }}>{preview ? (lang === "he" ? "גלו" : lang === "ru" ? "Открыть" : "Discover") : (lang === "he" ? "בחרו מוצר" : lang === "ru" ? "Выбрать" : "Pick a product")} {lang === "he" ? "←" : "→"}</span>
         </div>
       </div>
     </div>
@@ -13058,6 +13058,12 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                   {(() => { const ml = previewProduct === `mug` ? (lang === `he` ? `⚡ מוכן תוך 2–3 ימים` : lang === `ru` ? `⚡ Готово за 2–3 дня` : `⚡ Ready in 2–3 days`) : previewProduct === `shirt` ? (lang === `he` ? `👕 הכנה ומשלוח 5–7 ימי עסקים` : lang === `ru` ? `👕 Изготовление и доставка 5–7 раб. дней` : `👕 Made & shipped in 5–7 business days`) : t.madeToOrder; return ml ? <span style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, letterSpacing: `0.04em` }}>{ml}</span> : null; })()}
                   {t.shipFlat && <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif`, lineHeight: 1.5 }}>{t.shipFlat}</span>}
                 </div>
+              </div>
+            )}
+            {previewProduct && (
+              <div style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 16, flexWrap: `wrap`, marginBottom: 20, color: COLORS.gray, fontSize: 11.5, fontFamily: `'Heebo',sans-serif` }}>
+                <span style={{ display: `inline-flex`, alignItems: `center`, gap: 5 }}><AboutIcon name="lock" size={13} color={COLORS.gray} />{lang === `he` ? `תשלום מאובטח` : lang === `ru` ? `Безопасная оплата` : `Secure payment`}</span>
+                <span style={{ display: `inline-flex`, alignItems: `center`, gap: 5 }}>🛡️ {lang === `he` ? `אחריות פגם — נתקן או נחזיר` : lang === `ru` ? `Гарантия при браке` : `Defect guarantee`}</span>
               </div>
             )}
             </>)}
