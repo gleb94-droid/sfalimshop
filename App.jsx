@@ -9128,6 +9128,125 @@ const PHRASE_BAND = [
   { he: `המקום הכי נוח בבית כבר תפוס על ידי החתול`, en: `The best seat in the house is already taken by the cat`, ru: `Лучшее место в доме уже занято котом` },
 ];
 
+// EmotionalHero — the warm, calm first impression (replaces the 70-card float as the
+// opener). One living BLOOM portrait (warm glow + gentle float, slow rotation through a
+// few bestsellers, breed name) + an emotional headline + an inline "find your pet"
+// search + a quiet maker/trust line + the top review. The 70-collection moves below.
+// Photo-ready: the portrait slot can take a real product photo later.
+function EmotionalHero({ lang, setPage, reduceMotion }) {
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
+  const [picks, setPicks] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [q, setQ] = useState(``);
+  const [review, setReview] = useState(null);
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+
+  // A few bestseller portraits for the slow rotation (fallback to any active).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const sel = `slug,name_he,name_en,name_ru,mockup_url,mockup_bg`;
+        const { data } = await supabase.from(`pet_designs`).select(sel).eq(`is_active`, true).eq(`is_bestseller`, true).order(`sort_order`, { ascending: true }).limit(6);
+        let rows = (data || []).filter(d => d.mockup_url);
+        if (rows.length < 2) {
+          const { data: d2 } = await supabase.from(`pet_designs`).select(sel).eq(`is_active`, true).order(`sort_order`, { ascending: true }).limit(6);
+          rows = (d2 || []).filter(d => d.mockup_url);
+        }
+        if (alive) setPicks(rows.slice(0, 4));
+      } catch (_) {}
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  // Top active review for the quiet trust line (hides if none).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data } = await supabase.from(`testimonials`).select(`*`).eq(`is_active`, true).order(`sort_order`, { ascending: true }).order(`created_at`, { ascending: false }).limit(1);
+        if (alive) setReview((data && data[0]) || null);
+      } catch (_) {}
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    if (reduceMotion || picks.length < 2) return;
+    const tmr = setInterval(() => setIdx(i => (i + 1) % picks.length), 5200);
+    return () => clearInterval(tmr);
+  }, [reduceMotion, picks.length]);
+
+  const cur = picks.length ? picks[idx % picks.length] : null;
+  const breedName = cur ? (cur[`name_${lang}`] || cur.name_he || cur.name_en || ``) : ``;
+
+  const go = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const query = q.trim();
+    try { if (query) sessionStorage.setItem(`sf_hero_breed_q`, query); } catch (_) {}
+    setPage(`pets`);
+  };
+
+  const C = {
+    he: { eyebrow: `דיוקנאות חיות מאוירים`, h1a: `הם ממלאים את כל הבית.`, h1b: `עכשיו גם את הספל.`, sub: `הפכו את החיה שאתם אוהבים למזכרת — על ספל, חולצה או הדפס.`, ph: `איזו חיה שלכם?`, find: `מצאו`, seeAll: `ראו את כל ה-70 ←`, trust: `70 גזעים · מודפס אצלי, בבאר שבע` },
+    en: { eyebrow: `Illustrated pet portraits`, h1a: `They fill the whole house.`, h1b: `Now the mug, too.`, sub: `Turn the pet you love into a keepsake — on a mug, shirt or print.`, ph: `Your pet's breed?`, find: `Find`, seeAll: `See all 70 →`, trust: `70 breeds · printed by me, in Be'er Sheva` },
+    ru: { eyebrow: `Иллюстрированные портреты питомцев`, h1a: `Они заполняют весь дом.`, h1b: `Теперь и кружку.`, sub: `Преврати любимца в тёплую память — на кружке, футболке или принте.`, ph: `Порода вашего питомца?`, find: `Найти`, seeAll: `Все 70 →`, trust: `70 пород · печатаю сам, в Беэр-Шеве` },
+  };
+  const t = C[lang] || C.he;
+  const reviewName = review ? (review[`author_name_${lang}`] || review.author_name || ``) : ``;
+  const reviewBody = review ? (review[`body_${lang}`] || review.body_he || review.body_en || ``) : ``;
+  const stars = review ? Math.max(1, Math.min(5, Math.round(Number(review.rating) || 5))) : 0;
+
+  return (
+    <div style={{ direction: isRTL ? `rtl` : `ltr`, minHeight: isMobile ? `auto` : `92vh`, display: `flex`, flexDirection: `column`, alignItems: `center`, justifyContent: `center`, textAlign: `center`, padding: isMobile ? `90px 22px 40px` : `104px 24px 64px`, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.10) 0%, transparent 60%), ${COLORS.bg}`, position: `relative`, zIndex: 1 }}>
+      <div className="reveal" style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 22, color: COLORS.accent, fontSize: 11.5, fontWeight: 600, letterSpacing: `0.1em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>{t.eyebrow}</div>
+
+      <h1 className="reveal" data-delay="1" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(30px,7vw,58px)`, lineHeight: 1.08, letterSpacing: `-0.5px`, color: COLORS.white, margin: `0 0 16px`, maxWidth: 720 }}>
+        {t.h1a}<br /><span style={{ color: COLORS.accent, fontStyle: `italic` }}>{t.h1b}</span>
+      </h1>
+      <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.6, margin: `0 auto 26px`, maxWidth: 500, fontWeight: 300 }}>{t.sub}</p>
+
+      <div className="reveal" data-delay="3" style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 270 : 330, marginBottom: 20 }}>
+        <div aria-hidden="true" style={{ position: `absolute`, inset: `-8% -8% 6%`, background: `radial-gradient(ellipse at 50% 50%, rgba(255,107,53,0.26) 0%, rgba(255,107,53,0) 66%)`, pointerEvents: `none`, zIndex: 0 }} />
+        <div className={reduceMotion ? `` : `sf-hero-float`} style={{ position: `relative`, zIndex: 1 }}>
+          {cur ? (
+            <SmartImage key={cur.slug} src={transformImage(cur.mockup_url, { width: 720 })} alt={breedName} loading="eager" className="sf-hero-portrait" style={{ width: `100%`, height: `auto`, maxHeight: isMobile ? `46vh` : `54vh`, objectFit: `contain`, display: `block`, margin: `0 auto`, filter: `drop-shadow(0 18px 30px rgba(0,0,0,0.5))` }} />
+          ) : (
+            <div style={{ width: `100%`, aspectRatio: `1 / 1.2`, borderRadius: 18, background: COLORS.bgCard, border: `1px solid ${COLORS.border}` }} />
+          )}
+        </div>
+        {breedName ? <div key={`nm-${breedName}`} className="sf-hero-name" style={{ marginTop: 10, color: COLORS.grayLight || `#cfc7bd`, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: isMobile ? 16 : 19, letterSpacing: `0.3px` }}>{breedName}</div> : null}
+      </div>
+
+      <form onSubmit={go} className="reveal" data-delay="4" style={{ display: `flex`, gap: 8, width: `100%`, maxWidth: 420, marginBottom: 12, direction: isRTL ? `rtl` : `ltr` }}>
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={t.ph} aria-label={t.ph} style={{ flex: 1, minWidth: 0, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `13px 18px`, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 16, boxSizing: `border-box` }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+        <button type="submit" style={{ flexShrink: 0, background: `linear-gradient(135deg, ${COLORS.accentBtn} 0%, #A8461A 100%)`, color: `#fff`, border: `none`, borderRadius: 999, padding: `13px 22px`, fontFamily: `'Heebo',sans-serif`, fontSize: 15, fontWeight: 700, cursor: `pointer`, boxShadow: `0 8px 24px rgba(255,107,53,0.35)`, whiteSpace: `nowrap` }}>{t.find}</button>
+      </form>
+      <button onClick={() => setPage(`pets`)} className="reveal" data-delay="4" style={{ background: `transparent`, border: `none`, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, fontWeight: 600, cursor: `pointer`, marginBottom: 24, textDecoration: `underline`, textUnderlineOffset: `3px` }}>{t.seeAll}</button>
+
+      <div className="reveal" data-delay="5" style={{ display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 9 }}>
+        <div style={{ display: `inline-flex`, alignItems: `center`, gap: 7, color: COLORS.gray, fontSize: 12.5, fontFamily: `'Heebo',sans-serif` }}>
+          <span aria-hidden="true" style={{ color: COLORS.accent, display: `inline-flex` }}><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6.5" cy="9.5" rx="1.8" ry="2.3"/><ellipse cx="10.5" cy="6.8" rx="1.9" ry="2.5"/><ellipse cx="15" cy="6.8" rx="1.9" ry="2.5"/><ellipse cx="18.5" cy="9.5" rx="1.8" ry="2.3"/><path d="M12.5 11.3c3 0 5.2 2.2 5.2 4.6 0 2-1.7 3-3.3 2.6-.9-.2-1.3-.6-1.9-.6s-1 .4-1.9.6c-1.6.4-3.3-.6-3.3-2.6 0-2.4 2.2-4.6 5.2-4.6z"/></svg></span>
+          {t.trust}
+        </div>
+        {review && reviewBody ? (
+          <div style={{ display: `inline-flex`, alignItems: `center`, gap: 8, flexWrap: `wrap`, justifyContent: `center`, fontSize: 12.5, fontFamily: `'Heebo',sans-serif`, maxWidth: 430 }}>
+            <span aria-hidden="true" style={{ color: `#FFB800`, letterSpacing: `1px` }}>{`★`.repeat(stars)}</span>
+            <span style={{ color: `#cfc7bd` }}>{`"${reviewBody.length > 60 ? reviewBody.slice(0, 58) + `…` : reviewBody}"`}</span>
+            <span style={{ color: COLORS.white, fontWeight: 600 }}>· {reviewName}</span>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function PhraseBand({ lang, reduceMotion }) {
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -11252,6 +11371,10 @@ export default function App() {
         .sf-hero-word { display: inline-block; opacity: 0; transform: translateY(0.5em); animation: sfWordIn 0.6s cubic-bezier(.2,.8,.25,1) forwards; }
         @keyframes sfWordIn { to { opacity: 1; transform: translateY(0); } }
         @keyframes sfPhraseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        @keyframes sfHeroFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .sf-hero-float { animation: sfHeroFloat 6s ease-in-out infinite; }
+        .sf-hero-portrait, .sf-hero-name { animation: sfPhraseIn 0.7s ease both; }
+        @media (prefers-reduced-motion: reduce) { .sf-hero-float, .sf-hero-portrait, .sf-hero-name { animation: none; } }
         .sf-phrase { animation: sfPhraseIn 0.8s ease both; }
         @media (prefers-reduced-motion: reduce) { .sf-phrase { animation: none; } }
         /* Tactile tap feedback — on touch devices, buttons & links gently press in. */
@@ -11461,7 +11584,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
+            {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
@@ -11799,7 +11922,13 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
   // case-insensitively against names + breed_he/en/ru + breed_aliases.
   // Legacy rows (species IS NULL) only show under the All tab.
   const [speciesFilter, setSpeciesFilter] = useState(`all`);
-  const [breedQuery, setBreedQuery] = useState(``);
+  // Pre-fill from the home EmotionalHero "find your pet" search (sessionStorage handoff).
+  // PURE read in the initializer (StrictMode double-mounts both read the same value);
+  // the one-time cleanup happens in the effect below, never in the initializer.
+  const [breedQuery, setBreedQuery] = useState(() => {
+    try { return sessionStorage.getItem(`sf_hero_breed_q`) || ``; } catch (_) { return ``; }
+  });
+  useEffect(() => { try { sessionStorage.removeItem(`sf_hero_breed_q`); } catch (_) {} }, []);
   const [favOnly, setFavOnly] = useState(false); // "show favorites only" gallery filter
   const { favorites } = useFavorites();
   const pHero = useParallax(0.18);
