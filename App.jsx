@@ -9212,16 +9212,16 @@ function EmotionalHero({ lang, setPage, reduceMotion }) {
       </h1>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.6, margin: `0 auto 26px`, maxWidth: 500, fontWeight: 300 }}>{t.sub}</p>
 
-      <div className="reveal" data-delay="3" style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 270 : 330, marginBottom: 20 }}>
-        <div aria-hidden="true" style={{ position: `absolute`, inset: `-8% -8% 6%`, background: `radial-gradient(ellipse at 50% 50%, rgba(255,107,53,0.26) 0%, rgba(255,107,53,0) 66%)`, pointerEvents: `none`, zIndex: 0 }} />
-        <div className={reduceMotion ? `` : `sf-hero-float`} style={{ position: `relative`, zIndex: 1 }}>
+      <div className="reveal" data-delay="3" style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 248 : 320, marginBottom: 18 }}>
+        <div aria-hidden="true" style={{ position: `absolute`, inset: `-8% -8% 8%`, background: `radial-gradient(ellipse at 50% 50%, rgba(255,107,53,0.26) 0%, rgba(255,107,53,0) 66%)`, pointerEvents: `none`, zIndex: 0 }} />
+        {/* Fixed-size slot (portrait aspect) so a rotating / still-loading image never
+            collapses and "jumps" the layout — the space is always reserved. */}
+        <div className={reduceMotion ? `` : `sf-hero-float`} style={{ position: `relative`, zIndex: 1, width: `100%`, aspectRatio: `1414 / 2000`, margin: `0 auto` }}>
           {cur ? (
-            <SmartImage key={cur.slug} src={transformImage(cur.mockup_url, { width: 720 })} alt={breedName} loading="eager" className="sf-hero-portrait" style={{ width: `100%`, height: `auto`, maxHeight: isMobile ? `46vh` : `54vh`, objectFit: `contain`, display: `block`, margin: `0 auto`, filter: `drop-shadow(0 18px 30px rgba(0,0,0,0.5))` }} />
-          ) : (
-            <div style={{ width: `100%`, aspectRatio: `1 / 1.2`, borderRadius: 18, background: COLORS.bgCard, border: `1px solid ${COLORS.border}` }} />
-          )}
+            <SmartImage key={cur.slug} src={transformImage(cur.mockup_url, { width: 720 })} alt={breedName} loading="eager" className="sf-hero-portrait" style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block`, filter: `drop-shadow(0 18px 30px rgba(0,0,0,0.5))` }} />
+          ) : null}
         </div>
-        {breedName ? <div key={`nm-${breedName}`} className="sf-hero-name" style={{ marginTop: 10, color: COLORS.grayLight || `#cfc7bd`, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: isMobile ? 16 : 19, letterSpacing: `0.3px` }}>{breedName}</div> : null}
+        {breedName ? <div key={`nm-${breedName}`} className="sf-hero-name" style={{ marginTop: 12, color: COLORS.grayLight || `#cfc7bd`, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: isMobile ? 16 : 19, letterSpacing: `0.3px` }}>{breedName}</div> : null}
       </div>
 
       <form onSubmit={go} className="reveal" data-delay="4" style={{ display: `flex`, gap: 8, width: `100%`, maxWidth: 420, marginBottom: 12, direction: isRTL ? `rtl` : `ltr` }}>
@@ -11373,7 +11373,9 @@ export default function App() {
         @keyframes sfPhraseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
         @keyframes sfHeroFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .sf-hero-float { animation: sfHeroFloat 6s ease-in-out infinite; }
-        .sf-hero-portrait, .sf-hero-name { animation: sfPhraseIn 0.7s ease both; }
+        @keyframes sfImgFade { from { opacity: 0; } to { opacity: 1; } }
+        .sf-hero-portrait { animation: sfImgFade 0.8s ease both; }
+        .sf-hero-name { animation: sfPhraseIn 0.5s ease both; }
         @media (prefers-reduced-motion: reduce) { .sf-hero-float, .sf-hero-portrait, .sf-hero-name { animation: none; } }
         .sf-phrase { animation: sfPhraseIn 0.8s ease both; }
         @media (prefers-reduced-motion: reduce) { .sf-phrase { animation: none; } }
