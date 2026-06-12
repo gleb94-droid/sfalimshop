@@ -9217,9 +9217,16 @@ function EmotionalHero({ lang, setPage, reduceMotion }) {
         {/* Fixed-size slot (portrait aspect) so a rotating / still-loading image never
             collapses and "jumps" the layout — the space is always reserved. */}
         <div className={reduceMotion ? `` : `sf-hero-float`} style={{ position: `relative`, zIndex: 1, width: `100%`, aspectRatio: `1414 / 2000`, margin: `0 auto` }}>
-          {cur ? (
-            <SmartImage key={cur.slug} src={transformImage(cur.mockup_url, { width: 720 })} alt={breedName} loading="eager" className="sf-hero-portrait" style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block`, filter: `drop-shadow(0 18px 30px rgba(0,0,0,0.5))` }} />
-          ) : null}
+          {/* TRUE cross-fade: all portraits stacked + preloaded; only the active wrapper
+              is opaque. The cross-fade opacity lives on the WRAPPER (SmartImage manages
+              the <img>'s own load-fade, so opacity on the img itself gets overridden).
+              No re-mount + no gap → no flicker when it rotates. */}
+          {picks.map((p, i) => (
+            <div key={p.slug} aria-hidden={i !== idx} style={{ position: `absolute`, inset: 0, opacity: i === idx ? 1 : 0, transition: reduceMotion ? `none` : `opacity 0.9s ease`, pointerEvents: `none` }}>
+              <SmartImage src={transformImage(p.mockup_url, { width: 720 })} alt={i === idx ? breedName : ``} loading={i < 2 ? `eager` : `lazy`}
+                style={{ width: `100%`, height: `100%`, objectFit: `contain`, display: `block`, filter: `drop-shadow(0 18px 30px rgba(0,0,0,0.5))` }} />
+            </div>
+          ))}
         </div>
         {breedName ? <div key={`nm-${breedName}`} className="sf-hero-name" style={{ marginTop: 12, color: COLORS.grayLight || `#cfc7bd`, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: isMobile ? 16 : 19, letterSpacing: `0.3px` }}>{breedName}</div> : null}
       </div>
