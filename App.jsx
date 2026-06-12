@@ -9020,7 +9020,7 @@ function ProductBadges({ product, lang }) {
   );
 }
 
-function Hero({ setPage, lang }) {
+function Hero({ setPage, lang, compact = false }) {
   const t = LANGS[lang];
   const products = getCustomProducts(t);
   // Parallax offsets are CAPPED so they don't keep growing with scroll. Without
@@ -9039,8 +9039,19 @@ function Hero({ setPage, lang }) {
   const isMobile = vw < 768;
   const colCount = Math.min(products.length, 4);
   const gridCols = vw >= 900 ? `repeat(${colCount}, 1fr)` : vw >= 600 ? "repeat(2, 1fr)" : "1fr";
+  // compact = the home "design your own" strip (the emotional hero already owns the
+  // big headline/trust above); non-compact = the full hero (admin no-access fallback).
+  const compactHeading = lang === "he" ? "או עצבו משהו משלכם" : lang === "ru" ? "Или сделайте своё" : "Or design your own";
+  const compactSub = lang === "he" ? "ספל, חולצה או מדבקה עם העיצוב שלכם" : lang === "ru" ? "Кружка, футболка или стикер с вашим дизайном" : "A mug, shirt or sticker with your design";
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "80px 24px 120px", direction: t.dir, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
+    <div style={{ minHeight: compact ? "auto" : "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: compact ? "28px 24px 56px" : "80px 24px 120px", direction: t.dir, background: compact ? COLORS.bg : `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%), ${COLORS.bg}` }}>
+      {compact && (
+        <div className="reveal" style={{ textAlign: "center", marginBottom: isMobile ? 12 : 18 }}>
+          <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 800, fontSize: "clamp(22px,5.2vw,34px)", color: COLORS.white, margin: "0 0 8px" }}>{compactHeading}</h2>
+          <p style={{ color: COLORS.gray, fontSize: 14.5, fontFamily: "'Heebo',sans-serif", margin: 0 }}>{compactSub}</p>
+        </div>
+      )}
+      {!compact && (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", transform: `translateY(${pText}px)`, willChange: "transform" }}>
       <div className="reveal" style={{ display: "inline-block", background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: "6px 18px", marginBottom: 24, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Heebo',sans-serif" }}>{t.hero.badge}</div>
       <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: "clamp(36px,8vw,90px)", fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: "-2px", color: COLORS.white }}>
@@ -9078,7 +9089,8 @@ function Hero({ setPage, lang }) {
         <TrustRow lang={lang} />
       </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: isMobile ? 32 : 48, width: "100%", maxWidth: vw >= 900 ? colCount * 224 : vw >= 600 ? 560 : 420, justifyContent: "center", transform: `translateY(${pCards}px)`, willChange: "transform" }}>
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, marginTop: compact ? (isMobile ? 8 : 12) : (isMobile ? 32 : 48), width: "100%", maxWidth: vw >= 900 ? colCount * 224 : vw >= 600 ? 560 : 420, justifyContent: "center", transform: `translateY(${pCards}px)`, willChange: "transform" }}>
         {products.map((p, idx) => (
           <div key={p.id} onClick={() => setPage("order")}
             role="button" tabIndex={0}
@@ -11593,7 +11605,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
+            {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
