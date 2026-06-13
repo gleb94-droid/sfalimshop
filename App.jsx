@@ -4956,6 +4956,7 @@ function AdminPage({ lang }) {
                                     {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>+1</div>}
                                     {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>L-SL</div>}
                                     {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>R-SL</div>}
+                                    {it.extra_prints?.mug_shape === `rounded` && <div style={{ background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>{lang === `he` ? `☕ ספל מעוגל` : lang === `ru` ? `☕ Кружка округлая` : `☕ ROUNDED MUG`}</div>}
                                   </div>
                                   {it.design_url && (
                                     <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
@@ -5936,6 +5937,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     return new URLSearchParams(h.slice(qi + 1)).get(`paid`) === `0`;
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [mugShape, setMugShape] = useState(`classic`); // mug shape (classic|rounded) — text-only; rides extra_prints.mug_shape
   const [openCat, setOpenCat] = useState(null);
   const [showFabrics, setShowFabrics] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -6255,6 +6257,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       secondFront: { enabled: secondFront.enabled, image: secondFront.image, sameAsMain: secondFront.sameAsMain, pos: { ...secondFront.pos } },
       sleeveLeft: { ...sleeveLeft },
       sleeveRight: { ...sleeveRight },
+      mugShape: selectedProduct === `mug` ? mugShape : null,
       unitPrice,
       itemPrice: unitPrice,
     };
@@ -6304,6 +6307,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
   const resetForNewItem = () => {
     setSelectedProduct(null);
+    setMugShape(`classic`);
     setSelectedVariant(null);
     setSelectedColor(0);
     setUploadedImage(null);
@@ -6361,6 +6365,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       petNameColor: pendingBloomItem.petNameColor || null,
       // BLOOM identity for server-side price verification (pet_designs lookup).
       bloomSlug: pendingBloomItem.slug || null,
+      mugShape: pendingBloomItem.mugShape || `classic`,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -6935,7 +6940,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           // price server-side (never trust the browser-sent total):
           //   src = custom (fixed catalog) | bloom (pet_designs) ; pid/vid/slug
           //   identify the catalog entry / BLOOM design.
-          extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null },
+          extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null, mug_shape: it.productId === `mug` ? (it.mugShape || `classic`) : undefined },
         };
 
         if (user) {
@@ -7160,8 +7165,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 // Single reusable product card (used both standalone and inside the Oversize group).
                 const card = (p, num) => (
                   <div key={p.id} role="button" tabIndex={0} aria-pressed={selectedProduct === p.id} aria-label={p.name} className="reveal" data-delay={String(Math.min(num || 1, 6))}
-                    onClick={() => { setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); } }}
+                    onClick={() => { setSelectedProduct(p.id); setMugShape(`classic`); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedProduct(p.id); setMugShape(`classic`); setSelectedVariant(p.variants[0].id); setSelectedColor(0); setUploadedImage(null); setCommissionMode(false); } }}
                     style={{ background: selectedProduct === p.id ? "rgba(255,107,53,0.1)" : COLORS.bgCard, border: `2px solid ${selectedProduct === p.id ? COLORS.accent : COLORS.border}`, borderRadius: 12, padding: isMobile ? "16px 16px" : "20px 24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 0.2s" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                       {num != null && <span style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(num).padStart(2, '0')}</span>}
@@ -7471,6 +7476,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileUpload} />
                   {uploadError && <div role="alert" style={{ color: "#f87171", fontSize: 12, marginTop: 8, background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.4)", padding: "8px 12px", borderRadius: 8 }}>{uploadError}</div>}
                 </div>
+                {/* Mug shape — Classic / Rounded (text-only, same price). */}
+                {product.id === `mug` && <MugShapeSelector lang={lang} value={mugShape} onChange={setMugShape} />}
                 {/* Free size control — desktop only (mobile has it below mockup) */}
                 {!isMobile && uploadedImage && (
                   <div>
@@ -10925,6 +10932,7 @@ export default function App() {
       petNameColor: item.petNameColor || null,
       // BLOOM identity for server-side price verification (pet_designs lookup).
       bloomSlug: item.slug || null,
+      mugShape: item.mugShape || `classic`,
       imagePos: { x: 150, y: 130, size: 85 },
       backPrint: false,
       backDesign: { enabled: false, sameAsMain: true, image: null },
@@ -12950,6 +12958,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
   const [shirtSize, setShirtSize] = useState("m");
   const [zoomed, setZoomed] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(`mug`); // mug-first: opens on the mug (cheapest, sizeless entry); portrait stays view #0 in the carousel. null=portrait | `mug` | `shirt`
+  const [mugShape, setMugShape] = useState(`classic`); // mug shape (classic|rounded) — text-only; rides extra_prints.mug_shape
   const [petName, setPetName] = useState(``); // optional personalization (free)
   const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
   const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
@@ -13097,6 +13106,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       characterName: name,
       slug: design.slug,
       shirtColor: null,
+      mugShape: mugShape || `classic`,
       ...personalization,
     });
     if (onClose) onClose();
@@ -13336,6 +13346,10 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 <span aria-hidden="true">🎁</span>
                 <span>{lang === `he` ? `מתנה מושלמת — קל לארוז ולתת` : lang === `ru` ? `Идеальный подарок — легко упаковать и подарить` : `A perfect gift — easy to wrap and give`}</span>
               </div>
+            )}
+            {/* Mug shape — Classic / Rounded (text-only, same price). */}
+            {previewProduct === `mug` && (
+              <MugShapeSelector lang={lang} value={mugShape} onChange={setMugShape} />
             )}
             {/* Shirt framing — reframes the mug→shirt price step (₪59→₪119) as quality, not a jump. */}
             {previewProduct === `shirt` && (
@@ -13755,6 +13769,41 @@ function BreedStoryCard({ design, lang }) {
 // Pure presentational picker. Holds no state of its own — the parent (PetModal
 // or BreedPage) owns the selection so its preview image can react. onColorPreview
 // lets the parent flip its preview to the shirt when a color is tapped.
+// Mug shape choice (Classic / Rounded) — TEXT only, no photo. Same price for both;
+// the chosen shape rides extra_prints.mug_shape so the owner knows which to print.
+// Self-contained strings (he/en/ru) so it can drop into any mug flow (PetModal,
+// BreedPage, OrderPage) without touching their separate `t` dicts.
+const MUG_SHAPES_I18N = {
+  he: { label: `צורת הספל`, classic: `קלאסי`, classicDesc: `תחתית ישרה — הצורה הקלאסית המוכרת`, rounded: `מעוגל`, roundedDesc: `תחתית מעוגלת — צורה רכה ועדינה יותר` },
+  en: { label: `Mug shape`, classic: `Classic`, classicDesc: `Straight bottom — the familiar classic shape`, rounded: `Rounded`, roundedDesc: `Rounded bottom — a softer, more delicate shape` },
+  ru: { label: `Форма кружки`, classic: `Классическая`, classicDesc: `Прямое дно — привычная классика`, rounded: `Закруглённая`, roundedDesc: `Закруглённое дно — мягче и изящнее` },
+};
+function MugShapeSelector({ lang, value, onChange }) {
+  const L = MUG_SHAPES_I18N[lang] || MUG_SHAPES_I18N.he;
+  const isRTL = lang === `he`;
+  const labelId = React.useId(); // group label association for screen readers
+  const opts = [
+    { id: `classic`, label: L.classic, desc: L.classicDesc },
+    { id: `rounded`, label: L.rounded, desc: L.roundedDesc },
+  ];
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div id={labelId} style={{ color: COLORS.gray, fontFamily: `'IBM Plex Mono','Courier New',monospace`, fontSize: 11, letterSpacing: `1px`, textTransform: `uppercase`, marginBottom: 10 }}>{L.label}</div>
+      <div role="group" aria-labelledby={labelId} style={{ display: `flex`, gap: 8 }}>
+        {opts.map((opt) => {
+          const on = value === opt.id;
+          return (
+            <button key={opt.id} type="button" aria-pressed={on} onClick={() => onChange(opt.id)}
+              style={{ flex: 1, background: on ? `rgba(255,107,53,0.12)` : COLORS.bg, border: `2px solid ${on ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `10px 12px`, cursor: `pointer`, textAlign: isRTL ? `right` : `left`, fontFamily: `'Heebo',sans-serif`, transition: `border-color 0.15s, background 0.15s` }}>
+              <div style={{ color: on ? COLORS.accent : COLORS.white, fontWeight: 700, fontSize: 13.5, marginBottom: 3 }}>{opt.label}</div>
+              <div style={{ color: COLORS.gray, fontSize: 11, lineHeight: 1.4 }}>{opt.desc}</div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 function BloomShirtOptions({ lang, selectedColor, setSelectedColor, shirtType, setShirtType, shirtSize, setShirtSize, onColorPreview }) {
   return (
     <>
@@ -13992,6 +14041,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [petNameFont, setPetNameFont] = useState(PET_NAME_FONT_DEFAULT);
   const [petNameColor, setPetNameColor] = useState(PET_NAME_COLOR_DEFAULT);
   const [zoomed, setZoomed] = useState(false); // full-screen enlarge (shared <BloomImageCarousel>)
+  const [mugShape, setMugShape] = useState(`classic`); // mug shape (classic|rounded) — text-only; rides extra_prints.mug_shape
 
   const tt = {
     he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, shipFlat: `משלוח מ-₪27 · או מסירה אישית בבאר שבע · הכנה ומשלוח 3–7 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
@@ -14170,7 +14220,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, ...personalization });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, ...personalization });
+    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, mugShape: mugShape || `classic`, ...personalization });
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -14269,6 +14319,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                   <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
                   <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
                 </div>
+                {previewProduct === `mug` && (
+                  <MugShapeSelector lang={lang} value={mugShape} onChange={setMugShape} />
+                )}
                 {previewProduct && (
                   <div style={{ position: isMobile ? `sticky` : `static`, bottom: isMobile ? 8 : `auto`, zIndex: 6, marginBottom: 16 }}>
                   <button
