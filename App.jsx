@@ -5810,7 +5810,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
           {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11, lineHeight: 1.45, marginTop: 3 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
-          {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={13} color={it.petNameColor || COLORS.accent} /><span>{it.petName} (+₪{PET_NAME_SURCHARGE})</span></div>}
+          {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={13} color={it.petNameColor || COLORS.accent} /><span>{it.petName}{it.productId !== `mug` ? ` (+₪${PET_NAME_SURCHARGE})` : ``}</span></div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
             {it.color && (
@@ -5819,6 +5819,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
                 <span>{colorName(it.color, lang)}</span>
               </span>
             )}
+            {it.mugShape === `rounded` && <span style={{ color: COLORS.accent, fontWeight: 700 }}>☕ {lang === `he` ? `מעוגל` : lang === `ru` ? `округлая` : `rounded`}</span>}
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, direction: "ltr" }}>
@@ -7817,6 +7818,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName} × {it.qty}</div>
                     <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 3, lineHeight: 1.5 }}>
                       {it.variantLabel}
+                      {it.mugShape === `rounded` ? ` · ${lang === "he" ? "מעוגל" : lang === "ru" ? "округлая" : "rounded"}` : ""}
                       {it.backPrint ? ` · ${lang === "he" ? "הדפס אחורי" : lang === "ru" ? "Спина" : "Back print"}` : ""}
                       {it.secondFront.enabled ? ` · ${lang === "he" ? "הדפס נוסף" : lang === "ru" ? "Доп. перед" : "Extra front"}` : ""}
                       {it.sleeveLeft.enabled ? ` · ${lang === "he" ? "שרוול שמאל" : lang === "ru" ? "Левый рукав" : "Left sleeve"}` : ""}
@@ -10526,7 +10528,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
                     {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11.5, lineHeight: 1.45, marginTop: 4 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
-                    {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={14} color={it.petNameColor || COLORS.accent} /><span>{it.petName} (+₪{PET_NAME_SURCHARGE})</span></div>}
+                    {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={14} color={it.petNameColor || COLORS.accent} /><span>{it.petName}{it.productId !== `mug` ? ` (+₪${PET_NAME_SURCHARGE})` : ``}</span></div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
                       {it.color && (
@@ -10535,6 +10537,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                           <span>{colorName(it.color, lang)}</span>
                         </span>
                       )}
+                      {it.mugShape === `rounded` && <span style={{ color: COLORS.accent, fontWeight: 700 }}>☕ {lang === `he` ? `מעוגל` : lang === `ru` ? `округлая` : `rounded`}</span>}
                     </div>
                     {extras && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{extras}</div>}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
@@ -13100,7 +13103,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     if (!choice) return;
     onOrderBloom({
       productId: choice.productId,
-      price: (Number(choice.price) || 0) + petSurcharge,
+      price: (Number(choice.price) || 0), // pet-name personalization is FREE on mugs (no +₪20)
       designUrl: design.design_url,
       mockupUrl,
       characterName: name,
@@ -13319,7 +13322,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 on the product; it rides the cart line into the order and shows
                 in the admin order view. Empty → omitted. Shared shape with
                 BreedPage. */}
-            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} />
+            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug`} />
 
             {/* Shirt color/type/size — shown only when the shirt product is
                 selected. Shared with BreedPage via <BloomShirtOptions>. */}
@@ -13369,7 +13372,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
                 style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}
               >
-                <AboutIcon name="cart" size={18} color="#fff" />{lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
+                <AboutIcon name="cart" size={18} color="#fff" />{lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + (previewProduct === `mug` ? 0 : petSurcharge)}
               </button>
               </div>
             )}
@@ -13612,7 +13615,7 @@ function BloomImageCarousel({ design, lang, isMobile, previewProduct, setPreview
 // once a non-empty (trimmed) name is typed; clearing the name hides them and
 // resets font/color to defaults. The live preview lives separately (under the
 // design image) via <PetNamePreview>. Reads t.petName* labels.
-function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }) {
+function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor, freeForMug = false }) {
   const isRTL = lang === `he`;
   const show = (value || ``).trim().length > 0;
   const handleName = (raw) => {
@@ -13631,7 +13634,7 @@ function PetNameInput({ lang, t, value, onChange, font, onFont, color, onColor }
           </span>
           <span style={{ color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontSize: 15, fontWeight: 700 }}>{t.petNameTitle}</span>
         </span>
-        <span style={{ background: COLORS.accentBtn, color: `#fff`, fontFamily: "'Heebo',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{`+₪${PET_NAME_SURCHARGE}`}</span>
+        <span style={{ background: freeForMug ? `#16a34a` : COLORS.accentBtn, color: `#fff`, fontFamily: "'Heebo',sans-serif", fontSize: 12, fontWeight: 700, borderRadius: 999, padding: `3px 11px`, whiteSpace: `nowrap` }}>{freeForMug ? (lang === `he` ? `כלול בספל 🧡` : lang === `ru` ? `включено` : `included`) : `+₪${PET_NAME_SURCHARGE}`}</span>
       </div>
       <label htmlFor="bloom-pet-name" style={{ display: `block`, color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>{t.petNameLabel}</label>
       <input
@@ -13778,6 +13781,19 @@ const MUG_SHAPES_I18N = {
   en: { label: `Mug shape`, classic: `Classic`, classicDesc: `Straight bottom — the familiar classic shape`, rounded: `Rounded`, roundedDesc: `Rounded bottom — a softer, more delicate shape` },
   ru: { label: `Форма кружки`, classic: `Классическая`, classicDesc: `Прямое дно — привычная классика`, rounded: `Закруглённая`, roundedDesc: `Закруглённое дно — мягче и изящнее` },
 };
+// Tiny line-art mug icon — same cup, different BASE: straight/flat (classic) vs
+// rounded/tapered (rounded). Gives the text choice a visual without a photo.
+function MugShapeIcon({ shape, color }) {
+  const body = shape === `rounded`
+    ? `M6 6 H14 V13 Q14 18 10 18 Q6 18 6 13 Z`
+    : `M6 6 H14 V16.5 Q14 18 12.5 18 H7.5 Q6 18 6 16.5 Z`;
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <path d={body} />
+      <path d="M14 8.6 h1.7 a2.4 2.4 0 0 1 0 4.8 H14" />
+    </svg>
+  );
+}
 function MugShapeSelector({ lang, value, onChange }) {
   const L = MUG_SHAPES_I18N[lang] || MUG_SHAPES_I18N.he;
   const isRTL = lang === `he`;
@@ -13795,8 +13811,13 @@ function MugShapeSelector({ lang, value, onChange }) {
           return (
             <button key={opt.id} type="button" aria-pressed={on} onClick={() => onChange(opt.id)}
               style={{ flex: 1, background: on ? `rgba(255,107,53,0.12)` : COLORS.bg, border: `2px solid ${on ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `10px 12px`, cursor: `pointer`, textAlign: isRTL ? `right` : `left`, fontFamily: `'Heebo',sans-serif`, transition: `border-color 0.15s, background 0.15s` }}>
-              <div style={{ color: on ? COLORS.accent : COLORS.white, fontWeight: 700, fontSize: 13.5, marginBottom: 3 }}>{opt.label}</div>
-              <div style={{ color: COLORS.gray, fontSize: 11, lineHeight: 1.4 }}>{opt.desc}</div>
+              <div style={{ display: `flex`, alignItems: `center`, gap: 10 }}>
+                <MugShapeIcon shape={opt.id} color={on ? COLORS.accent : COLORS.gray} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: on ? COLORS.accent : COLORS.white, fontWeight: 700, fontSize: 13.5, marginBottom: 3 }}>{opt.label}</div>
+                  <div style={{ color: COLORS.gray, fontSize: 11, lineHeight: 1.4 }}>{opt.desc}</div>
+                </div>
+              </div>
             </button>
           );
         })}
@@ -14220,7 +14241,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, ...personalization });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, mugShape: mugShape || `classic`, ...personalization });
+    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0), designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, mugShape: mugShape || `classic`, ...personalization }); // pet-name FREE on mugs
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -14305,7 +14326,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>{tt.available}</div>
                 {/* Optional pet-name personalization (Task 8) — same component
                     and cart path as the modal. */}
-                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} />
+                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug`} />
                 {previewProduct === `shirt` && (
                   <BloomShirtOptions
                     lang={lang}
@@ -14330,7 +14351,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                     onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
                     onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
                     style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}>
-                    <AboutIcon name="cart" size={18} color="#fff" />{tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + petSurcharge}
+                    <AboutIcon name="cart" size={18} color="#fff" />{tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + (previewProduct === `mug` ? 0 : petSurcharge)}
                   </button>
                   </div>
                 )}

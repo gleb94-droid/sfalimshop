@@ -226,7 +226,7 @@ serve(async (req) => {
     else if (pid === "oversized") base = Number(data.price_shirt_oversized) || Number(data.price_shirt);
     else base = Number(data.price_shirt_basic) || Number(data.price_shirt);
     if (!base || !isFinite(base) || base <= 0) return null;
-    return base + (hasPet ? PET_SURCHARGE : 0);
+    return base + ((hasPet && pid !== "mug") ? PET_SURCHARGE : 0); // pet-name personalization is FREE on mugs
   };
   const pricePack = async (slug: string): Promise<number | null> => {
     if (!slug) return null;
