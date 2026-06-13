@@ -2232,7 +2232,7 @@ const LANGS = {
     nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה ←', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון ←', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו ←', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון ←", nav: "חידון" },
-    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס ביד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
+    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס בעבודת יד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח מ-₪27", delivery: "מוכן בימים ספורים", secure: "תשלום מאובטח", returns: "אחריות פגם — נתקן או נחזיר" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
@@ -2267,7 +2267,7 @@ const LANGS = {
     },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
-    payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור מס׳ 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "14 יום להחזרת פריטי מדף", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו", redirecting: "מעבירים אותך לעמוד התשלום המאובטח", redirectingSub: "רק רגע — אל תסגרו את החלון", ownerLine: "מודפס באהבה ביד, בבאר שבע", guestPay: "תשלום כאורח · ללא צורך בהרשמה" },
+    payment: { title: "תשלום מאובטח", subtitle: "סקור ואשר את ההזמנה", orderNum: "הזמנה מס׳", summary: "סיכום הזמנה", subtotal: "סכום פריטים", shipping: "משלוח", total: "סה״כ לתשלום", deliveryTo: "כתובת למשלוח", payBtn: "תשלם ", paySuffix: " בבטחה ←", processing: "מעבד...", soonTitle: "מערכת התשלום מגיעה בקרוב", soonSub: "אנחנו בתהליך אישור מול חברת הסליקה. ההזמנה שלך נשמרה ואנחנו ניצור איתך קשר אישית כשהמערכת תפעל.", soonBtn: "סגירה ושמירת הזמנה", cancel: "ביטול הזמנה", editDetails: "← עריכת פרטים", confirmCancel: "האם לבטל את ההזמנה?", securedBy: "מאובטח על ידי", acceptedCards: "אמצעי תשלום:", businessLine: "ספלים שופ · עוסק פטור מס׳ 321630279", trustFast: "תשלום מהיר ומאובטח", trustSSL: "הצפנת SSL 256-bit", trustReturn: "14 יום להחזרת פריטי מדף", trustNoSave: "פרטי כרטיס לא נשמרים אצלנו", redirecting: "מעבירים אותך לעמוד התשלום המאובטח", redirectingSub: "רק רגע — אל תסגרו את החלון", ownerLine: "מודפס באהבה בעבודת יד, בבאר שבע", guestPay: "תשלום כאורח · ללא צורך בהרשמה" },
     confirm: { title: "התשלום אושר!", subtitle: "ההזמנה שלך התקבלה", orderNum: "מספר הזמנה", thanksLine: "תודה {name}! שלחנו אישור לכתובת", whatsNext: "מה קורה עכשיו", step1Title: "אנחנו מתחילים בייצור", step1Sub: "ההזמנה שלך נכנסת לסבב הייצור הקרוב", step2Title: "ייצור: 2-4 ימי עסקים", step2Sub: "הדפסה איכותית של העיצוב שבחרת", step3Title: "משלוח: 1-3 ימי עסקים", step3Sub: "תקבל מספר מעקב באימייל", step4Title: "עדכון על כל שלב", step4Sub: "ניצור איתך קשר בכל שינוי", track: "מעקב אחר ההזמנה", another: "הזמנה נוספת", accountTitle: "פתיחת חשבון", accountDesc: "פתחו חשבון כדי לעקוב אחרי ההזמנה ולעבור לתשלום מהר יותר בפעם הבאה — בלחיצה אחת עם Google.", accountLater: "אולי מאוחר יותר" },
     auth: {
       login: "כניסה", register: "הרשמה", email: "אימייל", password: "סיסמה", name: "שם מלא",
@@ -9332,7 +9332,7 @@ function HomeMugsBanner({ lang, setPage }) {
           <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 10px` : `0 0 10px` }}>{T.sub}</p>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: isMobile ? `center` : (isRTL ? `flex-end` : `flex-start`), gap: 7, marginBottom: 20, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600 }}>
             <span aria-hidden="true">☕</span>
-            <span>{lang === `he` ? `מודפס ביד בבאר שבע · מוכן תוך 2–3 ימים` : lang === `ru` ? `Печать вручную в Беэр-Шеве · готово за 2–3 дня` : `Hand-printed in Be'er Sheva · ready in 2–3 days`}</span>
+            <span>{lang === `he` ? `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים` : lang === `ru` ? `Печать вручную в Беэр-Шеве · готово за 2–3 дня` : `Hand-printed in Be'er Sheva · ready in 2–3 days`}</span>
           </div>
           <button type="button" onClick={() => setPage(`mugs`)} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` }}
             onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
@@ -9414,8 +9414,8 @@ function MugsPage({ lang, setPage }) {
     he: {
       eyebrow: `ספלים שופ`,
       heading: `הספלים שלנו`,
-      sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. ספל קרמי איכותי עם העיצוב שאתם אוהבים, מודפס באהבה ביד בבאר שבע.`,
-      badges: [`קרמיקה 11oz`, `עמיד במדיח`, `הדפסת סובלימציה`, `מודפס ביד בבאר שבע`],
+      sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. ספל קרמי איכותי עם העיצוב שאתם אוהבים, מודפס באהבה בעבודת יד בבאר שבע.`,
+      badges: [`קרמיקה 11oz`, `עמיד במדיח`, `הדפסת סובלימציה`, `מודפס בעבודת יד בבאר שבע`],
       giftStrip: [`🎁 מתנה מושלמת`, `⚡ מוכן תוך 2–3 ימים`, `✍️ הוסיפו שם או תאריך`],
       bloomTitle: `כל דמות BLOOM — גם על ספל`,
       bloomSub: `70 דיוקנאות חיות מצוירים. בחרו את הגזע שלכם והדפיסו אותו על ספל.`,
@@ -9428,7 +9428,7 @@ function MugsPage({ lang, setPage }) {
         { icon: `rings`, title: `חתונה ואירועים`, price: `סט זוגי מ-₪149`, desc: `שמות · תאריך · תמונה · סטים לשולחן`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספלים מעוצבים לאירוע (חתונה / חברה)`) : null },
       ],
       whyTitle: `למה הספלים שלנו`,
-      why: [`קרמיקה איכותית 11oz, נעימה ליד`, `הדפסת סובלימציה — צבעים חיים שלא נמחקים`, `עמיד בכביסה במדיח`, `מודפס ידנית בבאר שבע · אספקה מהירה`],
+      why: [`קרמיקה איכותית 11oz, נעימה ליד`, `הדפסת סובלימציה — צבעים חיים שלא נמחקים`, `עמיד בכביסה במדיח`, `מודפס בעבודת יד בבאר שבע · אספקה מהירה`],
       giftTitle: `מתנה שנשארת`,
       giftText: `ספל מעוצב זו מתנה אישית שמלווה כל בוקר. מושלם ליום הולדת, חתונה, מתנה לצוות — או סתם כי בא לכם לפנק.`,
       finalCta: `התחילו לעצב ספל`,
@@ -14974,7 +14974,7 @@ const GENERIC_SEO_DESC = {
 const VIEW_SEO_DESC = {
   he: {
     order: `עצבו מוצר משלכם — העלו תמונה, בחרו חולצה/ספל/מדבקה, צבע ומידה, ואנחנו מדפיסים בישראל ושולחים עד הבית.`,
-    mugs: `הספלים שלנו — ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס ביד בבאר שבע.`,
+    mugs: `הספלים שלנו — ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס בעבודת יד בבאר שבע.`,
     pets: `אוסף BLOOM — 70 דיוקנאות מאוירים של כלבים וחתולים על חולצות, ספלים ומדבקות. מצאו את הגזע שלכם.`,
     about: `הסיפור של ספלים שופ — הדפסה מקומית בבאר שבע, באהבה ובדיוק, עם משלוח לכל הארץ.`,
     track: `מעקב אחר ההזמנה שלכם בספלים שופ.`,

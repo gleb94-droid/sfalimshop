@@ -277,7 +277,7 @@ ${ld}
 // home OG. Humans are redirected to the SPA hash route /#mugs.
 function buildMugsHtml() {
   const title = escapeHtml(`הספלים שלנו · ספלים שופ`);
-  const description = escapeHtml(`ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס ביד בבאר שבע.`);
+  const description = escapeHtml(`ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס בעבודת יד בבאר שבע.`);
   const canonical = escapeHtml(`${SITE_ORIGIN}/mugs`);
   const image = escapeHtml(DEFAULT_OG_IMAGE);
   const robots = escapeHtml(MAINTENANCE ? `noindex, nofollow` : `index, follow`);
@@ -287,7 +287,7 @@ function buildMugsHtml() {
     "@type": `Product`,
     name: `ספל מותאם אישית · ספלים שופ`,
     image: [DEFAULT_OG_IMAGE],
-    description: `ספל קרמי 11oz עם דיוקן BLOOM או העיצוב שלכם — מודפס ביד בבאר שבע.`,
+    description: `ספל קרמי 11oz עם דיוקן BLOOM או העיצוב שלכם — מודפס בעבודת יד בבאר שבע.`,
     brand: { "@type": `Brand`, name: `Sfalim Shop` },
     url: `${SITE_ORIGIN}/mugs`,
     offers: {
