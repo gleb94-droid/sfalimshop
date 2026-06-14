@@ -10723,9 +10723,20 @@ export default function App() {
   const [breedSlug, setBreedSlug] = useState(parseBreedSlugFromHash);
   const [lang, setLang] = useState(() => {
     if (typeof window === "undefined") return "he";
+    const valid = (l) => l === "he" || l === "en" || l === "ru";
     try {
+      // 1) An explicit ?lang= in the URL wins — so a shared link opens in the
+      //    sender's language regardless of the recipient's device.
+      const urlLang = new URLSearchParams(window.location.search).get("lang");
+      if (valid(urlLang)) return urlLang;
+      // 2) The visitor's own saved choice (returning visitor).
       const saved = window.localStorage.getItem("sf_lang");
-      if (saved === "he" || saved === "en" || saved === "ru") return saved;
+      if (valid(saved)) return saved;
+      // 3) First-time visitor with no saved choice: match their browser language
+      //    (ru / en), otherwise fall back to Hebrew (our primary).
+      const nav = (navigator.language || (navigator.languages && navigator.languages[0]) || "").toLowerCase();
+      if (nav.indexOf("ru") === 0) return "ru";
+      if (nav.indexOf("en") === 0) return "en";
     } catch (_) {}
     return "he";
   });
@@ -11244,6 +11255,18 @@ export default function App() {
     document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
     // Persist the chosen language so it survives a reload / return visit.
     try { window.localStorage.setItem("sf_lang", lang); } catch (_) {}
+    // Keep ?lang= in the URL for en/ru so a copied/shared link carries the
+    // language (Hebrew = default → URL stays clean). Canonical/og:url are set
+    // separately to clean path-only URLs, so this never affects SEO.
+    try {
+      const u = new URL(window.location.href);
+      const cur = u.searchParams.get("lang");
+      if (lang === "he") {
+        if (cur) { u.searchParams.delete("lang"); window.history.replaceState(null, "", u.toString()); }
+      } else if (cur !== lang) {
+        u.searchParams.set("lang", lang); window.history.replaceState(null, "", u.toString());
+      }
+    } catch (_) {}
   }, [page, lang]);
 
   // ============ ANALYTICS LOADER — fires only after cookie consent ============
