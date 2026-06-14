@@ -266,8 +266,8 @@ serve(async (req) => {
           // (pet portrait / custom design) × product (shirt / mug).
           // KEEP IN SYNC WITH COMMISSION_PRICE in App.jsx.
           const CPRICE: Record<string, { shirt: number; mug: number }> = {
-            pet: { shirt: 189, mug: 149 },
-            custom: { shirt: 149, mug: 109 },
+            pet: { shirt: 189, mug: 119 },
+            custom: { shirt: 149, mug: 89 },
           };
           // ctype/pid come from client-set extra_prints. Unknown ctype coerces to
           // "pet" (the MORE expensive tier — safe direction), and non-"mug" → shirt.

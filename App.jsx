@@ -7237,7 +7237,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               })()}
             </div>
             {/* Custom BLOOM commission — shirt-only choice: upload your own design, or we draw one from photos */}
-            {BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `mug` && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && (
+            {BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && (
               <div ref={commissionRef} style={{ marginTop: 20, background: `linear-gradient(135deg, rgba(255,107,53,0.14), rgba(255,107,53,0.04))`, border: `2px solid ${COLORS.accent}`, borderRadius: 14, padding: 18, boxShadow: `0 6px 24px rgba(255,107,53,0.18)` }}>
                 <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 4 }}>✨ {t.commission.badge}</div>
                 <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>{t.commission.choiceTitle}</div>
