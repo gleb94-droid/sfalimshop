@@ -12,11 +12,16 @@
 // Vercel project. The vercel.json rewrite passes the handle as a query
 // string so the function reads it from req.query.handle.
 //
-// Behavior (unchanged from the previous attempt):
+// Behavior:
 //   1. Look up the BLOOM character in Supabase pet_designs by slug column.
 //   2. Social-crawler UA → 200 HTML with per-character OG/Twitter tags.
 //   3. Real browser → 302 to /#pets/<handle> so the SPA opens the modal.
 //   4. Unknown handle → 302 to /.
+//
+// LANGUAGE: an optional ?lang=he|en|ru makes the share preview (OG card) render
+// in that language, and the human 302 preserves it (as /?lang=ru#…) so the SPA
+// opens in the same language the sharer used. Canonical/og:url stay CLEAN (no
+// ?lang) — one URL per page for all languages, matching the SPA's hreflang.
 //
 // SECURITY: PUBLIC anon key only (already shipped in the client bundle).
 // LAUNCH STEP: while MAINTENANCE is true the crawler HTML carries
@@ -72,6 +77,20 @@ function escapeHtml(value) {
     .replace(/'/g, `&#39;`);
 }
 
+// ---- Language helpers ----
+const VALID_LANGS = [`he`, `en`, `ru`];
+const OG_LOCALE = { he: `he_IL`, en: `en_US`, ru: `ru_RU` };
+function langDir(lang) { return lang === `he` ? `rtl` : `ltr`; }
+function siteName(lang) { return lang === `he` ? `ספלים שופ` : `Sfalim Shop`; }
+// Resolve ?lang= from the rewrite query or the raw URL; validate; default he.
+function pickLang(req) {
+  let l = ``;
+  if (req.query && typeof req.query.lang === `string`) l = req.query.lang;
+  if (!l && req.url) { try { l = new URL(req.url, `https://x.invalid`).searchParams.get(`lang`) || ``; } catch (_) {} }
+  l = String(l || ``).toLowerCase();
+  return VALID_LANGS.indexOf(l) !== -1 ? l : `he`;
+}
+
 async function lookupDesign(handle) {
   const url = process.env.SUPABASE_URL || FALLBACK_SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
@@ -99,17 +118,18 @@ async function lookupDesign(handle) {
   }
 }
 
-function pickName(d) {
-  return d.name_he || d.name_en || `BLOOM`;
+function pickName(d, lang) {
+  return d[`name_${lang}`] || d.name_he || d.name_en || `BLOOM`;
 }
 
-function pickDescription(d) {
-  const tagline = d.tagline_he || d.tagline_en || ``;
-  const animal = d.animal_he || d.animal_en || ``;
+function pickDescription(d, lang) {
+  const tagline = d[`tagline_${lang}`] || d.tagline_he || d.tagline_en || ``;
+  const animal = d[`animal_${lang}`] || d.animal_he || d.animal_en || ``;
   const tail = [tagline, animal].filter(Boolean).join(` · `);
-  const name = pickName(d);
-  if (tail) return `${name} — ${tail} · BLOOM Collection · ספלים שופ`;
-  return `${name} · BLOOM Collection של ספלים שופ`;
+  const name = pickName(d, lang);
+  return tail
+    ? `${name} — ${tail} · BLOOM Collection · ${siteName(lang)}`
+    : `${name} · BLOOM Collection · ${siteName(lang)}`;
 }
 
 // Inline JSON-LD safely: JSON.stringify does NOT escape `<`, so a stray
@@ -121,24 +141,26 @@ function jsonLdScript(obj) {
 
 // Per-breed crawler HTML, used by BOTH /breed/<slug> and the legacy /p/<slug>
 // character-share path. Canonical is the breed real path so /p shares
-// consolidate onto /breed. Carries Product JSON-LD.
-function buildBreedHtml(d, handle) {
-  const name = pickName(d);
-  const description = pickDescription(d);
+// consolidate onto /breed. Carries Product JSON-LD. lang drives the OG text only;
+// canonical/og:url stay clean (one URL for all languages).
+function buildBreedHtml(d, handle, lang) {
+  const name = pickName(d, lang);
+  const description = pickDescription(d, lang);
   const image = d.mockup_url || d.design_url || DEFAULT_OG_IMAGE;
   const canonical = `${SITE_ORIGIN}/breed/${encodeURIComponent(handle)}`;
   const robots = MAINTENANCE ? `noindex, nofollow` : `index, follow`;
 
-  const title = escapeHtml(`${name} · BLOOM · ספלים שופ`);
+  const title = escapeHtml(`${name} · BLOOM · ${siteName(lang)}`);
   const descAttr = escapeHtml(description);
   const imageAttr = escapeHtml(image);
   const canonicalAttr = escapeHtml(canonical);
   const nameAttr = escapeHtml(name);
   const robotsAttr = escapeHtml(robots);
+  const siteNameAttr = escapeHtml(siteName(lang));
 
   // Price span across this breed's purchasable products (shirt + mug) so the
-  // Product rich result can show a price. Pet-name (+₪20) is an optional add-on,
-  // excluded from the base offer range. Mirrors the runtime BreedPage JSON-LD.
+  // Product rich result can show a price. Pet-name is a free add-on on mugs and
+  // an optional add-on on shirts, excluded from the base offer range.
   const offerPrices = [d.price_shirt_basic, d.price_shirt_oversized, d.price_shirt, d.price_mug]
     .map((p) => Number(p))
     .filter((p) => Number.isFinite(p) && p > 0);
@@ -163,7 +185,7 @@ function buildBreedHtml(d, handle) {
   });
 
   return `<!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="${lang}" dir="${langDir(lang)}">
 <head>
 <meta charset="UTF-8" />
 <title>${title}</title>
@@ -171,7 +193,7 @@ function buildBreedHtml(d, handle) {
 <meta name="robots" content="${robotsAttr}" />
 <link rel="canonical" href="${canonicalAttr}" />
 <meta property="og:type" content="product" />
-<meta property="og:site_name" content="ספלים שופ" />
+<meta property="og:site_name" content="${siteNameAttr}" />
 <meta property="og:url" content="${canonicalAttr}" />
 <meta property="og:title" content="${nameAttr}" />
 <meta property="og:description" content="${descAttr}" />
@@ -181,7 +203,7 @@ function buildBreedHtml(d, handle) {
 <meta property="og:image:height" content="${image === DEFAULT_OG_IMAGE ? `630` : `2000`}" />
 <meta property="og:image:type" content="${image.endsWith(`.webp`) ? `image/webp` : `image/png`}" />
 <meta property="og:image:alt" content="${nameAttr}" />
-<meta property="og:locale" content="he_IL" />
+<meta property="og:locale" content="${OG_LOCALE[lang]}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="${canonicalAttr}" />
 <meta name="twitter:title" content="${nameAttr}" />
@@ -212,20 +234,24 @@ async function lookupBlogPost(handle) {
   }
 }
 
-function buildBlogHtml(p, handle) {
-  const title = p.title_he || p.title_en || `BLOOM`;
-  const seoTitle = p.seo_title_he || title;
-  const description = p.seo_description_he || p.excerpt_he || p.excerpt_en || `${title} · בלוג ספלים שופ`;
+function buildBlogHtml(p, handle, lang) {
+  const title = p[`title_${lang}`] || p.title_he || p.title_en || `BLOOM`;
+  // SEO title/description only exist in Hebrew; for en/ru use the localized
+  // title/excerpt directly.
+  const seoTitle = (lang === `he` ? p.seo_title_he : p[`title_${lang}`]) || title;
+  const description = (lang === `he` ? p.seo_description_he : p[`excerpt_${lang}`])
+    || p[`excerpt_${lang}`] || p.excerpt_he || p.excerpt_en || `${title} · ${siteName(lang)}`;
   const image = p.cover_image_url || DEFAULT_OG_IMAGE;
   const canonical = `${SITE_ORIGIN}/blog/${encodeURIComponent(handle)}`;
   const robots = MAINTENANCE ? `noindex, nofollow` : `index, follow`;
 
-  const titleAttr = escapeHtml(`${seoTitle} — Sfalim Shop`);
+  const titleAttr = escapeHtml(`${seoTitle} — ${siteName(lang)}`);
   const ogTitleAttr = escapeHtml(title);
   const descAttr = escapeHtml(description);
   const imageAttr = escapeHtml(image);
   const canonicalAttr = escapeHtml(canonical);
   const robotsAttr = escapeHtml(robots);
+  const siteNameAttr = escapeHtml(siteName(lang));
 
   const ld = jsonLdScript({
     "@context": `https://schema.org`,
@@ -242,7 +268,7 @@ function buildBlogHtml(p, handle) {
   });
 
   return `<!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="${lang}" dir="${langDir(lang)}">
 <head>
 <meta charset="UTF-8" />
 <title>${titleAttr}</title>
@@ -250,7 +276,7 @@ function buildBlogHtml(p, handle) {
 <meta name="robots" content="${robotsAttr}" />
 <link rel="canonical" href="${canonicalAttr}" />
 <meta property="og:type" content="article" />
-<meta property="og:site_name" content="ספלים שופ" />
+<meta property="og:site_name" content="${siteNameAttr}" />
 <meta property="og:url" content="${canonicalAttr}" />
 <meta property="og:title" content="${ogTitleAttr}" />
 <meta property="og:description" content="${descAttr}" />
@@ -260,7 +286,7 @@ function buildBlogHtml(p, handle) {
 <meta property="og:image:height" content="630" />
 <meta property="og:image:type" content="${image.endsWith(`.webp`) ? `image/webp` : `image/png`}" />
 <meta property="og:image:alt" content="${ogTitleAttr}" />
-<meta property="og:locale" content="he_IL" />
+<meta property="og:locale" content="${OG_LOCALE[lang]}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="${canonicalAttr}" />
 <meta name="twitter:title" content="${ogTitleAttr}" />
@@ -275,19 +301,41 @@ ${ld}
 // ---- Mugs hub crawler HTML (/mugs) — static, no DB lookup. The brand's
 // namesake/core page, so it gets its own share preview instead of the generic
 // home OG. Humans are redirected to the SPA hash route /#mugs.
-function buildMugsHtml() {
-  const title = escapeHtml(`הספלים שלנו · ספלים שופ`);
-  const description = escapeHtml(`ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס בעבודת יד בבאר שבע.`);
+const MUGS_COPY = {
+  he: {
+    title: `הספלים שלנו · ספלים שופ`,
+    desc: `ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס בעבודת יד בבאר שבע.`,
+    ldName: `ספל מותאם אישית · ספלים שופ`,
+    ldDesc: `ספל קרמי 11oz עם דיוקן BLOOM או העיצוב שלכם — מודפס בעבודת יד בבאר שבע.`,
+  },
+  en: {
+    title: `Our Mugs · Sfalim Shop`,
+    desc: `An 11oz ceramic mug with a BLOOM pet portrait, your own design, or a designed mug for weddings & events. Printed by me in Be'er Sheva.`,
+    ldName: `Custom mug · Sfalim Shop`,
+    ldDesc: `An 11oz ceramic mug with a BLOOM portrait or your own design — printed by me in Be'er Sheva.`,
+  },
+  ru: {
+    title: `Наши кружки · Sfalim Shop`,
+    desc: `Керамическая кружка 11oz с портретом BLOOM, вашим дизайном или дизайнерская кружка на свадьбу и события. Печатаю сам, в Беэр-Шеве.`,
+    ldName: `Кружка на заказ · Sfalim Shop`,
+    ldDesc: `Керамическая кружка 11oz с портретом BLOOM или вашим дизайном — печатаю сам, в Беэр-Шеве.`,
+  },
+};
+function buildMugsHtml(lang) {
+  const c = MUGS_COPY[lang] || MUGS_COPY.he;
+  const title = escapeHtml(c.title);
+  const description = escapeHtml(c.desc);
   const canonical = escapeHtml(`${SITE_ORIGIN}/mugs`);
   const image = escapeHtml(DEFAULT_OG_IMAGE);
   const robots = escapeHtml(MAINTENANCE ? `noindex, nofollow` : `index, follow`);
+  const siteNameAttr = escapeHtml(siteName(lang));
 
   const ld = jsonLdScript({
     "@context": `https://schema.org`,
     "@type": `Product`,
-    name: `ספל מותאם אישית · ספלים שופ`,
+    name: c.ldName,
     image: [DEFAULT_OG_IMAGE],
-    description: `ספל קרמי 11oz עם דיוקן BLOOM או העיצוב שלכם — מודפס בעבודת יד בבאר שבע.`,
+    description: c.ldDesc,
     brand: { "@type": `Brand`, name: `Sfalim Shop` },
     url: `${SITE_ORIGIN}/mugs`,
     offers: {
@@ -300,7 +348,7 @@ function buildMugsHtml() {
   });
 
   return `<!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="${lang}" dir="${langDir(lang)}">
 <head>
 <meta charset="UTF-8" />
 <title>${title}</title>
@@ -308,7 +356,7 @@ function buildMugsHtml() {
 <meta name="robots" content="${robots}" />
 <link rel="canonical" href="${canonical}" />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="ספלים שופ" />
+<meta property="og:site_name" content="${siteNameAttr}" />
 <meta property="og:url" content="${canonical}" />
 <meta property="og:title" content="${title}" />
 <meta property="og:description" content="${description}" />
@@ -318,7 +366,7 @@ function buildMugsHtml() {
 <meta property="og:image:height" content="630" />
 <meta property="og:image:type" content="${image && image.endsWith('.webp') ? 'image/webp' : 'image/png'}" />
 <meta property="og:image:alt" content="${title}" />
-<meta property="og:locale" content="he_IL" />
+<meta property="og:locale" content="${OG_LOCALE[lang]}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="${canonical}" />
 <meta name="twitter:title" content="${title}" />
@@ -361,17 +409,21 @@ module.exports = async function handler(req, res) {
   if (!type && req.url) { try { type = new URL(req.url, `https://x.invalid`).searchParams.get(`type`) || ``; } catch (_) {} }
   type = String(type || ``).toLowerCase();
 
+  // Optional ?lang= — drives the preview language + is preserved in the human 302.
+  const lang = pickLang(req);
+  const langQS = lang === `he` ? `` : `?lang=${lang}`;
+
   const ua = (req.headers && (req.headers[`user-agent`] || req.headers[`User-Agent`])) || ``;
   const crawler = isCrawler(ua);
 
   // Single structured log line per invocation — visible in Vercel runtime logs.
   // Branch decision is appended below after the lookup so we log it once.
-  console.log(`[og] method=${req.method} url=${req.url} handle=${handle} ua=${String(ua).slice(0, 120)}`);
+  console.log(`[og] method=${req.method} url=${req.url} handle=${handle} lang=${lang} ua=${String(ua).slice(0, 120)}`);
 
   if (!handle && type !== `mugs`) {
     console.log(`[og] branch=notfound reason=empty-handle`);
     res.statusCode = 302;
-    res.setHeader(`Location`, `/`);
+    res.setHeader(`Location`, `/${langQS}`);
     res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
     return;
@@ -379,13 +431,15 @@ module.exports = async function handler(req, res) {
 
   const redirectHome = () => {
     res.statusCode = 302;
-    res.setHeader(`Location`, `/`);
+    res.setHeader(`Location`, `/${langQS}`);
     res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
   };
-  const redirectHuman = (target) => {
+  // target = the SPA hash (e.g. `#mugs`); we prefix `/` + the lang query so the
+  // SPA reads the language from window.location.search on load.
+  const redirectHuman = (hash) => {
     res.statusCode = 302;
-    res.setHeader(`Location`, target);
+    res.setHeader(`Location`, `/${langQS}${hash}`);
     res.setHeader(`Cache-Control`, `private, no-store`);
     res.end();
   };
@@ -401,25 +455,25 @@ module.exports = async function handler(req, res) {
   const enc = encodeURIComponent(handle);
 
   if (type === `mugs`) {
-    if (!crawler) { console.log(`[og] branch=human type=mugs → /#mugs`); return redirectHuman(`/#mugs`); }
-    console.log(`[og] branch=crawler type=mugs`);
-    return serveHtml(buildMugsHtml());
+    if (!crawler) { console.log(`[og] branch=human type=mugs → /${langQS}#mugs`); return redirectHuman(`#mugs`); }
+    console.log(`[og] branch=crawler type=mugs lang=${lang}`);
+    return serveHtml(buildMugsHtml(lang));
   }
 
   if (type === `blog`) {
     const post = await lookupBlogPost(handle);
     if (!post) { console.log(`[og] branch=notfound type=blog handle=${handle}`); return redirectHome(); }
-    if (!crawler) { console.log(`[og] branch=human type=blog handle=${handle} → /#/blog/${handle}`); return redirectHuman(`/#/blog/${enc}`); }
-    console.log(`[og] branch=crawler type=blog handle=${handle}`);
-    return serveHtml(buildBlogHtml(post, handle));
+    if (!crawler) { console.log(`[og] branch=human type=blog handle=${handle} → /${langQS}#/blog/${handle}`); return redirectHuman(`#/blog/${enc}`); }
+    console.log(`[og] branch=crawler type=blog handle=${handle} lang=${lang}`);
+    return serveHtml(buildBlogHtml(post, handle, lang));
   }
 
   // type=breed (real /breed/<slug> page) OR no type (legacy /p/<slug> character
   // share) — both resolve a pet_designs row. They differ only in where humans land.
   const design = await lookupDesign(handle);
   if (!design) { console.log(`[og] branch=notfound type=${type || `pet`} handle=${handle}`); return redirectHome(); }
-  const humanTarget = type === `breed` ? `/#/breed/${enc}` : `/#pets/${enc}`;
-  if (!crawler) { console.log(`[og] branch=human type=${type || `pet`} handle=${handle} → ${humanTarget}`); return redirectHuman(humanTarget); }
-  console.log(`[og] branch=crawler type=${type || `pet`} handle=${handle} name=${pickName(design)}`);
-  return serveHtml(buildBreedHtml(design, handle));
+  const humanHash = type === `breed` ? `#/breed/${enc}` : `#pets/${enc}`;
+  if (!crawler) { console.log(`[og] branch=human type=${type || `pet`} handle=${handle} → /${langQS}${humanHash}`); return redirectHuman(humanHash); }
+  console.log(`[og] branch=crawler type=${type || `pet`} handle=${handle} lang=${lang} name=${pickName(design, lang)}`);
+  return serveHtml(buildBreedHtml(design, handle, lang));
 };
