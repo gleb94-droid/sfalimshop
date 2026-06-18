@@ -2294,8 +2294,8 @@ const LANGS = {
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך", guestTitle: "מעקב אחר ההזמנה שלך", guestDesc: "לא צריך סיסמה — נשלח לך למייל קישור מאובטח לצפייה בהזמנות שלך.", guestBtn: "שלח לי קישור" },
     approval: { submittedTitle: "העיצוב נשלח לאישור", submittedDesc: "העיצוב שלך נשלח לאישור — נעדכן אותך במייל ברגע שהוא יאושר, ואז תוכל לשלם. ההזמנה נשמרה.", npStep1Title: "מאשרים את העיצוב", npStep1Sub: "נבדוק את העיצוב ונעדכן אותך במייל", npStep2Title: "תשלום מאובטח", npStep2Sub: "אחרי האישור — משלמים וההזמנה נכנסת להפקה", npStep3Title: "ייצור: 2-4 ימי עסקים", npStep3Sub: "הדפסה איכותית של העיצוב שאישרת", npStep4Title: "משלוח: 1-3 ימי עסקים", npStep4Sub: "תקבל מספר מעקב באימייל", underReview: "העיצוב בבדיקה", underReviewDesc: "שלחנו את העיצוב שלך לאישור. נעדכן אותך במייל ברגע שהוא יאושר — ואז אפשר יהיה לשלם.", approvedTitle: "העיצוב אושר! 🎉", approvedDesc: "אפשר להשלים את התשלום וההזמנה תיכנס להפקה.", payNow: "שלם עכשיו", changesTitle: "נדרשים שינויים בעיצוב", reviewNote: "הערה מהצוות שלנו", editResubmit: "ערוך ושלח מחדש", uploadNew: "העלה עיצוב חדש (לא חובה)", resubmitBtn: "שלח מחדש לאישור", resubmitting: "שולח...", resubmitted: "נשלח מחדש — העיצוב בבדיקה שוב", cancelOrder: "בטל הזמנה", cancelConfirm: "לבטל את ההזמנה הזו?", cancelled: "ההזמנה בוטלה" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
-    products: { tshirt: "חולצת טי בייסיק", lycra: "חולצת לייקרה", oversized: "חולצת אוברסייז", look: "חולצת לוק אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
-    variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
+    products: { tshirt: "חולצת טי בייסיק", lycra: "חולצת לייקרה", oversized: "חולצת אוברסייז", look: "חולצת לוק אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", magic_mug: "ספל קסם משנה צבע", socks: "גרביים BLOOM", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
+    variants: { standard: "סטנדרט 11oz", oneSize: "מידה אחת", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
     bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} ←` },
   },
   en: {
@@ -2365,8 +2365,8 @@ const LANGS = {
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
     approval: { submittedTitle: "Your design was submitted for approval", submittedDesc: "Your design was submitted for approval — we'll email you once it's approved, then you can pay. Your order is saved.", npStep1Title: "We review your design", npStep1Sub: "We'll check it and email you", npStep2Title: "Secure payment", npStep2Sub: "Once approved — you pay and we start", npStep3Title: "Production: 2-4 business days", npStep3Sub: "Quality printing of your approved design", npStep4Title: "Shipping: 1-3 business days", npStep4Sub: "You'll receive tracking by email", underReview: "Design under review", underReviewDesc: "We've sent your design for approval. We'll email you the moment it's approved — then you can pay.", approvedTitle: "Design approved! 🎉", approvedDesc: "Complete payment and your order goes into production.", payNow: "Pay now", changesTitle: "Changes requested", reviewNote: "Note from our team", editResubmit: "Edit & resubmit", uploadNew: "Upload a new design (optional)", resubmitBtn: "Resubmit for approval", resubmitting: "Submitting...", resubmitted: "Resubmitted — under review again", cancelOrder: "Cancel order", cancelConfirm: "Cancel this order?", cancelled: "Order cancelled" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
-    products: { tshirt: "Basic T-Shirt", lycra: "Lycra Fitted Tee", oversized: "Oversize T-Shirt", look: "Look Oversize", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
-    variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
+    products: { tshirt: "Basic T-Shirt", lycra: "Lycra Fitted Tee", oversized: "Oversize T-Shirt", look: "Look Oversize", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", magic_mug: "Magic Mug", socks: "BLOOM Socks", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
+    variants: { standard: "Standard 11oz", oneSize: "One size", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
     bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close", seeAll: (n) => `See all ${n} →` },
   },
   ru: {
@@ -2436,8 +2436,8 @@ const LANGS = {
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
     approval: { submittedTitle: "Ваш дизайн отправлен на одобрение", submittedDesc: "Ваш дизайн отправлен на одобрение — мы сообщим по email, как только он будет одобрен, тогда можно оплатить. Заказ сохранён.", npStep1Title: "Утверждаем дизайн", npStep1Sub: "Проверим и сообщим по email", npStep2Title: "Оплата", npStep2Sub: "После одобрения — оплата, и заказ в производство", npStep3Title: "Производство: 2-4 рабочих дня", npStep3Sub: "Качественная печать одобренного дизайна", npStep4Title: "Доставка: 1-3 рабочих дня", npStep4Sub: "Трек-номер придёт на email", underReview: "Дизайн на проверке", underReviewDesc: "Мы отправили ваш дизайн на одобрение. Сообщим по email, как только он будет одобрен — тогда можно оплатить.", approvedTitle: "Дизайн одобрен! 🎉", approvedDesc: "Завершите оплату, и заказ отправится в производство.", payNow: "Оплатить", changesTitle: "Требуются изменения", reviewNote: "Комментарий нашей команды", editResubmit: "Изменить и отправить снова", uploadNew: "Загрузить новый дизайн (необязательно)", resubmitBtn: "Отправить на одобрение снова", resubmitting: "Отправка...", resubmitted: "Отправлено повторно — снова на проверке", cancelOrder: "Отменить заказ", cancelConfirm: "Отменить этот заказ?", cancelled: "Заказ отменён" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
-    products: { tshirt: "Базовая футболка", lycra: "Футболка Лайкра", oversized: "Оверсайз футболка", look: "Оверсайз «Look»", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
-    variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
+    products: { tshirt: "Базовая футболка", lycra: "Футболка Лайкра", oversized: "Оверсайз футболка", look: "Оверсайз «Look»", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", magic_mug: "Волшебная кружка", socks: "Носки BLOOM", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
+    variants: { standard: "Стандарт 11oz", oneSize: "Единый размер", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
     bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть", seeAll: (n) => `Смотреть все ${n} →` },
   },
 };
@@ -2736,7 +2736,7 @@ const POLICIES = {
 };
 
 // Localization helpers - translate a saved product/variant name to target language
-const PRODUCT_IDS = ['tshirt', 'lycra', 'oversized', 'look', 'stonewash', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
+const PRODUCT_IDS = ['tshirt', 'lycra', 'oversized', 'look', 'stonewash', 'dryfit', 'mug', 'magic_mug', 'socks', 'sticker', 'sticker_sq'];
 const localizeProduct = (savedName, targetLang) => {
   if (!savedName) return savedName;
   for (const id of PRODUCT_IDS) {
@@ -2768,6 +2768,8 @@ const SHIRT_COLOR_PALETTE = BLOOM_SHIRT_COLORS.map(c => c.hex);
 
 const PRODUCTS = (t) => [
   { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "magic_mug",  name: t.products.magic_mug, desc: { he: "ספל שחור משנה צבע בחום · הדפסת סובלימציה · עמיד במדיח", en: "Black heat-reveal mug · sublimation print · dishwasher-safe", ru: "Чёрная кружка, проявляется в тепле · сублимация · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 75 }], colors: ["#000000"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "socks",      name: t.products.socks,     desc: { he: "גרביים · מידה אחת · הדפסה צבעונית מלאה", en: "Socks · one size · full-color print", ru: "Носки · единый размер · полноцветная печать" }, variants: [{ id: "standard", label: t.variants.oneSize, price: 59 }], colors: ["#ffffff"], printArea: { x: 30, y: 80, w: 200, h: 200 } },
   { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · רכה ונושמת · גזרה רגילה · הדפסת DTF חדה", en: "100% combed cotton · soft & breathable · regular fit · crisp DTF print", ru: "100% чёсаный хлопок · мягкий и дышащий · обычный крой · чёткая DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black","gray","navy","royal","azure","turquoise","red","wine","orange","yellow","green","darkGreen","sage","beige","brown","purple","pink"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "lycra",      name: t.products.lycra,     desc: { he: "95% כותנה / 5% לייקרה · גזרה צמודה שחוזרת לצורתה · נוחות תנועה", en: "95% cotton / 5% lycra · figure-hugging fit that springs back · move-friendly", ru: "95% хлопок / 5% лайкра · приталенный крой, держит форму · свобода движения" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "oversized",  name: t.products.oversized, desc: { he: "100% כותנה סרוקה · גזרת אוברסייז · בד חלק להדפסה חדה", en: "100% combed cotton · oversize fit · smooth fabric for a crisp print", ru: "100% чёсаный хлопок · оверсайз · гладкая ткань для чёткой печати" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
@@ -2835,6 +2837,14 @@ const PLACEMENTS = {
     { id: "center", he: "מרכז",  en: "Center", ru: "Центр",  cx: 158, cy: 178 },
     { id: "right",  he: "ימין",  en: "Right",  ru: "Справа", cx: 193, cy: 178 },
   ],
+  magic_mug: [
+    { id: "left",   he: "שמאל",  en: "Left",   ru: "Слева",  cx: 120, cy: 178 },
+    { id: "center", he: "מרכז",  en: "Center", ru: "Центр",  cx: 158, cy: 178 },
+    { id: "right",  he: "ימין",  en: "Right",  ru: "Справа", cx: 193, cy: 178 },
+  ],
+  socks: [
+    { id: "center", he: "מרכז", en: "Center", ru: "Центр", cx: 200, cy: 200 },
+  ],
   sticker: [
     { id: "center", he: "מרכז",  en: "Center", ru: "Центр", cx: 200, cy: 198 },
     { id: "top",    he: "עליון", en: "Top",    ru: "Верх",  cx: 200, cy: 135 },
@@ -2874,6 +2884,14 @@ const SIZE_OPTIONS = {
     { id: "medium", px: 65,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
     { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
   ],
+  magic_mug: [
+    { id: "small",  px: 40,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
+    { id: "medium", px: 65,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
+  ],
+  socks: [
+    { id: "medium", px: 85,  label: { he: "סטנדרט", en: "Standard", ru: "Стандарт" }, cm: "~10×10 cm" },
+  ],
   sticker: [
     { id: "small",  px: 60,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
     { id: "medium", px: 110, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
@@ -2897,6 +2915,10 @@ const MOCKUP_URLS = {
   stonewash:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   dryfit:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
   mug:        "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/mug.png",
+  // TEMP: replace with real magic-mug photo before deploy — reuses the regular mug mockup for now
+  magic_mug:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/mug.png",
+  // TEMP: replace with real socks photo before deploy — reuses the oversize tee mockup as a placeholder
+  socks:      "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   sticker:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
   sticker_sq: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/square%20sticker.png",
 };
@@ -6941,7 +6963,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           // price server-side (never trust the browser-sent total):
           //   src = custom (fixed catalog) | bloom (pet_designs) ; pid/vid/slug
           //   identify the catalog entry / BLOOM design.
-          extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null, mug_shape: it.productId === `mug` ? (it.mugShape || `classic`) : undefined },
+          extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null, mug_shape: (it.productId === `mug` || it.productId === `magic_mug`) ? (it.mugShape || `classic`) : undefined },
         };
 
         if (user) {
@@ -12235,6 +12257,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       priceFrom: "החל מ-₪",
       shirtLabel: "חולצה",
       mugLabel: "ספל",
+      magicMugLabel: "ספל קסם",
+      socksLabel: "גרביים",
       stickerLabel: "מדבקה",
       availableOn: "זמין עבור",
       detailMore: "פרטים",
@@ -12283,6 +12307,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       priceFrom: "From ₪",
       shirtLabel: "T-shirt",
       mugLabel: "Mug",
+      magicMugLabel: "Magic Mug",
+      socksLabel: "Socks",
       stickerLabel: "Sticker",
       availableOn: "Available on",
       detailMore: "View details",
@@ -12331,6 +12357,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       priceFrom: "От ₪",
       shirtLabel: "Футболка",
       mugLabel: "Кружка",
+      magicMugLabel: "Волшебная кружка",
+      socksLabel: "Носки",
       stickerLabel: "Стикер",
       availableOn: "Доступно на",
       detailMore: "Подробнее",
@@ -13094,6 +13122,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     // saved on the order so the order preview matches what they saw.
     const mockupUrl =
       kind === `mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `magic_mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `socks` ? (design.mockup_url || design.design_url) :
       kind === `shirt` ? (
         (selectedColor?.id === `black` ? design.mockup_shirt_black_url : design.mockup_shirt_white_url) ||
         design.mockup_shirt_url || design.mockup_url || design.design_url
@@ -13118,21 +13148,25 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       return;
     }
     // Single-sticker purchase was retired (stickers are pack-only / free
-    // gift now), so the only remaining non-shirt kind is `mug`.
+    // gift now). Remaining non-shirt kinds: mug, magic_mug (₪75) and socks (₪59).
     const map = {
       mug: { productId: "mug", price: design.price_mug },
+      magic_mug: { productId: "magic_mug", price: 75 },
+      socks: { productId: "socks", price: 59 },
     };
     const choice = map[kind];
     if (!choice) return;
+    // mug-shape rides only the two mug kinds; socks have no shape.
+    const carriesMugShape = kind === `mug` || kind === `magic_mug`;
     onOrderBloom({
       productId: choice.productId,
-      price: (Number(choice.price) || 0), // pet-name personalization is FREE on mugs (no +₪20)
+      price: (Number(choice.price) || 0), // pet-name personalization is FREE on mugs/socks (no +₪20)
       designUrl: design.design_url,
       mockupUrl,
       characterName: name,
       slug: design.slug,
       shirtColor: null,
-      mugShape: mugShape || `classic`,
+      mugShape: carriesMugShape ? (mugShape || `classic`) : undefined,
       ...personalization,
     });
     if (onClose) onClose();
@@ -13345,7 +13379,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 on the product; it rides the cart line into the order and shows
                 in the admin order view. Empty → omitted. Shared shape with
                 BreedPage. */}
-            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug`} />
+            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`} />
 
             {/* Shirt color/type/size — shown only when the shirt product is
                 selected. Shared with BreedPage via <BloomShirtOptions>. */}
@@ -13364,6 +13398,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 buy a bundled pack from the PetsPage packs section instead. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
               <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
+              <ProductOption label={t.magicMugLabel} price={75} onClick={() => setPreviewProduct(`magic_mug`)} disabled={!design.design_url} selected={previewProduct === `magic_mug`} />
+              <ProductOption label={t.socksLabel} price={59} onClick={() => setPreviewProduct(`socks`)} disabled={!design.design_url} selected={previewProduct === `socks`} />
               <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
             </div>
             {/* Gift framing — mugs are the #1 gift item; reinforce it right where the mug is chosen. */}
@@ -13374,7 +13410,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               </div>
             )}
             {/* Mug shape — Classic / Rounded (text-only, same price). */}
-            {previewProduct === `mug` && (
+            {(previewProduct === `mug` || previewProduct === `magic_mug`) && (
               <MugShapeSelector lang={lang} value={mugShape} onChange={setMugShape} />
             )}
             {/* Shirt framing — reframes the mug→shirt price step (₪59→₪119) as quality, not a jump. */}
@@ -13395,7 +13431,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
                 style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}
               >
-                <AboutIcon name="cart" size={18} color="#fff" />{lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + (previewProduct === `mug` ? 0 : petSurcharge)}
+                <AboutIcon name="cart" size={18} color="#fff" />{lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `magic_mug` ? 75 : previewProduct === `socks` ? 59 : previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + ((previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`) ? 0 : petSurcharge)}
               </button>
               </div>
             )}
@@ -14088,9 +14124,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [mugShape, setMugShape] = useState(`classic`); // mug shape (classic|rounded) — text-only; rides extra_prints.mug_shape
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, shipFlat: `משלוח מ-₪27 · או מסירה אישית בבאר שבע · הכנה ומשלוח 3–7 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, shipFlat: `Shipping from ₪27 · or personal handoff in Be'er Sheva · Made & shipped in 3–7 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `Print size is matched to the product — for special requests, add a note at checkout.`, petNameFontLabel: `Font`, petNameColorLabel: `Color`, railTitle: `The whole BLOOM family` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, shipFlat: `Доставка от ₪27 · или личная передача в Беэр-Шеве · Изготовление и доставка 3–7 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.`, petNameFontLabel: `Шрифт`, petNameColorLabel: `Цвет`, railTitle: `Вся коллекция BLOOM` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, magicMug: `ספל קסם`, socks: `גרביים`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, shipFlat: `משלוח מ-₪27 · או מסירה אישית בבאר שבע · הכנה ומשלוח 3–7 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, magicMug: `Magic Mug`, socks: `Socks`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, shipFlat: `Shipping from ₪27 · or personal handoff in Be'er Sheva · Made & shipped in 3–7 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `Print size is matched to the product — for special requests, add a note at checkout.`, petNameFontLabel: `Font`, petNameColorLabel: `Color`, railTitle: `The whole BLOOM family` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, magicMug: `Волшебная кружка`, socks: `Носки`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, shipFlat: `Доставка от ₪27 · или личная передача в Беэр-Шеве · Изготовление и доставка 3–7 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.`, petNameFontLabel: `Шрифт`, petNameColorLabel: `Цвет`, railTitle: `Вся коллекция BLOOM` },
   }[lang] || {};
 
   useEffect(() => {
@@ -14255,6 +14291,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     if (!design.design_url) return;
     const mockupUrl =
       kind === `mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `magic_mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `socks` ? (design.mockup_url || design.design_url) :
       kind === `shirt` ? (
         (selectedColor?.id === `black` ? design.mockup_shirt_black_url : design.mockup_shirt_white_url) ||
         design.mockup_shirt_url || design.mockup_url || design.design_url
@@ -14264,7 +14302,17 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, ...personalization });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0), designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, mugShape: mugShape || `classic`, ...personalization }); // pet-name FREE on mugs
+    // Non-shirt kinds: mug, magic_mug (₪75) and socks (₪59). Mug-shape rides
+    // only the two mug kinds; socks have no shape. Pet-name is FREE on all three.
+    const map = {
+      mug: { productId: `mug`, price: design.price_mug },
+      magic_mug: { productId: `magic_mug`, price: 75 },
+      socks: { productId: `socks`, price: 59 },
+    };
+    const choice = map[kind];
+    if (!choice) return;
+    const carriesMugShape = kind === `mug` || kind === `magic_mug`;
+    onOrderBloom({ productId: choice.productId, price: (Number(choice.price) || 0), designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, mugShape: carriesMugShape ? (mugShape || `classic`) : undefined, ...personalization }); // pet-name FREE on mugs/socks
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -14349,7 +14397,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>{tt.available}</div>
                 {/* Optional pet-name personalization (Task 8) — same component
                     and cart path as the modal. */}
-                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug`} />
+                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`} />
                 {previewProduct === `shirt` && (
                   <BloomShirtOptions
                     lang={lang}
@@ -14361,9 +14409,11 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
                   <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
+                  <ProductOption label={tt.magicMug} price={75} onClick={() => setPreviewProduct(`magic_mug`)} disabled={!design.design_url} selected={previewProduct === `magic_mug`} />
+                  <ProductOption label={tt.socks} price={59} onClick={() => setPreviewProduct(`socks`)} disabled={!design.design_url} selected={previewProduct === `socks`} />
                   <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
                 </div>
-                {previewProduct === `mug` && (
+                {(previewProduct === `mug` || previewProduct === `magic_mug`) && (
                   <MugShapeSelector lang={lang} value={mugShape} onChange={setMugShape} />
                 )}
                 {previewProduct && (
@@ -14374,7 +14424,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                     onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
                     onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
                     style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}>
-                    <AboutIcon name="cart" size={18} color="#fff" />{tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + (previewProduct === `mug` ? 0 : petSurcharge)}
+                    <AboutIcon name="cart" size={18} color="#fff" />{tt.addToCart} · ₪{(previewProduct === `magic_mug` ? 75 : previewProduct === `socks` ? 59 : previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + ((previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`) ? 0 : petSurcharge)}
                   </button>
                   </div>
                 )}
