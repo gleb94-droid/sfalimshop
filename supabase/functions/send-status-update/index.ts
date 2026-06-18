@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -224,16 +225,52 @@ serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
-    const { customerName, customerEmail, product, newStatus, orderId, language } = body;
-
-    if (!customerEmail || !newStatus || !orderId) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+    const body = await req.json().catch(() => ({}));
+    const orderId = String(body?.orderId || "").trim();
+    if (!orderId) {
+      return new Response(JSON.stringify({ error: "Missing orderId" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // SECURITY: never trust the recipient / status / content from the caller.
+    // Look the order up server-side and email ONLY that order's real customer,
+    // with that order's REAL current status. This makes the endpoint useless for
+    // sending arbitrary "order update" emails to attacker-chosen addresses.
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    if (!supabaseUrl || !serviceKey) {
+      return new Response(JSON.stringify({ error: "Server misconfigured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    const { data: order, error: lookupErr } = await supabase
+      .from("orders")
+      .select("customer_name, customer_email, product, status, language")
+      .eq("id", orderId)
+      .maybeSingle();
+    if (lookupErr) {
+      return new Response(JSON.stringify({ error: "db_lookup_failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!order || !order.customer_email || !order.status) {
+      return new Response(JSON.stringify({ error: "order_not_found_or_incomplete" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const customerEmail = order.customer_email;
+    const customerName = order.customer_name || "";
+    const product = order.product || "";
+    const newStatus = order.status;
+    const language = order.language || "he";
     const lang = (language || "he") as keyof typeof content;
     const c = content[lang] || content.he;
 
