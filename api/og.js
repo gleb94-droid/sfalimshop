@@ -184,6 +184,19 @@ function buildBreedHtml(d, handle, lang) {
     } : {}),
   });
 
+  // BreadcrumbList: Home › BLOOM collection › this breed (parity with the SPA).
+  const crumbName = lang === `en` ? `BLOOM Collection` : lang === `ru` ? `Коллекция BLOOM` : `אוסף BLOOM`;
+  const homeName = lang === `en` ? `Home` : lang === `ru` ? `Главная` : `בית`;
+  const ldCrumb = jsonLdScript({
+    "@context": `https://schema.org`,
+    "@type": `BreadcrumbList`,
+    itemListElement: [
+      { "@type": `ListItem`, position: 1, name: homeName, item: `${SITE_ORIGIN}/` },
+      { "@type": `ListItem`, position: 2, name: crumbName, item: `${SITE_ORIGIN}/pets` },
+      { "@type": `ListItem`, position: 3, name, item: canonical },
+    ],
+  });
+
   return `<!DOCTYPE html>
 <html lang="${lang}" dir="${langDir(lang)}">
 <head>
@@ -210,6 +223,7 @@ function buildBreedHtml(d, handle, lang) {
 <meta name="twitter:description" content="${descAttr}" />
 <meta name="twitter:image" content="${imageAttr}" />
 ${ld}
+${ldCrumb}
 </head>
 <body></body>
 </html>`;
@@ -267,6 +281,19 @@ function buildBlogHtml(p, handle, lang) {
     url: canonical,
   });
 
+  // BreadcrumbList: Home › Blog › this post (parity with the SPA).
+  const homeName = lang === `en` ? `Home` : lang === `ru` ? `Главная` : `בית`;
+  const blogName = lang === `en` ? `Blog` : lang === `ru` ? `Блог` : `בלוג`;
+  const ldCrumb = jsonLdScript({
+    "@context": `https://schema.org`,
+    "@type": `BreadcrumbList`,
+    itemListElement: [
+      { "@type": `ListItem`, position: 1, name: homeName, item: `${SITE_ORIGIN}/` },
+      { "@type": `ListItem`, position: 2, name: blogName, item: `${SITE_ORIGIN}/blog` },
+      { "@type": `ListItem`, position: 3, name: title, item: canonical },
+    ],
+  });
+
   return `<!DOCTYPE html>
 <html lang="${lang}" dir="${langDir(lang)}">
 <head>
@@ -293,6 +320,7 @@ function buildBlogHtml(p, handle, lang) {
 <meta name="twitter:description" content="${descAttr}" />
 <meta name="twitter:image" content="${imageAttr}" />
 ${ld}
+${ldCrumb}
 </head>
 <body></body>
 </html>`;

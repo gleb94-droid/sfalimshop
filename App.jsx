@@ -4931,7 +4931,9 @@ function AdminPage({ lang }) {
                                 </div>
                               );
                             })()}
-                            {order.notes && <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>{order.notes}</div>}
+                            {order.notes && (order.notes.startsWith("🎁 GIFT MESSAGE: ")
+                              ? <OrderGiftNotes notes={order.notes} lang={lang} />
+                              : <div style={{ color: COLORS.gray, fontSize: 13, marginTop: 8, background: COLORS.bg, padding: "8px 12px", borderRadius: 6 }}>{order.notes}</div>)}
                             {group.some(o => o.customer_message) && (
                               <div style={{ marginTop: 8 }}>
                                 {group.filter(o => o.customer_message).map(o => (
@@ -5327,7 +5329,9 @@ function AdminPage({ lang }) {
                     <div style={{ color: COLORS.gray, fontSize: 12, wordBreak: `break-all` }}>{o.customer_email}{o.customer_phone ? ` · ${o.customer_phone}` : ``}</div>
                     <div style={{ color: COLORS.white, fontSize: 13, marginTop: 8 }}>{localizeProduct(o.product, lang)} · {localizeVariant(o.variant, lang)} × {o.quantity} · <span style={{ color: COLORS.accent, fontWeight: 700 }}>₪{o.total}</span></div>
                     <AdminPetNameBlock order={o} lang={lang} />
-                    {o.notes && <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6, background: COLORS.bg, padding: `7px 10px`, borderRadius: 6 }}>{o.notes}</div>}
+                    {o.notes && (o.notes.startsWith("🎁 GIFT MESSAGE: ")
+                      ? <OrderGiftNotes notes={o.notes} lang={lang} compact />
+                      : <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 6, background: COLORS.bg, padding: `7px 10px`, borderRadius: 6 }}>{o.notes}</div>)}
                     <div style={{ color: COLORS.grayLight, fontSize: 11, marginTop: 6 }}>{wlDate(o.created_at)} · {timeAgo(o.created_at, lang)}</div>
                     <div style={{ display: `flex`, gap: 10, marginTop: 12, flexWrap: `wrap` }}>
                       <button onClick={() => reviewDesign(o.id, `approved`)} style={{ background: COLORS.success, color: `#0f0f0f`, border: `none`, borderRadius: 8, padding: `10px 20px`, fontSize: 13.5, fontWeight: 700, cursor: `pointer`, fontFamily: "'Heebo',sans-serif" }}>
@@ -5992,7 +5996,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [accountBusy, setAccountBusy] = useState(false);
   const [accountSent, setAccountSent] = useState(false);
   const [accountError, setAccountError] = useState("");
-  const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "" });
+  const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "", gift: false, giftMessage: "" });
   const [addrSuggestions, setAddrSuggestions] = useState([]);
   const [showAddrSugg, setShowAddrSugg] = useState(false);
   const [addrLoading, setAddrLoading] = useState(false);
@@ -6796,6 +6800,14 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
         customer_city: form.city.trim() || null,
         customer_postal_code: form.postalCode.trim() || null,
       };
+      // Gift option (rides the free-text notes field — no DB column, no price change).
+      // When the order is a gift with a card message, prepend the gift marker so the
+      // admin can spot it and copy the handwritten-card text. Otherwise notes pass
+      // through unchanged.
+      const giftMsg = form.gift ? form.giftMessage.trim() : "";
+      const notesValue = giftMsg
+        ? (form.notes ? `🎁 GIFT MESSAGE: ${giftMsg}\n${form.notes}` : `🎁 GIFT MESSAGE: ${giftMsg}`)
+        : form.notes;
       // Does this checkout contain a customer-uploaded custom design? If so the
       // whole group waits for design approval before payment (you can't pay for
       // half a cart). BLOOM / pet-name items carry an https design URL; only a
@@ -6819,7 +6831,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             color: null,
             quantity: it.qty,
             total: packItemTotal,
-            notes: form.notes,
+            notes: notesValue,
             status: `pending_payment`,
             payment_status: `idle`,
             currency: `ILS`,
@@ -6858,7 +6870,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             color: it.color,
             quantity: it.qty,
             total: commissionItemTotal,
-            notes: form.notes,
+            notes: notesValue,
             requires_design_approval: false,
             design_approval_status: `not_required`,
             status: `pending_payment`,
@@ -6944,7 +6956,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           ...addr,
           delivery_method: deliveryMethod,
           product: itProduct.name, variant: itVariant.label, color: it.color,
-          quantity: it.qty, total: itemTotal, notes: form.notes,
+          quantity: it.qty, total: itemTotal, notes: notesValue,
           pet_name: it.petName || null,
           pet_name_font: it.petNameFont || null,
           pet_name_color: it.petNameColor || null,
@@ -7757,6 +7769,15 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 </div>
               </div>
               <div><label htmlFor="order-notes" style={labelStyle}>{t.form.notes}</label><textarea id="order-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder={t.form.notesPh} rows={3} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} /></div>
+              <div>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14, color: COLORS.white }}>
+                  <input type="checkbox" checked={form.gift} onChange={e => setForm(p => ({ ...p, gift: e.target.checked }))} style={{ width: 18, height: 18, accentColor: COLORS.accent, cursor: "pointer" }} />
+                  <span>{lang === "he" ? "🎁 זו מתנה" : lang === "ru" ? "🎁 Это подарок" : "🎁 This is a gift"}</span>
+                </label>
+                {form.gift && (
+                  <input id="order-gift-msg" type="text" maxLength={140} value={form.giftMessage} onChange={e => setForm(p => ({ ...p, giftMessage: e.target.value }))} placeholder={lang === "he" ? "הקדשה אישית (תיכתב על כרטיס)" : lang === "ru" ? "Личное сообщение (напишем на открытке)" : "Personal message (handwritten on a card)"} style={{ ...inputStyle, marginTop: 8 }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
+                )}
+              </div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
                 <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4 }}>{t.form.paymentSub}</div>
@@ -11287,7 +11308,12 @@ export default function App() {
       const title = langTitles[page] || langTitles.home;
       document.title = title;
       const viewDesc = (VIEW_SEO_DESC[lang] || VIEW_SEO_DESC.he)[page];
-      setGenericSeo(lang, title, viewDesc);
+      // Known routes that have a real (non-hash) path served by Vercel get their
+      // own canonical/og:url so the runtime tags match api/og.js. Everything else
+      // (home, track, admin, policies…) falls back to the homepage URL.
+      const PAGE_PATHS = { mugs: `/mugs`, pets: `/pets`, about: `/about`, order: `/order` };
+      const pageUrl = PAGE_PATHS[page] ? `${SEO_ORIGIN}${PAGE_PATHS[page]}` : undefined;
+      setGenericSeo(lang, title, viewDesc, pageUrl);
     }
     // Update html lang+dir to match current selection
     document.documentElement.lang = lang;
@@ -13802,6 +13828,30 @@ function AdminPetNameBlock({ order, lang }) {
   );
 }
 
+// ============ ORDER GIFT NOTES — admin badge for gift orders ============
+// The customer's order "notes" carry an optional gift marker, prepended at
+// checkout: "🎁 GIFT MESSAGE: <msg>\n<rest of notes>". Split it back out so the
+// admin sees a clear "🎁 Gift" badge + the card text, with any remaining notes
+// below. No DB column — rides the free-text notes field.
+const GIFT_MARKER = "🎁 GIFT MESSAGE: ";
+function OrderGiftNotes({ notes, lang, compact }) {
+  if (!notes || !notes.startsWith(GIFT_MARKER)) return null;
+  const rest = notes.slice(GIFT_MARKER.length);
+  const nl = rest.indexOf("\n");
+  const giftMsg = nl === -1 ? rest : rest.slice(0, nl);
+  const otherNotes = nl === -1 ? "" : rest.slice(nl + 1);
+  const badge = lang === `he` ? `🎁 מתנה` : lang === `ru` ? `🎁 Подарок` : `🎁 Gift`;
+  const cardLbl = lang === `he` ? `הקדשה לכרטיס` : lang === `ru` ? `Текст на открытке` : `Card message`;
+  const fs = compact ? 12 : 13;
+  return (
+    <div style={{ marginTop: compact ? 6 : 8, background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 8, padding: compact ? `7px 10px` : `8px 12px` }}>
+      <div style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, marginBottom: 4 }}>{badge}</div>
+      <div style={{ color: COLORS.white, fontSize: fs }}><span style={{ color: COLORS.gray }}>{cardLbl}: </span>{giftMsg}</div>
+      {otherNotes && <div style={{ color: COLORS.gray, fontSize: fs, marginTop: 6 }}>{otherNotes}</div>}
+    </div>
+  );
+}
+
 // ============ BREED STORY CARD — origin + fun facts (shared) ============
 // Renders the "About the breed" card from the breed_origin_* / breed_facts_*
 // columns. Used by both PetModal and BreedPage so the story stays identical.
@@ -14199,7 +14249,17 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       lang === `en` ? `${name} in BLOOM style — a illustrated pet portrait on premium shirts, mugs & stickers.` :
       lang === `ru` ? `${name} в стиле BLOOM — рисованный портрет питомца на премиальных футболках, кружках и стикерах.` :
       `${name} בסגנון BLOOM — דיוקן חיה מאויר על חולצות, ספלים ומדבקות איכותיים.`;
-    const desc = `${base}${origin ? ` ${origin}` : (tagline ? ` ${tagline}` : ``)}`.slice(0, 300);
+    // Price + city tail — concrete numbers + "printed in Be'er Sheva" make the
+    // search snippet more compelling and locally relevant. Uses the real DB
+    // fields; omits any product whose price is missing.
+    const mugP = Number(design.price_mug);
+    const shirtP = Number(design.price_shirt_oversized) || Number(design.price_shirt);
+    const parts = [];
+    if (Number.isFinite(mugP) && mugP > 0) parts.push(lang === `en` ? `mug ₪${mugP}` : lang === `ru` ? `кружка ₪${mugP}` : `ספל ₪${mugP}`);
+    if (Number.isFinite(shirtP) && shirtP > 0) parts.push(lang === `en` ? `shirt ₪${shirtP}` : lang === `ru` ? `футболка ₪${shirtP}` : `חולצה ₪${shirtP}`);
+    const cityTail = lang === `en` ? `printed in Be'er Sheva` : lang === `ru` ? `печать в Беэр-Шеве` : `מודפס בבאר שבע`;
+    const priceTail = `${parts.length ? `${parts.join(` · `)} · ` : ``}${cityTail}`;
+    const desc = `${base}${origin ? ` ${origin}` : (tagline ? ` ${tagline}` : ``)}`.slice(0, 150) + ` · ${priceTail}`;
     const img = design.mockup_url || design.mockup_shirt_url || design.design_url || ``;
     const url = `${SEO_ORIGIN}/breed/${design.slug}`;
     document.title = title;
@@ -14217,6 +14277,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     setCanonical(url);
     setHreflang(url);
     removeJsonLd(`blog-article-ld`); // never both at once
+    removeJsonLd(`blog-breadcrumb-ld`);
     // Price span across this breed's purchasable products (shirt + mug), so the
     // Product rich result can show a price. Pet-name (+₪20) is an optional add-on
     // and intentionally excluded from the base offer range.
@@ -14242,6 +14303,20 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       } : undefined,
     };
     injectJsonLd(ld, `breed-product-ld`);
+    // BreadcrumbList: Home › BLOOM collection › this breed. Helps search engines
+    // show a breadcrumb trail in results. URLs match the runtime canonicals.
+    const crumbName = lang === `en` ? `BLOOM Collection` : lang === `ru` ? `Коллекция BLOOM` : `אוסף BLOOM`;
+    const homeName = lang === `en` ? `Home` : lang === `ru` ? `Главная` : `בית`;
+    const breadcrumbLd = {
+      "@context": `https://schema.org`,
+      "@type": `BreadcrumbList`,
+      "itemListElement": [
+        { "@type": `ListItem`, "position": 1, "name": homeName, "item": `${SEO_ORIGIN}/` },
+        { "@type": `ListItem`, "position": 2, "name": crumbName, "item": `${SEO_ORIGIN}/pets` },
+        { "@type": `ListItem`, "position": 3, "name": name, "item": url },
+      ],
+    };
+    injectJsonLd(breadcrumbLd, `breed-breadcrumb-ld`);
   }, [design, lang]);
 
   if (loading) {
@@ -14947,7 +15022,9 @@ function FaqPage({ lang }) {
     setHreflang(url);
     // Never two dynamic blocks at once (parity with breed/blog).
     removeJsonLd(`breed-product-ld`);
+    removeJsonLd(`breed-breadcrumb-ld`);
     removeJsonLd(`blog-article-ld`);
+    removeJsonLd(`blog-breadcrumb-ld`);
     const ld = {
       "@context": `https://schema.org`,
       "@type": `FAQPage`,
@@ -15135,23 +15212,28 @@ const VIEW_SEO_DESC = {
 // drop any per-page JSON-LD. Called for every route that isn't a breed page or
 // a blog page (those own their SEO in their components). `title` is the
 // already-resolved per-route document title.
-function setGenericSeo(lang, title, descOverride) {
+function setGenericSeo(lang, title, descOverride, pageUrl) {
   const desc = descOverride || GENERIC_SEO_DESC[lang] || GENERIC_SEO_DESC.he;
+  // Real per-route URL for canonical/og:url (e.g. /mugs, /pets, /about). When no
+  // pageUrl is passed we default to the homepage, preserving prior behavior.
+  const url = pageUrl || `${SEO_ORIGIN}/`;
   setMeta(`description`, desc);
   setMeta(`og:title`, title, `property`);
   setMeta(`og:description`, desc, `property`);
   setMeta(`og:type`, `website`, `property`);
-  setMeta(`og:url`, `${SEO_ORIGIN}/`, `property`);
+  setMeta(`og:url`, url, `property`);
   setMeta(`og:image`, SITE_OG_IMAGE, `property`);
   setMeta(`og:locale`, ogLocale(lang), `property`);
   setMeta(`twitter:card`, `summary_large_image`);
   setMeta(`twitter:title`, title);
   setMeta(`twitter:description`, desc);
   setMeta(`twitter:image`, SITE_OG_IMAGE);
-  setCanonical(`${SEO_ORIGIN}/`);
-  setHreflang(`${SEO_ORIGIN}/`);
+  setCanonical(url);
+  setHreflang(url);
   removeJsonLd(`breed-product-ld`);
+  removeJsonLd(`breed-breadcrumb-ld`);
   removeJsonLd(`blog-article-ld`);
+  removeJsonLd(`blog-breadcrumb-ld`);
   removeJsonLd(`faq-ld`);
 }
 
@@ -15288,7 +15370,9 @@ function BlogIndex({ lang, goToBlog }) {
     setHreflang(indexUrl);
     // Coming from a post → clear its Article block; from a breed → its Product.
     removeJsonLd(`blog-article-ld`);
+    removeJsonLd(`blog-breadcrumb-ld`);
     removeJsonLd(`breed-product-ld`);
+    removeJsonLd(`breed-breadcrumb-ld`);
   }, [lang]);
 
   useEffect(() => {
@@ -15463,6 +15547,7 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
     setCanonical(postUrl);
     setHreflang(postUrl);
     removeJsonLd(`breed-product-ld`); // never both at once
+    removeJsonLd(`breed-breadcrumb-ld`);
     const ld = {
       "@context": `https://schema.org`, "@type": `Article`,
       "headline": ogTitle, "image": [ogImage],
@@ -15474,6 +15559,19 @@ function BlogPost({ slug, lang, goToBlog, setPage, onShareToast }) {
       "mainEntityOfPage": postUrl,
     };
     injectJsonLd(ld, `blog-article-ld`);
+    // BreadcrumbList: Home › Blog › this post.
+    const homeName = lang === `en` ? `Home` : lang === `ru` ? `Главная` : `בית`;
+    const blogName = lang === `en` ? `Blog` : lang === `ru` ? `Блог` : `בלוג`;
+    const breadcrumbLd = {
+      "@context": `https://schema.org`,
+      "@type": `BreadcrumbList`,
+      "itemListElement": [
+        { "@type": `ListItem`, "position": 1, "name": homeName, "item": `${SEO_ORIGIN}/` },
+        { "@type": `ListItem`, "position": 2, "name": blogName, "item": `${SEO_ORIGIN}/blog` },
+        { "@type": `ListItem`, "position": 3, "name": ogTitle, "item": postUrl },
+      ],
+    };
+    injectJsonLd(breadcrumbLd, `blog-breadcrumb-ld`);
   }, [post, lang]);
 
   if (loading) {
