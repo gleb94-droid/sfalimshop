@@ -2808,6 +2808,22 @@ const formatPriceRange = (variants) => {
   return min === max ? `₪${min}` : `⁦₪${min}–₪${max}⁩`;
 };
 
+// Plural-correct word for a variant count. EN singular/plural; RU follows the
+// standard rule (1→вариант, 2-4→варианта, 5+ & teens 11-14→вариантов).
+// HE returns "" so the caller falls back to its existing t.product.options.
+const variantCountWord = (n, lang) => {
+  const c = Math.abs(Number(n) || 0);
+  if (lang === `en`) return c === 1 ? `option` : `options`;
+  if (lang === `ru`) {
+    const mod100 = c % 100, mod10 = c % 10;
+    if (mod100 >= 11 && mod100 <= 14) return `вариантов`;
+    if (mod10 === 1) return `вариант`;
+    if (mod10 >= 2 && mod10 <= 4) return `варианта`;
+    return `вариантов`;
+  }
+  return ``;
+};
+
 // Placement presets — cx/cy = center of the design on the mockup (SVG units, 400×400)
 const PLACEMENTS = {
   tshirt:  [
@@ -3815,6 +3831,23 @@ function TrackPage({ lang, user, clearCart }) {
                 style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, background: `#25D366`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: 14, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box` }}>
                 <span style={{ fontSize: 18 }}>💬</span> {t.commission.postCta}
               </a>
+            </div>
+          )}
+          {ok && (
+            <div style={{ background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 12, padding: 16, marginBottom: 20, textAlign: `center` }}>
+              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14, lineHeight: 1.6, marginBottom: 12 }}>
+                {lang === `he` ? `אהבתם? ספרו לנו 🧡 שתפו תמונה ותייגו @sfalimshop — נשמח לראות!` : lang === `ru` ? `Понравилось? Расскажите 🧡 Поделитесь фото и отметьте @sfalimshop — будем рады!` : `Love it? Tell us 🧡 Share a photo & tag @sfalimshop — we'd love to see it!`}
+              </div>
+              <div style={{ display: `flex`, gap: 10, flexWrap: `wrap`, justifyContent: `center` }}>
+                <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer"
+                  style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, gap: 8, flex: `1 1 130px`, background: `linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: `11px 14px`, fontSize: 14, fontWeight: 700, fontFamily: `'Heebo',sans-serif` }}>
+                  <span style={{ fontSize: 16 }}>📷</span> {lang === `he` ? `אינסטגרם` : lang === `ru` ? `Instagram` : `Instagram`}
+                </a>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lang === `he` ? `היי! קיבלתי את ההזמנה ורציתי להשאיר חוות דעת 🧡` : lang === `ru` ? `Привет! Получил(а) заказ и хочу оставить отзыв 🧡` : `Hi! I got my order and I'd love to leave a review 🧡`)}`} target="_blank" rel="noopener noreferrer"
+                  style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, gap: 8, flex: `1 1 130px`, background: `#25D366`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: `11px 14px`, fontSize: 14, fontWeight: 700, fontFamily: `'Heebo',sans-serif` }}>
+                  <span style={{ fontSize: 16 }}>💬</span> {lang === `he` ? `חוות דעת` : lang === `ru` ? `Отзыв` : `Review`}
+                </a>
+              </div>
             </div>
           )}
           <button onClick={() => { try { window.history.replaceState({}, ``, `${window.location.pathname}#track`); } catch (_) {} setPayReturnDismissed(true); }}
@@ -4956,7 +4989,7 @@ function AdminPage({ lang }) {
                                     {it.second_front_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>+1</div>}
                                     {it.sleeve_left_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>L-SL</div>}
                                     {it.sleeve_right_url && <div style={{ background: COLORS.bgCard, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>R-SL</div>}
-                                    {it.extra_prints?.mug_shape === `rounded` && <div style={{ background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>{lang === `he` ? `☕ ספל מעוגל` : lang === `ru` ? `☕ Кружка округлая` : `☕ ROUNDED MUG`}</div>}
+                                    {it.extra_prints?.mug_shape === `rounded` && <div style={{ background: `rgba(255,107,53,0.12)`, border: `1px solid ${COLORS.accent}`, borderRadius: 6, padding: "3px 8px", fontSize: 10, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.05em" }}>{`☕ ${(MUG_SHAPES_I18N[lang] || MUG_SHAPES_I18N.he).rounded}`}</div>}
                                   </div>
                                   {it.design_url && (
                                     <div style={{ background: COLORS.bgCard, borderRadius: 8, padding: 6, marginBottom: 8 }}>
@@ -5819,7 +5852,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
                 <span>{colorName(it.color, lang)}</span>
               </span>
             )}
-            {it.mugShape === `rounded` && <span style={{ color: COLORS.accent, fontWeight: 700 }}>☕ {lang === `he` ? `מעוגל` : lang === `ru` ? `округлая` : `rounded`}</span>}
+            {it.mugShape === `rounded` && <span style={{ color: COLORS.accent, fontWeight: 700 }}>☕ {(MUG_SHAPES_I18N[lang] || MUG_SHAPES_I18N.he).rounded}</span>}
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, direction: "ltr" }}>
@@ -6134,6 +6167,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [currentItemCartId, setCurrentItemCartId] = useState(null);
   // showNextChoice opens immediately when arriving with a BLOOM item to add.
   const [showNextChoice, setShowNextChoice] = useState(!!pendingBloomItem);
+  const nextChoiceRef = useDialogFocus(showNextChoice); // focus-trap + restore for the "item added" modal
   // Tracks whether the "added to cart" popup is showing for a BLOOM item
   // (its buttons return to the collection) vs a custom item.
   const [nextChoiceIsBloom, setNextChoiceIsBloom] = useState(!!pendingBloomItem);
@@ -7109,7 +7143,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
 
         {showNextChoice && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-            <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 420, width: "100%", textAlign: "center" }}>
+            <div ref={nextChoiceRef} role="dialog" aria-modal="true" aria-label={lang === "he" ? "הפריט נוסף לסל" : lang === "ru" ? "Товар добавлен в корзину" : "Item added to cart"} onKeyDown={(e) => { if (e.key === "Escape") { setShowNextChoice(false); setNextChoiceIsBloom(false); } }} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 32, maxWidth: 420, width: "100%", textAlign: "center" }}>
               <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: "50%", background: "rgba(40,200,120,0.12)", border: "2px solid #28C878", marginBottom: 16, color: "#28C878", fontSize: 26, fontWeight: 700 }}>✓</div>
               <div style={{ color: COLORS.white, fontSize: 20, fontWeight: 700, marginBottom: 8, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif" }}>
                 {lang === "he" ? "הפריט נוסף לסל!" : lang === "ru" ? "Товар добавлен в корзину!" : "Item added to cart!"}
@@ -7181,7 +7215,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                           {p.is_new && <span style={{ background: "transparent", color: COLORS.accent, border: `1px solid ${COLORS.accent}`, fontFamily: "'Heebo',sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "1px 6px", borderRadius: 4 }}>{LANGS[lang].badges.new}</span>}
                         </div>
                         <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
-                        <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {t.product.options}</span></div>
+                        <div style={{ color: COLORS.accent, fontSize: 13, marginTop: 6, fontWeight: 700 }}>{formatPriceRange(p.variants)} <span style={{ color: COLORS.gray, fontWeight: 400 }}>· {p.variants.length} {variantCountWord(p.variants.length, lang) || t.product.options}</span></div>
                       </div>
                     </div>
                     {selectedProduct === p.id && <span style={{ color: COLORS.accent, flexShrink: 0 }}>✓</span>}
@@ -7818,7 +7852,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName} × {it.qty}</div>
                     <div style={{ color: COLORS.gray, fontSize: 12, marginTop: 3, lineHeight: 1.5 }}>
                       {it.variantLabel}
-                      {it.mugShape === `rounded` ? ` · ${lang === "he" ? "מעוגל" : lang === "ru" ? "округлая" : "rounded"}` : ""}
+                      {it.mugShape === `rounded` ? ` · ${(MUG_SHAPES_I18N[lang] || MUG_SHAPES_I18N.he).rounded}` : ""}
                       {it.backPrint ? ` · ${lang === "he" ? "הדפס אחורי" : lang === "ru" ? "Спина" : "Back print"}` : ""}
                       {it.secondFront.enabled ? ` · ${lang === "he" ? "הדפס נוסף" : lang === "ru" ? "Доп. перед" : "Extra front"}` : ""}
                       {it.sleeveLeft.enabled ? ` · ${lang === "he" ? "שרוול שמאל" : lang === "ru" ? "Левый рукав" : "Left sleeve"}` : ""}
@@ -9689,7 +9723,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
   // through to the full nav below, 100% unchanged.
   if (preview) {
     return (
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
+      <nav aria-label={lang === "he" ? "ניווט תצוגה מקדימה" : lang === "ru" ? "Навигация предпросмотра" : "Preview navigation"} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
         {/* Logo → coming-soon landing */}
         <button type="button" onClick={() => setPage("home")} aria-label={lang === "he" ? "ספלים שופ — דף הבית" : lang === "ru" ? "Sfalim Shop — главная" : "Sfalim Shop — home"} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center" }}>
           <img src="/logo.jpg" alt="" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} />
@@ -9712,7 +9746,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
   return (
     <>
-    <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
+    <nav aria-label={lang === "he" ? "ניווט ראשי" : lang === "ru" ? "Основная навигация" : "Main navigation"} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(15,15,15,0.95)", backdropFilter: "blur(24px)", borderBottom: `1px solid rgba(255,107,53,0.15)`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "0 16px" : "0 32px", height: 72, direction: "ltr", boxShadow: "0 4px 30px rgba(0,0,0,0.3)" }}>
       {/* Logo - LEFT */}
       <button type="button" onClick={() => setPage("home")} aria-label={lang === "he" ? "ספלים שופ — דף הבית" : lang === "ru" ? "Sfalim Shop — главная" : "Sfalim Shop — home"} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, display: "inline-flex", alignItems: "center" }}>
         <img src="/logo.jpg" alt="" style={{ height: isMobile ? 40 : 58, width: "auto", maxWidth: isMobile ? 160 : 280, mixBlendMode: "screen" }} /></button>
@@ -9973,7 +10007,7 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
         style={{
           position: 'fixed', bottom: 24, insetInlineStart: 24, zIndex: 9998,
           width: 52, height: 52, borderRadius: '50%',
-          background: '#FF6B35', border: 'none', cursor: 'pointer',
+          background: COLORS.accentBtn, border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 22, boxShadow: '0 4px 20px rgba(255,107,53,0.5)',
           transition: 'transform 0.2s, box-shadow 0.2s, opacity 0.25s',
@@ -9991,7 +10025,7 @@ function AccessibilityMenu({ lang, cartOpen, overlayOpen, reduceMotion, setReduc
 
       {/* Accessibility panel — sits on the same inline-start side as the button. */}
       {open && (
-        <div ref={a11yPanelRef} role="dialog" aria-label={t.title} onKeyDown={e => { if (e.key === "Escape") setOpen(false); }} style={{
+        <div ref={a11yPanelRef} role="dialog" aria-modal="true" aria-label={t.title} onKeyDown={e => { if (e.key === "Escape") setOpen(false); }} style={{
           position: 'fixed', bottom: 88, insetInlineStart: 24, zIndex: 9997,
           background: '#1a1a1a', border: '1px solid #2a2a2a',
           borderRadius: 16, padding: 20, width: 260, maxWidth: "calc(100vw - 48px)",
@@ -10513,7 +10547,12 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
             <div style={{ textAlign: "center", padding: "70px 20px", color: COLORS.gray }}>
               <div style={{ fontSize: 46, marginBottom: 14 }}>🛒</div>
               <div style={{ color: COLORS.white, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{tr.empty}</div>
-              <div style={{ fontSize: 13 }}>{tr.emptySub}</div>
+              <div style={{ fontSize: 13, marginBottom: 18 }}>{tr.emptySub}</div>
+              {onAddMore && (
+                <button type="button" onClick={onAddMore} style={{ background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "12px 22px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Heebo',sans-serif", touchAction: "manipulation" }}>
+                  {lang === "he" ? "לגלריה →" : lang === "ru" ? "К коллекции →" : "Browse the collection →"}
+                </button>
+              )}
             </div>
           ) : (
             cart.map((it) => {
@@ -10537,7 +10576,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                           <span>{colorName(it.color, lang)}</span>
                         </span>
                       )}
-                      {it.mugShape === `rounded` && <span style={{ color: COLORS.accent, fontWeight: 700 }}>☕ {lang === `he` ? `מעוגל` : lang === `ru` ? `округлая` : `rounded`}</span>}
+                      {it.mugShape === `rounded` && <span style={{ color: COLORS.accent, fontWeight: 700 }}>☕ {(MUG_SHAPES_I18N[lang] || MUG_SHAPES_I18N.he).rounded}</span>}
                     </div>
                     {extras && <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 4 }}>{extras}</div>}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
@@ -13190,7 +13229,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
           borderRadius: 16,
           maxWidth: 1000,
           width: "100%",
-          maxHeight: "92vh",
+          maxHeight: "92svh",
           overflowY: "auto",
           position: "relative",
           boxShadow: "0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(255,107,53,0.1)",
