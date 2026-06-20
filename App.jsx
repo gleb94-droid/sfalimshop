@@ -6422,6 +6422,34 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     if (pendingCheckout) { setStep(3); clearPendingCheckout(); }
   }, [pendingCheckout]);
 
+  // ── Commission deep-link ────────────────────────────────────────────
+  // Arrived from the BLOOM modal "Design my pet" upsell: pre-enter the
+  // "we design it for you" commission flow on the product step (step 1) with
+  // the product + commission type already chosen, so the user lands inside the
+  // flow rather than on a blank picker. Consumed once, then cleared (no loop).
+  const commissionConsumedRef = useRef(false);
+  useEffect(() => {
+    if (commissionConsumedRef.current || !pendingCommission) return;
+    commissionConsumedRef.current = true;
+    const pid = pendingCommission.product || `mug`;
+    const prod = products.find(p => p.id === pid);
+    if (!prod || !prod.variants.length) { clearPendingCommission(); return; }
+    setSelectedProduct(pid);
+    setMugShape(`classic`);
+    setSelectedVariant(prod.variants[0].id);
+    setSelectedColor(0);
+    setUploadedImage(null);
+    setCommissionMode(true);
+    setCommissionType(pendingCommission.ctype || `pet`);
+    setCommissionAck(false);
+    // The product picker + commission box live on step 1. Make sure we're there
+    // (we may have defaulted to step 3 if a cart/checkout intent was also set).
+    setStep(1);
+    // Scroll the commission box into view once it has rendered.
+    setTimeout(() => { try { commissionRef.current?.scrollIntoView({ behavior: `smooth`, block: `center` }); } catch (_) {} }, 60);
+    clearPendingCommission();
+  }, []);
+
   const safeGo = (action) => {
     if (step >= 2 && step < 4) { setLeaveWarning(true); setPendingNav(() => action); }
     else action();
@@ -10813,6 +10841,10 @@ export default function App() {
     (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.DEV) ||
     (typeof window !== "undefined" && window.sessionStorage.getItem("sf_staff") === "1"));
   const [pendingBloomItem, setPendingBloomItem] = useState(null);
+  // Deep-link intent: when set, OrderPage pre-enters the "we design it for you"
+  // commission flow with the product + type already chosen (e.g. from the
+  // PetModal "Design my pet" upsell). { product, ctype }. Consumed once, then cleared.
+  const [pendingCommission, setPendingCommission] = useState(null);
 
   // Always open at the very top on load/refresh. The browser otherwise
   // restores the previous scroll position on reload; we disable that and
@@ -10953,6 +10985,14 @@ export default function App() {
   // longer uses it; it calls addBloomToCart directly so the user stays on /pets.
   const orderBloomDesign = (item) => {
     setPendingBloomItem(item);
+    setPage("order");
+  };
+
+  // Deep-link straight into the pet-portrait commission ("we design it for you")
+  // flow from the BLOOM modal upsell. Sets the intent OrderPage consumes, then
+  // navigates — the user lands on the order page with the commission preselected.
+  const onCommissionPet = () => {
+    setPendingCommission({ product: "mug", ctype: "pet" });
     setPage("order");
   };
 
@@ -11707,12 +11747,12 @@ export default function App() {
             {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
-            {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
+            {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onCommissionPet={onCommissionPet} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
             {page === "blog" && (blogSlug
               ? <BlogPost slug={blogSlug} lang={lang} goToBlog={goToBlog} setPage={setPage} onShareToast={showToast} />
               : <BlogIndex lang={lang} goToBlog={goToBlog} />)}
-            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} />}
+            {page === "order" && <OrderPage lang={lang} user={user} setPage={setPage} pendingBloomItem={pendingBloomItem} clearPendingBloomItem={() => setPendingBloomItem(null)} cart={cart} setCart={setCart} updateCartQty={updateCartQty} pendingCheckout={pendingCheckout} clearPendingCheckout={() => setPendingCheckout(false)} pendingCommission={pendingCommission} clearPendingCommission={() => setPendingCommission(null)} />}
             {page === "track" && <TrackPage lang={lang} user={user} clearCart={clearCart} />}
             {page === "auth" && <AuthPage lang={lang} onAuth={handleAuth} />}
             {page === "admin" && isAdmin && <AdminPage lang={lang} />}
@@ -12026,7 +12066,7 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
   );
 }
 
-function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrderBloom, onAddStickerPack, onShareToast }) {
+function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrderBloom, onCommissionPet, onAddStickerPack, onShareToast }) {
   const isRTL = lang === "he";
   const w = WL[lang] || WL.he; // BLOOM Family waitlist copy (pre-launch preview)
   const [blogPosts, setBlogPosts] = useState([]); // latest 3 published — drives the "from our blog" stripe
@@ -12829,6 +12869,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
+          onCommissionPet={onCommissionPet}
           shareSlug={slugify(selected)}
           onShareToast={onShareToast}
         />
@@ -13043,7 +13084,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, setPage, onClose, isMobile, onOrderBloom, shareSlug, onShareToast }) {
+function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, setPage, onClose, isMobile, onOrderBloom, onCommissionPet, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("oversized"); // BLOOM prints on Oversize only (₪119)
@@ -13509,7 +13550,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
             {/* "Paint MY pet" commission upsell — routes into the existing
                 "we design it for you" pet-portrait flow on the order page. The
                 price is read from COMMISSION_PRICE (never hardcoded). */}
-            {!preview && setPage && (
+            {!preview && onCommissionPet && (
               <div style={{ marginTop: 16, background: `linear-gradient(135deg, rgba(255,107,53,0.14), rgba(255,107,53,0.04))`, border: `2px solid ${COLORS.accent}`, borderRadius: 14, padding: 16 }}>
                 <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 5 }}>🐾 {lang === `he` ? `אוהבים את הסגנון?` : lang === `ru` ? `Нравится стиль?` : `Love this style?`}</div>
                 <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14.5, lineHeight: 1.45, marginBottom: 6 }}>
@@ -13520,7 +13561,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 </div>
                 <button
                   type="button"
-                  onClick={() => { if (onClose) onClose(); setPage(`order`); }}
+                  onClick={() => { if (onClose) onClose(); onCommissionPet(); }}
                   style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `13px 18px`, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, fontWeight: 700, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, transition: `background 0.2s` }}
                   onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
                   onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accentBtn; }}>
