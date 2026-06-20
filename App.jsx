@@ -12853,6 +12853,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
           preview={preview}
           goToBlog={goToBlog}
           goToBreed={goToBreed}
+          setPage={setPage}
           onClose={closePet}
           isMobile={isMobile}
           onOrderBloom={onOrderBloom}
@@ -13070,7 +13071,7 @@ function PetCard({ design, lang, index, name, animal, tagline, priceFrom, previe
 }
 
 // ============ PET MODAL — character detail ============
-function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, onClose, isMobile, onOrderBloom, shareSlug, onShareToast }) {
+function PetModal({ design, lang, name, animal, tagline, t, preview = false, goToBlog, goToBreed, setPage, onClose, isMobile, onOrderBloom, shareSlug, onShareToast }) {
   const isRTL = lang === "he";
   const [selectedColor, setSelectedColor] = useState(BLOOM_SHIRT_COLORS[0]);
   const [shirtType, setShirtType] = useState("oversized"); // BLOOM prints on Oversize only (₪119)
@@ -13103,6 +13104,25 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
         .eq(`breed_slug_link`, design.slug).eq(`status`, `published`)
         .order(`published_at`, { ascending: false }).limit(1).maybeSingle();
       if (!cancelled && data) setBreedPost(data);
+    })();
+    return () => { cancelled = true; };
+  }, [design && design.slug]);
+  // "More characters you'll love" — the same gentle marquee rail as BreedPage.
+  // One fetch per modal open (keyed on slug), guarded against unmount. Pulls the
+  // active roster, drops the current character, caps at 12 for a tidy rail.
+  const [related, setRelated] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    setRelated([]);
+    if (!design || !design.slug) return;
+    (async () => {
+      const { data } = await supabase
+        .from(`pet_designs`)
+        .select(`slug,name_he,name_en,name_ru,mockup_url,mockup_shirt_url,mockup_mug_url,species`)
+        .eq(`is_active`, true)
+        .order(`sort_order`, { ascending: true });
+      if (cancelled || !data) return;
+      setRelated(data.filter((c) => c.slug !== design.slug).slice(0, 12));
     })();
     return () => { cancelled = true; };
   }, [design && design.slug]);
@@ -13521,6 +13541,44 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
             {/* About the breed — origin + fun facts (content-writer agent).
                 Shared with BreedPage; renders null when the breed has no content. */}
             <BreedStoryCard design={design} lang={lang} />
+
+            {/* "Paint MY pet" commission upsell — routes into the existing
+                "we design it for you" pet-portrait flow on the order page. The
+                price is read from COMMISSION_PRICE (never hardcoded). */}
+            {!preview && setPage && (
+              <div style={{ marginTop: 16, background: `linear-gradient(135deg, rgba(255,107,53,0.14), rgba(255,107,53,0.04))`, border: `2px solid ${COLORS.accent}`, borderRadius: 14, padding: 16 }}>
+                <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 5 }}>🐾 {lang === `he` ? `אוהבים את הסגנון?` : lang === `ru` ? `Нравится стиль?` : `Love this style?`}</div>
+                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14.5, lineHeight: 1.45, marginBottom: 6 }}>
+                  {lang === `he` ? `נעצב דיוקן BLOOM של החיה האמיתית שלכם` : lang === `ru` ? `Создадим BLOOM-портрет вашего настоящего питомца` : `We'll design a BLOOM portrait of your own pet`}
+                </div>
+                <div style={{ color: COLORS.gray, fontSize: 12, lineHeight: 1.5, marginBottom: 12 }}>
+                  {lang === `he` ? `שולחים תמונות, ואנחנו מעצבים — מתחיל מ-₪${COMMISSION_PRICE.pet.mug}` : lang === `ru` ? `Вы присылаете фото — мы создаём. От ₪${COMMISSION_PRICE.pet.mug}` : `You send photos, we design it — from ₪${COMMISSION_PRICE.pet.mug}`}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { if (onClose) onClose(); setPage(`order`); }}
+                  style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `13px 18px`, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, fontWeight: 700, cursor: `pointer`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, transition: `background 0.2s` }}
+                  onMouseOver={(e) => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                  onMouseOut={(e) => { e.currentTarget.style.background = COLORS.accentBtn; }}>
+                  ✨ {lang === `he` ? `עצבו את החיה שלי` : lang === `ru` ? `Создать портрет питомца` : `Design my pet`}
+                </button>
+              </div>
+            )}
+
+            {/* "More characters you'll love" — same marquee rail as BreedPage.
+                Renders only when the fetch returned others. Clicking a character
+                closes the modal (so the toast/navigation is visible) and opens it. */}
+            {related.length > 0 && (
+              <div style={{ marginTop: 4 }}>
+                <BloomCharacterRail
+                  characters={related}
+                  lang={lang}
+                  goToBreed={(slug) => { if (onClose) onClose(); goToBreed(slug); }}
+                  isMobile={isMobile}
+                  heading={lang === `he` ? `עוד דמויות שתאהבו` : lang === `ru` ? `Ещё персонажи, которые понравятся` : `More characters you'll love`}
+                />
+              </div>
+            )}
 
             {/* Slice 3: link to the breed's blog post when one is published. */}
             {breedPost && goToBlog && (
