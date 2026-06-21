@@ -5957,7 +5957,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
   );
 }
 
-function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart, updateCartQty, pendingCheckout, clearPendingCheckout }) {
+function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomItem, cart, setCart, updateCartQty, pendingCheckout, clearPendingCheckout, pendingCommission, clearPendingCommission }) {
   const t = LANGS[lang];
   const products = getCustomProducts(t);
   const [step, setStep] = useState((pendingBloomItem || pendingCheckout) ? 3 : 1);
