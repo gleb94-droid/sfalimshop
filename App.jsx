@@ -2232,7 +2232,7 @@ const LANGS = {
     nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה ←', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון ←', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו ←', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון ←", nav: "חידון" },
-    hero: { badge: "הדפסות מותאמות אישית · ישראל 🇮🇱", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס בעבודת יד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
+    hero: { badge: "הדפסות מותאמות אישית · ישראל", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס בעבודת יד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
     trust: { shipping: "משלוח מ-₪27", delivery: "מוכן בימים ספורים", secure: "תשלום מאובטח", returns: "אחריות פגם — נתקן או נחזיר" },
     badges: { bestseller: "רב מכר", new: "חדש" },
     reviews: { eyebrow: "ביקורות לקוחות", title: "מה אומרים עלינו", aria: "ביקורת לקוח" },
@@ -2303,7 +2303,7 @@ const LANGS = {
     nav: { home: "Home", mugs: "Mugs", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
-    hero: { badge: "Custom Prints · Made in Israel 🇮🇱", h1line1: "Designed", h1line2: "for your style", sub: "Mugs, shirts & BLOOM pet portraits — personalized with your design, hand-printed in Be'er Sheva.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
+    hero: { badge: "Custom Prints · Made in Israel", h1line1: "Designed", h1line2: "for your style", sub: "Mugs, shirts & BLOOM pet portraits — personalized with your design, hand-printed in Be'er Sheva.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
     trust: { shipping: "Shipping from ₪27", delivery: "Ready in a few days", secure: "Secure payment", returns: "Defect guarantee — we fix or refund" },
     badges: { bestseller: "Bestseller", new: "New" },
     reviews: { eyebrow: "Customer reviews", title: "What customers say", aria: "Customer review" },
@@ -2374,7 +2374,7 @@ const LANGS = {
     nav: { home: "Главная", mugs: "Кружки", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
-    hero: { badge: "Индивидуальная печать · Израиль 🇮🇱", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Кружки, футболки и портреты BLOOM — с вашим дизайном, печать вручную в Беэр-Шеве.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
+    hero: { badge: "Индивидуальная печать · Израиль", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Кружки, футболки и портреты BLOOM — с вашим дизайном, печать вручную в Беэр-Шеве.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
     trust: { shipping: "Доставка от ₪27", delivery: "Готово за несколько дней", secure: "Безопасная оплата", returns: "Гарантия при браке — починим или вернём" },
     badges: { bestseller: "Хит продаж", new: "Новинка" },
     reviews: { eyebrow: "Отзывы клиентов", title: "Что говорят о нас", aria: "Отзыв клиента" },
@@ -9227,7 +9227,7 @@ function Hero({ setPage, lang, compact = false }) {
             <div style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 12, lineHeight: 1.5, marginTop: 4, minHeight: 34 }}>{p.desc?.[lang] || p.desc?.en || ""}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
               <span style={{ color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontWeight: 800, fontSize: 17 }}>{formatPriceRange(p.variants)}</span>
-              <span style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 10.5, letterSpacing: "0.03em" }}>🎨 {lang === "he" ? "העיצוב שלכם" : lang === "ru" ? "ваш дизайн" : "your design"}</span>
+              <span style={{ color: COLORS.gray, fontFamily: "'Heebo',sans-serif", fontSize: 10.5, letterSpacing: "0.03em", display: "inline-flex", alignItems: "center", gap: 4 }}><AboutIcon name="palette" size={12} color={COLORS.gray} /><span>{lang === "he" ? "העיצוב שלכם" : lang === "ru" ? "ваш дизайн" : "your design"}</span></span>
             </div>
           </div>
         ))}
@@ -9441,17 +9441,17 @@ function HomeMugsBanner({ lang, setPage }) {
     <section aria-labelledby="home-mugs-title" dir={isRTL ? `rtl` : `ltr`} style={{ background: COLORS.bg, padding: isMobile ? `8px 18px 40px` : `8px 32px 64px` }}>
       <div style={{ maxWidth: 1000, margin: `0 auto`, background: `linear-gradient(135deg, rgba(255,107,53,0.12), rgba(255,107,53,0.03))`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 22, padding: isMobile ? `26px 22px` : `34px 40px`, display: `flex`, flexDirection: isMobile ? `column` : `row`, alignItems: `center`, gap: isMobile ? 22 : 36 }}>
         <div style={{ flex: 1, textAlign: isMobile ? `center` : (isRTL ? `right` : `left`) }}>
-          <span style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `5px 15px`, marginBottom: 12, color: COLORS.accent, fontSize: 11, fontWeight: 700, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>☕ {T.eyebrow}</span>
+          <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `5px 15px`, marginBottom: 12, color: COLORS.accent, fontSize: 11, fontWeight: 700, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}><AboutIcon name="pawprint" size={13} color={COLORS.accent} /><span>{T.eyebrow}</span></span>
           <h2 id="home-mugs-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(26px,4.5vw,40px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 12px` }}>{T.heading}</h2>
           <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 10px` : `0 0 10px` }}>{T.sub}</p>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: isMobile ? `center` : (isRTL ? `flex-end` : `flex-start`), gap: 7, marginBottom: 20, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600 }}>
-            <span aria-hidden="true">☕</span>
+            <AboutIcon name="printer" size={15} color={COLORS.accent} />
             <span>{lang === `he` ? `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים` : lang === `ru` ? `Печать вручную в Беэр-Шеве · готово за 2–3 дня` : `Hand-printed in Be'er Sheva · ready in 2–3 days`}</span>
           </div>
           <button type="button" onClick={() => setPage(`mugs`)} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` }}
             onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
             onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
-            <span aria-hidden="true">☕</span> {T.cta} {isRTL ? `←` : `→`}
+            <AboutIcon name="pawprint" size={16} color="#fff" /> {T.cta} {isRTL ? `←` : `→`}
           </button>
           <div style={{ marginTop: 10, color: COLORS.accent, fontSize: 13, fontWeight: 700, fontFamily: `'Heebo',sans-serif` }}>{lang === `he` ? `החל מ-₪59` : lang === `ru` ? `от ₪59` : `from ₪59`}</div>
         </div>
@@ -9530,7 +9530,7 @@ function MugsPage({ lang, setPage }) {
       heading: `הספלים שלנו`,
       sub: `קוראים לנו ספלים — וזה בדיוק מה שאנחנו עושים הכי טוב. ספל קרמי איכותי עם העיצוב שאתם אוהבים, מודפס באהבה בעבודת יד בבאר שבע.`,
       badges: [`קרמיקה 11oz`, `עמיד במדיח`, `הדפסת סובלימציה`, `מודפס בעבודת יד בבאר שבע`],
-      giftStrip: [`🎁 מתנה מושלמת`, `⚡ מוכן תוך 2–3 ימים`, `✍️ הוסיפו שם או תאריך`],
+      giftStrip: [`מתנה מושלמת`, `מוכן תוך 2–3 ימים`, `הוסיפו שם או תאריך`],
       bloomTitle: `כל דמות BLOOM — גם על ספל`,
       bloomSub: `70 דיוקנאות חיות מצוירים. בחרו את הגזע שלכם והדפיסו אותו על ספל.`,
       bloomCta: `עיין באוסף BLOOM`,
@@ -9552,7 +9552,7 @@ function MugsPage({ lang, setPage }) {
       heading: `Our Mugs`,
       sub: `"Sfalim" literally means "mugs" — and it's what we do best. A quality ceramic mug with the design you love, printed by hand with love in Be'er Sheva.`,
       badges: [`11oz ceramic`, `Dishwasher-safe`, `Sublimation print`, `Hand-printed in Be'er Sheva`],
-      giftStrip: [`🎁 Perfect gift`, `⚡ Ready in 2–3 days`, `✍️ Add a name or date`],
+      giftStrip: [`Perfect gift`, `Ready in 2–3 days`, `Add a name or date`],
       bloomTitle: `Every BLOOM character — on a mug too`,
       bloomSub: `70 illustrated pet portraits. Pick your breed and print it on a mug.`,
       bloomCta: `Browse the BLOOM collection`,
@@ -9574,7 +9574,7 @@ function MugsPage({ lang, setPage }) {
       heading: `Наши кружки`,
       sub: `«Сфалим» и означает «кружки» — и это то, что мы делаем лучше всего. Качественная керамическая кружка с дизайном, который вам нравится, напечатана вручную с любовью в Беэр-Шеве.`,
       badges: [`Керамика 11oz`, `Можно в посудомойку`, `Сублимационная печать`, `Печать вручную в Беэр-Шеве`],
-      giftStrip: [`🎁 Идеальный подарок`, `⚡ Готово за 2–3 дня`, `✍️ Добавьте имя или дату`],
+      giftStrip: [`Идеальный подарок`, `Готово за 2–3 дня`, `Добавьте имя или дату`],
       bloomTitle: `Любой персонаж BLOOM — и на кружке`,
       bloomSub: `70 рисованных портретов питомцев. Выберите породу и напечатайте на кружке.`,
       bloomCta: `Каталог BLOOM`,
@@ -9601,7 +9601,7 @@ function MugsPage({ lang, setPage }) {
     <div dir={isRTL ? `rtl` : `ltr`} style={{ minHeight: `100vh`, paddingTop: 72, paddingBottom: 80, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.10) 0%, transparent 55%), ${COLORS.bg}`, color: COLORS.white }}>
       {/* HERO */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 36 : 64, paddingBottom: isMobile ? 28 : 40, textAlign: `center` }}>
-        <span className="reveal" style={{ display: `inline-block`, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>☕ {c.eyebrow}</span>
+        <span className="reveal" style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}><AboutIcon name="pawprint" size={13} color={COLORS.accent} /><span>{c.eyebrow}</span></span>
         <h1 className="reveal" data-delay="1" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(34px,7vw,68px)`, lineHeight: 1.05, margin: `0 0 16px` }}>{c.heading}</h1>
         <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.7, maxWidth: 620, margin: `0 auto 24px` }}>{c.sub}</p>
         <ul className="reveal" data-delay="3" role="list" style={{ listStyle: `none`, margin: 0, padding: 0, display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 9 }}>
@@ -9614,7 +9614,7 @@ function MugsPage({ lang, setPage }) {
         {c.giftStrip && (
           <div className="reveal" data-delay="4" style={{ display: `flex`, flexWrap: `wrap`, justifyContent: `center`, gap: 10, marginTop: 16 }}>
             {c.giftStrip.map((g, i) => (
-              <span key={i} style={{ display: `inline-flex`, alignItems: `center`, padding: `7px 15px`, borderRadius: 999, background: COLORS.accentBtn, color: `#fff`, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 700, boxShadow: `0 4px 14px rgba(255,107,53,0.22)` }}>{g}</span>
+              <span key={i} style={{ display: `inline-flex`, alignItems: `center`, gap: 6, padding: `7px 15px`, borderRadius: 999, background: COLORS.accentBtn, color: `#fff`, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 700, boxShadow: `0 4px 14px rgba(255,107,53,0.22)` }}><AboutIcon name={i === 0 ? `heart` : i === 1 ? `truck` : `sparkles`} size={14} color="#fff" /><span>{g}</span></span>
             ))}
           </div>
         )}
@@ -9692,7 +9692,7 @@ function MugsPage({ lang, setPage }) {
             </ul>
           </div>
           <div style={{ background: `linear-gradient(160deg, rgba(255,107,53,0.14), rgba(255,107,53,0.03))`, border: `1px solid rgba(255,107,53,0.25)`, borderRadius: 18, padding: isMobile ? `22px 20px` : `28px 28px`, display: `flex`, flexDirection: `column`, justifyContent: `center` }}>
-            <div style={{ fontSize: 30, marginBottom: 8 }} aria-hidden="true">🎁</div>
+            <div style={{ marginBottom: 8 }} aria-hidden="true"><AboutIcon name="heart" size={30} color={COLORS.accent} /></div>
             <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: 22, margin: `0 0 10px` }}>{c.giftTitle}</h3>
             <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, lineHeight: 1.65, margin: 0 }}>{c.giftText}</p>
           </div>
@@ -9707,7 +9707,7 @@ function MugsPage({ lang, setPage }) {
         <button type="button" onClick={() => setPage(`order`)} style={ctaBtnStyle}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
           onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
-          <span aria-hidden="true" style={{ fontSize: 18 }}>☕</span> {c.finalCta} {isRTL ? `←` : `→`}
+          <AboutIcon name="pawprint" size={18} color="#fff" /> {c.finalCta} {isRTL ? `←` : `→`}
         </button>
       </section>
     </div>
