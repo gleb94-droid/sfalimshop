@@ -10035,22 +10035,19 @@ function CollagePage({ lang, setPage }) {
         </div>
       </section>
 
-      {/* SHOWCASE — real MY CREW examples: the design worn (3 looks) + the flat artwork */}
+      {/* SHOWCASE — real MY CREW examples: cats + dogs, worn (2 looks each) */}
       <section style={{ ...sectionStyle, paddingTop: 0, paddingBottom: isMobile ? 24 : 36 }}>
         <div style={{ display: `grid`, gridTemplateColumns: `repeat(2, 1fr)`, gap: 12, maxWidth: 680, margin: `0 auto` }}>
           {[
             `/my-crew/mycrew-worn-1.webp`,
+            `/my-crew/mycrew-dog-1.webp`,
             `/my-crew/mycrew-worn-3.webp`,
-            `/my-crew/mycrew-worn-2.webp`,
-            `/my-crew/mycrew-design-sonya-sanya.webp`,
-          ].map((src, i) => {
-            const isArt = src.includes(`design`);
-            return (
-              <div key={i} style={{ background: isArt ? `#f4f4f4` : COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
-                <SmartImage src={src} alt={t.name} loading={i === 0 ? `eager` : `lazy`} style={{ width: `100%`, height: `100%`, objectFit: isArt ? `contain` : `cover`, display: `block` }} />
-              </div>
-            );
-          })}
+            `/my-crew/mycrew-dog-2.webp`,
+          ].map((src, i) => (
+            <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+              <SmartImage src={src} alt={t.name} loading={i === 0 ? `eager` : `lazy`} style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
+            </div>
+          ))}
         </div>
       </section>
 
