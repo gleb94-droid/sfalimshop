@@ -2304,8 +2304,8 @@ const LANGS = {
       step3: `מאשרים → מדפיסים בבאר שבע`,
       howTitle: `איך זה עובד`,
       priceLine: `₪169 · הכל כלול`,
-      showcaseFront: `קדמי · המשפט שלך`,
-      showcaseBack: `גב · הקולאז' של החבורה`,
+      showcaseWorn: `על החולצה`,
+      showcaseDesign: `העיצוב`,
       cta: `מתחילים את MY CREW`,
       bandPitch: `MY CREW — החיה האמיתית שלך על חולצה`,
       trustLine: `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים`,
@@ -2421,8 +2421,8 @@ const LANGS = {
       step3: `You approve → we print in Be'er Sheva`,
       howTitle: `How it works`,
       priceLine: `₪169 · all included`,
-      showcaseFront: `Front · your phrase`,
-      showcaseBack: `Back · your crew collage`,
+      showcaseWorn: `On the tee`,
+      showcaseDesign: `The design`,
       cta: `Start MY CREW`,
       bandPitch: `MY CREW — your real pet on a shirt`,
       trustLine: `Hand-printed in Be'er Sheva · ready in 2–3 days`,
@@ -2538,8 +2538,8 @@ const LANGS = {
       step3: `Вы утверждаете → печатаем в Беэр-Шеве`,
       howTitle: `Как это работает`,
       priceLine: `₪169 · всё включено`,
-      showcaseFront: `Спереди · ваша фраза`,
-      showcaseBack: `Сзади · коллаж банды`,
+      showcaseWorn: `На футболке`,
+      showcaseDesign: `Дизайн`,
       cta: `Начать MY CREW`,
       bandPitch: `MY CREW — ваш настоящий питомец на футболке`,
       trustLine: `Печать вручную в Беэр-Шеве · готово за 2–3 дня`,
@@ -9734,9 +9734,9 @@ function HomeMyCrewBand({ lang, setPage }) {
           </button>
           <div style={{ marginTop: 10, color: COLORS.accent, fontSize: 13, fontWeight: 700, fontFamily: `'Heebo',sans-serif` }}>{mc.priceLine}</div>
         </div>
-        {/* TODO: real MY CREW photo — placeholder oversize-tee template for now */}
+        {/* Real MY CREW example — the design worn on the tee */}
         <div style={{ flexShrink: 0, width: isMobile ? `100%` : 220, maxWidth: 260, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
-          <img src={MOCKUP_URLS.oversized} alt={mc.name} loading="lazy" decoding="async" style={{ width: `100%`, maxWidth: 200, objectFit: `contain`, filter: `drop-shadow(0 10px 24px rgba(255,107,53,0.22)) brightness(0.95)`, display: `block` }} />
+          <img src={`/my-crew/mycrew-mockup-sonya-sanya.webp`} alt={mc.name} loading="lazy" decoding="async" style={{ width: `100%`, maxWidth: 220, borderRadius: 14, objectFit: `cover`, filter: `drop-shadow(0 10px 24px rgba(255,107,53,0.22))`, display: `block` }} />
         </div>
       </div>
     </section>
@@ -10035,17 +10035,16 @@ function CollagePage({ lang, setPage }) {
         </div>
       </section>
 
-      {/* SHOWCASE IMAGE — placeholder until owner supplies real MY CREW photos */}
+      {/* SHOWCASE — real MY CREW example: the design worn on the tee + the flat artwork */}
       <section style={{ ...sectionStyle, paddingTop: 0, paddingBottom: isMobile ? 24 : 36 }}>
-        {/* TODO: swap to real MY CREW collage tee photos when owner supplies them */}
         <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(2, 1fr)`, gap: 14, maxWidth: 680, margin: `0 auto` }}>
-          {[{ src: MOCKUP_URLS.oversized, label: t.showcaseFront }, { src: MOCKUP_URLS.oversized, label: t.showcaseBack }].map((item, i) => (
-            <div key={i} style={{ position: `relative`, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+          {[{ src: `/my-crew/mycrew-mockup-sonya-sanya.webp`, label: t.showcaseWorn }, { src: `/my-crew/mycrew-design-sonya-sanya.webp`, label: t.showcaseDesign }].map((item, i) => (
+            <div key={i} style={{ position: `relative`, background: i === 1 ? `#f4f4f4` : COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
               <SmartImage
-                src={transformImage(item.src, { width: 480 })}
-                alt=""
+                src={item.src}
+                alt={item.label}
                 loading={i === 0 ? `eager` : `lazy`}
-                style={{ width: `80%`, height: `80%`, objectFit: `contain`, display: `block`, filter: `drop-shadow(0 12px 24px rgba(0,0,0,0.5))` }}
+                style={{ width: `100%`, height: `100%`, objectFit: i === 0 ? `cover` : `contain`, display: `block` }}
               />
               <span style={{ position: `absolute`, bottom: 12, insetInlineStart: 12, background: `rgba(255,107,53,0.92)`, color: `#fff`, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 12, padding: `5px 11px`, borderRadius: 8, letterSpacing: `0.02em` }}>{item.label}</span>
             </div>
