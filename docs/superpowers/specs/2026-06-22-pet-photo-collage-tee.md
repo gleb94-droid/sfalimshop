@@ -1,6 +1,6 @@
 # Pet Photo-Collage Tee ("MY CREW") — Product Design Spec
 
-**Date:** 2026-06-22 · **Status:** design finalized + name LOCKED (MY CREW); pending owner assets (example photos + final price) before build · **Branch:** to be built on `launch-prep`
+**Date:** 2026-06-22 · **Status:** design finalized; name (MY CREW) + price (₪169) LOCKED; ONLY blocker left = owner example photos before build · **Branch:** to be built on `launch-prep`
 
 > Name: **MY CREW** — FINAL (confirmed by owner 2026-06-22). Kept English across all languages (like BLOOM); local subtitle — he `החבורה שלך על חולצה`, ru `твоя банда на футболке`, en `your crew on a tee`.
 
@@ -29,7 +29,7 @@ Front + back + sleeve · up to **12 photos** · pet name(s) · **design-approval
 3. **"In memory" mode** — one toggle ("This is a tribute 🤍") swaps the phrase set to gentle ones (`בלב לנצח` / `Forever in my heart` / `Always with me`) + optional years field (`[NAME] · 2015–2024`). Handle warmly; offer quietly, do NOT market aggressively. Same collage engine, different emotional mode. Same price (a mode, not a surcharge).
 
 ## 6. Pricing
-- **Base tee:** ₪149 (all sides, up to 12 photos, name, approval included). Optional premium positioning ₪169.
+- **Base tee:** **₪169** (LOCKED — all sides, up to 12 photos, name, approval included).
 - **+ same-design mug:** +₪49 (vs ₪59 standalone) → "Full Crew Set."
 - **In-memory mode:** no surcharge.
 - Server re-prices via the existing `create-payment` commission path (a new commission/collage type) — **deploy the edge fn before exposing it** (server-first rule).
@@ -57,5 +57,5 @@ Tee → colour → collage style → **mode (Celebrate / In memory)** → front 
 
 ## 10. Blockers before build
 1. **2-3 photos of real finished collage tees** (back) for the showcase.
-2. Owner confirms **price** (₪149 / ₪169). *(Name locked: MY CREW.)*
+2. ~~Price + name~~ — DONE: **MY CREW · ₪169** (+₪49 same-design mug). Only the example photos remain.
 Then: build Phase 1 on `launch-prep` (showcase + commission option + server pricing) → review → deploy (server-first) → merge.
