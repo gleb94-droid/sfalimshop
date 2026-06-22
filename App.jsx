@@ -2229,7 +2229,7 @@ const timeBetween = (start, end, lang) => {
 const LANGS = {
   he: {
     dir: "rtl", label: "HE",
-    nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
+    nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", collage: "MY CREW", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה ←', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון ←', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו ←', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון ←", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס בעבודת יד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
@@ -2349,7 +2349,7 @@ const LANGS = {
   },
   en: {
     dir: "ltr", label: "EN",
-    nav: { home: "Home", mugs: "Mugs", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
+    nav: { home: "Home", mugs: "Mugs", order: "Order", pets: "BLOOM", collage: "MY CREW", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel", h1line1: "Designed", h1line2: "for your style", sub: "Mugs, shirts & BLOOM pet portraits — personalized with your design, hand-printed in Be'er Sheva.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
@@ -2469,7 +2469,7 @@ const LANGS = {
   },
   ru: {
     dir: "ltr", label: "RU",
-    nav: { home: "Главная", mugs: "Кружки", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
+    nav: { home: "Главная", mugs: "Кружки", order: "Заказ", pets: "BLOOM", collage: "MY CREW", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Кружки, футболки и портреты BLOOM — с вашим дизайном, печать вручную в Беэр-Шеве.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
@@ -9871,7 +9871,7 @@ function MugsPage({ lang, setPage }) {
   };
   const c = D[lang] || D.he;
 
-  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, padding: isMobile ? `0 18px` : `0 32px` };
+  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, paddingLeft: isMobile ? 18 : 32, paddingRight: isMobile ? 18 : 32 };
   const ctaBtnStyle = { display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` };
 
   return (
@@ -10006,7 +10006,7 @@ function CollagePage({ lang, setPage, goToCollage }) {
 
   const t = (LANGS[lang] || LANGS.he).myCrew;
 
-  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, padding: isMobile ? `0 18px` : `0 32px` };
+  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, paddingLeft: isMobile ? 18 : 32, paddingRight: isMobile ? 18 : 32 };
   const ctaBtnStyle = { display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` };
 
   const steps = [
@@ -10233,7 +10233,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-        {["home", "mugs", "pets", "order", "about"].map(p => (
+        {["home", "mugs", "pets", "collage", "order", "about"].map(p => (
           <button key={p} onClick={() => setPage(p)} aria-current={page === p ? "page" : undefined} style={{
             background: page === p ? COLORS.accentDim : "transparent",
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
@@ -10304,7 +10304,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     {/* Mobile dropdown */}
     {mobileMenu && (
       <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, maxHeight: "calc(100vh - 72px)", overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
-        {["home", "mugs", "pets", "order", "about"].map(p => (
+        {["home", "mugs", "pets", "collage", "order", "about"].map(p => (
           <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
         <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
