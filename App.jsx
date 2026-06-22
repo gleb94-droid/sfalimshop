@@ -2303,6 +2303,7 @@ const LANGS = {
       step1: `בוחרים חולצה ושולחים עד 12 תמונות`,
       step2: `אנחנו בונים קולאז' ושולחים לאישור`,
       step3: `מאשרים → מדפיסים בבאר שבע`,
+      howTitle: `איך זה עובד`,
       priceLine: `₪169 · הכל כלול`,
       cta: `מתחילים את MY CREW`,
       bandPitch: `MY CREW — החיה האמיתית שלך על חולצה`,
@@ -2417,6 +2418,7 @@ const LANGS = {
       step1: `Choose your shirt and send up to 12 photos`,
       step2: `We build the collage and send you a preview`,
       step3: `You approve → we print in Be'er Sheva`,
+      howTitle: `How it works`,
       priceLine: `₪169 · all included`,
       cta: `Start my MY CREW`,
       bandPitch: `MY CREW — your real pet on a shirt`,
@@ -2531,6 +2533,7 @@ const LANGS = {
       step1: `Выбираете футболку и присылаете до 12 фото`,
       step2: `Мы собираем коллаж и присылаем на согласование`,
       step3: `Вы утверждаете → печатаем в Беэр-Шеве`,
+      howTitle: `Как это работает`,
       priceLine: `₪169 · всё включено`,
       cta: `Начать MY CREW`,
       bandPitch: `MY CREW — ваш настоящий питомец на футболке`,
@@ -10005,7 +10008,7 @@ function CollagePage({ lang, setPage }) {
       {/* HOW IT WORKS — 3 steps */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 28 : 44, paddingBottom: isMobile ? 20 : 36 }}>
         <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(22px,4vw,32px)`, textAlign: `center`, margin: `0 0 24px` }}>
-          {lang === `he` ? `איך זה עובד` : lang === `ru` ? `Как это работает` : `How it works`}
+          {t.howTitle}
         </h2>
         <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(3, 1fr)`, gap: 14 }}>
           {steps.map((s, i) => (
