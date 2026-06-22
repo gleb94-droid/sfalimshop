@@ -2268,7 +2268,6 @@ const LANGS = {
       choiceCollage: `📸 קולאז' מהתמונות שלכם`,
       choiceCollageSub: `MY CREW — עד 12 תמונות אמיתיות של החיה שלך`,
       cartNoteCollage: `MY CREW · קולאז' מהתמונות שלך — נתאם את התמונות אחרי התשלום בוואטסאפ`,
-      collageHow: `שולחים עד 12 תמונות בוואטסאפ, אנחנו בונים קולאז' ושולחים לאישור לפני ההדפסה`,
       adminBadgeCollage: `MY CREW — ממתין לתמונות`,
     },
     myCrew: {
@@ -2384,7 +2383,6 @@ const LANGS = {
       choiceCollage: `📸 Collage from your photos`,
       choiceCollageSub: `MY CREW — up to 12 real photos of your pet`,
       cartNoteCollage: `MY CREW · collage from your photos — we'll arrange them over WhatsApp after payment`,
-      collageHow: `Send up to 12 photos on WhatsApp, we build the collage and send a preview for approval before printing`,
       adminBadgeCollage: `MY CREW — awaiting photos`,
     },
     myCrew: {
@@ -2500,7 +2498,6 @@ const LANGS = {
       choiceCollage: `📸 Коллаж из ваших фото`,
       choiceCollageSub: `MY CREW — до 12 реальных фото питомца`,
       cartNoteCollage: `MY CREW · коллаж из ваших фото — согласуем после оплаты в WhatsApp`,
-      collageHow: `Пришлите до 12 фото в WhatsApp, мы соберём коллаж и пришлём превью на утверждение перед печатью`,
       adminBadgeCollage: `MY CREW — ожидает фото`,
     },
     myCrew: {
@@ -7607,7 +7604,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
             )}
             {commissionMode && BLOOM_COMMISSION_ENABLED ? (
-              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setCommissionAck(false); setSelectedProduct(null); setStep(3); } }} disabled={!selectedProduct || !selectedVariant || !commissionAck} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: (!selectedProduct || !selectedVariant || !commissionAck) ? `not-allowed` : `pointer`, opacity: (!selectedProduct || !selectedVariant || !commissionAck) ? 0.55 : 1, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{commissionPrice(commissionType, selectedProduct)}</button>
+              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setCommissionAck(false); setSelectedProduct(null); setStep(3); setCollageStyle(`bw`); setCollageMode(`celebrate`); setCollagePhrase(``); setCollageSleeve(false); setCollageYears(``); setPetNames(``); setPetCount(1); setSetMug(false); } }} disabled={!selectedProduct || !selectedVariant || !commissionAck} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: (!selectedProduct || !selectedVariant || !commissionAck) ? `not-allowed` : `pointer`, opacity: (!selectedProduct || !selectedVariant || !commissionAck) ? 0.55 : 1, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{commissionPrice(commissionType, selectedProduct)}</button>
             ) : (
               <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>{t.product.continue}</button>
             )}
@@ -14489,7 +14486,7 @@ function CollageOptions({
       <div style={{ marginBottom: 16 }}>
         <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.modeLabel}</div>
         <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
-          {chipBtn(collageMode === `celebrate`, () => { setCollageMode(`celebrate`); setCollagePhrase(``); }, mc.modeCelebrate)}
+          {chipBtn(collageMode === `celebrate`, () => { setCollageMode(`celebrate`); setCollagePhrase(``); setCollageYears(``); }, mc.modeCelebrate)}
           {chipBtn(collageMode === `memory`,    () => { setCollageMode(`memory`);    setCollagePhrase(``); }, mc.modeMemory)}
         </div>
       </div>
