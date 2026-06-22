@@ -68,7 +68,7 @@ git commit -m "feat(create-payment): MY CREW collage tier (tee=169, set mug=49)"
 
 **Files:** Modify `App.jsx` — add a `myCrew` sub-object to `LANGS.he` / `.en` / `.ru` (place beside the existing `commission` object so the implementer finds it by proximity), plus the four commission keys from the original plan.
 
-**Interfaces:** Produces `LANGS[lang].commission.choiceCollage` / `choiceCollageSub` / `cartNoteCollage` / `collageHow`, and a `LANGS[lang].myCrew` object with: `name` (`MY CREW`), `subtitle`, selector labels (`colorLabel`, `styleLabel`, `styleBW`, `styleColor`, `modeLabel`, `modeCelebrate`, `modeMemory`, `phraseLabel`, `phraseOptions` [array], `sleeveLabel`, `petNamesLabel`, `petCountLabel`), `memoryPhrases` [array], `yearsLabel`, `photoGuideTitle`, `photoGuide` [array of 3 tips], `oneOfOne`, `setUpsellLabel` (`+ same design on a mug · +₪49`), `briefLabel` (the WhatsApp brief preamble), and page/band copy (`heroPitch`, `step1/2/3`, `priceLine`, `cta`, `bandPitch`, `bloomCrosslink`). All trilingual.
+**Interfaces:** Produces `LANGS[lang].commission.choiceCollage` / `choiceCollageSub` / `cartNoteCollage` / `collageHow` / `adminBadgeCollage` (admin queue label: `📸 MY CREW — awaiting photos` / he `MY CREW — ממתין לתמונות` / ru `MY CREW — ожидает фото`), and a `LANGS[lang].myCrew` object with: `name` (`MY CREW`), `subtitle`, selector labels (`colorLabel`, `styleLabel`, `styleBW`, `styleColor`, `modeLabel`, `modeCelebrate`, `modeMemory`, `phraseLabel`, `phraseOptions` [array], `sleeveLabel`, `petNamesLabel`, `petCountLabel`), `memoryPhrases` [array], `yearsLabel`, `photoGuideTitle`, `photoGuide` [array of 3 tips], `oneOfOne`, `setUpsellLabel` (`+ same design on a mug · +₪49`), `briefLabel` (the WhatsApp brief preamble), and page/band copy (`heroPitch`, `step1/2/3`, `priceLine`, `cta`, `bandPitch`, `bloomCrosslink`). All trilingual.
 
 - [ ] **Step 1: Add the four `commission.*` keys** (he/en/ru) — choiceCollage / choiceCollageSub / cartNoteCollage / collageHow. Copy the exact strings from the version-controlled spec §8 + the values below into each `commission` object:
 
@@ -204,6 +204,8 @@ git commit -m "feat(my-crew): CollageOptions selector panel + collage option on 
 - [ ] **Step 3: Push the set-mug second line** — after the existing `setCart(c => [...c, {...}])` in `addCommissionToCart`, if `commissionType === 'collage' && setMug`, append a second cart item: `productId: 'mug'`, `commissionType: 'collage'`, `isCommission: true`, `unitPrice: 49`, `itemPrice: 49`, `collage: {...same...}`, a `variantId` matching the mug's sizeless variant. (Read the mug product entry in `PRODUCTS` for its variant id.)
 
 - [ ] **Step 4: Persist to `extra_prints`** — at App.jsx:6936 add `collage` to the commission row's `extra_prints` object: `..., collage: it.collage || null`.
+
+- [ ] **Step 4b: Admin badge** — find where the existing commission `adminBadge` ("BLOOM commission — awaiting photos") renders on the admin order card (grep `adminBadge`). Add a branch so a collage order shows `t.commission.adminBadgeCollage` instead, so the owner's queue clearly distinguishes a MY CREW photo-collage order from a BLOOM-portrait one.
 
 - [ ] **Step 5: Smart WhatsApp brief** — find where the Track-page commission CTA builds the prefill (the `postPrefill(id)` calls near App.jsx:3662 / the strings at 2334/2405). Add a helper that, for a collage order, reads `extra_prints.collage` and appends a localized brief, e.g.:
 
