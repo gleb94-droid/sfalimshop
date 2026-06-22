@@ -1,8 +1,8 @@
 # Pet Photo-Collage Tee ("MY CREW") — Product Design Spec
 
-**Date:** 2026-06-22 · **Status:** design finalized, pending owner assets (example photos + final price/name) before build · **Branch:** to be built on `launch-prep`
+**Date:** 2026-06-22 · **Status:** design finalized + name LOCKED (MY CREW); pending owner assets (example photos + final price) before build · **Branch:** to be built on `launch-prep`
 
-> Working name: **MY CREW** (owner to confirm — alternatives: "REAL ONES", "BLOOM REAL").
+> Name: **MY CREW** — FINAL (confirmed by owner 2026-06-22). Kept English across all languages (like BLOOM); local subtitle — he `החבורה שלך על חולצה`, ru `твоя банда на футболке`, en `your crew on a tee`.
 
 ## 1. Concept
 An oversize tee with a **streetwear collage of the customer's REAL pet photos** (up to 12) on the back + a small phrase on the front. Sibling to BLOOM: **BLOOM = illustrated portraits (70 ready characters); MY CREW = the customer's own photos.** Made "we design it" style: pay-first → customer sends photos via WhatsApp → owner builds the collage → design-approval preview → print → ship. Owner prints in-house (DTF) in Be'er Sheva.
@@ -57,5 +57,5 @@ Tee → colour → collage style → **mode (Celebrate / In memory)** → front 
 
 ## 10. Blockers before build
 1. **2-3 photos of real finished collage tees** (back) for the showcase.
-2. Owner confirms **price** (₪149 / ₪169) + **line name** (MY CREW / alt).
+2. Owner confirms **price** (₪149 / ₪169). *(Name locked: MY CREW.)*
 Then: build Phase 1 on `launch-prep` (showcase + commission option + server pricing) → review → deploy (server-first) → merge.
