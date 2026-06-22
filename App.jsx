@@ -9986,7 +9986,7 @@ function MugsPage({ lang, setPage }) {
 // Promotes the MY CREW collage-tee commission service (up to 12 real pet
 // photos assembled into a streetwear oversize-tee print). Pay-first, WhatsApp
 // photo handoff after checkout. No DB, no extra props needed.
-function CollagePage({ lang, setPage }) {
+function CollagePage({ lang, setPage, goToCollage }) {
   const isRTL = lang === `he`;
   const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
   useEffect(() => {
@@ -10096,7 +10096,7 @@ function CollagePage({ lang, setPage }) {
         </p>
         <button
           type="button"
-          onClick={() => setPage(`order`)}
+          onClick={() => (goToCollage ? goToCollage() : setPage(`order`))}
           style={ctaBtnStyle}
           onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
           onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
@@ -11414,6 +11414,13 @@ export default function App() {
     setPage("order");
   };
 
+  // MY CREW /collage CTA — preselect the oversize tee + collage commission, then
+  // navigate so the user lands directly in the photo-collage flow (not a blank picker).
+  const goToCollage = () => {
+    setPendingCommission({ product: "oversized", ctype: "collage" });
+    setPage("order");
+  };
+
   // Short-lived toast shown after a BLOOM item is added to the cart from /pets.
   // null when hidden, otherwise the localized message string.
   const [cartToast, setCartToast] = useState(null);
@@ -12165,7 +12172,7 @@ export default function App() {
             {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><ScrollReveal><HomeMyCrewBand lang={lang} setPage={setPage} /></ScrollReveal><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
-            {page === `collage` && <CollagePage lang={lang} setPage={setPage} />}
+            {page === `collage` && <CollagePage lang={lang} setPage={setPage} goToCollage={goToCollage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onCommissionPet={onCommissionPet} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
             {page === "blog" && (blogSlug
