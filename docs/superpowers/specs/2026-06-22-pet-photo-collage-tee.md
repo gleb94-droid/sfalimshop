@@ -1,6 +1,6 @@
 # Pet Photo-Collage Tee ("MY CREW") — Product Design Spec
 
-**Date:** 2026-06-22 · **Status:** design finalized; name (MY CREW) + price (₪169) LOCKED; ONLY blocker left = owner example photos before build · **Branch:** to be built on `launch-prep`
+**Date:** 2026-06-22 · **Status:** design finalized; name (MY CREW) + price (₪169) LOCKED; scope = **ALL-IN** (on-site selectors + smart WhatsApp brief + mug set-upsell +₪49 + photo guide + "in memory" mode; NO live collage constructor — owner builds the collage manually); ONLY blocker to ship = owner example photos for the showcase (code is not blocked — uses placeholders) · **Branch:** to be built on `launch-prep`
 
 > Name: **MY CREW** — FINAL (confirmed by owner 2026-06-22). Kept English across all languages (like BLOOM); local subtitle — he `החבורה שלך על חולצה`, ru `твоя банда на футболке`, en `your crew on a tee`.
 
@@ -37,16 +37,22 @@ Front + back + sleeve · up to **12 photos** · pet name(s) · **design-approval
 ## 7. Customer journey (kept simple)
 Tee → colour → collage style → **mode (Celebrate / In memory)** → front phrase → sleeve (opt) → pet name(s) → **"+ mug with the same design?"** → pay → WhatsApp photos (up to 12) → **approval preview** → print → ship.
 
-## 8. Site implementation — phased (the "best way to upload it")
-**Phase 1 (ship now, minimal code):**
-- A **showcase block** (home + a `/collage` mini-page) with 2-3 REAL example photos + the 3-step "how it works" + CTA.
-- Entry = the **existing "we design it" commission flow** with a new option **"📸 Pet photo collage"** (priced server-side).
-- Rich customization (colour/style/phrase/mode/sleeve) handled in the **WhatsApp conversation** + an order note initially — NOT a complex on-site selector. A photo/choice checklist goes in the post-pay WhatsApp prefill.
-- SEO: `/collage` page + **internal links from the already-published gift blog posts** (`custom-pet-photo-gift-guide`, `gifts-for-dog-lovers`) → ready-made funnel.
-- Cross-link from BLOOM (/pets + PetModal): a small "want your REAL pet? → photo collage" link.
+## 8. Site implementation — ALL-IN (one cohesive flow, no phasing)
+Owner decision 2026-06-22: build the full experience now. The guiding principle — **every on-site choice is cheap metadata that makes the product feel premium AND auto-builds a complete order brief**, so the owner gets everything upfront (fewer redos, faster turnaround). We do NOT build a live collage constructor (photo upload + layout render): the owner designs the collage by hand from WhatsApp photos, so an on-site render adds huge build cost with no payoff.
 
-**Phase 2 (after demand proves out):**
-- On-site selectors for colour / collage style / front phrase / mode; the "+ mug same design" upsell checkbox; optional gallery of examples.
+**Build (all of it):**
+- **Entry** = the existing "we design it" commission flow + a new option **"📸 Pet photo collage"** (a new `collage` commission type), priced server-side at ₪169 (deploy create-payment FIRST).
+- **On-site selectors** (all just captured as order metadata): tee colour (white/black) · collage style (B&W streetwear default / colour) · **mode (Celebrate / In memory 🤍)** · front phrase (from the menu) · sleeve micro-print (opt) · pet name(s) + count (drives the naming rule 1/2/3+).
+- **Smart brief (the standout feature):** as the customer chooses, build a structured summary that is auto-injected into the **post-pay WhatsApp prefill** — the owner receives a ready order-naryad ("Black · B&W · phrase POWERED BY LUNA · 2 pets: MAX & LUNA · mode: Celebrate · +mug") instead of a blank "send photos".
+- **Photo guide** inline in the flow ("which photos to send" — clear, face close-up, varied angles) → fewer bad submissions / redos.
+- **Mug set-upsell** — a "+ same design on a mug? +₪49" checkbox on the collage step → a second server-priced cart line ("Full Crew Set"). (Owner pick: mug only for now; tote later.)
+- **"In memory" mode** — a gentle toggle that swaps the phrase set to tributes (`בלב לנצח` / `Forever in my heart` / `Always with me`) + an optional years field (`[NAME] · 2015–2024`). Offered quietly, never marketed aggressively. Same price (a mode, not a surcharge).
+- **`1 OF 1` promise** surfaced as a brand seal on the showcase + flow + cart note.
+- **Showcase:** home band + a `/collage` mini-page (placeholder imagery until owner supplies real collage-tee photos; swap later — does NOT block the build).
+- **SEO:** `/collage` in both sitemaps + internal links from the published gift blog posts (`custom-pet-photo-gift-guide`, `gifts-for-dog-lovers`).
+- **Cross-link from BLOOM** (/pets + PetModal): a subtle "want your REAL pet? → photo collage" link.
+
+**Explicitly OUT of scope (deferred / not built):** live on-site collage constructor with photo upload + layout preview (Phase 3 if ever — owner designs manually); tote/socks set variants (mug-only for now).
 
 ## 9. Marketing / how we offer it
 - **Reel reveal** (turn around → the pet collage on the back) = the viral shot.
