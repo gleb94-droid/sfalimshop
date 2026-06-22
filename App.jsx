@@ -2939,8 +2939,13 @@ const CUSTOM_STICKER_IDS = ['sticker', 'sticker_sq'];
 // (cart re-render, localizeProduct, order history) keep working. Re-enable a model by
 // removing its id from this list.
 const LAUNCH_HIDDEN_SHIRT_IDS = ['tshirt', 'lycra', 'look', 'dryfit'];
+// Magic Mug + Socks are fully built (priced live in create-payment v24) but parked
+// until the owner has stock + real product photos. Flip to true to expose them
+// everywhere (order picker, PetModal, BreedPage). Server pricing already supports them.
+const MAGIC_MUG_SOCKS_ENABLED = false;
 const getCustomProducts = (t) => {
   let all = PRODUCTS(t).filter(p => !LAUNCH_HIDDEN_SHIRT_IDS.includes(p.id));
+  if (!MAGIC_MUG_SOCKS_ENABLED) all = all.filter(p => p.id !== `magic_mug` && p.id !== `socks`);
   if (!STONEWASH_ENABLED) all = all.filter(p => p.id !== `stonewash`);
   if (CUSTOM_STICKERS_ENABLED) return all;
   return all.filter(p => !CUSTOM_STICKER_IDS.includes(p.id));
@@ -13948,8 +13953,10 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 buy a bundled pack from the PetsPage packs section instead. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
               <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
+              {MAGIC_MUG_SOCKS_ENABLED && (<>
               <ProductOption label={t.magicMugLabel} price={75} onClick={() => setPreviewProduct(`magic_mug`)} disabled={!design.design_url} selected={previewProduct === `magic_mug`} />
               <ProductOption label={t.socksLabel} price={59} onClick={() => setPreviewProduct(`socks`)} disabled={!design.design_url} selected={previewProduct === `socks`} />
+              </>)}
               <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
             </div>
             {/* Gift framing — mugs are the #1 gift item; reinforce it right where the mug is chosen. */}
@@ -15260,8 +15267,10 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
                   <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
+                  {MAGIC_MUG_SOCKS_ENABLED && (<>
                   <ProductOption label={tt.magicMug} price={75} onClick={() => setPreviewProduct(`magic_mug`)} disabled={!design.design_url} selected={previewProduct === `magic_mug`} />
                   <ProductOption label={tt.socks} price={59} onClick={() => setPreviewProduct(`socks`)} disabled={!design.design_url} selected={previewProduct === `socks`} />
+                  </>)}
                   <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
                 </div>
                 {(previewProduct === `mug` || previewProduct === `magic_mug`) && (
