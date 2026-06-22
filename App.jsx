@@ -2287,6 +2287,12 @@ const LANGS = {
       petCountLabel: `כמה חיות?`,
       memoryPhrases: [`בלב לנצח`, `תמיד איתי`, `[שם] · 2015–2024`],
       yearsLabel: `שנים (אופציונלי)`,
+      yearsPlaceholder: `לדוגמה 2015–2024`,
+      countHintOne: `שם אחד מופיע בעיצוב`,
+      countHintTwo: `שמות מופיעים: A & B`,
+      countHintThree: `שלושה ומעלה — THE … CREW`,
+      placeholderSingle: `שם החיה`,
+      placeholderMulti: `שמות מופרדים בפסיק`,
       photoGuideTitle: `אילו תמונות לשלוח`,
       photoGuide: [`תמונות חדות וברורות`, `פנים מקרוב + זוויות שונות`, `אור טוב, רקע פשוט`],
       oneOfOne: `1 OF 1 · עיצוב ייחודי רק לך`,
@@ -2394,6 +2400,12 @@ const LANGS = {
       petCountLabel: `How many pets?`,
       memoryPhrases: [`Forever in my heart`, `Always with me`, `[name] · 2015–2024`],
       yearsLabel: `Years (optional)`,
+      yearsPlaceholder: `e.g. 2015–2024`,
+      countHintOne: `One name on the design`,
+      countHintTwo: `Names appear as: A & B`,
+      countHintThree: `Three or more — THE … CREW`,
+      placeholderSingle: `Pet name`,
+      placeholderMulti: `Names separated by commas`,
       photoGuideTitle: `What photos to send`,
       photoGuide: [`Sharp, clear photos`, `Close-up face + different angles`, `Good lighting, simple background`],
       oneOfOne: `1 OF 1 · a unique design just for you`,
@@ -2501,6 +2513,12 @@ const LANGS = {
       petCountLabel: `Сколько питомцев?`,
       memoryPhrases: [`Навсегда в сердце`, `Всегда со мной`, `[имя] · 2015–2024`],
       yearsLabel: `Годы (необязательно)`,
+      yearsPlaceholder: `напр. 2015–2024`,
+      countHintOne: `Одно имя на дизайне`,
+      countHintTwo: `Имена: A & B`,
+      countHintThree: `Три и более — THE … CREW`,
+      placeholderSingle: `Имя питомца`,
+      placeholderMulti: `Имена через запятую`,
       photoGuideTitle: `Какие фото прислать`,
       photoGuide: [`Чёткие и ясные фото`, `Крупный план морды + разные ракурсы`, `Хорошее освещение, простой фон`],
       oneOfOne: `1 OF 1 · уникальный дизайн только для вас`,
@@ -14251,7 +14269,7 @@ function CollageOptions({
             type="text"
             value={collageYears}
             onChange={(e) => setCollageYears(e.target.value)}
-            placeholder={`e.g. 2015–2024`}
+            placeholder={mc.yearsPlaceholder}
             style={{
               width: `100%`, boxSizing: `border-box`,
               background: COLORS.bgCard, border: `1px solid ${COLORS.border}`,
@@ -14308,20 +14326,14 @@ function CollageOptions({
           ))}
         </div>
         <div style={{ color: COLORS.gray, fontSize: 11.5, marginBottom: 8, lineHeight: 1.5 }}>
-          {petCount === 1
-            ? (lang === `he` ? `שם אחד מופיע בעיצוב` : lang === `ru` ? `Одно имя на дизайне` : `One name on the design`)
-            : petCount === 2
-              ? (lang === `he` ? `שמות מופיעים: A & B` : lang === `ru` ? `Имена: A & B` : `Names appear as: A & B`)
-              : (lang === `he` ? `שלושה ומעלה — THE … CREW` : lang === `ru` ? `Три и более — THE … CREW` : `Three or more — THE … CREW`)}
+          {petCount === 1 ? mc.countHintOne : petCount === 2 ? mc.countHintTwo : mc.countHintThree}
         </div>
         <label style={{ display: `block`, color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{mc.petNamesLabel}</label>
         <input
           type="text"
           value={petNames}
           onChange={(e) => setPetNames(e.target.value)}
-          placeholder={petCount === 1
-            ? (lang === `he` ? `שם החיה` : lang === `ru` ? `Имя питомца` : `Pet name`)
-            : (lang === `he` ? `שמות מופרדים בפסיק` : lang === `ru` ? `Имена через запятую` : `Names separated by commas`)}
+          placeholder={petCount === 1 ? mc.placeholderSingle : mc.placeholderMulti}
           style={{
             width: `100%`, boxSizing: `border-box`,
             background: COLORS.bgCard, border: `1px solid ${COLORS.border}`,
