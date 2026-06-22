@@ -9932,6 +9932,135 @@ function MugsPage({ lang, setPage }) {
   );
 }
 
+// ── CollagePage — /collage — MY CREW landing page ────────────────────────────
+// Promotes the MY CREW collage-tee commission service (up to 12 real pet
+// photos assembled into a streetwear oversize-tee print). Pay-first, WhatsApp
+// photo handoff after checkout. No DB, no extra props needed.
+function CollagePage({ lang, setPage }) {
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+
+  const t = (LANGS[lang] || LANGS.he).myCrew;
+
+  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, padding: isMobile ? `0 18px` : `0 32px` };
+  const ctaBtnStyle = { display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` };
+
+  const steps = [
+    { icon: `pawprint`, text: t.step1 },
+    { icon: `palette`,  text: t.step2 },
+    { icon: `printer`,  text: t.step3 },
+  ];
+
+  return (
+    <div dir={isRTL ? `rtl` : `ltr`} style={{ minHeight: `100vh`, paddingTop: 72, paddingBottom: 80, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.10) 0%, transparent 55%), ${COLORS.bg}`, color: COLORS.white }}>
+
+      {/* HERO */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 36 : 64, paddingBottom: isMobile ? 28 : 40, textAlign: `center` }}>
+        {/* Eyebrow badge */}
+        <span className="reveal" style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>
+          <AboutIcon name="pawprint" size={13} color={COLORS.accent} />
+          <span>{t.name}</span>
+        </span>
+
+        {/* Wordmark + subtitle — always paired, never name alone */}
+        <h1 className="reveal" data-delay="1" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(38px,8vw,76px)`, lineHeight: 1.0, margin: `0 0 8px`, letterSpacing: `-1px` }}>
+          {t.name}
+        </h1>
+        <p className="reveal" data-delay="1" style={{ fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 16 : 20, fontWeight: 600, color: COLORS.accent, margin: `0 0 20px`, letterSpacing: `0.04em` }}>
+          {t.subtitle}
+        </p>
+        <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.7, maxWidth: 560, margin: `0 auto 28px` }}>
+          {t.heroPitch}
+        </p>
+
+        {/* 1 OF 1 seal */}
+        <div className="reveal" data-delay="3" style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: `linear-gradient(135deg, rgba(255,107,53,0.18), rgba(255,107,53,0.06))`, border: `1.5px solid rgba(255,107,53,0.45)`, borderRadius: 10, padding: `10px 20px`, marginBottom: 28 }}>
+          <AboutIcon name="sparkles" size={18} color={COLORS.accent} />
+          <span style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 14.5, color: COLORS.white, letterSpacing: `0.08em`, textTransform: `uppercase` }}>{t.oneOfOne}</span>
+        </div>
+      </section>
+
+      {/* SHOWCASE IMAGE — placeholder until owner supplies real MY CREW photos */}
+      <section style={{ ...sectionStyle, paddingTop: 0, paddingBottom: isMobile ? 24 : 36 }}>
+        {/* TODO: swap to real MY CREW collage tee photos when owner supplies them */}
+        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(2, 1fr)`, gap: 14, maxWidth: 680, margin: `0 auto` }}>
+          {[MOCKUP_URLS.oversized, MOCKUP_URLS.oversized].map((src, i) => (
+            <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+              <SmartImage
+                src={transformImage(src, { width: 480 })}
+                alt=""
+                loading={i === 0 ? `eager` : `lazy`}
+                style={{ width: `80%`, height: `80%`, objectFit: `contain`, display: `block`, filter: `drop-shadow(0 12px 24px rgba(0,0,0,0.5))` }}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS — 3 steps */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 28 : 44, paddingBottom: isMobile ? 20 : 36 }}>
+        <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(22px,4vw,32px)`, textAlign: `center`, margin: `0 0 24px` }}>
+          {lang === `he` ? `איך זה עובד` : lang === `ru` ? `Как это работает` : `How it works`}
+        </h2>
+        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(3, 1fr)`, gap: 14 }}>
+          {steps.map((s, i) => (
+            <div key={i} style={{ background: `linear-gradient(160deg, rgba(255,107,53,0.09), rgba(255,107,53,0.02))`, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `18px 16px` : `22px 20px`, display: `flex`, flexDirection: `column`, alignItems: `flex-start`, gap: 10 }}>
+              <div style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 46, height: 46, borderRadius: 12, background: COLORS.accentDim }}>
+                <AboutIcon name={s.icon} size={24} color={COLORS.accent} />
+              </div>
+              <div style={{ display: `flex`, alignItems: `center`, gap: 8 }}>
+                <span style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 12, color: COLORS.accent, letterSpacing: `0.1em` }}>{`0${i + 1}`}</span>
+                <span style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 15, fontWeight: 600, lineHeight: 1.45 }}>{s.text}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PHOTO GUIDE */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 20 : 32, paddingBottom: isMobile ? 20 : 36 }}>
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 18, padding: isMobile ? `22px 18px` : `28px 28px`, maxWidth: 680, margin: `0 auto` }}>
+          <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: 20, margin: `0 0 14px`, display: `flex`, alignItems: `center`, gap: 10 }}>
+            <AboutIcon name="sparkles" size={20} color={COLORS.accent} />
+            {t.photoGuideTitle}
+          </h3>
+          <ul role="list" style={{ listStyle: `none`, margin: 0, padding: 0, display: `flex`, flexDirection: `column`, gap: 10 }}>
+            {(t.photoGuide || []).map((tip, i) => (
+              <li key={i} style={{ display: `flex`, alignItems: `flex-start`, gap: 10, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, lineHeight: 1.55 }}>
+                <span aria-hidden="true" style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>✓</span>
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* PRICE + CTA */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 40, textAlign: `center` }}>
+        <p style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: `clamp(20px,4.5vw,28px)`, color: COLORS.accent, margin: `0 0 20px` }}>
+          {t.priceLine}
+        </p>
+        <button
+          type="button"
+          onClick={() => setPage(`order`)}
+          style={ctaBtnStyle}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+        >
+          <AboutIcon name="pawprint" size={18} color="#fff" />
+          {t.cta}
+          {isRTL ? ` ←` : ` →`}
+        </button>
+      </section>
+    </div>
+  );
+}
+
 // Nav
 function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick, preview = false }) {
   const t = LANGS[lang];
@@ -11006,7 +11135,7 @@ function NotFoundPage({ lang, setPage }) {
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'mugs', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
+ const VALID_PAGES = ['home', 'mugs', 'collage', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -11987,6 +12116,7 @@ export default function App() {
             {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
+            {page === `collage` && <CollagePage lang={lang} setPage={setPage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onCommissionPet={onCommissionPet} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
             {page === "blog" && (blogSlug
