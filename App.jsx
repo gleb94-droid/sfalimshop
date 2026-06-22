@@ -2307,6 +2307,7 @@ const LANGS = {
       priceLine: `₪169 · הכל כלול`,
       cta: `מתחילים את MY CREW`,
       bandPitch: `MY CREW — החיה האמיתית שלך על חולצה`,
+      trustLine: `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים`,
       bloomCrosslink: `רוצה את החיה האמיתית שלך? → קולאז' מהתמונות`,
     },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
@@ -2422,6 +2423,7 @@ const LANGS = {
       priceLine: `₪169 · all included`,
       cta: `Start my MY CREW`,
       bandPitch: `MY CREW — your real pet on a shirt`,
+      trustLine: `Hand-printed in Be'er Sheva · ready in 2–3 days`,
       bloomCrosslink: `Want your real pet? → Collage from photos`,
     },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
@@ -2537,6 +2539,7 @@ const LANGS = {
       priceLine: `₪169 · всё включено`,
       cta: `Начать MY CREW`,
       bandPitch: `MY CREW — ваш настоящий питомец на футболке`,
+      trustLine: `Печать вручную в Беэр-Шеве · готово за 2–3 дня`,
       bloomCrosslink: `Хотите своего настоящего питомца? → Коллаж из фото`,
     },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
@@ -9719,7 +9722,7 @@ function HomeMyCrewBand({ lang, setPage }) {
           <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 18px` : `0 0 18px` }}>{mc.bandPitch}</p>
           <div style={{ display: `flex`, alignItems: `center`, justifyContent: isMobile ? `center` : (isRTL ? `flex-end` : `flex-start`), gap: 7, marginBottom: 20, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600 }}>
             <AboutIcon name="printer" size={15} color={COLORS.accent} />
-            <span>{lang === `he` ? `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים` : lang === `ru` ? `Печать вручную в Беэр-Шеве · готово за 2–3 дня` : `Hand-printed in Be'er Sheva · ready in 2–3 days`}</span>
+            <span>{mc.trustLine}</span>
           </div>
           <button type="button" onClick={() => setPage(`collage`)} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` }}
             onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
