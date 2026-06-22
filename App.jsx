@@ -2297,6 +2297,7 @@ const LANGS = {
       photoGuide: [`תמונות חדות וברורות`, `פנים מקרוב + זוויות שונות`, `אור טוב, רקע פשוט`],
       oneOfOne: `1 OF 1 · עיצוב ייחודי רק לך`,
       boxTitle: `MY CREW — החיה האמיתית שלכם, כקולאז'`,
+      giftLine: `מתנה מושלמת לאוהבי חיות — אפשר להוסיף הודעה בכתב יד בקופה`,
       includedLine: `כלול: הדפס קדמי + גב + שרוול · עד 12 תמונות · אישור עיצוב לפני הדפסה · מודפס בעבודת יד בבאר שבע`,
       setUpsellLabel: `+ אותו עיצוב על ספל · +₪49`,
       briefLabel: `הפרטים שבחרתי:`,
@@ -2416,6 +2417,7 @@ const LANGS = {
       photoGuide: [`Sharp, clear photos`, `Close-up face + different angles`, `Good lighting, simple background`],
       oneOfOne: `1 OF 1 · a unique design just for you`,
       boxTitle: `MY CREW — your real pet, collaged`,
+      giftLine: `A perfect gift for any pet lover — add a handwritten note at checkout`,
       includedLine: `Included: front + back + sleeve print · up to 12 photos · you approve the design before we print · hand-printed in Be'er Sheva`,
       setUpsellLabel: `+ same design on a mug · +₪49`,
       briefLabel: `My order details:`,
@@ -2535,6 +2537,7 @@ const LANGS = {
       photoGuide: [`Чёткие и ясные фото`, `Крупный план морды + разные ракурсы`, `Хорошее освещение, простой фон`],
       oneOfOne: `1 OF 1 · уникальный дизайн только для вас`,
       boxTitle: `MY CREW — твой питомец, коллажем`,
+      giftLine: `Идеальный подарок любителю животных — открытку с подписью добавьте на кассе`,
       includedLine: `Включено: печать спереди + сзади + рукав · до 12 фото · утверждение дизайна перед печатью · печать вручную в Беэр-Шеве`,
       setUpsellLabel: `+ тот же дизайн на кружке · +₪49`,
       briefLabel: `Мой выбор:`,
@@ -10100,6 +10103,10 @@ function CollagePage({ lang, setPage, goToCollage }) {
         <p style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: `clamp(20px,4.5vw,28px)`, color: COLORS.accent, margin: `0 0 20px` }}>
           {t.priceLine}
         </p>
+        <div style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, color: COLORS.gray, fontSize: 13.5, margin: `0 0 18px`, lineHeight: 1.5, flexWrap: `wrap` }}>
+          <AboutIcon name="heart" size={16} color={COLORS.accent} />
+          <span>{t.giftLine}</span>
+        </div>
         <button
           type="button"
           onClick={() => (goToCollage ? goToCollage() : setPage(`order`))}

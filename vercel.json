@@ -22,7 +22,7 @@
     },
     {
       "source": "/collage",
-      "destination": "/index.html"
+      "destination": "/api/og?type=collage"
     },
     {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
