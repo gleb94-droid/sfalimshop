@@ -1853,7 +1853,7 @@ const PET_NAME_SURCHARGE = 20;
 // exposed in the UI (the choice box renders for non-mug products only), so there is no
 // live price mismatch today — but sync the edge fn to these values BEFORE ever exposing
 // mug commission, or the server would re-price the mug to the old (higher) amount.
-const COMMISSION_PRICE = { pet: { shirt: 189, mug: 119 }, custom: { shirt: 149, mug: 89 } };
+const COMMISSION_PRICE = { pet: { shirt: 189, mug: 119 }, custom: { shirt: 149, mug: 89 }, collage: { shirt: 169, mug: 49 } };
 const commissionPrice = (ctype, pid) => {
   const tier = COMMISSION_PRICE[ctype] || COMMISSION_PRICE.pet;
   return pid === `mug` ? tier.mug : tier.shirt;
@@ -6309,8 +6309,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // When true, the Step-1 shirt path is a "draw my pet from photos" commission
   // (pay-first, no upload) instead of the normal upload customizer.
   const [commissionMode, setCommissionMode] = useState(false);
-  const [commissionType, setCommissionType] = useState(`pet`); // 'pet' | 'custom'
+  const [commissionType, setCommissionType] = useState(`pet`); // 'pet' | 'custom' | 'collage'
   const [commissionAck, setCommissionAck] = useState(false); // required "made-to-order, non-refundable after approval" acknowledgement
+  // CollageOptions state — produced by Task 3, consumed by Task 4 (cart/brief wiring)
+  const [collageStyle, setCollageStyle] = useState(`bw`);
+  const [collageMode, setCollageMode] = useState(`celebrate`);
+  const [collagePhrase, setCollagePhrase] = useState(``);
+  const [collageSleeve, setCollageSleeve] = useState(false);
+  const [collageYears, setCollageYears] = useState(``);
+  const [petNames, setPetNames] = useState(``);
+  const [petCount, setPetCount] = useState(1);
+  const [setMug, setSetMug] = useState(false);
   const commissionRef = useRef(null);
   // When a shirt is picked, scroll the "upload vs draw-from-photos" choice into
   // view (it sits below the product list) so it's noticed — especially on mobile.
@@ -7458,30 +7467,64 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>✏️ {t.commission.choiceCustom}</div>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCustomSub}</div>
                   </button>
+                  {selectedProduct === `oversized` && (
+                  <button onClick={() => { setCommissionMode(true); setCommissionType(`collage`); setCommissionAck(false); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `collage`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `collage`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>{t.commission.choiceCollage}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCollageSub}</div>
+                  </button>
+                  )}
                 </div>
                 {commissionMode && (
                   <div style={{ marginTop: 16 }}>
-                    <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.color}</div>
-                    <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
-                      {(product?.colors || []).map((hex, i) => (
-                        <button key={i} aria-label={`${t.customize.color} ${i + 1}`} aria-pressed={selectedColor === i} onClick={() => setSelectedColor(i)} style={{ width: 30, height: 30, borderRadius: `50%`, background: hex, border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`, cursor: `pointer`, padding: 0 }} />
-                      ))}
-                    </div>
-                    {(product?.variants || []).length > 1 && (<>
-                    <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.size}</div>
-                    <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
-                      {(product?.variants || []).map((v) => (
-                        <button key={v.id} aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : `transparent`, color: selectedVariant === v.id ? `#fff` : COLORS.gray, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `8px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{v.label}</button>
-                      ))}
-                    </div>
-                    </>)}
-                    <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: `12px 14px`, fontSize: 12.5, lineHeight: 1.7, color: COLORS.gray }}>
-                      <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13, marginBottom: 5 }}>{lang === `he` ? `איך זה עובד אחרי התשלום:` : lang === `ru` ? `Как это работает после оплаты:` : `How it works after you pay:`}</div>
-                      <div>📸 {commissionType === `pet` ? t.commission.microHow : t.commission.customHow}</div>
-                      <div style={{ color: COLORS.white }}>🔁 <b>{t.commission.microRevisions}</b></div>
-                      <div>⏱️ {t.commission.microTime}</div>
-                      <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
-                    </div>
+                    {commissionType === `collage` ? (
+                      <CollageOptions
+                        lang={lang}
+                        t={t}
+                        product={product}
+                        selectedColor={selectedColor}
+                        setSelectedColor={setSelectedColor}
+                        collageStyle={collageStyle}
+                        setCollageStyle={setCollageStyle}
+                        collageMode={collageMode}
+                        setCollageMode={setCollageMode}
+                        collagePhrase={collagePhrase}
+                        setCollagePhrase={setCollagePhrase}
+                        collageSleeve={collageSleeve}
+                        setCollageSleeve={setCollageSleeve}
+                        collageYears={collageYears}
+                        setCollageYears={setCollageYears}
+                        petNames={petNames}
+                        setPetNames={setPetNames}
+                        petCount={petCount}
+                        setPetCount={setPetCount}
+                        setMug={setMug}
+                        setSetMug={setSetMug}
+                      />
+                    ) : (
+                      <>
+                        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.color}</div>
+                        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
+                          {(product?.colors || []).map((hex, i) => (
+                            <button key={i} aria-label={`${t.customize.color} ${i + 1}`} aria-pressed={selectedColor === i} onClick={() => setSelectedColor(i)} style={{ width: 30, height: 30, borderRadius: `50%`, background: hex, border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`, cursor: `pointer`, padding: 0 }} />
+                          ))}
+                        </div>
+                        {(product?.variants || []).length > 1 && (<>
+                        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.size}</div>
+                        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
+                          {(product?.variants || []).map((v) => (
+                            <button key={v.id} aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : `transparent`, color: selectedVariant === v.id ? `#fff` : COLORS.gray, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `8px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{v.label}</button>
+                          ))}
+                        </div>
+                        </>)}
+                        <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: `12px 14px`, fontSize: 12.5, lineHeight: 1.7, color: COLORS.gray }}>
+                          <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13, marginBottom: 5 }}>{lang === `he` ? `איך זה עובד אחרי התשלום:` : lang === `ru` ? `Как это работает после оплаты:` : `How it works after you pay:`}</div>
+                          <div>📸 {commissionType === `pet` ? t.commission.microHow : t.commission.customHow}</div>
+                          <div style={{ color: COLORS.white }}>🔁 <b>{t.commission.microRevisions}</b></div>
+                          <div>⏱️ {t.commission.microTime}</div>
+                          <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
+                        </div>
+                      </>
+                    )}
                     <label style={{ display: `flex`, alignItems: `flex-start`, gap: 8, marginTop: 12, cursor: `pointer`, color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5 }}>
                       <input type="checkbox" checked={commissionAck} onChange={(e) => setCommissionAck(e.target.checked)} style={{ marginTop: 2, accentColor: COLORS.accent, width: 16, height: 16, flexShrink: 0, cursor: `pointer` }} />
                       <span>{lang === `he` ? `אני מבין/ה שזו עבודה בהזמנה אישית — נתקן עד שאהיה מרוצה, אך אין החזר כספי לאחר אישור העיצוב.` : lang === `ru` ? `Я понимаю, что это изготовление под заказ — правим, пока не буду доволен/льна, но возврата нет после утверждения дизайна.` : `I understand this is made to order — we revise until I'm happy, but it's non-refundable once I approve the design.`}</span>
@@ -14119,6 +14162,220 @@ function BreedStoryCard({ design, lang }) {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+// ============ COLLAGE OPTIONS — MY CREW commission selectors ============
+// Rendered inside the OrderPage commission panel when commissionType === 'collage'.
+// Oversize-tee only. All state lives in OrderPage; this component is pure UI.
+function CollageOptions({
+  lang, t, product,
+  selectedColor, setSelectedColor,
+  collageStyle, setCollageStyle,
+  collageMode, setCollageMode,
+  collagePhrase, setCollagePhrase,
+  collageSleeve, setCollageSleeve,
+  collageYears, setCollageYears,
+  petNames, setPetNames,
+  petCount, setPetCount,
+  setMug, setSetMug,
+}) {
+  const mc = t.myCrew;
+  const isMemory = collageMode === `memory`;
+  const phraseList = isMemory ? mc.memoryPhrases : mc.phraseOptions;
+  // Helper: toggle style chips (bw / color)
+  const chipBtn = (active, onClick, label) => (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      style={{
+        background: active ? COLORS.accentBtn : `transparent`,
+        color: active ? `#fff` : COLORS.gray,
+        border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+        borderRadius: 8, padding: `8px 16px`, cursor: `pointer`,
+        fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13,
+        transition: `background 0.2s, border-color 0.2s`,
+      }}
+    >{label}</button>
+  );
+
+  return (
+    <div>
+      {/* Shirt colour */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.colorLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
+          {(product?.colors || []).map((hex, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`${mc.colorLabel} ${i + 1}`}
+              aria-pressed={selectedColor === i}
+              onClick={() => setSelectedColor(i)}
+              style={{
+                width: 30, height: 30, borderRadius: `50%`, background: hex, padding: 0, cursor: `pointer`,
+                border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`,
+                transition: `transform 0.15s, border-color 0.15s`,
+                transform: selectedColor === i ? `scale(1.18)` : `scale(1)`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Collage style — bw / color */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.styleLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
+          {chipBtn(collageStyle === `bw`,    () => setCollageStyle(`bw`),    mc.styleBW)}
+          {chipBtn(collageStyle === `color`, () => setCollageStyle(`color`), mc.styleColor)}
+        </div>
+      </div>
+
+      {/* Mode — celebrate / memory */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.modeLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
+          {chipBtn(collageMode === `celebrate`, () => { setCollageMode(`celebrate`); setCollagePhrase(``); }, mc.modeCelebrate)}
+          {chipBtn(collageMode === `memory`,    () => { setCollageMode(`memory`);    setCollagePhrase(``); }, mc.modeMemory)}
+        </div>
+      </div>
+
+      {/* Years input — memory mode only */}
+      {isMemory && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: `block`, color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{mc.yearsLabel}</label>
+          <input
+            type="text"
+            value={collageYears}
+            onChange={(e) => setCollageYears(e.target.value)}
+            placeholder={`e.g. 2015–2024`}
+            style={{
+              width: `100%`, boxSizing: `border-box`,
+              background: COLORS.bgCard, border: `1px solid ${COLORS.border}`,
+              borderRadius: 8, padding: `9px 12px`, color: COLORS.white,
+              fontFamily: `'Heebo',sans-serif`, fontSize: 14, outline: `none`,
+              textAlign: `start`,
+            }}
+          />
+        </div>
+      )}
+
+      {/* Front phrase chips */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.phraseLabel}</div>
+        <div style={{ display: `flex`, gap: 6, flexWrap: `wrap` }}>
+          {phraseList.map((phrase) => (
+            <button
+              key={phrase}
+              type="button"
+              aria-pressed={collagePhrase === phrase}
+              onClick={() => setCollagePhrase(collagePhrase === phrase ? `` : phrase)}
+              style={{
+                background: collagePhrase === phrase ? `rgba(255,107,53,0.18)` : `transparent`,
+                color: collagePhrase === phrase ? COLORS.accent : COLORS.gray,
+                border: `1px solid ${collagePhrase === phrase ? COLORS.accent : COLORS.border}`,
+                borderRadius: 20, padding: `6px 13px`, cursor: `pointer`,
+                fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: collagePhrase === phrase ? 700 : 400,
+                transition: `background 0.15s, border-color 0.15s`,
+              }}
+            >{phrase}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Pet count + names */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.petCountLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 10 }}>
+          {[1, 2, 3, 4].map((n) => (
+            <button
+              key={n}
+              type="button"
+              aria-pressed={petCount === n}
+              onClick={() => setPetCount(n)}
+              style={{
+                background: petCount === n ? COLORS.accentBtn : `transparent`,
+                color: petCount === n ? `#fff` : COLORS.gray,
+                border: `1px solid ${petCount === n ? COLORS.accent : COLORS.border}`,
+                borderRadius: 8, padding: `8px 16px`, cursor: `pointer`,
+                fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13,
+                minWidth: 44,
+              }}
+            >{n}{n === 4 ? `+` : ``}</button>
+          ))}
+        </div>
+        <div style={{ color: COLORS.gray, fontSize: 11.5, marginBottom: 8, lineHeight: 1.5 }}>
+          {petCount === 1
+            ? (lang === `he` ? `שם אחד מופיע בעיצוב` : lang === `ru` ? `Одно имя на дизайне` : `One name on the design`)
+            : petCount === 2
+              ? (lang === `he` ? `שמות מופיעים: A & B` : lang === `ru` ? `Имена: A & B` : `Names appear as: A & B`)
+              : (lang === `he` ? `שלושה ומעלה — THE … CREW` : lang === `ru` ? `Три и более — THE … CREW` : `Three or more — THE … CREW`)}
+        </div>
+        <label style={{ display: `block`, color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{mc.petNamesLabel}</label>
+        <input
+          type="text"
+          value={petNames}
+          onChange={(e) => setPetNames(e.target.value)}
+          placeholder={petCount === 1
+            ? (lang === `he` ? `שם החיה` : lang === `ru` ? `Имя питомца` : `Pet name`)
+            : (lang === `he` ? `שמות מופרדים בפסיק` : lang === `ru` ? `Имена через запятую` : `Names separated by commas`)}
+          style={{
+            width: `100%`, boxSizing: `border-box`,
+            background: COLORS.bgCard, border: `1px solid ${COLORS.border}`,
+            borderRadius: 8, padding: `9px 12px`, color: COLORS.white,
+            fontFamily: `'Heebo',sans-serif`, fontSize: 14, outline: `none`,
+            textAlign: `start`,
+          }}
+        />
+      </div>
+
+      {/* Sleeve checkbox */}
+      <label style={{ display: `flex`, alignItems: `center`, gap: 8, marginBottom: 16, cursor: `pointer`, color: COLORS.gray, fontSize: 13 }}>
+        <input
+          type="checkbox"
+          checked={collageSleeve}
+          onChange={(e) => setCollageSleeve(e.target.checked)}
+          style={{ accentColor: COLORS.accent, width: 16, height: 16, flexShrink: 0, cursor: `pointer` }}
+        />
+        <span>{mc.sleeveLabel}</span>
+      </label>
+
+      {/* Photo guide — collapsible */}
+      <details style={{ marginBottom: 16 }}>
+        <summary style={{ color: COLORS.accent, fontWeight: 700, fontSize: 12.5, cursor: `pointer`, userSelect: `none`, listStyle: `none`, display: `flex`, alignItems: `center`, gap: 6 }}>
+          <span>📸</span>
+          <span>{mc.photoGuideTitle}</span>
+        </summary>
+        <ul style={{ margin: `10px 0 0`, padding: `0 0 0 18px`, color: COLORS.gray, fontSize: 12, lineHeight: 1.8 }}>
+          {mc.photoGuide.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      </details>
+
+      {/* 1 OF 1 seal */}
+      <div style={{
+        display: `inline-flex`, alignItems: `center`, gap: 6,
+        background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`,
+        borderRadius: 20, padding: `5px 14px`, marginBottom: 16,
+        color: COLORS.accent, fontSize: 12, fontWeight: 700, letterSpacing: `0.06em`,
+      }}>
+        ✦ {mc.oneOfOne}
+      </div>
+
+      {/* Mug set-upsell */}
+      <label style={{ display: `flex`, alignItems: `flex-start`, gap: 8, cursor: `pointer`, color: COLORS.gray, fontSize: 13, lineHeight: 1.5 }}>
+        <input
+          type="checkbox"
+          checked={setMug}
+          onChange={(e) => setSetMug(e.target.checked)}
+          style={{ accentColor: COLORS.accent, width: 16, height: 16, flexShrink: 0, cursor: `pointer`, marginTop: 2 }}
+        />
+        <span style={{ color: setMug ? COLORS.white : COLORS.gray, fontWeight: setMug ? 600 : 400 }}>{mc.setUpsellLabel}</span>
+      </label>
     </div>
   );
 }
