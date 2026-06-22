@@ -3729,6 +3729,13 @@ function AccountSettings({ lang }) {
   );
 }
 
+// Builds the smart collage brief appended to the WhatsApp prefill on the Track page.
+const collageBrief = (c, lang) => {
+  if (!c) return ``;
+  const L = (LANGS[lang] || LANGS.he).myCrew;
+  return `\n\n${L.briefLabel}\n• ${c.style === `bw` ? `B&W` : `Color`} · ${c.mode === `memory` ? `\u{1F90D}` : `\u{1F389}`}${c.phrase ? ` · "${c.phrase}"` : ``}${c.petNames ? ` · ${c.petNames}` : ``}${c.sleeve ? ` · sleeve` : ``}${c.years ? ` · ${c.years}` : ``}`;
+};
+
 // Order Tracker
 function TrackPage({ lang, user, clearCart }) {
   const t = LANGS[lang];
@@ -3769,7 +3776,8 @@ function TrackPage({ lang, user, clearCart }) {
   const [payReturnDismissed, setPayReturnDismissed] = useState(false);
   const [payReturnStatus, setPayReturnStatus] = useState(`loading`); // loading | succeeded | processing | unknown
   const [isCommissionPaid, setIsCommissionPaid] = useState(false); // paid group has a commission → show the WhatsApp photo CTA
-  const [commissionPaidType, setCommissionPaidType] = useState(`pet`); // 'pet' | 'custom' — which brief to show
+  const [commissionPaidType, setCommissionPaidType] = useState(`pet`); // 'pet' | 'custom' | 'collage' — which brief to show
+  const [commissionPaidCollage, setCommissionPaidCollage] = useState(null); // collage payload for smart brief
   useEffect(() => {
     if (!payReturn) return;
     if (!payReturn.orderGroup) { setPayReturnStatus(`unknown`); return; }
@@ -3785,7 +3793,10 @@ function TrackPage({ lang, user, clearCart }) {
         setPayReturnStatus(succeeded ? `succeeded` : `processing`);
         const commOrder = data.find(o => o.extra_prints?.src === `commission`);
         setIsCommissionPaid(succeeded && !!commOrder);
-        if (commOrder) setCommissionPaidType(commOrder.extra_prints?.ctype || `pet`);
+        if (commOrder) {
+          setCommissionPaidType(commOrder.extra_prints?.ctype || `pet`);
+          setCommissionPaidCollage(commOrder.extra_prints?.collage || null);
+        }
         // Clear the cart ONLY on a confirmed-succeeded payment return — never on
         // a failure or an unconfirmed/processing return. Guarded by `succeeded`
         // above so we can't wipe a cart that wasn't actually paid for.
@@ -3974,8 +3985,8 @@ function TrackPage({ lang, user, clearCart }) {
           {ok && isCommissionPaid && (
             <div style={{ background: `rgba(37,211,102,0.08)`, border: `1px solid rgba(37,211,102,0.4)`, borderRadius: 12, padding: 16, marginBottom: 20, textAlign: `start` }}>
               <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t.commission.postHeading}</div>
-              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{commissionPaidType === `pet` ? t.commission.postSub : t.commission.customPostSub}</div>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent((commissionPaidType === `pet` ? t.commission.postPrefill : t.commission.customPostPrefill)(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`))}`} target="_blank" rel="noopener noreferrer"
+              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{commissionPaidType === `collage` ? t.commission.postSub : (commissionPaidType === `pet` ? t.commission.postSub : t.commission.customPostSub)}</div>
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(commissionPaidType === `collage` ? (t.commission.postPrefill(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`) + collageBrief(commissionPaidCollage, lang)) : ((commissionPaidType === `pet` ? t.commission.postPrefill : t.commission.customPostPrefill)(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`)))}`} target="_blank" rel="noopener noreferrer"
                 style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, background: `#25D366`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: 14, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box` }}>
                 <span style={{ fontSize: 18 }}>💬</span> {t.commission.postCta}
               </a>
@@ -5048,7 +5059,7 @@ function AdminPage({ lang }) {
                           <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{groupTotal}</div>
                           <div style={{ marginTop: 6 }}><PaymentBadge status={order.payment_status} lang={lang} /></div>
                           {group.some(o => o.extra_prints?.src === `commission`) && (
-                            <div style={{ marginTop: 6, display: `inline-block`, background: `rgba(255,107,53,0.12)`, border: `1px solid rgba(255,107,53,0.45)`, color: COLORS.accent, borderRadius: 8, padding: `3px 10px`, fontSize: 11, fontWeight: 700 }}>🎨 {t.commission.adminBadge}</div>
+                            <div style={{ marginTop: 6, display: `inline-block`, background: `rgba(255,107,53,0.12)`, border: `1px solid rgba(255,107,53,0.45)`, color: COLORS.accent, borderRadius: 8, padding: `3px 10px`, fontSize: 11, fontWeight: 700 }}>🎨 {group.some(o => o.extra_prints?.ctype === `collage`) ? t.commission.adminBadgeCollage : t.commission.adminBadge}</div>
                           )}
                           <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 6px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
                           <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
@@ -5994,7 +6005,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
-          {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11, lineHeight: 1.45, marginTop: 3 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
+          {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11, lineHeight: 1.45, marginTop: 3 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `collage` ? `cartNoteCollage` : (it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`)]}</div>}
           {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={13} color={it.petNameColor || COLORS.accent} /><span>{it.petName}{it.productId !== `mug` ? ` (+₪${PET_NAME_SURCHARGE})` : ``}</span></div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
@@ -6385,6 +6396,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     const unitPrice = commissionPrice(commissionType, selectedProduct);
     const colorHex = (product.colors && product.colors[selectedColor]) || null;
     const cartItemId = Date.now() + Math.random();
+    const collagePayload = commissionType === `collage`
+      ? { style: collageStyle, mode: collageMode, phrase: collagePhrase, sleeve: collageSleeve, years: collageYears, petNames, petCount }
+      : null;
     const itemData = {
       productId: selectedProduct,
       productName: product.name,
@@ -6397,6 +6411,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       isCustom: false,
       isCommission: true,
       commissionType,
+      collage: collagePayload,
       uploadedUrl: null,
       mockupUrl: null,
       imagePos: { x: 150, y: 130, size: 85 },
@@ -6408,7 +6423,38 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       unitPrice,
       itemPrice: unitPrice,
     };
-    setCart(c => [...c, { id: cartItemId, ...itemData }]);
+    const mugUnitPrice = 49;
+    setCart(c => {
+      const next = [...c, { id: cartItemId, ...itemData }];
+      if (commissionType === `collage` && setMug) {
+        next.push({
+          id: cartItemId + 0.1,
+          productId: `mug`,
+          productName: (PRODUCTS(t).find(p => p.id === `mug`) || {}).name || `Mug`,
+          variantId: `standard`,
+          variantLabel: t.variants?.standard || `Standard`,
+          colorIdx: 0,
+          color: `#ffffff`,
+          qty: 1,
+          uploadedImage: null,
+          isCustom: false,
+          isCommission: true,
+          commissionType: `collage`,
+          collage: collagePayload,
+          uploadedUrl: null,
+          mockupUrl: null,
+          imagePos: { x: 150, y: 130, size: 85 },
+          backPrint: false,
+          backDesign: { enabled: false, sameAsMain: true, image: null },
+          secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
+          sleeveLeft: { enabled: false, sameAsMain: true, image: null },
+          sleeveRight: { enabled: false, sameAsMain: true, image: null },
+          unitPrice: mugUnitPrice,
+          itemPrice: mugUnitPrice,
+        });
+      }
+      return next;
+    });
     try {
       window.gtag?.(`event`, `add_to_cart`, { currency: `ILS`, value: unitPrice, items: [{ item_id: selectedProduct, item_name: product?.name, price: unitPrice, quantity: 1 }] });
       window.fbq?.(`track`, `AddToCart`, { currency: `ILS`, value: unitPrice, content_ids: [selectedProduct], content_type: `product` });
@@ -7068,7 +7114,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             language: lang,
             back_print: false,
             order_group: orderGroupId,
-            extra_prints: { shipping_method: deliveryMethod, src: `commission`, ctype: it.commissionType || `pet`, pid: it.productId, vid: it.variantId, slug: null },
+            extra_prints: { shipping_method: deliveryMethod, src: `commission`, ctype: it.commissionType || `pet`, pid: it.productId, vid: it.variantId, slug: null, collage: it.collage || null },
           };
           if (user) {
             const { data: orderData, error } = await supabase.from(`orders`).insert(commissionRow).select().single();
@@ -10806,7 +10852,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
-                    {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11.5, lineHeight: 1.45, marginTop: 4 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
+                    {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11.5, lineHeight: 1.45, marginTop: 4 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `collage` ? `cartNoteCollage` : (it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`)]}</div>}
                     {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={14} color={it.petNameColor || COLORS.accent} /><span>{it.petName}{it.productId !== `mug` ? ` (+₪${PET_NAME_SURCHARGE})` : ``}</span></div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
