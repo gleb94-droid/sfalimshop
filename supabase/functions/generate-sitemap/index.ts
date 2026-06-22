@@ -65,6 +65,7 @@ Deno.serve(async (req: Request) => {
   const staticUrls = [
     { loc: `${SITE}/`, priority: "1.0" },
     { loc: `${SITE}/mugs`, priority: "0.8" },
+    { loc: `${SITE}/collage`, priority: "0.8" },
     { loc: `${SITE}/pets`, priority: "0.9" },
     { loc: `${SITE}/about`, priority: "0.6" },
     { loc: `${SITE}/blog`, priority: "0.7" },

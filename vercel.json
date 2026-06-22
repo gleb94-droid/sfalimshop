@@ -21,6 +21,10 @@
       "destination": "/api/og?type=mugs"
     },
     {
+      "source": "/collage",
+      "destination": "/api/og?type=collage"
+    },
+    {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }

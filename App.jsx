@@ -1853,7 +1853,7 @@ const PET_NAME_SURCHARGE = 20;
 // exposed in the UI (the choice box renders for non-mug products only), so there is no
 // live price mismatch today — but sync the edge fn to these values BEFORE ever exposing
 // mug commission, or the server would re-price the mug to the old (higher) amount.
-const COMMISSION_PRICE = { pet: { shirt: 189, mug: 119 }, custom: { shirt: 149, mug: 89 } };
+const COMMISSION_PRICE = { pet: { shirt: 189, mug: 119 }, custom: { shirt: 149, mug: 89 }, collage: { shirt: 169, mug: 49 } };
 const commissionPrice = (ctype, pid) => {
   const tier = COMMISSION_PRICE[ctype] || COMMISSION_PRICE.pet;
   return pid === `mug` ? tier.mug : tier.shirt;
@@ -2229,7 +2229,7 @@ const timeBetween = (start, end, lang) => {
 const LANGS = {
   he: {
     dir: "rtl", label: "HE",
-    nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
+    nav: { home: "בית", mugs: "ספלים", order: "הזמנה", pets: "BLOOM", collage: "MY CREW", track: "מעקב הזמנה", about: "אודות", login: "כניסה", logout: "יציאה", admin: "ניהול" },
     blogHeroTitle:'הבלוג של ספלים שופ', blogHeroSubtitle:'מדריכים, סיפורים והשראה לאוהבי חיות מחמד', blogReadMore:'המשך לקרוא ←', blogCategoryAll:'הכל', blogCategoryBreeds:'גזעים', blogCategoryGifts:'מתנות', blogCategoryCulture:'תרבות', blogCategoryStories:'סיפורים', blogPublishedOn:'פורסם ב-', blogRelatedProduct:'הספל של הגזע הזה ←', blogRelatedPosts:'מאמרים נוספים שיעניינו אותך', blogShareTitle:'שתפו את הפוסט', blogShareWhatsapp:'WhatsApp', blogShareCopy:'העתק קישור', blogShareCopied:'✓ הקישור הועתק', blogQuizCta:'לא בטוח איזה גזע מתאים לך? עבור על החידון ←', blogBackToList:'← חזרה לכל המאמרים', navBlog:'בלוג', blogReadMoreBreed:'📖 קרא עוד על הגזע', blogFromOurBlog:'מהבלוג שלנו ←', blogEmpty:'עדיין אין מאמרים. בקרוב!', blogNotFound:'המאמר לא נמצא', blogBreadcrumbHome:'בית', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 קח את חידון BLOOM · גלה איזו חיה אתה", banner_title: "איזו דמות BLOOM אתה?", banner_sub: "11 שאלות קצרות יגלו איזו מ-70 הדמויות הכי מתאימה לאופי שלך.", banner_cta: "קח את החידון ←", nav: "חידון" },
     hero: { badge: "הדפסות מותאמות אישית · ישראל", h1line1: "מעוצב", h1line2: "לסגנון שלך", sub: "ספלים, חולצות ודיוקנאות BLOOM — מותאמים אישית עם העיצוב שלכם, מודפס בעבודת יד בבאר שבע.", cta: "עצב בעצמך ←", ctaSecondary: "עיין באוסף BLOOM", from: "החל מ-₪" },
@@ -2259,11 +2259,60 @@ const LANGS = {
       addBtn: `המשך לתשלום ←`,
       postHeading: `קיבלנו את ההזמנה! 🎨`,
       postSub: `עכשיו שלחו לנו בוואטסאפ 2–4 תמונות של החיה מזוויות שונות (פנים, פרופיל, גוף מלא), ונתחיל לעצב.`,
+      collagePostSub: `שלחו לנו עד 12 תמונות של החיה/ות שלכם בוואטסאפ, ונבנה את הקולאז' של MY CREW ונשלח לאישור לפני ההדפסה.`,
       postCta: `שליחת תמונות בוואטסאפ`,
       postPrefill: (id) => `היי! ביצעתי הזמנת BLOOM אישית מספר ${id} — הנה תמונות של החיה שלי:`,
       cartNotePet: `🎨 דיוקן אישי — נעצב מהתמונות שתשלחו בוואטסאפ אחרי התשלום`,
       cartNoteCustom: `🎨 עיצוב אישי — נעצב לפי הרעיון שתשלחו בוואטסאפ אחרי התשלום`,
       adminBadge: `קומישן BLOOM — ממתין לתמונות`,
+      choiceCollage: `📸 קולאז' מהתמונות שלכם`,
+      choiceCollageSub: `MY CREW — עד 12 תמונות אמיתיות של החיה שלך`,
+      cartNoteCollage: `MY CREW · קולאז' מהתמונות שלך — נתאם את התמונות אחרי התשלום בוואטסאפ`,
+      adminBadgeCollage: `MY CREW — ממתין לתמונות`,
+    },
+    myCrew: {
+      name: `MY CREW`,
+      subtitle: `החבורה שלך על חולצה`,
+      colorLabel: `צבע חולצה`,
+      styleLabel: `סגנון הקולאז'`,
+      styleBW: `שחור-לבן (סטריט)`,
+      styleColor: `צבעוני`,
+      modeLabel: `מצב`,
+      modeCelebrate: `חגיגה 🎉`,
+      modeMemory: `לזכר 🤍`,
+      phraseLabel: `משפט קדמי (אופציונלי)`,
+      phraseOptions: [`[שם]`, `DOG MOM`, `DOG DAD`, `CAT MOM`, `CAT DAD`, `POWERED BY [שם]`, `[שם] EST. '21`],
+      sleeveLabel: `הדפס שרוול קטן (אופציונלי)`,
+      petNamesLabel: `שם/שמות החיה`,
+      petCountLabel: `כמה חיות?`,
+      memoryPhrases: [`בלב לנצח`, `תמיד איתי`, `[שם] · 2015–2024`],
+      yearsLabel: `שנים (אופציונלי)`,
+      yearsPlaceholder: `לדוגמה 2015–2024`,
+      countHintOne: `שם אחד מופיע בעיצוב`,
+      countHintTwo: `שמות מופיעים: A & B`,
+      countHintThree: `שלושה ומעלה — THE … CREW`,
+      placeholderSingle: `שם החיה`,
+      placeholderMulti: `שמות מופרדים בפסיק`,
+      photoGuideTitle: `אילו תמונות לשלוח`,
+      photoGuide: [`תמונות חדות וברורות`, `פנים מקרוב + זוויות שונות`, `אור טוב, רקע פשוט`],
+      oneOfOne: `1 OF 1 · עיצוב ייחודי רק לך`,
+      boxTitle: `MY CREW — החיה האמיתית שלכם, כקולאז'`,
+      giftLine: `מתנה מושלמת לאוהבי חיות — אפשר להוסיף הודעה בכתב יד בקופה`,
+      includedLine: `כלול: הדפס קדמי + גב + שרוול · עד 12 תמונות · אישור עיצוב לפני הדפסה · מודפס בעבודת יד בבאר שבע`,
+      setUpsellLabel: `+ אותו עיצוב על ספל · +₪49`,
+      briefLabel: `הפרטים שבחרתי:`,
+      heroPitch: `החיה האמיתית שלך, כקולאז' סטריטוויר על חולצת אוברסייז. 1 of 1.`,
+      step1: `בוחרים חולצה ושולחים עד 12 תמונות`,
+      step2: `אנחנו בונים קולאז' ושולחים לאישור`,
+      step3: `מאשרים → מדפיסים בבאר שבע`,
+      howTitle: `איך זה עובד`,
+      priceLine: `₪169 · הכל כלול`,
+      showcaseWorn: `על החולצה`,
+      showcaseDesign: `העיצוב`,
+      cta: `מתחילים את MY CREW`,
+      bandPitch: `MY CREW — החיה האמיתית שלך על חולצה`,
+      trustLine: `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים`,
+      bloomCrosslink: `רוצה את החיה האמיתית שלך? → קולאז' מהתמונות`,
     },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
@@ -2294,13 +2343,13 @@ const LANGS = {
     track: { title: "מעקב הזמנות", sub: "עקוב אחרי ההתקדמות של ההזמנות שלך", noOrders: "אין הזמנות עדיין", order: "הזמנה", status: "סטטוס", date: "תאריך", guestTitle: "מעקב אחר ההזמנה שלך", guestDesc: "לא צריך סיסמה — נשלח לך למייל קישור מאובטח לצפייה בהזמנות שלך.", guestBtn: "שלח לי קישור" },
     approval: { submittedTitle: "העיצוב נשלח לאישור", submittedDesc: "העיצוב שלך נשלח לאישור — נעדכן אותך במייל ברגע שהוא יאושר, ואז תוכל לשלם. ההזמנה נשמרה.", npStep1Title: "מאשרים את העיצוב", npStep1Sub: "נבדוק את העיצוב ונעדכן אותך במייל", npStep2Title: "תשלום מאובטח", npStep2Sub: "אחרי האישור — משלמים וההזמנה נכנסת להפקה", npStep3Title: "ייצור: 2-4 ימי עסקים", npStep3Sub: "הדפסה איכותית של העיצוב שאישרת", npStep4Title: "משלוח: 1-3 ימי עסקים", npStep4Sub: "תקבל מספר מעקב באימייל", underReview: "העיצוב בבדיקה", underReviewDesc: "שלחנו את העיצוב שלך לאישור. נעדכן אותך במייל ברגע שהוא יאושר — ואז אפשר יהיה לשלם.", approvedTitle: "העיצוב אושר! 🎉", approvedDesc: "אפשר להשלים את התשלום וההזמנה תיכנס להפקה.", payNow: "שלם עכשיו", changesTitle: "נדרשים שינויים בעיצוב", reviewNote: "הערה מהצוות שלנו", editResubmit: "ערוך ושלח מחדש", uploadNew: "העלה עיצוב חדש (לא חובה)", resubmitBtn: "שלח מחדש לאישור", resubmitting: "שולח...", resubmitted: "נשלח מחדש — העיצוב בבדיקה שוב", cancelOrder: "בטל הזמנה", cancelConfirm: "לבטל את ההזמנה הזו?", cancelled: "ההזמנה בוטלה" },
     admin: { title: "לוח ניהול", orders: "הזמנות", total: "סה״כ", statuses: { received: "התקבלה", design: "בעיצוב", printing: "בהדפסה", ready: "מוכן", shipped: "נשלח", delivered: "נמסר" }, customer: "לקוח", updateStatus: "עדכן סטטוס", noOrders: "אין הזמנות" },
-    products: { tshirt: "חולצת טי בייסיק", lycra: "חולצת לייקרה", oversized: "חולצת אוברסייז", look: "חולצת לוק אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
-    variants: { standard: "סטנדרט 11oz", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
+    products: { tshirt: "חולצת טי בייסיק", lycra: "חולצת לייקרה", oversized: "חולצת אוברסייז", look: "חולצת לוק אוברסייז", stonewash: "חולצת אוברסייז סטון ווש", dryfit: "חולצת דרייפיט", mug: "ספל", magic_mug: "ספל קסם משנה צבע", socks: "גרביים BLOOM", sticker: "מדבקה עגולה", sticker_sq: "מדבקה מרובעת" },
+    variants: { standard: "סטנדרט 11oz", oneSize: "מידה אחת", large: "גדול 15oz", magic: "משנה צבע", small: "קטן 5×5 ס״מ", medium: "בינוני 10×10 ס״מ", largeS: "גדול 15×15 ס״מ", sheet: "גיליון מדבקות" },
     bloom: { collection: "אוסף", instagramAria: "אינסטגרם", closeModal: "סגור", seeAll: (n) => `ראה את כל ה-${n} ←` },
   },
   en: {
     dir: "ltr", label: "EN",
-    nav: { home: "Home", mugs: "Mugs", order: "Order", pets: "BLOOM", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
+    nav: { home: "Home", mugs: "Mugs", order: "Order", pets: "BLOOM", collage: "MY CREW", track: "Track Order", about: "About", login: "Login", logout: "Logout", admin: "Admin" },
     blogHeroTitle:'Sfalim Shop Blog', blogHeroSubtitle:'Guides, stories, and inspiration for pet lovers', blogReadMore:'Continue reading →', blogCategoryAll:'All', blogCategoryBreeds:'Breeds', blogCategoryGifts:'Gifts', blogCategoryCulture:'Culture', blogCategoryStories:'Stories', blogPublishedOn:'Published on ', blogRelatedProduct:'The mug for this breed →', blogRelatedPosts:'More articles you might enjoy', blogShareTitle:'Share', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Copy link', blogShareCopied:'✓ Link copied', blogQuizCta:'Not sure which breed fits you? Take the quiz →', blogBackToList:'← Back to all articles', navBlog:'Blog', blogReadMoreBreed:'📖 Read more about the breed', blogFromOurBlog:'From our blog →', blogEmpty:'No articles yet. Coming soon!', blogNotFound:'Article not found', blogBreadcrumbHome:'Home', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Take the BLOOM quiz · Which pet are you?", banner_title: "Which BLOOM pet are you?", banner_sub: "11 quick questions reveal which of our 70 characters fits you best.", banner_cta: "Take the quiz →", nav: "Quiz" },
     hero: { badge: "Custom Prints · Made in Israel", h1line1: "Designed", h1line2: "for your style", sub: "Mugs, shirts & BLOOM pet portraits — personalized with your design, hand-printed in Be'er Sheva.", cta: "Design your own →", ctaSecondary: "Browse the BLOOM collection", from: "from ₪" },
@@ -2330,11 +2379,60 @@ const LANGS = {
       addBtn: `Continue to payment →`,
       postHeading: `We've got your order! 🎨`,
       postSub: `Now send us 2–4 photos of your pet from different angles (face, profile, full body) on WhatsApp, and we'll start designing.`,
+      collagePostSub: `Send us up to 12 photos of your pet(s) on WhatsApp, and we'll build your MY CREW collage and send a preview for approval before printing.`,
       postCta: `Send photos on WhatsApp`,
       postPrefill: (id) => `Hi! I placed a custom BLOOM order #${id} — here are photos of my pet:`,
       cartNotePet: `🎨 Custom portrait — we'll design it from the photos you send on WhatsApp after payment`,
       cartNoteCustom: `🎨 Custom design — we'll design it from the idea you send on WhatsApp after payment`,
       adminBadge: `BLOOM commission — awaiting photos`,
+      choiceCollage: `📸 Collage from your photos`,
+      choiceCollageSub: `MY CREW — up to 12 real photos of your pet`,
+      cartNoteCollage: `MY CREW · collage from your photos — we'll arrange them over WhatsApp after payment`,
+      adminBadgeCollage: `MY CREW — awaiting photos`,
+    },
+    myCrew: {
+      name: `MY CREW`,
+      subtitle: `your crew on a tee`,
+      colorLabel: `Shirt color`,
+      styleLabel: `Collage style`,
+      styleBW: `Black & white (street)`,
+      styleColor: `Color`,
+      modeLabel: `Mode`,
+      modeCelebrate: `Celebration 🎉`,
+      modeMemory: `In memory 🤍`,
+      phraseLabel: `Front phrase (optional)`,
+      phraseOptions: [`[name]`, `DOG MOM`, `DOG DAD`, `CAT MOM`, `CAT DAD`, `POWERED BY [name]`, `[name] EST. '21`],
+      sleeveLabel: `Small sleeve print (optional)`,
+      petNamesLabel: `Pet name(s)`,
+      petCountLabel: `How many pets?`,
+      memoryPhrases: [`Forever in my heart`, `Always with me`, `[name] · 2015–2024`],
+      yearsLabel: `Years (optional)`,
+      yearsPlaceholder: `e.g. 2015–2024`,
+      countHintOne: `One name on the design`,
+      countHintTwo: `Names appear as: A & B`,
+      countHintThree: `Three or more — THE … CREW`,
+      placeholderSingle: `Pet name`,
+      placeholderMulti: `Names separated by commas`,
+      photoGuideTitle: `What photos to send`,
+      photoGuide: [`Sharp, clear photos`, `Close-up face + different angles`, `Good lighting, simple background`],
+      oneOfOne: `1 OF 1 · a unique design just for you`,
+      boxTitle: `MY CREW — your real pet, collaged`,
+      giftLine: `A perfect gift for any pet lover — add a handwritten note at checkout`,
+      includedLine: `Included: front + back + sleeve print · up to 12 photos · you approve the design before we print · hand-printed in Be'er Sheva`,
+      setUpsellLabel: `+ same design on a mug · +₪49`,
+      briefLabel: `My order details:`,
+      heroPitch: `Your real pet, as a streetwear collage on an oversize tee. 1 of 1.`,
+      step1: `Choose your shirt and send up to 12 photos`,
+      step2: `We build the collage and send you a preview`,
+      step3: `You approve → we print in Be'er Sheva`,
+      howTitle: `How it works`,
+      priceLine: `₪169 · all included`,
+      showcaseWorn: `On the tee`,
+      showcaseDesign: `The design`,
+      cta: `Start MY CREW`,
+      bandPitch: `MY CREW — your real pet on a shirt`,
+      trustLine: `Hand-printed in Be'er Sheva · ready in 2–3 days`,
+      bloomCrosslink: `Want your real pet? → Collage from photos`,
     },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
     form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
@@ -2365,13 +2463,13 @@ const LANGS = {
     track: { title: "Order Tracking", sub: "Follow the progress of your orders", noOrders: "No orders yet", order: "Order", status: "Status", date: "Date", guestTitle: "Track your order", guestDesc: "No password needed — we'll email you a secure link to view your orders.", guestBtn: "Send me the link" },
     approval: { submittedTitle: "Your design was submitted for approval", submittedDesc: "Your design was submitted for approval — we'll email you once it's approved, then you can pay. Your order is saved.", npStep1Title: "We review your design", npStep1Sub: "We'll check it and email you", npStep2Title: "Secure payment", npStep2Sub: "Once approved — you pay and we start", npStep3Title: "Production: 2-4 business days", npStep3Sub: "Quality printing of your approved design", npStep4Title: "Shipping: 1-3 business days", npStep4Sub: "You'll receive tracking by email", underReview: "Design under review", underReviewDesc: "We've sent your design for approval. We'll email you the moment it's approved — then you can pay.", approvedTitle: "Design approved! 🎉", approvedDesc: "Complete payment and your order goes into production.", payNow: "Pay now", changesTitle: "Changes requested", reviewNote: "Note from our team", editResubmit: "Edit & resubmit", uploadNew: "Upload a new design (optional)", resubmitBtn: "Resubmit for approval", resubmitting: "Submitting...", resubmitted: "Resubmitted — under review again", cancelOrder: "Cancel order", cancelConfirm: "Cancel this order?", cancelled: "Order cancelled" },
     admin: { title: "Admin Dashboard", orders: "Orders", total: "total", statuses: { received: "Received", design: "Design", printing: "Printing", ready: "Ready", shipped: "Shipped", delivered: "Delivered" }, customer: "Customer", updateStatus: "Update Status", noOrders: "No orders yet" },
-    products: { tshirt: "Basic T-Shirt", lycra: "Lycra Fitted Tee", oversized: "Oversize T-Shirt", look: "Look Oversize", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
-    variants: { standard: "Standard 11oz", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
+    products: { tshirt: "Basic T-Shirt", lycra: "Lycra Fitted Tee", oversized: "Oversize T-Shirt", look: "Look Oversize", stonewash: "Oversize Stone-wash Shirt", dryfit: "Dri-FIT T-Shirt", mug: "Custom Mug", magic_mug: "Magic Mug", socks: "BLOOM Socks", sticker: "Round Sticker", sticker_sq: "Square Sticker" },
+    variants: { standard: "Standard 11oz", oneSize: "One size", large: "Large 15oz", magic: "Magic Color Change", small: "Small 5×5cm", medium: "Medium 10×10cm", largeS: "Large 15×15cm", sheet: "Sticker Sheet" },
     bloom: { collection: "Collection", instagramAria: "Instagram", closeModal: "Close", seeAll: (n) => `See all ${n} →` },
   },
   ru: {
     dir: "ltr", label: "RU",
-    nav: { home: "Главная", mugs: "Кружки", order: "Заказ", pets: "BLOOM", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
+    nav: { home: "Главная", mugs: "Кружки", order: "Заказ", pets: "BLOOM", collage: "MY CREW", track: "Отследить", about: "О нас", login: "Войти", logout: "Выйти", admin: "Админ" },
     blogHeroTitle:'Блог Sfalim Shop', blogHeroSubtitle:'Гиды, истории и вдохновение для любителей питомцев', blogReadMore:'Читать далее →', blogCategoryAll:'Все', blogCategoryBreeds:'Породы', blogCategoryGifts:'Подарки', blogCategoryCulture:'Культура', blogCategoryStories:'Истории', blogPublishedOn:'Опубликовано ', blogRelatedProduct:'Кружка этой породы →', blogRelatedPosts:'Другие статьи', blogShareTitle:'Поделиться', blogShareWhatsapp:'WhatsApp', blogShareCopy:'Копировать ссылку', blogShareCopied:'✓ Ссылка скопирована', blogQuizCta:'Не уверены, какая порода вам подходит? Пройдите тест →', blogBackToList:'← Назад к статьям', navBlog:'Блог', blogReadMoreBreed:'📖 Подробнее о породе', blogFromOurBlog:'Из нашего блога →', blogEmpty:'Пока нет статей. Скоро!', blogNotFound:'Статья не найдена', blogBreadcrumbHome:'Главная', blogShareFacebook:'Facebook',
     quiz: { hero_cta: "🐾 Пройди BLOOM-квиз · Какое ты животное?", banner_title: "Какое ты BLOOM-животное?", banner_sub: "11 коротких вопросов раскроют, какой из 70 персонажей подходит тебе больше всего.", banner_cta: "Пройти квиз →", nav: "Квиз" },
     hero: { badge: "Индивидуальная печать · Израиль", h1line1: "Создано", h1line2: "в вашем стиле", sub: "Кружки, футболки и портреты BLOOM — с вашим дизайном, печать вручную в Беэр-Шеве.", cta: "Создать свой →", ctaSecondary: "Каталог BLOOM", from: "от ₪" },
@@ -2401,11 +2499,60 @@ const LANGS = {
       addBtn: `Перейти к оплате →`,
       postHeading: `Заказ принят! 🎨`,
       postSub: `Теперь пришлите нам 2–4 фото питомца с разных ракурсов (анфас, профиль, в полный рост) в WhatsApp, и мы начнём создавать.`,
+      collagePostSub: `Пришлите до 12 фото вашего питомца(ев) в WhatsApp — мы соберём коллаж MY CREW и пришлём превью на утверждение перед печатью.`,
       postCta: `Отправить фото в WhatsApp`,
       postPrefill: (id) => `Здравствуйте! Я оформил персональный BLOOM-заказ №${id} — вот фото моего питомца:`,
       cartNotePet: `🎨 Индивидуальный портрет — создадим по фото, которые пришлёте в WhatsApp после оплаты`,
       cartNoteCustom: `🎨 Индивидуальный дизайн — создадим по идее, которую пришлёте в WhatsApp после оплаты`,
       adminBadge: `Комиссия BLOOM — ждёт фото`,
+      choiceCollage: `📸 Коллаж из ваших фото`,
+      choiceCollageSub: `MY CREW — до 12 реальных фото питомца`,
+      cartNoteCollage: `MY CREW · коллаж из ваших фото — согласуем после оплаты в WhatsApp`,
+      adminBadgeCollage: `MY CREW — ожидает фото`,
+    },
+    myCrew: {
+      name: `MY CREW`,
+      subtitle: `твоя банда на футболке`,
+      colorLabel: `Цвет футболки`,
+      styleLabel: `Стиль коллажа`,
+      styleBW: `Чёрно-белый (стрит)`,
+      styleColor: `Цветной`,
+      modeLabel: `Режим`,
+      modeCelebrate: `Праздник 🎉`,
+      modeMemory: `В память 🤍`,
+      phraseLabel: `Фраза спереди (необязательно)`,
+      phraseOptions: [`[имя]`, `DOG MOM`, `DOG DAD`, `CAT MOM`, `CAT DAD`, `POWERED BY [имя]`, `[имя] EST. '21`],
+      sleeveLabel: `Маленький принт на рукаве (необязательно)`,
+      petNamesLabel: `Имя/имена питомца`,
+      petCountLabel: `Сколько питомцев?`,
+      memoryPhrases: [`Навсегда в сердце`, `Всегда со мной`, `[имя] · 2015–2024`],
+      yearsLabel: `Годы (необязательно)`,
+      yearsPlaceholder: `напр. 2015–2024`,
+      countHintOne: `Одно имя на дизайне`,
+      countHintTwo: `Имена: A & B`,
+      countHintThree: `Три и более — THE … CREW`,
+      placeholderSingle: `Имя питомца`,
+      placeholderMulti: `Имена через запятую`,
+      photoGuideTitle: `Какие фото прислать`,
+      photoGuide: [`Чёткие и ясные фото`, `Крупный план морды + разные ракурсы`, `Хорошее освещение, простой фон`],
+      oneOfOne: `1 OF 1 · уникальный дизайн только для вас`,
+      boxTitle: `MY CREW — твой питомец, коллажем`,
+      giftLine: `Идеальный подарок любителю животных — открытку с подписью добавьте на кассе`,
+      includedLine: `Включено: печать спереди + сзади + рукав · до 12 фото · утверждение дизайна перед печатью · печать вручную в Беэр-Шеве`,
+      setUpsellLabel: `+ тот же дизайн на кружке · +₪49`,
+      briefLabel: `Мой выбор:`,
+      heroPitch: `Ваш настоящий питомец — как стритвир-коллаж на оверсайз-футболке. 1 of 1.`,
+      step1: `Выбираете футболку и присылаете до 12 фото`,
+      step2: `Мы собираем коллаж и присылаем на согласование`,
+      step3: `Вы утверждаете → печатаем в Беэр-Шеве`,
+      howTitle: `Как это работает`,
+      priceLine: `₪169 · всё включено`,
+      showcaseWorn: `На футболке`,
+      showcaseDesign: `Дизайн`,
+      cta: `Начать MY CREW`,
+      bandPitch: `MY CREW — ваш настоящий питомец на футболке`,
+      trustLine: `Печать вручную в Беэр-Шеве · готово за 2–3 дня`,
+      bloomCrosslink: `Хотите своего настоящего питомца? → Коллаж из фото`,
     },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
     form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
@@ -2436,8 +2583,8 @@ const LANGS = {
     track: { title: "Отслеживание заказов", sub: "Следите за прогрессом ваших заказов", noOrders: "Заказов пока нет", order: "Заказ", status: "Статус", date: "Дата", guestTitle: "Отслеживание заказа", guestDesc: "Пароль не нужен — мы отправим вам на email защищённую ссылку для просмотра ваших заказов.", guestBtn: "Отправить ссылку" },
     approval: { submittedTitle: "Ваш дизайн отправлен на одобрение", submittedDesc: "Ваш дизайн отправлен на одобрение — мы сообщим по email, как только он будет одобрен, тогда можно оплатить. Заказ сохранён.", npStep1Title: "Утверждаем дизайн", npStep1Sub: "Проверим и сообщим по email", npStep2Title: "Оплата", npStep2Sub: "После одобрения — оплата, и заказ в производство", npStep3Title: "Производство: 2-4 рабочих дня", npStep3Sub: "Качественная печать одобренного дизайна", npStep4Title: "Доставка: 1-3 рабочих дня", npStep4Sub: "Трек-номер придёт на email", underReview: "Дизайн на проверке", underReviewDesc: "Мы отправили ваш дизайн на одобрение. Сообщим по email, как только он будет одобрен — тогда можно оплатить.", approvedTitle: "Дизайн одобрен! 🎉", approvedDesc: "Завершите оплату, и заказ отправится в производство.", payNow: "Оплатить", changesTitle: "Требуются изменения", reviewNote: "Комментарий нашей команды", editResubmit: "Изменить и отправить снова", uploadNew: "Загрузить новый дизайн (необязательно)", resubmitBtn: "Отправить на одобрение снова", resubmitting: "Отправка...", resubmitted: "Отправлено повторно — снова на проверке", cancelOrder: "Отменить заказ", cancelConfirm: "Отменить этот заказ?", cancelled: "Заказ отменён" },
     admin: { title: "Панель администратора", orders: "Заказов", total: "всего", statuses: { received: "Получен", design: "Дизайн", printing: "Печать", ready: "Готов", shipped: "Отправлен", delivered: "Доставлен" }, customer: "Клиент", updateStatus: "Обновить статус", noOrders: "Заказов нет" },
-    products: { tshirt: "Базовая футболка", lycra: "Футболка Лайкра", oversized: "Оверсайз футболка", look: "Оверсайз «Look»", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
-    variants: { standard: "Стандарт 11oz", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
+    products: { tshirt: "Базовая футболка", lycra: "Футболка Лайкра", oversized: "Оверсайз футболка", look: "Оверсайз «Look»", stonewash: "Футболка оверсайз стоунвош", dryfit: "Dri-FIT футболка", mug: "Кружка", magic_mug: "Волшебная кружка", socks: "Носки BLOOM", sticker: "Круглый стикер", sticker_sq: "Квадратный стикер" },
+    variants: { standard: "Стандарт 11oz", oneSize: "Единый размер", large: "Большой 15oz", magic: "Меняет цвет", small: "Маленький 5×5см", medium: "Средний 10×10см", largeS: "Большой 15×15см", sheet: "Лист стикеров" },
     bloom: { collection: "Коллекция", instagramAria: "Инстаграм", closeModal: "Закрыть", seeAll: (n) => `Смотреть все ${n} →` },
   },
 };
@@ -2736,7 +2883,7 @@ const POLICIES = {
 };
 
 // Localization helpers - translate a saved product/variant name to target language
-const PRODUCT_IDS = ['tshirt', 'lycra', 'oversized', 'look', 'stonewash', 'dryfit', 'mug', 'sticker', 'sticker_sq'];
+const PRODUCT_IDS = ['tshirt', 'lycra', 'oversized', 'look', 'stonewash', 'dryfit', 'mug', 'magic_mug', 'socks', 'sticker', 'sticker_sq'];
 const localizeProduct = (savedName, targetLang) => {
   if (!savedName) return savedName;
   for (const id of PRODUCT_IDS) {
@@ -2768,6 +2915,8 @@ const SHIRT_COLOR_PALETTE = BLOOM_SHIRT_COLORS.map(c => c.hex);
 
 const PRODUCTS = (t) => [
   { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "magic_mug",  name: t.products.magic_mug, desc: { he: "ספל שחור משנה צבע בחום · הדפסת סובלימציה · עמיד במדיח", en: "Black heat-reveal mug · sublimation print · dishwasher-safe", ru: "Чёрная кружка, проявляется в тепле · сублимация · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 75 }], colors: ["#000000"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "socks",      name: t.products.socks,     desc: { he: "גרביים · מידה אחת · הדפסה צבעונית מלאה", en: "Socks · one size · full-color print", ru: "Носки · единый размер · полноцветная печать" }, variants: [{ id: "standard", label: t.variants.oneSize, price: 59 }], colors: ["#ffffff"], printArea: { x: 30, y: 80, w: 200, h: 200 } },
   { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · רכה ונושמת · גזרה רגילה · הדפסת DTF חדה", en: "100% combed cotton · soft & breathable · regular fit · crisp DTF print", ru: "100% чёсаный хлопок · мягкий и дышащий · обычный крой · чёткая DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black","gray","navy","royal","azure","turquoise","red","wine","orange","yellow","green","darkGreen","sage","beige","brown","purple","pink"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "lycra",      name: t.products.lycra,     desc: { he: "95% כותנה / 5% לייקרה · גזרה צמודה שחוזרת לצורתה · נוחות תנועה", en: "95% cotton / 5% lycra · figure-hugging fit that springs back · move-friendly", ru: "95% хлопок / 5% лайкра · приталенный крой, держит форму · свобода движения" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
   { id: "oversized",  name: t.products.oversized, desc: { he: "100% כותנה סרוקה · גזרת אוברסייז · בד חלק להדפסה חדה", en: "100% combed cotton · oversize fit · smooth fabric for a crisp print", ru: "100% чёсаный хлопок · оверсайз · гладкая ткань для чёткой печати" }, is_new: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
@@ -2790,8 +2939,13 @@ const CUSTOM_STICKER_IDS = ['sticker', 'sticker_sq'];
 // (cart re-render, localizeProduct, order history) keep working. Re-enable a model by
 // removing its id from this list.
 const LAUNCH_HIDDEN_SHIRT_IDS = ['tshirt', 'lycra', 'look', 'dryfit'];
+// Magic Mug + Socks are fully built (priced live in create-payment v24) but parked
+// until the owner has stock + real product photos. Flip to true to expose them
+// everywhere (order picker, PetModal, BreedPage). Server pricing already supports them.
+const MAGIC_MUG_SOCKS_ENABLED = false;
 const getCustomProducts = (t) => {
   let all = PRODUCTS(t).filter(p => !LAUNCH_HIDDEN_SHIRT_IDS.includes(p.id));
+  if (!MAGIC_MUG_SOCKS_ENABLED) all = all.filter(p => p.id !== `magic_mug` && p.id !== `socks`);
   if (!STONEWASH_ENABLED) all = all.filter(p => p.id !== `stonewash`);
   if (CUSTOM_STICKERS_ENABLED) return all;
   return all.filter(p => !CUSTOM_STICKER_IDS.includes(p.id));
@@ -2851,6 +3005,14 @@ const PLACEMENTS = {
     { id: "center", he: "מרכז",  en: "Center", ru: "Центр",  cx: 158, cy: 178 },
     { id: "right",  he: "ימין",  en: "Right",  ru: "Справа", cx: 193, cy: 178 },
   ],
+  magic_mug: [
+    { id: "left",   he: "שמאל",  en: "Left",   ru: "Слева",  cx: 120, cy: 178 },
+    { id: "center", he: "מרכז",  en: "Center", ru: "Центр",  cx: 158, cy: 178 },
+    { id: "right",  he: "ימין",  en: "Right",  ru: "Справа", cx: 193, cy: 178 },
+  ],
+  socks: [
+    { id: "center", he: "מרכז", en: "Center", ru: "Центр", cx: 200, cy: 200 },
+  ],
   sticker: [
     { id: "center", he: "מרכז",  en: "Center", ru: "Центр", cx: 200, cy: 198 },
     { id: "top",    he: "עליון", en: "Top",    ru: "Верх",  cx: 200, cy: 135 },
@@ -2890,6 +3052,14 @@ const SIZE_OPTIONS = {
     { id: "medium", px: 65,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
     { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
   ],
+  magic_mug: [
+    { id: "small",  px: 40,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
+    { id: "medium", px: 65,  label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
+    { id: "large",  px: 160, label: { he: "גדול",  en: "Large",  ru: "Бол." },  cm: "12×10 cm" },
+  ],
+  socks: [
+    { id: "medium", px: 85,  label: { he: "סטנדרט", en: "Standard", ru: "Стандарт" }, cm: "~10×10 cm" },
+  ],
   sticker: [
     { id: "small",  px: 60,  label: { he: "קטן",   en: "Small",  ru: "Мал." },  cm: "5×5 cm"   },
     { id: "medium", px: 110, label: { he: "בינוני", en: "Medium", ru: "Сред." }, cm: "8×8 cm"   },
@@ -2913,6 +3083,10 @@ const MOCKUP_URLS = {
   stonewash:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   dryfit:     "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/dri%20fit%20t%20shirt.png",
   mug:        "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/mug.png",
+  // TEMP: replace with real magic-mug photo before deploy — reuses the regular mug mockup for now
+  magic_mug:  "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/mug.png",
+  // TEMP: replace with real socks photo before deploy — reuses the oversize tee mockup as a placeholder
+  socks:      "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/oversize.png",
   sticker:    "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/round%20sticker.png",
   sticker_sq: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/square%20sticker.png",
 };
@@ -3581,6 +3755,13 @@ function AccountSettings({ lang }) {
   );
 }
 
+// Builds the smart collage brief appended to the WhatsApp prefill on the Track page.
+const collageBrief = (c, lang) => {
+  if (!c) return ``;
+  const L = (LANGS[lang] || LANGS.he).myCrew;
+  return `\n\n${L.briefLabel}\n• ${c.style === `bw` ? `B&W` : `Color`} · ${c.mode === `memory` ? `\u{1F90D}` : `\u{1F389}`}${c.phrase ? ` · "${c.phrase}"` : ``}${c.petNames ? ` · ${c.petNames}` : ``}${c.sleeve ? ` · sleeve` : ``}${c.years ? ` · ${c.years}` : ``}`;
+};
+
 // Order Tracker
 function TrackPage({ lang, user, clearCart }) {
   const t = LANGS[lang];
@@ -3621,7 +3802,8 @@ function TrackPage({ lang, user, clearCart }) {
   const [payReturnDismissed, setPayReturnDismissed] = useState(false);
   const [payReturnStatus, setPayReturnStatus] = useState(`loading`); // loading | succeeded | processing | unknown
   const [isCommissionPaid, setIsCommissionPaid] = useState(false); // paid group has a commission → show the WhatsApp photo CTA
-  const [commissionPaidType, setCommissionPaidType] = useState(`pet`); // 'pet' | 'custom' — which brief to show
+  const [commissionPaidType, setCommissionPaidType] = useState(`pet`); // 'pet' | 'custom' | 'collage' — which brief to show
+  const [commissionPaidCollage, setCommissionPaidCollage] = useState(null); // collage payload for smart brief
   useEffect(() => {
     if (!payReturn) return;
     if (!payReturn.orderGroup) { setPayReturnStatus(`unknown`); return; }
@@ -3637,7 +3819,10 @@ function TrackPage({ lang, user, clearCart }) {
         setPayReturnStatus(succeeded ? `succeeded` : `processing`);
         const commOrder = data.find(o => o.extra_prints?.src === `commission`);
         setIsCommissionPaid(succeeded && !!commOrder);
-        if (commOrder) setCommissionPaidType(commOrder.extra_prints?.ctype || `pet`);
+        if (commOrder) {
+          setCommissionPaidType(commOrder.extra_prints?.ctype || `pet`);
+          setCommissionPaidCollage(commOrder.extra_prints?.collage || null);
+        }
         // Clear the cart ONLY on a confirmed-succeeded payment return — never on
         // a failure or an unconfirmed/processing return. Guarded by `succeeded`
         // above so we can't wipe a cart that wasn't actually paid for.
@@ -3826,8 +4011,8 @@ function TrackPage({ lang, user, clearCart }) {
           {ok && isCommissionPaid && (
             <div style={{ background: `rgba(37,211,102,0.08)`, border: `1px solid rgba(37,211,102,0.4)`, borderRadius: 12, padding: 16, marginBottom: 20, textAlign: `start` }}>
               <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t.commission.postHeading}</div>
-              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{commissionPaidType === `pet` ? t.commission.postSub : t.commission.customPostSub}</div>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent((commissionPaidType === `pet` ? t.commission.postPrefill : t.commission.customPostPrefill)(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`))}`} target="_blank" rel="noopener noreferrer"
+              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{commissionPaidType === `collage` ? t.commission.collagePostSub : (commissionPaidType === `pet` ? t.commission.postSub : t.commission.customPostSub)}</div>
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(commissionPaidType === `collage` ? (t.commission.postPrefill(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`) + collageBrief(commissionPaidCollage, lang)) : ((commissionPaidType === `pet` ? t.commission.postPrefill : t.commission.customPostPrefill)(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`)))}`} target="_blank" rel="noopener noreferrer"
                 style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, background: `#25D366`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: 14, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box` }}>
                 <span style={{ fontSize: 18 }}>💬</span> {t.commission.postCta}
               </a>
@@ -4900,7 +5085,7 @@ function AdminPage({ lang }) {
                           <div style={{ color: COLORS.accent, fontWeight: 700 }}>₪{groupTotal}</div>
                           <div style={{ marginTop: 6 }}><PaymentBadge status={order.payment_status} lang={lang} /></div>
                           {group.some(o => o.extra_prints?.src === `commission`) && (
-                            <div style={{ marginTop: 6, display: `inline-block`, background: `rgba(255,107,53,0.12)`, border: `1px solid rgba(255,107,53,0.45)`, color: COLORS.accent, borderRadius: 8, padding: `3px 10px`, fontSize: 11, fontWeight: 700 }}>🎨 {t.commission.adminBadge}</div>
+                            <div style={{ marginTop: 6, display: `inline-block`, background: `rgba(255,107,53,0.12)`, border: `1px solid rgba(255,107,53,0.45)`, color: COLORS.accent, borderRadius: 8, padding: `3px 10px`, fontSize: 11, fontWeight: 700 }}>🎨 {group.some(o => o.extra_prints?.ctype === `collage`) ? t.commission.adminBadgeCollage : t.commission.adminBadge}</div>
                           )}
                           <div style={{ color: statusColors[order.status], fontSize: 12, marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}><span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: stage.dot, boxShadow: `0 0 6px ${stage.dot}66` }}></span>{stage[lang] || stage.en}</div>
                           <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 2 }}>{timeAgo(order.created_at, lang)}</div>
@@ -5846,7 +6031,7 @@ function OrderSummary({ lang, cart, setCart, updateCartQty, isMobile, shippingPr
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{it.productName}</div>
-          {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11, lineHeight: 1.45, marginTop: 3 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
+          {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11, lineHeight: 1.45, marginTop: 3 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `collage` ? `cartNoteCollage` : (it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`)]}</div>}
           {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 13, fontWeight: 700, marginTop: 3, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={13} color={it.petNameColor || COLORS.accent} /><span>{it.petName}{it.productId !== `mug` ? ` (+₪${PET_NAME_SURCHARGE})` : ``}</span></div>}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: COLORS.gray, fontSize: 11.5, flexWrap: "wrap" }}>
             {it.variantLabel && <span>{it.variantLabel}</span>}
@@ -6179,8 +6364,17 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   // When true, the Step-1 shirt path is a "draw my pet from photos" commission
   // (pay-first, no upload) instead of the normal upload customizer.
   const [commissionMode, setCommissionMode] = useState(false);
-  const [commissionType, setCommissionType] = useState(`pet`); // 'pet' | 'custom'
+  const [commissionType, setCommissionType] = useState(`pet`); // 'pet' | 'custom' | 'collage'
   const [commissionAck, setCommissionAck] = useState(false); // required "made-to-order, non-refundable after approval" acknowledgement
+  // CollageOptions state — produced by Task 3, consumed by Task 4 (cart/brief wiring)
+  const [collageStyle, setCollageStyle] = useState(`bw`);
+  const [collageMode, setCollageMode] = useState(`celebrate`);
+  const [collagePhrase, setCollagePhrase] = useState(``);
+  const [collageSleeve, setCollageSleeve] = useState(false);
+  const [collageYears, setCollageYears] = useState(``);
+  const [petNames, setPetNames] = useState(``);
+  const [petCount, setPetCount] = useState(1);
+  const [setMug, setSetMug] = useState(false);
   const commissionRef = useRef(null);
   // When a shirt is picked, scroll the "upload vs draw-from-photos" choice into
   // view (it sits below the product list) so it's noticed — especially on mobile.
@@ -6228,6 +6422,9 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
     const unitPrice = commissionPrice(commissionType, selectedProduct);
     const colorHex = (product.colors && product.colors[selectedColor]) || null;
     const cartItemId = Date.now() + Math.random();
+    const collagePayload = commissionType === `collage`
+      ? { style: collageStyle, mode: collageMode, phrase: collagePhrase, sleeve: collageSleeve, years: collageYears, petNames, petCount }
+      : null;
     const itemData = {
       productId: selectedProduct,
       productName: product.name,
@@ -6240,6 +6437,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       isCustom: false,
       isCommission: true,
       commissionType,
+      collage: collagePayload,
       uploadedUrl: null,
       mockupUrl: null,
       imagePos: { x: 150, y: 130, size: 85 },
@@ -6251,7 +6449,38 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       unitPrice,
       itemPrice: unitPrice,
     };
-    setCart(c => [...c, { id: cartItemId, ...itemData }]);
+    const mugUnitPrice = 49;
+    setCart(c => {
+      const next = [...c, { id: cartItemId, ...itemData }];
+      if (commissionType === `collage` && setMug) {
+        next.push({
+          id: Date.now() + Math.random(),
+          productId: `mug`,
+          productName: (PRODUCTS(t).find(p => p.id === `mug`) || {}).name || `Mug`,
+          variantId: `standard`,
+          variantLabel: t.variants?.standard || `Standard`,
+          colorIdx: 0,
+          color: `#ffffff`,
+          qty: 1,
+          uploadedImage: null,
+          isCustom: false,
+          isCommission: true,
+          commissionType: `collage`,
+          collage: collagePayload,
+          uploadedUrl: null,
+          mockupUrl: null,
+          imagePos: { x: 150, y: 130, size: 85 },
+          backPrint: false,
+          backDesign: { enabled: false, sameAsMain: true, image: null },
+          secondFront: { enabled: false, image: null, sameAsMain: true, pos: { x: 210, y: 120, size: 43 } },
+          sleeveLeft: { enabled: false, sameAsMain: true, image: null },
+          sleeveRight: { enabled: false, sameAsMain: true, image: null },
+          unitPrice: mugUnitPrice,
+          itemPrice: mugUnitPrice,
+        });
+      }
+      return next;
+    });
     try {
       window.gtag?.(`event`, `add_to_cart`, { currency: `ILS`, value: unitPrice, items: [{ item_id: selectedProduct, item_name: product?.name, price: unitPrice, quantity: 1 }] });
       window.fbq?.(`track`, `AddToCart`, { currency: `ILS`, value: unitPrice, content_ids: [selectedProduct], content_type: `product` });
@@ -6911,7 +7140,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             language: lang,
             back_print: false,
             order_group: orderGroupId,
-            extra_prints: { shipping_method: deliveryMethod, src: `commission`, ctype: it.commissionType || `pet`, pid: it.productId, vid: it.variantId, slug: null },
+            extra_prints: { shipping_method: deliveryMethod, src: `commission`, ctype: it.commissionType || `pet`, pid: it.productId, vid: it.variantId, slug: null, collage: it.collage || null },
           };
           if (user) {
             const { data: orderData, error } = await supabase.from(`orders`).insert(commissionRow).select().single();
@@ -7015,7 +7244,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           // price server-side (never trust the browser-sent total):
           //   src = custom (fixed catalog) | bloom (pet_designs) ; pid/vid/slug
           //   identify the catalog entry / BLOOM design.
-          extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null, mug_shape: it.productId === `mug` ? (it.mugShape || `classic`) : undefined },
+          extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null, mug_shape: (it.productId === `mug` || it.productId === `magic_mug`) ? (it.mugShape || `classic`) : undefined },
         };
 
         if (user) {
@@ -7313,8 +7542,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             {/* Custom BLOOM commission — shirt-only choice: upload your own design, or we draw one from photos */}
             {BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && (
               <div ref={commissionRef} style={{ marginTop: 20, background: `linear-gradient(135deg, rgba(255,107,53,0.14), rgba(255,107,53,0.04))`, border: `2px solid ${COLORS.accent}`, borderRadius: 14, padding: 18, boxShadow: `0 6px 24px rgba(255,107,53,0.18)` }}>
-                <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 4 }}>✨ {t.commission.badge}</div>
-                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>{t.commission.choiceTitle}</div>
+                <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 4 }}>✨ {(commissionMode && commissionType === `collage`) ? t.myCrew.name : t.commission.badge}</div>
+                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>{(commissionMode && commissionType === `collage`) ? t.myCrew.boxTitle : t.commission.choiceTitle}</div>
                 <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
                   <button onClick={() => setCommissionMode(false)} style={{ flex: `1 1 150px`, textAlign: `start`, background: !commissionMode ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${!commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>📁 {t.commission.choiceUpload}</div>
@@ -7328,30 +7557,64 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>✏️ {t.commission.choiceCustom}</div>
                     <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCustomSub}</div>
                   </button>
+                  {selectedProduct === `oversized` && (
+                  <button onClick={() => { setCommissionMode(true); setCommissionType(`collage`); setCommissionAck(false); }} style={{ flex: `1 1 150px`, textAlign: `start`, background: (commissionMode && commissionType === `collage`) ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${(commissionMode && commissionType === `collage`) ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
+                    <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>{t.commission.choiceCollage}</div>
+                    <div style={{ color: COLORS.gray, fontSize: 11, marginTop: 3 }}>{t.commission.choiceCollageSub}</div>
+                  </button>
+                  )}
                 </div>
                 {commissionMode && (
                   <div style={{ marginTop: 16 }}>
-                    <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.color}</div>
-                    <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
-                      {(product?.colors || []).map((hex, i) => (
-                        <button key={i} aria-label={`${t.customize.color} ${i + 1}`} aria-pressed={selectedColor === i} onClick={() => setSelectedColor(i)} style={{ width: 30, height: 30, borderRadius: `50%`, background: hex, border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`, cursor: `pointer`, padding: 0 }} />
-                      ))}
-                    </div>
-                    {(product?.variants || []).length > 1 && (<>
-                    <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.size}</div>
-                    <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
-                      {(product?.variants || []).map((v) => (
-                        <button key={v.id} aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : `transparent`, color: selectedVariant === v.id ? `#fff` : COLORS.gray, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `8px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{v.label}</button>
-                      ))}
-                    </div>
-                    </>)}
-                    <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: `12px 14px`, fontSize: 12.5, lineHeight: 1.7, color: COLORS.gray }}>
-                      <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13, marginBottom: 5 }}>{lang === `he` ? `איך זה עובד אחרי התשלום:` : lang === `ru` ? `Как это работает после оплаты:` : `How it works after you pay:`}</div>
-                      <div>📸 {commissionType === `pet` ? t.commission.microHow : t.commission.customHow}</div>
-                      <div style={{ color: COLORS.white }}>🔁 <b>{t.commission.microRevisions}</b></div>
-                      <div>⏱️ {t.commission.microTime}</div>
-                      <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
-                    </div>
+                    {commissionType === `collage` ? (
+                      <CollageOptions
+                        lang={lang}
+                        t={t}
+                        product={product}
+                        selectedColor={selectedColor}
+                        setSelectedColor={setSelectedColor}
+                        collageStyle={collageStyle}
+                        setCollageStyle={setCollageStyle}
+                        collageMode={collageMode}
+                        setCollageMode={setCollageMode}
+                        collagePhrase={collagePhrase}
+                        setCollagePhrase={setCollagePhrase}
+                        collageSleeve={collageSleeve}
+                        setCollageSleeve={setCollageSleeve}
+                        collageYears={collageYears}
+                        setCollageYears={setCollageYears}
+                        petNames={petNames}
+                        setPetNames={setPetNames}
+                        petCount={petCount}
+                        setPetCount={setPetCount}
+                        setMug={setMug}
+                        setSetMug={setSetMug}
+                      />
+                    ) : (
+                      <>
+                        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.color}</div>
+                        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
+                          {(product?.colors || []).map((hex, i) => (
+                            <button key={i} aria-label={`${t.customize.color} ${i + 1}`} aria-pressed={selectedColor === i} onClick={() => setSelectedColor(i)} style={{ width: 30, height: 30, borderRadius: `50%`, background: hex, border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`, cursor: `pointer`, padding: 0 }} />
+                          ))}
+                        </div>
+                        {(product?.variants || []).length > 1 && (<>
+                        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{t.customize.size}</div>
+                        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 16 }}>
+                          {(product?.variants || []).map((v) => (
+                            <button key={v.id} aria-pressed={selectedVariant === v.id} onClick={() => setSelectedVariant(v.id)} style={{ background: selectedVariant === v.id ? COLORS.accentBtn : `transparent`, color: selectedVariant === v.id ? `#fff` : COLORS.gray, border: `1px solid ${selectedVariant === v.id ? COLORS.accent : COLORS.border}`, borderRadius: 8, padding: `8px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{v.label}</button>
+                          ))}
+                        </div>
+                        </>)}
+                        <div style={{ background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 10, padding: `12px 14px`, fontSize: 12.5, lineHeight: 1.7, color: COLORS.gray }}>
+                          <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13, marginBottom: 5 }}>{lang === `he` ? `איך זה עובד אחרי התשלום:` : lang === `ru` ? `Как это работает после оплаты:` : `How it works after you pay:`}</div>
+                          <div>📸 {commissionType === `pet` ? t.commission.microHow : t.commission.customHow}</div>
+                          <div style={{ color: COLORS.white }}>🔁 <b>{t.commission.microRevisions}</b></div>
+                          <div>⏱️ {t.commission.microTime}</div>
+                          <div style={{ marginTop: 6, color: `#9a9a9a` }}>ℹ️ {t.commission.microRefund}</div>
+                        </div>
+                      </>
+                    )}
                     <label style={{ display: `flex`, alignItems: `flex-start`, gap: 8, marginTop: 12, cursor: `pointer`, color: COLORS.gray, fontSize: 12.5, lineHeight: 1.5 }}>
                       <input type="checkbox" checked={commissionAck} onChange={(e) => setCommissionAck(e.target.checked)} style={{ marginTop: 2, accentColor: COLORS.accent, width: 16, height: 16, flexShrink: 0, cursor: `pointer` }} />
                       <span>{lang === `he` ? `אני מבין/ה שזו עבודה בהזמנה אישית — נתקן עד שאהיה מרוצה, אך אין החזר כספי לאחר אישור העיצוב.` : lang === `ru` ? `Я понимаю, что это изготовление под заказ — правим, пока не буду доволен/льна, но возврата нет после утверждения дизайна.` : `I understand this is made to order — we revise until I'm happy, but it's non-refundable once I approve the design.`}</span>
@@ -7361,7 +7624,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
               </div>
             )}
             {commissionMode && BLOOM_COMMISSION_ENABLED ? (
-              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setCommissionAck(false); setSelectedProduct(null); setStep(3); } }} disabled={!selectedProduct || !selectedVariant || !commissionAck} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: (!selectedProduct || !selectedVariant || !commissionAck) ? `not-allowed` : `pointer`, opacity: (!selectedProduct || !selectedVariant || !commissionAck) ? 0.55 : 1, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{commissionPrice(commissionType, selectedProduct)}</button>
+              <button onClick={() => { if (addCommissionToCart()) { setCommissionMode(false); setCommissionAck(false); setSelectedProduct(null); setStep(3); setCollageStyle(`bw`); setCollageMode(`celebrate`); setCollagePhrase(``); setCollageSleeve(false); setCollageYears(``); setPetNames(``); setPetCount(1); setSetMug(false); } }} disabled={!selectedProduct || !selectedVariant || !commissionAck} style={{ marginTop: 24, width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 8, padding: `14px`, fontSize: 15, fontWeight: 700, cursor: (!selectedProduct || !selectedVariant || !commissionAck) ? `not-allowed` : `pointer`, opacity: (!selectedProduct || !selectedVariant || !commissionAck) ? 0.55 : 1, fontFamily: `'Heebo',sans-serif` }}>{t.commission.addBtn} · ₪{commissionPrice(commissionType, selectedProduct)}</button>
             ) : (
               <button onClick={() => selectedProduct && setStep(2)} disabled={!selectedProduct} style={{ marginTop: 24, width: "100%", background: selectedProduct ? COLORS.accentBtn : COLORS.bgCard, color: selectedProduct ? "#fff" : COLORS.gray, border: "none", borderRadius: 8, padding: "14px", fontSize: 15, fontWeight: 600, cursor: selectedProduct ? "pointer" : "not-allowed", fontFamily: "'Heebo',sans-serif" }}>{t.product.continue}</button>
             )}
@@ -9453,6 +9716,47 @@ function HomeMugsBanner({ lang, setPage }) {
   );
 }
 
+// HomeMyCrewBand — compact promo band for the MY CREW /collage page.
+// Mirrors HomeMugsBanner styling: eyebrow pill + wordmark + subtitle +
+// pitch copy + placeholder tee image + CTA. Rendered on the home page
+// after HomeMugsBanner (wrapped in ScrollReveal by the call site).
+function HomeMyCrewBand({ lang, setPage }) {
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+  const mc = (LANGS[lang] || LANGS.he).myCrew;
+  return (
+    <section aria-labelledby="home-mycrew-title" dir={isRTL ? `rtl` : `ltr`} style={{ background: COLORS.bg, padding: isMobile ? `0 18px 40px` : `0 32px 56px` }}>
+      <div style={{ maxWidth: 1000, margin: `0 auto`, background: `linear-gradient(135deg, rgba(255,107,53,0.10), rgba(255,107,53,0.02))`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 22, padding: isMobile ? `26px 22px` : `34px 40px`, display: `flex`, flexDirection: isMobile ? `column` : `row`, alignItems: `center`, gap: isMobile ? 22 : 36 }}>
+        <div style={{ flex: 1, textAlign: isMobile ? `center` : (isRTL ? `right` : `left`) }}>
+          <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `5px 15px`, marginBottom: 12, color: COLORS.accent, fontSize: 11, fontWeight: 700, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}><AboutIcon name="palette" size={13} color={COLORS.accent} /><span>{mc.name}</span></span>
+          <h2 id="home-mycrew-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(24px,4vw,38px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 6px` }}>{mc.name}</h2>
+          <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontStyle: `italic`, marginBottom: 12 }}>{mc.subtitle}</div>
+          <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 18px` : `0 0 18px` }}>{mc.bandPitch}</p>
+          <div style={{ display: `flex`, alignItems: `center`, justifyContent: isMobile ? `center` : (isRTL ? `flex-end` : `flex-start`), gap: 7, marginBottom: 20, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600 }}>
+            <AboutIcon name="printer" size={15} color={COLORS.accent} />
+            <span>{mc.trustLine}</span>
+          </div>
+          <button type="button" onClick={() => setPage(`collage`)} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` }}
+            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+            onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
+            <AboutIcon name="pawprint" size={16} color="#fff" /> {mc.cta} {isRTL ? `←` : `→`}
+          </button>
+          <div style={{ marginTop: 10, color: COLORS.accent, fontSize: 13, fontWeight: 700, fontFamily: `'Heebo',sans-serif` }}>{mc.priceLine}</div>
+        </div>
+        {/* Real MY CREW example — the design worn on the tee */}
+        <div style={{ flexShrink: 0, width: isMobile ? `100%` : 220, maxWidth: 260, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+          <img src={`/my-crew/mycrew-worn-1.webp`} alt={mc.name} loading="lazy" decoding="async" style={{ width: `100%`, maxWidth: 220, borderRadius: 14, objectFit: `cover`, filter: `drop-shadow(0 10px 24px rgba(255,107,53,0.22))`, display: `block` }} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // MugsPage — the dedicated flagship hub for mugs. The brand name "ספלים"
 // literally means "mugs", so this puts the core product front-and-centre.
 // Showcase + CTAs into the EXISTING flows (BLOOM gallery / order / WhatsApp) —
@@ -9572,7 +9876,7 @@ function MugsPage({ lang, setPage }) {
   };
   const c = D[lang] || D.he;
 
-  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, padding: isMobile ? `0 18px` : `0 32px` };
+  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, paddingLeft: isMobile ? 18 : 32, paddingRight: isMobile ? 18 : 32 };
   const ctaBtnStyle = { display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` };
 
   return (
@@ -9692,6 +9996,138 @@ function MugsPage({ lang, setPage }) {
   );
 }
 
+// ── CollagePage — /collage — MY CREW landing page ────────────────────────────
+// Promotes the MY CREW collage-tee commission service (up to 12 real pet
+// photos assembled into a streetwear oversize-tee print). Pay-first, WhatsApp
+// photo handoff after checkout. No DB, no extra props needed.
+function CollagePage({ lang, setPage, goToCollage }) {
+  const isRTL = lang === `he`;
+  const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener(`resize`, h);
+    return () => window.removeEventListener(`resize`, h);
+  }, []);
+
+  const t = (LANGS[lang] || LANGS.he).myCrew;
+
+  const sectionStyle = { maxWidth: 1080, margin: `0 auto`, paddingLeft: isMobile ? 18 : 32, paddingRight: isMobile ? 18 : 32 };
+  const ctaBtnStyle = { display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` };
+
+  const steps = [
+    { icon: `pawprint`, text: t.step1 },
+    { icon: `palette`,  text: t.step2 },
+    { icon: `printer`,  text: t.step3 },
+  ];
+
+  return (
+    <div dir={isRTL ? `rtl` : `ltr`} style={{ minHeight: `100vh`, paddingTop: 72, paddingBottom: 80, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.10) 0%, transparent 55%), ${COLORS.bg}`, color: COLORS.white }}>
+
+      {/* HERO */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 36 : 64, paddingBottom: isMobile ? 28 : 40, textAlign: `center` }}>
+        {/* Eyebrow badge */}
+        <span className="reveal" style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 18px`, marginBottom: 18, color: COLORS.accent, fontSize: 12, fontWeight: 600, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>
+          <AboutIcon name="pawprint" size={13} color={COLORS.accent} />
+          <span>{t.name}</span>
+        </span>
+
+        {/* Wordmark + subtitle — always paired, never name alone */}
+        <h1 className="reveal" data-delay="1" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(38px,8vw,76px)`, lineHeight: 1.0, margin: `0 0 8px`, letterSpacing: `-1px` }}>
+          {t.name}
+        </h1>
+        <p className="reveal" data-delay="1" style={{ fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 16 : 20, fontWeight: 600, color: COLORS.accent, margin: `0 0 20px`, letterSpacing: `0.04em` }}>
+          {t.subtitle}
+        </p>
+        <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.7, maxWidth: 560, margin: `0 auto 28px` }}>
+          {t.heroPitch}
+        </p>
+
+        {/* 1 OF 1 seal */}
+        <div className="reveal" data-delay="3" style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: `linear-gradient(135deg, rgba(255,107,53,0.18), rgba(255,107,53,0.06))`, border: `1.5px solid rgba(255,107,53,0.45)`, borderRadius: 10, padding: `10px 20px`, marginBottom: 28 }}>
+          <AboutIcon name="sparkles" size={18} color={COLORS.accent} />
+          <span style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 14.5, color: COLORS.white, letterSpacing: `0.08em`, textTransform: `uppercase` }}>{t.oneOfOne}</span>
+        </div>
+      </section>
+
+      {/* SHOWCASE — real MY CREW examples: cats + dogs, worn (2 looks each) */}
+      <section style={{ ...sectionStyle, paddingTop: 0, paddingBottom: isMobile ? 24 : 36 }}>
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(2, 1fr)`, gap: 12, maxWidth: 680, margin: `0 auto` }}>
+          {[
+            `/my-crew/mycrew-worn-1.webp`,
+            `/my-crew/mycrew-dog-1.webp`,
+            `/my-crew/mycrew-worn-3.webp`,
+            `/my-crew/mycrew-dog-2.webp`,
+          ].map((src, i) => (
+            <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+              <SmartImage src={src} alt={t.name} loading={i === 0 ? `eager` : `lazy`} style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS — 3 steps */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 28 : 44, paddingBottom: isMobile ? 20 : 36 }}>
+        <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(22px,4vw,32px)`, textAlign: `center`, margin: `0 0 24px` }}>
+          {t.howTitle}
+        </h2>
+        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(3, 1fr)`, gap: 14 }}>
+          {steps.map((s, i) => (
+            <div key={i} style={{ background: `linear-gradient(160deg, rgba(255,107,53,0.09), rgba(255,107,53,0.02))`, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `18px 16px` : `22px 20px`, display: `flex`, flexDirection: `column`, alignItems: `flex-start`, gap: 10 }}>
+              <div style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 46, height: 46, borderRadius: 12, background: COLORS.accentDim }}>
+                <AboutIcon name={s.icon} size={24} color={COLORS.accent} />
+              </div>
+              <div style={{ display: `flex`, alignItems: `center`, gap: 8 }}>
+                <span style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 12, color: COLORS.accent, letterSpacing: `0.1em` }}>{`0${i + 1}`}</span>
+                <span style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 15, fontWeight: 600, lineHeight: 1.45 }}>{s.text}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PHOTO GUIDE */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 20 : 32, paddingBottom: isMobile ? 20 : 36 }}>
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 18, padding: isMobile ? `22px 18px` : `28px 28px`, maxWidth: 680, margin: `0 auto` }}>
+          <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: 20, margin: `0 0 14px`, display: `flex`, alignItems: `center`, gap: 10 }}>
+            <AboutIcon name="sparkles" size={20} color={COLORS.accent} />
+            {t.photoGuideTitle}
+          </h3>
+          <ul role="list" style={{ listStyle: `none`, margin: 0, padding: 0, display: `flex`, flexDirection: `column`, gap: 10 }}>
+            {(t.photoGuide || []).map((tip, i) => (
+              <li key={i} style={{ display: `flex`, alignItems: `flex-start`, gap: 10, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 14.5, lineHeight: 1.55 }}>
+                <span aria-hidden="true" style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>✓</span>
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* PRICE + CTA */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 40, textAlign: `center` }}>
+        <p style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: `clamp(20px,4.5vw,28px)`, color: COLORS.accent, margin: `0 0 20px` }}>
+          {t.priceLine}
+        </p>
+        <div style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, color: COLORS.gray, fontSize: 13.5, margin: `0 0 18px`, lineHeight: 1.5, flexWrap: `wrap` }}>
+          <AboutIcon name="heart" size={16} color={COLORS.accent} />
+          <span>{t.giftLine}</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => (goToCollage ? goToCollage() : setPage(`order`))}
+          style={ctaBtnStyle}
+          onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+          onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+        >
+          <AboutIcon name="pawprint" size={18} color="#fff" />
+          {t.cta}
+          {isRTL ? ` ←` : ` →`}
+        </button>
+      </section>
+    </div>
+  );
+}
+
 // Nav
 function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, cartCount, onCartClick, preview = false }) {
   const t = LANGS[lang];
@@ -9802,7 +10238,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-        {["home", "mugs", "pets", "order", "about"].map(p => (
+        {["home", "mugs", "pets", "collage", "order", "about"].map(p => (
           <button key={p} onClick={() => setPage(p)} aria-current={page === p ? "page" : undefined} style={{
             background: page === p ? COLORS.accentDim : "transparent",
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
@@ -9873,7 +10309,7 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     {/* Mobile dropdown */}
     {mobileMenu && (
       <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, maxHeight: "calc(100vh - 72px)", overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
-        {["home", "mugs", "pets", "order", "about"].map(p => (
+        {["home", "mugs", "pets", "collage", "order", "about"].map(p => (
           <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
         <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
@@ -10615,7 +11051,7 @@ function CartDrawer({ lang, open, cart, setCart, updateCartQty, onClose, onCheck
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: COLORS.white, fontWeight: 600, fontSize: 14 }}>{it.productName}</div>
-                    {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11.5, lineHeight: 1.45, marginTop: 4 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`]}</div>}
+                    {it.isCommission && <div style={{ color: COLORS.accent, fontSize: 11.5, lineHeight: 1.45, marginTop: 4 }}>{(LANGS[lang] || LANGS.he).commission[it.commissionType === `collage` ? `cartNoteCollage` : (it.commissionType === `custom` ? `cartNoteCustom` : `cartNotePet`)]}</div>}
                     {it.petName && <div style={{ color: it.petNameColor || COLORS.accent, fontFamily: `'${it.petNameFont || PET_NAME_FONT_DEFAULT}', sans-serif`, fontSize: 14, fontWeight: 700, marginTop: 4, display: `inline-flex`, alignItems: `center`, gap: 5 }} dir={hasHebrew(it.petName) ? `rtl` : `ltr`}><AboutIcon name="pawprint" size={14} color={it.petNameColor || COLORS.accent} /><span>{it.petName}{it.productId !== `mug` ? ` (+₪${PET_NAME_SURCHARGE})` : ``}</span></div>}
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, color: COLORS.gray, fontSize: 12.5, flexWrap: "wrap" }}>
                       {it.variantLabel && <span>{it.variantLabel}</span>}
@@ -10766,7 +11202,7 @@ function NotFoundPage({ lang, setPage }) {
 }
 
 export default function App() {
- const VALID_PAGES = ['home', 'mugs', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
+ const VALID_PAGES = ['home', 'mugs', 'collage', 'order', 'track', 'auth', 'admin', 'about', 'pets', 'breed', 'blog', 'faq', 'policies', 'reset-password', ...(MUG_STUDIO_ENABLED ? ['mug-studio'] : [])];
 
   // Clean URL paths → policy section IDs (for Google verification + SEO)
   const PATH_TO_POLICY_SECTION = {
@@ -10993,6 +11429,13 @@ export default function App() {
   // navigates — the user lands on the order page with the commission preselected.
   const onCommissionPet = () => {
     setPendingCommission({ product: "mug", ctype: "pet" });
+    setPage("order");
+  };
+
+  // MY CREW /collage CTA — preselect the oversize tee + collage commission, then
+  // navigate so the user lands directly in the photo-collage flow (not a blank picker).
+  const goToCollage = () => {
+    setPendingCommission({ product: "oversized", ctype: "collage" });
     setPage("order");
   };
 
@@ -11744,9 +12187,10 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
+            {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><ScrollReveal><HomeMyCrewBand lang={lang} setPage={setPage} /></ScrollReveal><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
+            {page === `collage` && <CollagePage lang={lang} setPage={setPage} goToCollage={goToCollage} />}
             {page === "pets" && <PetsPage lang={lang} setPage={setPage} goToBlog={goToBlog} goToBreed={goToBreed} preview={publicPreview} onOrderBloom={addBloomToCart} onCommissionPet={onCommissionPet} onAddStickerPack={addStickerPackToCart} onShareToast={showToast} />}
             {page === "breed" && <BreedPage slug={breedSlug} lang={lang} setPage={setPage} goToBreed={goToBreed} goToBlog={goToBlog} preview={publicPreview} onOrderBloom={addBloomToCart} onShareToast={showToast} />}
             {page === "blog" && (blogSlug
@@ -12340,6 +12784,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       priceFrom: "החל מ-₪",
       shirtLabel: "חולצה",
       mugLabel: "ספל",
+      magicMugLabel: "ספל קסם",
+      socksLabel: "גרביים",
       stickerLabel: "מדבקה",
       availableOn: "זמין עבור",
       detailMore: "פרטים",
@@ -12388,6 +12834,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       priceFrom: "From ₪",
       shirtLabel: "T-shirt",
       mugLabel: "Mug",
+      magicMugLabel: "Magic Mug",
+      socksLabel: "Socks",
       stickerLabel: "Sticker",
       availableOn: "Available on",
       detailMore: "View details",
@@ -12436,6 +12884,8 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       priceFrom: "От ₪",
       shirtLabel: "Футболка",
       mugLabel: "Кружка",
+      magicMugLabel: "Волшебная кружка",
+      socksLabel: "Носки",
       stickerLabel: "Стикер",
       availableOn: "Доступно на",
       detailMore: "Подробнее",
@@ -12518,9 +12968,16 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         <p className="reveal" data-delay="3" style={{ color: COLORS.gray, fontSize: isMobile ? 15 : 18, fontFamily: "'Heebo',sans-serif", maxWidth: 540, margin: "0 auto 8px", lineHeight: 1.5 }}>
           {t.subheading}
         </p>
-        <p className="reveal" data-delay="4" style={{ color: "#8a8a8a", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 40px", lineHeight: 1.5 }}>
+        <p className="reveal" data-delay="4" style={{ color: "#8a8a8a", fontSize: isMobile ? 13 : 15, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", maxWidth: 540, margin: "0 auto 28px", lineHeight: 1.5 }}>
           {t.subheading2 ? t.subheading2(designs.length) : ``}
         </p>
+        {/* MY CREW cross-link — subtle text pill pointing to /collage */}
+        <div className="reveal" data-delay="5" style={{ display: `inline-flex`, alignItems: `center`, gap: 7, background: `rgba(255,107,53,0.07)`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 999, padding: `8px 18px`, marginBottom: 32 }}>
+          <AboutIcon name="palette" size={13} color={COLORS.accent} />
+          <button type="button" onClick={() => setPage(`collage`)} style={{ background: `none`, border: `none`, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 13, fontWeight: 600, cursor: `pointer`, padding: 0, textDecoration: `underline`, textUnderlineOffset: `3px` }}>
+            {(LANGS[lang] || LANGS.he).myCrew.bloomCrosslink}
+          </button>
+        </div>
       </section>
 
       {/* ===== JOIN THE BLOOM FAMILY (pre-launch public preview only) ===== */}
@@ -13220,6 +13677,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     // saved on the order so the order preview matches what they saw.
     const mockupUrl =
       kind === `mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `magic_mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `socks` ? (design.mockup_url || design.design_url) :
       kind === `shirt` ? (
         (selectedColor?.id === `black` ? design.mockup_shirt_black_url : design.mockup_shirt_white_url) ||
         design.mockup_shirt_url || design.mockup_url || design.design_url
@@ -13244,21 +13703,25 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
       return;
     }
     // Single-sticker purchase was retired (stickers are pack-only / free
-    // gift now), so the only remaining non-shirt kind is `mug`.
+    // gift now). Remaining non-shirt kinds: mug, magic_mug (₪75) and socks (₪59).
     const map = {
       mug: { productId: "mug", price: design.price_mug },
+      magic_mug: { productId: "magic_mug", price: 75 },
+      socks: { productId: "socks", price: 59 },
     };
     const choice = map[kind];
     if (!choice) return;
+    // mug-shape rides only the two mug kinds; socks have no shape.
+    const carriesMugShape = kind === `mug` || kind === `magic_mug`;
     onOrderBloom({
       productId: choice.productId,
-      price: (Number(choice.price) || 0), // pet-name personalization is FREE on mugs (no +₪20)
+      price: (Number(choice.price) || 0), // pet-name personalization is FREE on mugs/socks (no +₪20)
       designUrl: design.design_url,
       mockupUrl,
       characterName: name,
       slug: design.slug,
       shirtColor: null,
-      mugShape: mugShape || `classic`,
+      mugShape: carriesMugShape ? (mugShape || `classic`) : undefined,
       ...personalization,
     });
     if (onClose) onClose();
@@ -13471,7 +13934,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 on the product; it rides the cart line into the order and shows
                 in the admin order view. Empty → omitted. Shared shape with
                 BreedPage. */}
-            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug`} />
+            <PetNameInput lang={lang} t={t} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`} />
 
             {/* Shirt color/type/size — shown only when the shirt product is
                 selected. Shared with BreedPage via <BloomShirtOptions>. */}
@@ -13490,6 +13953,10 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 buy a bundled pack from the PetsPage packs section instead. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
               <ProductOption label={t.mugLabel} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
+              {MAGIC_MUG_SOCKS_ENABLED && (<>
+              <ProductOption label={t.magicMugLabel} price={75} onClick={() => setPreviewProduct(`magic_mug`)} disabled={!design.design_url} selected={previewProduct === `magic_mug`} />
+              <ProductOption label={t.socksLabel} price={59} onClick={() => setPreviewProduct(`socks`)} disabled={!design.design_url} selected={previewProduct === `socks`} />
+              </>)}
               <ProductOption label={t.shirtLabel} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
             </div>
             {/* Gift framing — mugs are the #1 gift item; reinforce it right where the mug is chosen. */}
@@ -13500,7 +13967,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               </div>
             )}
             {/* Mug shape — Classic / Rounded (text-only, same price). */}
-            {previewProduct === `mug` && (
+            {(previewProduct === `mug` || previewProduct === `magic_mug`) && (
               <MugShapeSelector lang={lang} value={mugShape} onChange={setMugShape} />
             )}
             {/* Shirt framing — reframes the mug→shirt price step (₪59→₪119) as quality, not a jump. */}
@@ -13521,7 +13988,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                 onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
                 style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}
               >
-                <AboutIcon name="cart" size={18} color="#fff" />{lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + (previewProduct === `mug` ? 0 : petSurcharge)}
+                <AboutIcon name="cart" size={18} color="#fff" />{lang === "he" ? "הוסף לעגלה" : lang === "ru" ? "В корзину" : "Add to cart"} · ₪{(previewProduct === `magic_mug` ? 75 : previewProduct === `socks` ? 59 : previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + ((previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`) ? 0 : petSurcharge)}
               </button>
               </div>
             )}
@@ -13979,6 +14446,220 @@ function BreedStoryCard({ design, lang }) {
   );
 }
 
+// ============ COLLAGE OPTIONS — MY CREW commission selectors ============
+// Rendered inside the OrderPage commission panel when commissionType === 'collage'.
+// Oversize-tee only. All state lives in OrderPage; this component is pure UI.
+function CollageOptions({
+  lang, t, product,
+  selectedColor, setSelectedColor,
+  collageStyle, setCollageStyle,
+  collageMode, setCollageMode,
+  collagePhrase, setCollagePhrase,
+  collageSleeve, setCollageSleeve,
+  collageYears, setCollageYears,
+  petNames, setPetNames,
+  petCount, setPetCount,
+  setMug, setSetMug,
+}) {
+  const mc = t.myCrew;
+  const isMemory = collageMode === `memory`;
+  const phraseList = isMemory ? mc.memoryPhrases : mc.phraseOptions;
+  // Helper: toggle style chips (bw / color)
+  const chipBtn = (active, onClick, label) => (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      style={{
+        background: active ? COLORS.accentBtn : `transparent`,
+        color: active ? `#fff` : COLORS.gray,
+        border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+        borderRadius: 8, padding: `8px 16px`, cursor: `pointer`,
+        fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13,
+        transition: `background 0.2s, border-color 0.2s`,
+      }}
+    >{label}</button>
+  );
+
+  return (
+    <div>
+      {/* Shirt colour */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.colorLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
+          {(product?.colors || []).map((hex, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`${mc.colorLabel} ${i + 1}`}
+              aria-pressed={selectedColor === i}
+              onClick={() => setSelectedColor(i)}
+              style={{
+                width: 30, height: 30, borderRadius: `50%`, background: hex, padding: 0, cursor: `pointer`,
+                border: selectedColor === i ? `3px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`,
+                transition: `transform 0.15s, border-color 0.15s`,
+                transform: selectedColor === i ? `scale(1.18)` : `scale(1)`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Collage style — bw / color */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.styleLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
+          {chipBtn(collageStyle === `bw`,    () => setCollageStyle(`bw`),    mc.styleBW)}
+          {chipBtn(collageStyle === `color`, () => setCollageStyle(`color`), mc.styleColor)}
+        </div>
+      </div>
+
+      {/* Mode — celebrate / memory */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.modeLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap` }}>
+          {chipBtn(collageMode === `celebrate`, () => { setCollageMode(`celebrate`); setCollagePhrase(``); setCollageYears(``); }, mc.modeCelebrate)}
+          {chipBtn(collageMode === `memory`,    () => { setCollageMode(`memory`);    setCollagePhrase(``); }, mc.modeMemory)}
+        </div>
+      </div>
+
+      {/* Years input — memory mode only */}
+      {isMemory && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: `block`, color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{mc.yearsLabel}</label>
+          <input
+            type="text"
+            value={collageYears}
+            onChange={(e) => setCollageYears(e.target.value)}
+            placeholder={mc.yearsPlaceholder}
+            style={{
+              width: `100%`, boxSizing: `border-box`,
+              background: COLORS.bgCard, border: `1px solid ${COLORS.border}`,
+              borderRadius: 8, padding: `9px 12px`, color: COLORS.white,
+              fontFamily: `'Heebo',sans-serif`, fontSize: 14, outline: `none`,
+              textAlign: `start`,
+            }}
+          />
+        </div>
+      )}
+
+      {/* Front phrase chips */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.phraseLabel}</div>
+        <div style={{ display: `flex`, gap: 6, flexWrap: `wrap` }}>
+          {phraseList.map((phrase) => (
+            <button
+              key={phrase}
+              type="button"
+              aria-pressed={collagePhrase === phrase}
+              onClick={() => setCollagePhrase(collagePhrase === phrase ? `` : phrase)}
+              style={{
+                background: collagePhrase === phrase ? `rgba(255,107,53,0.18)` : `transparent`,
+                color: collagePhrase === phrase ? COLORS.accent : COLORS.gray,
+                border: `1px solid ${collagePhrase === phrase ? COLORS.accent : COLORS.border}`,
+                borderRadius: 20, padding: `6px 13px`, cursor: `pointer`,
+                fontFamily: `'Heebo',sans-serif`, fontSize: 12, fontWeight: collagePhrase === phrase ? 700 : 400,
+                transition: `background 0.15s, border-color 0.15s`,
+              }}
+            >{phrase}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Pet count + names */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{mc.petCountLabel}</div>
+        <div style={{ display: `flex`, gap: 8, flexWrap: `wrap`, marginBottom: 10 }}>
+          {[1, 2, 3, 4].map((n) => (
+            <button
+              key={n}
+              type="button"
+              aria-pressed={petCount === n}
+              onClick={() => setPetCount(n)}
+              style={{
+                background: petCount === n ? COLORS.accentBtn : `transparent`,
+                color: petCount === n ? `#fff` : COLORS.gray,
+                border: `1px solid ${petCount === n ? COLORS.accent : COLORS.border}`,
+                borderRadius: 8, padding: `8px 16px`, cursor: `pointer`,
+                fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13,
+                minWidth: 44,
+              }}
+            >{n}{n === 4 ? `+` : ``}</button>
+          ))}
+        </div>
+        <div style={{ color: COLORS.gray, fontSize: 11.5, marginBottom: 8, lineHeight: 1.5 }}>
+          {petCount === 1 ? mc.countHintOne : petCount === 2 ? mc.countHintTwo : mc.countHintThree}
+        </div>
+        <label style={{ display: `block`, color: COLORS.gray, fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{mc.petNamesLabel}</label>
+        <input
+          type="text"
+          value={petNames}
+          onChange={(e) => setPetNames(e.target.value)}
+          placeholder={petCount === 1 ? mc.placeholderSingle : mc.placeholderMulti}
+          style={{
+            width: `100%`, boxSizing: `border-box`,
+            background: COLORS.bgCard, border: `1px solid ${COLORS.border}`,
+            borderRadius: 8, padding: `9px 12px`, color: COLORS.white,
+            fontFamily: `'Heebo',sans-serif`, fontSize: 14, outline: `none`,
+            textAlign: `start`,
+          }}
+        />
+      </div>
+
+      {/* Sleeve checkbox */}
+      <label style={{ display: `flex`, alignItems: `center`, gap: 8, marginBottom: 16, cursor: `pointer`, color: COLORS.gray, fontSize: 13 }}>
+        <input
+          type="checkbox"
+          checked={collageSleeve}
+          onChange={(e) => setCollageSleeve(e.target.checked)}
+          style={{ accentColor: COLORS.accent, width: 16, height: 16, flexShrink: 0, cursor: `pointer` }}
+        />
+        <span>{mc.sleeveLabel}</span>
+      </label>
+
+      {/* Photo guide — collapsible */}
+      <details style={{ marginBottom: 16 }}>
+        <summary style={{ color: COLORS.accent, fontWeight: 700, fontSize: 12.5, cursor: `pointer`, userSelect: `none`, listStyle: `none`, display: `flex`, alignItems: `center`, gap: 6 }}>
+          <span>📸</span>
+          <span>{mc.photoGuideTitle}</span>
+        </summary>
+        <ul style={{ margin: `10px 0 0`, padding: `0 0 0 18px`, color: COLORS.gray, fontSize: 12, lineHeight: 1.8 }}>
+          {mc.photoGuide.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      </details>
+
+      {/* 1 OF 1 seal */}
+      <div style={{
+        display: `inline-flex`, alignItems: `center`, gap: 6,
+        background: `rgba(255,107,53,0.08)`, border: `1px solid rgba(255,107,53,0.3)`,
+        borderRadius: 20, padding: `5px 14px`, marginBottom: 16,
+        color: COLORS.accent, fontSize: 12, fontWeight: 700, letterSpacing: `0.06em`,
+      }}>
+        ✦ {mc.oneOfOne}
+      </div>
+
+      {/* Mug set-upsell */}
+      <label style={{ display: `flex`, alignItems: `flex-start`, gap: 8, cursor: `pointer`, color: COLORS.gray, fontSize: 13, lineHeight: 1.5 }}>
+        <input
+          type="checkbox"
+          checked={setMug}
+          onChange={(e) => setSetMug(e.target.checked)}
+          style={{ accentColor: COLORS.accent, width: 16, height: 16, flexShrink: 0, cursor: `pointer`, marginTop: 2 }}
+        />
+        <span style={{ color: setMug ? COLORS.white : COLORS.gray, fontWeight: setMug ? 600 : 400 }}>{mc.setUpsellLabel}</span>
+      </label>
+
+      {/* What's included — value reassurance at the ₪169 decision point */}
+      <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${COLORS.border}`, display: `flex`, alignItems: `flex-start`, gap: 8, color: COLORS.gray, fontSize: 12, lineHeight: 1.6 }}>
+        <span aria-hidden="true" style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>✓</span>
+        <span>{mc.includedLine}</span>
+      </div>
+    </div>
+  );
+}
+
 // ============ BLOOM SHIRT OPTIONS — color / type / size (shared) ============
 // Pure presentational picker. Holds no state of its own — the parent (PetModal
 // or BreedPage) owns the selection so its preview image can react. onColorPreview
@@ -14276,9 +14957,9 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
   const [mugShape, setMugShape] = useState(`classic`); // mug shape (classic|rounded) — text-only; rides extra_prints.mug_shape
 
   const tt = {
-    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, shipFlat: `משלוח מ-₪27 · או מסירה אישית בבאר שבע · הכנה ומשלוח 3–7 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
-    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, shipFlat: `Shipping from ₪27 · or personal handoff in Be'er Sheva · Made & shipped in 3–7 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `Print size is matched to the product — for special requests, add a note at checkout.`, petNameFontLabel: `Font`, petNameColorLabel: `Color`, railTitle: `The whole BLOOM family` },
-    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, shipFlat: `Доставка от ₪27 · или личная передача в Беэр-Шеве · Изготовление и доставка 3–7 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.`, petNameFontLabel: `Шрифт`, petNameColorLabel: `Цвет`, railTitle: `Вся коллекция BLOOM` },
+    he: { home: `בית`, collection: `אוסף BLOOM`, available: `זמין עבור`, shirt: `חולצה`, mug: `ספל`, magicMug: `ספל קסם`, socks: `גרביים`, addToCart: `הוסף לעגלה`, made: `נוצר בהזמנה`, dispatch: `זמן ייצור 3-5 ימי עסקים`, shipFlat: `משלוח מ-₪27 · או מסירה אישית בבאר שבע · הכנה ומשלוח 3–7 ימי עסקים`, relatedDogs: `עוד כלבים`, relatedCats: `עוד חתולים`, related: `גזעים נוספים`, back: `חזרה לאוסף`, notFound: `הגזע לא נמצא`, share: `שתפו`, copied: `הקישור הועתק!`, whatsapp: `שתפו בוואטסאפ`, zoom: `הגדל`, petNameTitle: `התאמה אישית`, petNameLabel: `שם חיית המחמד (אופציונלי)`, petNamePlaceholder: `למשל: רקסי`, petNameHelper: `גודל ההדפסה מותאם למוצר — לבקשות מיוחדות כתבו בהערות.`, petNameFontLabel: `גופן`, petNameColorLabel: `צבע`, railTitle: `כל אוסף BLOOM` },
+    en: { home: `Home`, collection: `BLOOM Collection`, available: `Available on`, shirt: `T-shirt`, mug: `Mug`, magicMug: `Magic Mug`, socks: `Socks`, addToCart: `Add to cart`, made: `Made to order`, dispatch: `Production 3-5 business days`, shipFlat: `Shipping from ₪27 · or personal handoff in Be'er Sheva · Made & shipped in 3–7 business days`, relatedDogs: `More dogs`, relatedCats: `More cats`, related: `More breeds`, back: `Back to collection`, notFound: `Breed not found`, share: `Share`, copied: `Link copied!`, whatsapp: `Share on WhatsApp`, zoom: `Zoom`, petNameTitle: `Personalization`, petNameLabel: `Pet name (optional)`, petNamePlaceholder: `e.g. Rex`, petNameHelper: `Print size is matched to the product — for special requests, add a note at checkout.`, petNameFontLabel: `Font`, petNameColorLabel: `Color`, railTitle: `The whole BLOOM family` },
+    ru: { home: `Главная`, collection: `Коллекция BLOOM`, available: `Доступно на`, shirt: `Футболка`, mug: `Кружка`, magicMug: `Волшебная кружка`, socks: `Носки`, addToCart: `В корзину`, made: `Сделано на заказ`, dispatch: `Производство 3-5 рабочих дней`, shipFlat: `Доставка от ₪27 · или личная передача в Беэр-Шеве · Изготовление и доставка 3–7 рабочих дней`, relatedDogs: `Ещё собаки`, relatedCats: `Ещё кошки`, related: `Другие породы`, back: `Назад к коллекции`, notFound: `Порода не найдена`, share: `Поделиться`, copied: `Ссылка скопирована!`, whatsapp: `Поделиться в WhatsApp`, zoom: `Увеличить`, petNameTitle: `Персонализация`, petNameLabel: `Имя питомца (необязательно)`, petNamePlaceholder: `напр. Рекс`, petNameHelper: `Размер печати подбирается под товар — для особых пожеланий оставьте примечание при оформлении.`, petNameFontLabel: `Шрифт`, petNameColorLabel: `Цвет`, railTitle: `Вся коллекция BLOOM` },
   }[lang] || {};
 
   useEffect(() => {
@@ -14468,6 +15149,8 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
     if (!design.design_url) return;
     const mockupUrl =
       kind === `mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `magic_mug` ? (design.mockup_mug_url || design.mockup_url || design.design_url) :
+      kind === `socks` ? (design.mockup_url || design.design_url) :
       kind === `shirt` ? (
         (selectedColor?.id === `black` ? design.mockup_shirt_black_url : design.mockup_shirt_white_url) ||
         design.mockup_shirt_url || design.mockup_url || design.design_url
@@ -14477,7 +15160,17 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
       onOrderBloom({ productId: shirtProductId, variantId: shirtSize, price: (Number(shirtPrice) || 0) + petSurcharge, designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: selectedColor, ...personalization });
       return;
     }
-    onOrderBloom({ productId: `mug`, price: (Number(design.price_mug) || 0), designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, mugShape: mugShape || `classic`, ...personalization }); // pet-name FREE on mugs
+    // Non-shirt kinds: mug, magic_mug (₪75) and socks (₪59). Mug-shape rides
+    // only the two mug kinds; socks have no shape. Pet-name is FREE on all three.
+    const map = {
+      mug: { productId: `mug`, price: design.price_mug },
+      magic_mug: { productId: `magic_mug`, price: 75 },
+      socks: { productId: `socks`, price: 59 },
+    };
+    const choice = map[kind];
+    if (!choice) return;
+    const carriesMugShape = kind === `mug` || kind === `magic_mug`;
+    onOrderBloom({ productId: choice.productId, price: (Number(choice.price) || 0), designUrl: design.design_url, mockupUrl, characterName: name, shirtColor: null, mugShape: carriesMugShape ? (mugShape || `classic`) : undefined, ...personalization }); // pet-name FREE on mugs/socks
   };
 
   const shareUrl = `https://www.sfalimshop.com/p/${design.slug}`;
@@ -14562,7 +15255,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 <div style={{ color: COLORS.gray, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: 14 }}>{tt.available}</div>
                 {/* Optional pet-name personalization (Task 8) — same component
                     and cart path as the modal. */}
-                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug`} />
+                <PetNameInput lang={lang} t={tt} value={petName} onChange={setPetName} font={petNameFont} onFont={setPetNameFont} color={petNameColor} onColor={setPetNameColor} freeForMug={previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`} />
                 {previewProduct === `shirt` && (
                   <BloomShirtOptions
                     lang={lang}
@@ -14574,9 +15267,13 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                 )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
                   <ProductOption label={tt.mug} price={design.price_mug} onClick={() => setPreviewProduct(`mug`)} disabled={!design.design_url} selected={previewProduct === `mug`} badge={lang === `he` ? `מומלץ` : lang === `ru` ? `Рекомендуем` : `Recommended`} />
+                  {MAGIC_MUG_SOCKS_ENABLED && (<>
+                  <ProductOption label={tt.magicMug} price={75} onClick={() => setPreviewProduct(`magic_mug`)} disabled={!design.design_url} selected={previewProduct === `magic_mug`} />
+                  <ProductOption label={tt.socks} price={59} onClick={() => setPreviewProduct(`socks`)} disabled={!design.design_url} selected={previewProduct === `socks`} />
+                  </>)}
                   <ProductOption label={tt.shirt} price={shirtPrice} onClick={() => setPreviewProduct(`shirt`)} disabled={!design.design_url} selected={previewProduct === `shirt`} />
                 </div>
-                {previewProduct === `mug` && (
+                {(previewProduct === `mug` || previewProduct === `magic_mug`) && (
                   <MugShapeSelector lang={lang} value={mugShape} onChange={setMugShape} />
                 )}
                 {previewProduct && (
@@ -14587,7 +15284,7 @@ function BreedPage({ slug, lang, setPage, goToBreed, goToBlog, preview = false, 
                     onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
                     onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
                     style={{ width: "100%", background: COLORS.accentBtn, color: "#fff", border: "none", borderRadius: 10, padding: "16px 20px", minHeight: 52, cursor: design.design_url ? "pointer" : "not-allowed", opacity: design.design_url ? 1 : 0.5, fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s", boxShadow: isMobile ? "0 8px 24px rgba(0,0,0,0.45), 0 4px 14px rgba(255,107,53,0.35)" : "none" }}>
-                    <AboutIcon name="cart" size={18} color="#fff" />{tt.addToCart} · ₪{(previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + (previewProduct === `mug` ? 0 : petSurcharge)}
+                    <AboutIcon name="cart" size={18} color="#fff" />{tt.addToCart} · ₪{(previewProduct === `magic_mug` ? 75 : previewProduct === `socks` ? 59 : previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + ((previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`) ? 0 : petSurcharge)}
                   </button>
                   </div>
                 )}

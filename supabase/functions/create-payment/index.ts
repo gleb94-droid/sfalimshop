@@ -208,6 +208,8 @@ serve(async (req) => {
   // ============================================================
   const CATALOG: Record<string, number | Record<string, number>> = {
     mug: { standard: 69 },
+    magic_mug: { standard: 75 }, // black heat-reveal mug (custom-upload path)
+    socks: { standard: 59 },     // one-size socks (custom-upload path)
     tshirt: 149, lycra: 149, oversized: 149, look: 149, stonewash: 149, dryfit: 149,
     sticker: { small: 15, medium: 25, largeS: 35, sheet: 45 },
     sticker_sq: { small: 15, medium: 25, largeS: 35, sheet: 45 },
@@ -223,10 +225,13 @@ serve(async (req) => {
     if (!data) return null;
     let base: number;
     if (pid === "mug") base = Number(data.price_mug);
+    else if (pid === "magic_mug") base = 75; // flat retail — heat-reveal mug (not per-design)
+    else if (pid === "socks") base = 59;     // flat retail — one-size BLOOM socks (not per-design)
     else if (pid === "oversized") base = Number(data.price_shirt_oversized) || Number(data.price_shirt);
     else base = Number(data.price_shirt_basic) || Number(data.price_shirt);
     if (!base || !isFinite(base) || base <= 0) return null;
-    return base + ((hasPet && pid !== "mug") ? PET_SURCHARGE : 0); // pet-name personalization is FREE on mugs
+    // pet-name personalization is FREE on the mug family (mug, magic_mug) + socks
+    return base + ((hasPet && pid !== "mug" && pid !== "magic_mug" && pid !== "socks") ? PET_SURCHARGE : 0);
   };
   const pricePack = async (slug: string): Promise<number | null> => {
     if (!slug) return null;
@@ -268,6 +273,7 @@ serve(async (req) => {
           const CPRICE: Record<string, { shirt: number; mug: number }> = {
             pet: { shirt: 189, mug: 119 },
             custom: { shirt: 149, mug: 89 },
+            collage: { shirt: 169, mug: 49 }, // MY CREW tee=169; mug=49 = "Full Crew Set" add-on (set-only, no standalone collage mug)
           };
           // ctype/pid come from client-set extra_prints. Unknown ctype coerces to
           // "pet" (the MORE expensive tier — safe direction), and non-"mug" → shirt.
@@ -276,7 +282,7 @@ serve(async (req) => {
           // the commission type (small schema follow-up) — there is no independent
           // server record of pet-vs-custom today. Low impact + requires crafting an
           // insert with the public anon key.
-          const ctype = meta.ctype === "custom" ? "custom" : "pet";
+          const ctype = meta.ctype === "custom" ? "custom" : (meta.ctype === "collage" ? "collage" : "pet");
           unit = pid === "mug" ? CPRICE[ctype].mug : CPRICE[ctype].shirt;
         }
         if (unit == null || !isFinite(unit) || unit <= 0) { allResolved = false; break; }

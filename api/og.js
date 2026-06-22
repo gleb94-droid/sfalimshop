@@ -406,6 +406,86 @@ ${ld}
 </html>`;
 }
 
+// ---- MY CREW collage tee crawler HTML (/collage) — static, no DB lookup. The
+// custom photo-collage tee; gets its own branded share preview (og-collage.jpg)
+// so ad/social shares look like a real product. Humans → SPA hash route /#collage.
+const COLLAGE_OG_IMAGE = `${SITE_ORIGIN}/og-collage.jpg`;
+const COLLAGE_COPY = {
+  he: {
+    title: `MY CREW · קולאז' מהתמונות שלכם · ספלים שופ`,
+    desc: `חולצת אוברסייז עם קולאז' סטריטוויר מהתמונות האמיתיות של החיה שלכם — עד 12 תמונות, 1 of 1. מודפס בעבודת יד בבאר שבע.`,
+    ldName: `MY CREW — חולצת קולאז' מהתמונות שלכם`,
+    ldDesc: `חולצת אוברסייז עם קולאז' מהתמונות האמיתיות של החיה שלכם — מודפס בעבודת יד בבאר שבע.`,
+  },
+  en: {
+    title: `MY CREW · your pet photo-collage tee · Sfalim Shop`,
+    desc: `An oversize tee with a streetwear collage of your pet's real photos — up to 12 photos, 1 of 1. Hand-printed in Be'er Sheva.`,
+    ldName: `MY CREW — your pet photo-collage tee`,
+    ldDesc: `An oversize tee with a collage of your pet's real photos — hand-printed in Be'er Sheva.`,
+  },
+  ru: {
+    title: `MY CREW · футболка-коллаж из фото питомца · Sfalim Shop`,
+    desc: `Оверсайз-футболка со стритвир-коллажем из реальных фото вашего питомца — до 12 фото, 1 of 1. Печать вручную в Беэр-Шеве.`,
+    ldName: `MY CREW — футболка-коллаж из фото питомца`,
+    ldDesc: `Оверсайз-футболка с коллажем из реальных фото вашего питомца — печать вручную в Беэр-Шеве.`,
+  },
+};
+function buildCollageHtml(lang) {
+  const c = COLLAGE_COPY[lang] || COLLAGE_COPY.he;
+  const title = escapeHtml(c.title);
+  const description = escapeHtml(c.desc);
+  const canonical = escapeHtml(`${SITE_ORIGIN}/collage`);
+  const image = escapeHtml(COLLAGE_OG_IMAGE);
+  const robots = escapeHtml(MAINTENANCE ? `noindex, nofollow` : `index, follow`);
+  const siteNameAttr = escapeHtml(siteName(lang));
+
+  const ld = jsonLdScript({
+    "@context": `https://schema.org`,
+    "@type": `Product`,
+    name: c.ldName,
+    image: [COLLAGE_OG_IMAGE],
+    description: c.ldDesc,
+    brand: { "@type": `Brand`, name: `MY CREW / Sfalim Shop` },
+    url: `${SITE_ORIGIN}/collage`,
+    offers: {
+      "@type": `Offer`,
+      priceCurrency: `ILS`,
+      price: 169,
+      availability: `https://schema.org/InStock`,
+    },
+  });
+
+  return `<!DOCTYPE html>
+<html lang="${lang}" dir="${langDir(lang)}">
+<head>
+<meta charset="UTF-8" />
+<title>${title}</title>
+<meta name="description" content="${description}" />
+<meta name="robots" content="${robots}" />
+<link rel="canonical" href="${canonical}" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="${siteNameAttr}" />
+<meta property="og:url" content="${canonical}" />
+<meta property="og:title" content="${title}" />
+<meta property="og:description" content="${description}" />
+<meta property="og:image" content="${image}" />
+<meta property="og:image:secure_url" content="${image}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="${title}" />
+<meta property="og:locale" content="${OG_LOCALE[lang]}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="${canonical}" />
+<meta name="twitter:title" content="${title}" />
+<meta name="twitter:description" content="${description}" />
+<meta name="twitter:image" content="${image}" />
+${ld}
+</head>
+<body></body>
+</html>`;
+}
+
 module.exports = async function handler(req, res) {
   // Resolve handle. vercel.json rewrite passes it as ?handle=<slug>; fall back
   // to scraping the path for local dev / direct calls.
@@ -448,7 +528,7 @@ module.exports = async function handler(req, res) {
   // Branch decision is appended below after the lookup so we log it once.
   console.log(`[og] method=${req.method} url=${req.url} handle=${handle} lang=${lang} ua=${String(ua).slice(0, 120)}`);
 
-  if (!handle && type !== `mugs`) {
+  if (!handle && type !== `mugs` && type !== `collage`) {
     console.log(`[og] branch=notfound reason=empty-handle`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/${langQS}`);
@@ -486,6 +566,12 @@ module.exports = async function handler(req, res) {
     if (!crawler) { console.log(`[og] branch=human type=mugs → /${langQS}#mugs`); return redirectHuman(`#mugs`); }
     console.log(`[og] branch=crawler type=mugs lang=${lang}`);
     return serveHtml(buildMugsHtml(lang));
+  }
+
+  if (type === `collage`) {
+    if (!crawler) { console.log(`[og] branch=human type=collage → /${langQS}#collage`); return redirectHuman(`#collage`); }
+    console.log(`[og] branch=crawler type=collage lang=${lang}`);
+    return serveHtml(buildCollageHtml(lang));
   }
 
   if (type === `blog`) {
