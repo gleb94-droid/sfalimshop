@@ -2296,6 +2296,8 @@ const LANGS = {
       photoGuideTitle: `אילו תמונות לשלוח`,
       photoGuide: [`תמונות חדות וברורות`, `פנים מקרוב + זוויות שונות`, `אור טוב, רקע פשוט`],
       oneOfOne: `1 OF 1 · עיצוב ייחודי רק לך`,
+      boxTitle: `MY CREW — החיה האמיתית שלכם, כקולאז'`,
+      includedLine: `כלול: הדפס קדמי + גב + שרוול · עד 12 תמונות · אישור עיצוב לפני הדפסה · מודפס בעבודת יד בבאר שבע`,
       setUpsellLabel: `+ אותו עיצוב על ספל · +₪49`,
       briefLabel: `הפרטים שבחרתי:`,
       heroPitch: `החיה האמיתית שלך, כקולאז' סטריטוויר על חולצת אוברסייז. 1 of 1.`,
@@ -2413,6 +2415,8 @@ const LANGS = {
       photoGuideTitle: `What photos to send`,
       photoGuide: [`Sharp, clear photos`, `Close-up face + different angles`, `Good lighting, simple background`],
       oneOfOne: `1 OF 1 · a unique design just for you`,
+      boxTitle: `MY CREW — your real pet, collaged`,
+      includedLine: `Included: front + back + sleeve print · up to 12 photos · you approve the design before we print · hand-printed in Be'er Sheva`,
       setUpsellLabel: `+ same design on a mug · +₪49`,
       briefLabel: `My order details:`,
       heroPitch: `Your real pet, as a streetwear collage on an oversize tee. 1 of 1.`,
@@ -2530,6 +2534,8 @@ const LANGS = {
       photoGuideTitle: `Какие фото прислать`,
       photoGuide: [`Чёткие и ясные фото`, `Крупный план морды + разные ракурсы`, `Хорошее освещение, простой фон`],
       oneOfOne: `1 OF 1 · уникальный дизайн только для вас`,
+      boxTitle: `MY CREW — твой питомец, коллажем`,
+      includedLine: `Включено: печать спереди + сзади + рукав · до 12 фото · утверждение дизайна перед печатью · печать вручную в Беэр-Шеве`,
       setUpsellLabel: `+ тот же дизайн на кружке · +₪49`,
       briefLabel: `Мой выбор:`,
       heroPitch: `Ваш настоящий питомец — как стритвир-коллаж на оверсайз-футболке. 1 of 1.`,
@@ -7528,8 +7534,8 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             {/* Custom BLOOM commission — shirt-only choice: upload your own design, or we draw one from photos */}
             {BLOOM_COMMISSION_ENABLED && selectedProduct && selectedProduct !== `sticker` && selectedProduct !== `sticker_sq` && (
               <div ref={commissionRef} style={{ marginTop: 20, background: `linear-gradient(135deg, rgba(255,107,53,0.14), rgba(255,107,53,0.04))`, border: `2px solid ${COLORS.accent}`, borderRadius: 14, padding: 18, boxShadow: `0 6px 24px rgba(255,107,53,0.18)` }}>
-                <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 4 }}>✨ {t.commission.badge}</div>
-                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>{t.commission.choiceTitle}</div>
+                <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 11, letterSpacing: `0.08em`, textTransform: `uppercase`, marginBottom: 4 }}>✨ {(commissionMode && commissionType === `collage`) ? t.myCrew.name : t.commission.badge}</div>
+                <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>{(commissionMode && commissionType === `collage`) ? t.myCrew.boxTitle : t.commission.choiceTitle}</div>
                 <div style={{ display: `flex`, gap: 10, flexWrap: `wrap` }}>
                   <button onClick={() => setCommissionMode(false)} style={{ flex: `1 1 150px`, textAlign: `start`, background: !commissionMode ? `rgba(255,107,53,0.12)` : `transparent`, border: `2px solid ${!commissionMode ? COLORS.accent : COLORS.border}`, borderRadius: 10, padding: `12px 14px`, cursor: `pointer`, fontFamily: `'Heebo',sans-serif` }}>
                     <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 13 }}>📁 {t.commission.choiceUpload}</div>
@@ -14630,6 +14636,12 @@ function CollageOptions({
         />
         <span style={{ color: setMug ? COLORS.white : COLORS.gray, fontWeight: setMug ? 600 : 400 }}>{mc.setUpsellLabel}</span>
       </label>
+
+      {/* What's included — value reassurance at the ₪169 decision point */}
+      <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${COLORS.border}`, display: `flex`, alignItems: `flex-start`, gap: 8, color: COLORS.gray, fontSize: 12, lineHeight: 1.6 }}>
+        <span aria-hidden="true" style={{ color: COLORS.accent, fontWeight: 700, flexShrink: 0 }}>✓</span>
+        <span>{mc.includedLine}</span>
+      </div>
     </div>
   );
 }
