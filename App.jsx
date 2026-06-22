@@ -2259,6 +2259,7 @@ const LANGS = {
       addBtn: `המשך לתשלום ←`,
       postHeading: `קיבלנו את ההזמנה! 🎨`,
       postSub: `עכשיו שלחו לנו בוואטסאפ 2–4 תמונות של החיה מזוויות שונות (פנים, פרופיל, גוף מלא), ונתחיל לעצב.`,
+      collagePostSub: `שלחו לנו עד 12 תמונות של החיה/ות שלכם בוואטסאפ, ונבנה את הקולאז' של MY CREW ונשלח לאישור לפני ההדפסה.`,
       postCta: `שליחת תמונות בוואטסאפ`,
       postPrefill: (id) => `היי! ביצעתי הזמנת BLOOM אישית מספר ${id} — הנה תמונות של החיה שלי:`,
       cartNotePet: `🎨 דיוקן אישי — נעצב מהתמונות שתשלחו בוואטסאפ אחרי התשלום`,
@@ -2372,6 +2373,7 @@ const LANGS = {
       addBtn: `Continue to payment →`,
       postHeading: `We've got your order! 🎨`,
       postSub: `Now send us 2–4 photos of your pet from different angles (face, profile, full body) on WhatsApp, and we'll start designing.`,
+      collagePostSub: `Send us up to 12 photos of your pet(s) on WhatsApp, and we'll build your MY CREW collage and send a preview for approval before printing.`,
       postCta: `Send photos on WhatsApp`,
       postPrefill: (id) => `Hi! I placed a custom BLOOM order #${id} — here are photos of my pet:`,
       cartNotePet: `🎨 Custom portrait — we'll design it from the photos you send on WhatsApp after payment`,
@@ -2485,6 +2487,7 @@ const LANGS = {
       addBtn: `Перейти к оплате →`,
       postHeading: `Заказ принят! 🎨`,
       postSub: `Теперь пришлите нам 2–4 фото питомца с разных ракурсов (анфас, профиль, в полный рост) в WhatsApp, и мы начнём создавать.`,
+      collagePostSub: `Пришлите до 12 фото вашего питомца(ев) в WhatsApp — мы соберём коллаж MY CREW и пришлём превью на утверждение перед печатью.`,
       postCta: `Отправить фото в WhatsApp`,
       postPrefill: (id) => `Здравствуйте! Я оформил персональный BLOOM-заказ №${id} — вот фото моего питомца:`,
       cartNotePet: `🎨 Индивидуальный портрет — создадим по фото, которые пришлёте в WhatsApp после оплаты`,
@@ -3985,7 +3988,7 @@ function TrackPage({ lang, user, clearCart }) {
           {ok && isCommissionPaid && (
             <div style={{ background: `rgba(37,211,102,0.08)`, border: `1px solid rgba(37,211,102,0.4)`, borderRadius: 12, padding: 16, marginBottom: 20, textAlign: `start` }}>
               <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t.commission.postHeading}</div>
-              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{commissionPaidType === `collage` ? t.commission.postSub : (commissionPaidType === `pet` ? t.commission.postSub : t.commission.customPostSub)}</div>
+              <div style={{ color: COLORS.gray, fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>{commissionPaidType === `collage` ? t.commission.collagePostSub : (commissionPaidType === `pet` ? t.commission.postSub : t.commission.customPostSub)}</div>
               <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(commissionPaidType === `collage` ? (t.commission.postPrefill(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`) + collageBrief(commissionPaidCollage, lang)) : ((commissionPaidType === `pet` ? t.commission.postPrefill : t.commission.customPostPrefill)(`SXP-${payReturn.orderGroup.slice(-8).toUpperCase()}`)))}`} target="_blank" rel="noopener noreferrer"
                 style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, width: `100%`, background: `#25D366`, color: `#fff`, textDecoration: `none`, borderRadius: 10, padding: 14, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, boxSizing: `border-box` }}>
                 <span style={{ fontSize: 18 }}>💬</span> {t.commission.postCta}
@@ -6428,7 +6431,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
       const next = [...c, { id: cartItemId, ...itemData }];
       if (commissionType === `collage` && setMug) {
         next.push({
-          id: cartItemId + 0.1,
+          id: Date.now() + Math.random(),
           productId: `mug`,
           productName: (PRODUCTS(t).find(p => p.id === `mug`) || {}).name || `Mug`,
           variantId: `standard`,
