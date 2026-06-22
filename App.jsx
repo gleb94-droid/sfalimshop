@@ -9736,7 +9736,7 @@ function HomeMyCrewBand({ lang, setPage }) {
         </div>
         {/* Real MY CREW example — the design worn on the tee */}
         <div style={{ flexShrink: 0, width: isMobile ? `100%` : 220, maxWidth: 260, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
-          <img src={`/my-crew/mycrew-mockup-sonya-sanya.webp`} alt={mc.name} loading="lazy" decoding="async" style={{ width: `100%`, maxWidth: 220, borderRadius: 14, objectFit: `cover`, filter: `drop-shadow(0 10px 24px rgba(255,107,53,0.22))`, display: `block` }} />
+          <img src={`/my-crew/mycrew-worn-1.webp`} alt={mc.name} loading="lazy" decoding="async" style={{ width: `100%`, maxWidth: 220, borderRadius: 14, objectFit: `cover`, filter: `drop-shadow(0 10px 24px rgba(255,107,53,0.22))`, display: `block` }} />
         </div>
       </div>
     </section>
@@ -10035,20 +10035,22 @@ function CollagePage({ lang, setPage }) {
         </div>
       </section>
 
-      {/* SHOWCASE — real MY CREW example: the design worn on the tee + the flat artwork */}
+      {/* SHOWCASE — real MY CREW examples: the design worn (3 looks) + the flat artwork */}
       <section style={{ ...sectionStyle, paddingTop: 0, paddingBottom: isMobile ? 24 : 36 }}>
-        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(2, 1fr)`, gap: 14, maxWidth: 680, margin: `0 auto` }}>
-          {[{ src: `/my-crew/mycrew-mockup-sonya-sanya.webp`, label: t.showcaseWorn }, { src: `/my-crew/mycrew-design-sonya-sanya.webp`, label: t.showcaseDesign }].map((item, i) => (
-            <div key={i} style={{ position: `relative`, background: i === 1 ? `#f4f4f4` : COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
-              <SmartImage
-                src={item.src}
-                alt={item.label}
-                loading={i === 0 ? `eager` : `lazy`}
-                style={{ width: `100%`, height: `100%`, objectFit: i === 0 ? `cover` : `contain`, display: `block` }}
-              />
-              <span style={{ position: `absolute`, bottom: 12, insetInlineStart: 12, background: `rgba(255,107,53,0.92)`, color: `#fff`, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 12, padding: `5px 11px`, borderRadius: 8, letterSpacing: `0.02em` }}>{item.label}</span>
-            </div>
-          ))}
+        <div style={{ display: `grid`, gridTemplateColumns: `repeat(2, 1fr)`, gap: 12, maxWidth: 680, margin: `0 auto` }}>
+          {[
+            `/my-crew/mycrew-worn-1.webp`,
+            `/my-crew/mycrew-worn-3.webp`,
+            `/my-crew/mycrew-worn-2.webp`,
+            `/my-crew/mycrew-design-sonya-sanya.webp`,
+          ].map((src, i) => {
+            const isArt = src.includes(`design`);
+            return (
+              <div key={i} style={{ background: isArt ? `#f4f4f4` : COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+                <SmartImage src={src} alt={t.name} loading={i === 0 ? `eager` : `lazy`} style={{ width: `100%`, height: `100%`, objectFit: isArt ? `contain` : `cover`, display: `block` }} />
+              </div>
+            );
+          })}
         </div>
       </section>
 
