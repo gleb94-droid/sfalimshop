@@ -273,6 +273,7 @@ serve(async (req) => {
           const CPRICE: Record<string, { shirt: number; mug: number }> = {
             pet: { shirt: 189, mug: 119 },
             custom: { shirt: 149, mug: 89 },
+            collage: { shirt: 169, mug: 49 }, // MY CREW tee=169; mug=49 = "Full Crew Set" add-on (set-only, no standalone collage mug)
           };
           // ctype/pid come from client-set extra_prints. Unknown ctype coerces to
           // "pet" (the MORE expensive tier — safe direction), and non-"mug" → shirt.
@@ -281,7 +282,7 @@ serve(async (req) => {
           // the commission type (small schema follow-up) — there is no independent
           // server record of pet-vs-custom today. Low impact + requires crafting an
           // insert with the public anon key.
-          const ctype = meta.ctype === "custom" ? "custom" : "pet";
+          const ctype = meta.ctype === "custom" ? "custom" : (meta.ctype === "collage" ? "collage" : "pet");
           unit = pid === "mug" ? CPRICE[ctype].mug : CPRICE[ctype].shirt;
         }
         if (unit == null || !isFinite(unit) || unit <= 0) { allResolved = false; break; }
