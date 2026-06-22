@@ -3091,6 +3091,23 @@ const MOCKUP_URLS = {
   sticker_sq: "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/square%20sticker.png",
 };
 
+// Designed example photos for product CARDS / pickers — so a card shows a real
+// PRINTED product (a BLOOM design on it), not an empty blank. The blank MOCKUP_URLS
+// above stay the canvas the live editor draws the customer's design onto. Falls back
+// to the blank when a product has no designed example. (mug = golden-retriever dog,
+// shirt = tuxedo cat — dog+cat variety.)
+const BLOOM_MOCK = "https://ubvgrxlxtelulwjtfudd.supabase.co/storage/v1/object/public/mockups/bloom";
+const PRODUCT_CARD_IMG = {
+  mug:        `${BLOOM_MOCK}/01_golden_retriever-mug.webp`,
+  magic_mug:  `${BLOOM_MOCK}/01_golden_retriever-mug.webp`,
+  oversized:  `${BLOOM_MOCK}/48_tuxedo-shirt-white.jpg`,
+  tshirt:     `${BLOOM_MOCK}/48_tuxedo-shirt-white.jpg`,
+  lycra:      `${BLOOM_MOCK}/48_tuxedo-shirt-white.jpg`,
+  look:       `${BLOOM_MOCK}/01_golden_retriever-shirt-white.jpg`,
+  stonewash:  `${BLOOM_MOCK}/01_golden_retriever-shirt-white.jpg`,
+  dryfit:     `${BLOOM_MOCK}/01_golden_retriever-shirt-white.jpg`,
+};
+
 // transformImage — rewrites a Supabase Storage *public object* URL to the
 // on-the-fly image-transform endpoint (Pro feature), serving a resized,
 // re-compressed image for thumbnail/card/grid contexts. Browsers send
@@ -7475,7 +7492,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                     <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 18, flex: 1, minWidth: 0 }}>
                       {num != null && <span style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontSize: isMobile ? 18 : 22, fontStyle: "italic", color: selectedProduct === p.id ? COLORS.accent : "#8a8a8a", minWidth: isMobile ? 22 : 32, flexShrink: 0 }}>{String(num).padStart(2, '0')}</span>}
                       <div style={{ width: isMobile ? 60 : 76, height: isMobile ? 60 : 76, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: COLORS.bg, border: `1px solid ${selectedProduct === p.id ? "rgba(255,107,53,0.4)" : COLORS.border}`, borderRadius: 10, padding: 6, transition: "border-color 0.2s" }}>
-                        <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 200 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                        <SmartImage src={transformImage(PRODUCT_CARD_IMG[p.id] || MOCKUP_URLS[p.id], { width: 200 })} alt={p.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: (PRODUCT_CARD_IMG[p.id] ? "cover" : "contain"), borderRadius: PRODUCT_CARD_IMG[p.id] ? 10 : 0 }} />
                       </div>
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
@@ -9461,7 +9478,7 @@ function Hero({ setPage, lang, compact = false }) {
             <ProductBadges product={p} lang={lang} />
             <div style={{ position: "relative", width: "100%", height: 130, marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 56%, rgba(255,107,53,0.20) 0%, rgba(255,107,53,0) 62%)", pointerEvents: "none" }} />
-              <SmartImage src={transformImage(MOCKUP_URLS[p.id], { width: 320 })} alt={p.name} loading="lazy" style={{ position: "relative", width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.45))" }} />
+              <SmartImage src={transformImage(PRODUCT_CARD_IMG[p.id] || MOCKUP_URLS[p.id], { width: 320 })} alt={p.name} loading="lazy" style={{ position: "relative", width: "100%", height: "100%", objectFit: (PRODUCT_CARD_IMG[p.id] ? "cover" : "contain"), borderRadius: PRODUCT_CARD_IMG[p.id] ? 12 : 0, filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.45))" }} />
             </div>
             <div style={{ color: COLORS.white, fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontWeight: 700, fontSize: 22, marginBottom: 4, letterSpacing: "-0.3px" }}>{p.name}</div>
             <div style={{ width: 24, height: 2, background: "rgba(255,107,53,0.4)", margin: "8px 0", borderRadius: 2 }}></div>
