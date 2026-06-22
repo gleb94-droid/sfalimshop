@@ -2304,6 +2304,8 @@ const LANGS = {
       step3: `מאשרים → מדפיסים בבאר שבע`,
       howTitle: `איך זה עובד`,
       priceLine: `₪169 · הכל כלול`,
+      showcaseFront: `קדמי · המשפט שלך`,
+      showcaseBack: `גב · הקולאז' של החבורה`,
       cta: `מתחילים את MY CREW`,
       bandPitch: `MY CREW — החיה האמיתית שלך על חולצה`,
       trustLine: `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים`,
@@ -2419,7 +2421,9 @@ const LANGS = {
       step3: `You approve → we print in Be'er Sheva`,
       howTitle: `How it works`,
       priceLine: `₪169 · all included`,
-      cta: `Start my MY CREW`,
+      showcaseFront: `Front · your phrase`,
+      showcaseBack: `Back · your crew collage`,
+      cta: `Start MY CREW`,
       bandPitch: `MY CREW — your real pet on a shirt`,
       trustLine: `Hand-printed in Be'er Sheva · ready in 2–3 days`,
       bloomCrosslink: `Want your real pet? → Collage from photos`,
@@ -2534,6 +2538,8 @@ const LANGS = {
       step3: `Вы утверждаете → печатаем в Беэр-Шеве`,
       howTitle: `Как это работает`,
       priceLine: `₪169 · всё включено`,
+      showcaseFront: `Спереди · ваша фраза`,
+      showcaseBack: `Сзади · коллаж банды`,
       cta: `Начать MY CREW`,
       bandPitch: `MY CREW — ваш настоящий питомец на футболке`,
       trustLine: `Печать вручную в Беэр-Шеве · готово за 2–3 дня`,
@@ -10033,14 +10039,15 @@ function CollagePage({ lang, setPage }) {
       <section style={{ ...sectionStyle, paddingTop: 0, paddingBottom: isMobile ? 24 : 36 }}>
         {/* TODO: swap to real MY CREW collage tee photos when owner supplies them */}
         <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `1fr` : `repeat(2, 1fr)`, gap: 14, maxWidth: 680, margin: `0 auto` }}>
-          {[MOCKUP_URLS.oversized, MOCKUP_URLS.oversized].map((src, i) => (
-            <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
+          {[{ src: MOCKUP_URLS.oversized, label: t.showcaseFront }, { src: MOCKUP_URLS.oversized, label: t.showcaseBack }].map((item, i) => (
+            <div key={i} style={{ position: `relative`, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, overflow: `hidden`, aspectRatio: `4 / 5`, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
               <SmartImage
-                src={transformImage(src, { width: 480 })}
+                src={transformImage(item.src, { width: 480 })}
                 alt=""
                 loading={i === 0 ? `eager` : `lazy`}
                 style={{ width: `80%`, height: `80%`, objectFit: `contain`, display: `block`, filter: `drop-shadow(0 12px 24px rgba(0,0,0,0.5))` }}
               />
+              <span style={{ position: `absolute`, bottom: 12, insetInlineStart: 12, background: `rgba(255,107,53,0.92)`, color: `#fff`, fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 12, padding: `5px 11px`, borderRadius: 8, letterSpacing: `0.02em` }}>{item.label}</span>
             </div>
           ))}
         </div>
