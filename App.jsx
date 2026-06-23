@@ -9469,7 +9469,7 @@ function Hero({ setPage, lang, compact = false }) {
             aria-label={lang === "he" ? `להזמנה: ${p.name}` : lang === "ru" ? `Заказать: ${p.name}` : `Order: ${p.name}`}
             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPage("order"); } }}
             className="reveal" data-delay={String(Math.min(idx + 1, 6))}
-            style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "24px 24px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
+            style={{ position: "relative", background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? "18px 18px" : "28px 32px", cursor: "pointer", transition: "border-color 0.2s, transform 0.18s cubic-bezier(.2,.6,.2,1), box-shadow 0.3s, opacity 0.75s cubic-bezier(.2,.6,.2,1)" }}
             onMouseOver={e => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = `0 20px 40px rgba(255,107,53,0.15)`; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = COLORS.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
             onTouchStart={e => { e.currentTarget.style.transform = "scale(0.97)"; }}
@@ -9596,7 +9596,7 @@ function EmotionalHero({ lang, setPage, reduceMotion }) {
       </h1>
       <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.6, margin: `0 auto 26px`, maxWidth: 500, fontWeight: 300 }}>{t.sub}</p>
 
-      <div className="reveal" data-delay="3" style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 248 : 320, marginBottom: 18 }}>
+      <div className="reveal" data-delay="3" style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 258 : 392, marginBottom: 18 }}>
         <div aria-hidden="true" style={{ position: `absolute`, inset: `-8% -8% 8%`, background: `radial-gradient(ellipse at 50% 50%, rgba(255,107,53,0.26) 0%, rgba(255,107,53,0) 66%)`, pointerEvents: `none`, zIndex: 0 }} />
         {/* Fixed-size slot (portrait aspect) so a rotating / still-loading image never
             collapses and "jumps" the layout — the space is always reserved. */}
