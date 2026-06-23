@@ -12531,10 +12531,44 @@ function JoinBloomCTA({ lang, source, breedInterest = null, breedName = null, va
   );
 }
 
+// Skeleton placeholders that RESERVE the async sections' real height so they
+// don't insert-and-shift content when pet_designs / blog_posts arrive (CLS fix).
+// They reuse the real cards' structure (aspect-ratio image + matching line
+// boxes) so their height tracks the real card height — no magic pixel numbers.
+function SkelPetCard({ isMobile }) {
+  return (
+    <div aria-hidden="true" style={{ border: `1px solid rgba(255,255,255,0.06)`, borderRadius: 14, overflow: `hidden`, background: `transparent` }}>
+      <div style={{ aspectRatio: `1`, background: `#141414` }} />
+      <div style={{ padding: isMobile ? 14 : 20 }}>
+        <div style={{ height: isMobile ? 26 : 34, width: `70%`, background: `#1c1c1c`, borderRadius: 6 }} />
+        <div style={{ height: isMobile ? 16 : 18, width: `45%`, background: `#161616`, borderRadius: 5, marginTop: 8 }} />
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${COLORS.border}` }}>
+          <div style={{ height: isMobile ? 22 : 24, width: `55%`, background: `#161616`, borderRadius: 999 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+function SkelBlogCard() {
+  return (
+    <div aria-hidden="true" style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, overflow: `hidden`, display: `flex`, flexDirection: `column` }}>
+      <div style={{ width: `100%`, aspectRatio: `1200 / 630`, background: `#0d0d0d` }} />
+      <div style={{ padding: `16px 18px`, display: `flex`, flexDirection: `column`, gap: 8 }}>
+        <div style={{ height: 10, width: `30%`, background: `#161616`, borderRadius: 4 }} />
+        <div style={{ height: 24, width: `85%`, background: `#1c1c1c`, borderRadius: 6 }} />
+        <div style={{ height: 14, width: `100%`, background: `#161616`, borderRadius: 4 }} />
+        <div style={{ height: 14, width: `70%`, background: `#161616`, borderRadius: 4 }} />
+        <div style={{ height: 20, width: `40%`, background: `#161616`, borderRadius: 4, marginTop: 6, alignSelf: `flex-end` }} />
+      </div>
+    </div>
+  );
+}
+
 function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrderBloom, onCommissionPet, onAddStickerPack, onShareToast }) {
   const isRTL = lang === "he";
   const w = WL[lang] || WL.he; // BLOOM Family waitlist copy (pre-launch preview)
   const [blogPosts, setBlogPosts] = useState([]); // latest 3 published — drives the "from our blog" stripe
+  const [blogLoaded, setBlogLoaded] = useState(false); // true once the blog fetch settles — reserves the stripe space until then (CLS)
   const quizT = LANGS[lang].quiz; // quiz banner copy lives in LANGS (single source)
   const [designs, setDesigns] = useState([]);
   const [packs, setPacks] = useState([]);
@@ -12612,7 +12646,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .limit(3);
-      if (!cancelled && !error && data) setBlogPosts(data);
+      if (!cancelled) { if (!error && data) setBlogPosts(data); setBlogLoaded(true); }
     })();
     return () => { cancelled = true; };
   }, []);
@@ -13032,14 +13066,16 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
       {/* ===== FROM OUR BLOG stripe (Slice 3) — only when 3+ published posts.
               Hidden in the pre-launch public preview (we don't surface blog posts
               to maintenance visitors); returns for the full post-launch site. ===== */}
-      {!preview && blogPosts.length >= 3 && (
+      {!preview && (blogPosts.length >= 3 || !blogLoaded) && (
         <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "16px 16px 0" : "24px 40px 0" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
             <h2 style={{ fontFamily: "'Playfair Display','Frank Ruhl Libre',serif", fontStyle: "italic", fontWeight: 700, fontSize: isMobile ? "1.4rem" : "1.9rem", color: COLORS.white, margin: 0 }}>{(LANGS[lang] || LANGS.he).blogHeroTitle}</h2>
             <button onClick={() => goToBlog && goToBlog()} style={{ background: "transparent", border: "none", color: COLORS.accent, fontFamily: "'Heebo',sans-serif", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{(LANGS[lang] || LANGS.he).blogFromOurBlog}</button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 16 : 20 }}>
-            {blogPosts.map((p) => <BlogCard key={p.slug} post={p} lang={lang} goToBlog={goToBlog} compact />)}
+            {blogPosts.length >= 3
+              ? blogPosts.map((p) => <BlogCard key={p.slug} post={p} lang={lang} goToBlog={goToBlog} compact />)
+              : [0, 1, 2].map((i) => <SkelBlogCard key={i} />)}
           </div>
         </section>
       )}
@@ -13048,7 +13084,7 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
               character in the admin editor to feature it here; gives first-time visitors a
               short shortlist instead of all 70 at once. Hidden when <3 are flagged. Opens the
               same PetModal as the grid (openPet). ===== */}
-      {!loading && bestsellers.length >= 3 && (
+      {(loading || bestsellers.length >= 3) && (
         <section style={{ position: "relative", zIndex: 1, maxWidth: 1400, margin: "0 auto", padding: isMobile ? "8px 16px 0" : "16px 40px 0" }}>
           <div style={{ background: "linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,107,53,0.02))", border: "1px solid rgba(255,107,53,0.2)", borderRadius: 18, padding: isMobile ? "18px 14px" : "24px 28px" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
@@ -13060,11 +13096,13 @@ function PetsPage({ lang, setPage, goToBlog, goToBreed, preview = false, onOrder
               </span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(200px, 1fr))", gap: isMobile ? 12 : 18 }}>
-              {bestsellers.map((d, i) => (
-                <div key={d.id} className="reveal" data-delay={String((i % 6) + 1)}>
-                  <PetCard design={d} lang={lang} index={i} name={getDesignName(d)} animal={getAnimal(d)} tagline={getTagline(d)} priceFrom={t.priceFrom} preview={preview} onClick={() => openPet(d)} isMobile={isMobile} />
-                </div>
-              ))}
+              {loading
+                ? Array.from({ length: 10 }).map((_, i) => <SkelPetCard key={i} isMobile={isMobile} />)
+                : bestsellers.map((d, i) => (
+                  <div key={d.id} className="reveal" data-delay={String((i % 6) + 1)}>
+                    <PetCard design={d} lang={lang} index={i} name={getDesignName(d)} animal={getAnimal(d)} tagline={getTagline(d)} priceFrom={t.priceFrom} preview={preview} onClick={() => openPet(d)} isMobile={isMobile} />
+                  </div>
+                ))}
             </div>
           </div>
         </section>
