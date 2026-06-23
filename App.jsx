@@ -11409,6 +11409,10 @@ export default function App() {
     const hash = root === 'home' ? '' : newPage;
     window.history.pushState({ page: root }, '', `#${hash}`);
     setPageState(root);
+    // SPA: changing `page` doesn't reset the scroll, so a new page would open at
+    // wherever you were (e.g. the bottom). Always start the new page at the top.
+    // (Deep-links that scroll to an element run their own scroll AFTER this, on mount.)
+    try { window.scrollTo(0, 0); } catch (_) {}
   };
 
   // Blog navigation. slug = a post slug (opens BlogPost) or null/undefined
