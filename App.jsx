@@ -237,7 +237,7 @@ function AssistantWidget({ lang, page, setPage, hideFab }) {
   useEffect(() => {
     if (open || hideFab || (page !== `mugs` && page !== `pets`)) return;
     try { if (sessionStorage.getItem(`sfali_nudge`)) return; } catch (_) {}
-    const id = setTimeout(() => setNudge(true), 6000);
+    const id = setTimeout(() => setNudge(true), 11000);
     return () => clearTimeout(id);
   }, [page, open, hideFab]);
   const dismissNudge = () => { setNudge(false); try { sessionStorage.setItem(`sfali_nudge`, `1`); } catch (_) {} };
