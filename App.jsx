@@ -2309,7 +2309,7 @@ const LANGS = {
       priceLine: `₪169 · הכל כלול`,
       showcaseWorn: `על החולצה`,
       showcaseDesign: `העיצוב`,
-      cta: `מתחילים את MY CREW`,
+      cta: `צרו את החבורה שלכם`,
       bandPitch: `MY CREW — החיה האמיתית שלך על חולצה`,
       trustLine: `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים`,
       bloomCrosslink: `רוצה את החיה האמיתית שלך? → קולאז' מהתמונות`,
@@ -2429,7 +2429,7 @@ const LANGS = {
       priceLine: `₪169 · all included`,
       showcaseWorn: `On the tee`,
       showcaseDesign: `The design`,
-      cta: `Start MY CREW`,
+      cta: `Create your crew`,
       bandPitch: `MY CREW — your real pet on a shirt`,
       trustLine: `Hand-printed in Be'er Sheva · ready in 2–3 days`,
       bloomCrosslink: `Want your real pet? → Collage from photos`,
@@ -2549,7 +2549,7 @@ const LANGS = {
       priceLine: `₪169 · всё включено`,
       showcaseWorn: `На футболке`,
       showcaseDesign: `Дизайн`,
-      cta: `Начать MY CREW`,
+      cta: `Создай свою банду`,
       bandPitch: `MY CREW — ваш настоящий питомец на футболке`,
       trustLine: `Печать вручную в Беэр-Шеве · готово за 2–3 дня`,
       bloomCrosslink: `Хотите своего настоящего питомца? → Коллаж из фото`,
@@ -10026,6 +10026,18 @@ function CollagePage({ lang, setPage, goToCollage }) {
     return () => window.removeEventListener(`resize`, h);
   }, []);
 
+  // Sticky CTA bar visibility — show it whenever the inline CTA button is OFF screen
+  // (mirrors the checkout pay-pill pattern), so the order action is always reachable.
+  const ctaRef = useRef(null);
+  const [ctaInView, setCtaInView] = useState(true);
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el || typeof IntersectionObserver === `undefined`) return;
+    const io = new IntersectionObserver(([e]) => setCtaInView(e.isIntersecting), { rootMargin: `0px 0px -40px 0px` });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const t = (LANGS[lang] || LANGS.he).myCrew;
 
   const sectionStyle = { maxWidth: 1080, margin: `0 auto`, paddingLeft: isMobile ? 18 : 32, paddingRight: isMobile ? 18 : 32 };
@@ -10130,6 +10142,7 @@ function CollagePage({ lang, setPage, goToCollage }) {
           <span>{t.giftLine}</span>
         </div>
         <button
+          ref={ctaRef}
           type="button"
           onClick={() => (goToCollage ? goToCollage() : setPage(`order`))}
           style={ctaBtnStyle}
@@ -10141,6 +10154,35 @@ function CollagePage({ lang, setPage, goToCollage }) {
           {isRTL ? ` ←` : ` →`}
         </button>
       </section>
+
+      {/* Sticky CTA bar — always-reachable order action; slides away when the inline CTA is on screen */}
+      <div
+        aria-hidden={ctaInView}
+        style={{
+          position: `fixed`, left: 0, right: 0, bottom: 0, zIndex: 90,
+          transform: ctaInView ? `translateY(120%)` : `translateY(0)`,
+          transition: `transform 0.32s cubic-bezier(.2,.6,.2,1)`,
+          background: `rgba(15,15,15,0.92)`, backdropFilter: `blur(12px)`, WebkitBackdropFilter: `blur(12px)`,
+          borderTop: `1px solid ${COLORS.border}`,
+          padding: isMobile ? `10px 16px calc(10px + env(safe-area-inset-bottom))` : `12px 24px`,
+          pointerEvents: ctaInView ? `none` : `auto`,
+        }}
+      >
+        <div style={{ maxWidth: 980, margin: `0 auto`, display: `flex`, alignItems: `center`, justifyContent: `space-between`, gap: 12 }}>
+          <span style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 14.5, color: COLORS.white, whiteSpace: `nowrap` }}>{t.priceLine}</span>
+          <button
+            type="button"
+            onClick={() => (goToCollage ? goToCollage() : setPage(`order`))}
+            style={{ ...ctaBtnStyle, padding: isMobile ? `12px 20px` : `12px 26px`, fontSize: 15, boxShadow: `none`, flexShrink: 0 }}
+            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+            onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+          >
+            <AboutIcon name="pawprint" size={16} color="#fff" />
+            {t.cta}
+            {isRTL ? ` ←` : ` →`}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
