@@ -2313,6 +2313,21 @@ const LANGS = {
       bandPitch: `MY CREW — החיה האמיתית שלך על חולצה`,
       trustLine: `מודפס בעבודת יד בבאר שבע · מוכן תוך 2–3 ימים`,
       bloomCrosslink: `רוצה את החיה האמיתית שלך? → קולאז' מהתמונות`,
+      trustApprove: `אתם מאשרים את העיצוב לפני ההדפסה`,
+      valueTitle: `מה כלול ב-₪169`,
+      included: [`הדפס קדמי + גב + שרוול`, `עד 12 תמונות אמיתיות`, `שם/שמות החיה`, `אישור עיצוב לפני ההדפסה`, `מודפס בעבודת יד בבאר שבע`],
+      transformTitle: `מהתמונות שלכם → לחבורה על החולצה`,
+      transformBefore: `התמונות שלכם`,
+      transformAfter: `הקולאז' על החולצה`,
+      setTitle: `Full Crew Set`,
+      setSub: `שומרים לכם את העיצוב — אותו קולאז' גם על ספל, ב-₪49 בלבד (במקום ₪59)`,
+      faqTitle: `שאלות נפוצות`,
+      faq: [
+        { q: `כמה תמונות אפשר לשלוח?`, a: `עד 12 תמונות, בוואטסאפ אחרי ההזמנה. אנחנו בוחרים את הטובות ביותר לקולאז'.` },
+        { q: `אראה את העיצוב לפני ההדפסה?`, a: `בטוח. שולחים לכם תצוגה לאישור — מדפיסים רק אחרי שאתם מאשרים.` },
+        { q: `מה אם בא לי שינוי?`, a: `נתקן עד שתהיו מרוצים. בלי לחץ.` },
+        { q: `כמה זמן זה לוקח?`, a: `2–3 ימי עסקים אחרי האישור. מודפס בעבודת יד בבאר שבע.` },
+      ],
     },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
@@ -2433,6 +2448,21 @@ const LANGS = {
       bandPitch: `MY CREW — your real pet on a shirt`,
       trustLine: `Hand-printed in Be'er Sheva · ready in 2–3 days`,
       bloomCrosslink: `Want your real pet? → Collage from photos`,
+      trustApprove: `You approve the design before we print`,
+      valueTitle: `What's in your ₪169`,
+      included: [`Front + back + sleeve print`, `Up to 12 real photos`, `Pet name(s)`, `Design approval before printing`, `Hand-printed in Be'er Sheva`],
+      transformTitle: `From your photos → your crew on a tee`,
+      transformBefore: `Your photos`,
+      transformAfter: `The collage on a tee`,
+      setTitle: `Full Crew Set`,
+      setSub: `We keep your design — the same collage on a mug too, just ₪49 (instead of ₪59)`,
+      faqTitle: `Frequently asked`,
+      faq: [
+        { q: `How many photos can I send?`, a: `Up to 12, via WhatsApp after you order. We pick the best ones for the collage.` },
+        { q: `Will I see the design before printing?`, a: `Absolutely. We send you a preview to approve — we only print after you say yes.` },
+        { q: `What if I want changes?`, a: `We revise until you're happy. No pressure.` },
+        { q: `How long does it take?`, a: `2–3 business days after approval. Hand-printed in Be'er Sheva.` },
+      ],
     },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
     form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
@@ -2553,6 +2583,21 @@ const LANGS = {
       bandPitch: `MY CREW — ваш настоящий питомец на футболке`,
       trustLine: `Печать вручную в Беэр-Шеве · готово за 2–3 дня`,
       bloomCrosslink: `Хотите своего настоящего питомца? → Коллаж из фото`,
+      trustApprove: `Вы утверждаете дизайн до печати`,
+      valueTitle: `Что входит в ₪169`,
+      included: [`Печать спереди + сзади + рукав`, `До 12 реальных фото`, `Имя/имена питомца`, `Утверждение дизайна до печати`, `Печать вручную в Беэр-Шеве`],
+      transformTitle: `Из ваших фото → ваша банда на футболке`,
+      transformBefore: `Ваши фото`,
+      transformAfter: `Коллаж на футболке`,
+      setTitle: `Full Crew Set`,
+      setSub: `Мы храним ваш дизайн — тот же коллаж и на кружке, всего ₪49 (вместо ₪59)`,
+      faqTitle: `Частые вопросы`,
+      faq: [
+        { q: `Сколько фото можно прислать?`, a: `До 12, в WhatsApp после заказа. Мы выберем лучшие для коллажа.` },
+        { q: `Увижу ли дизайн до печати?`, a: `Конечно. Пришлём макет на согласование — печатаем только после вашего «да».` },
+        { q: `А если захочу правки?`, a: `Правим, пока не понравится. Без давления.` },
+        { q: `Сколько времени занимает?`, a: `2–3 рабочих дня после согласования. Печать вручную в Беэр-Шеве.` },
+      ],
     },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
     form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
@@ -10050,7 +10095,7 @@ function CollagePage({ lang, setPage, goToCollage }) {
   ];
 
   return (
-    <div dir={isRTL ? `rtl` : `ltr`} style={{ minHeight: `100vh`, paddingTop: 72, paddingBottom: 80, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.10) 0%, transparent 55%), ${COLORS.bg}`, color: COLORS.white }}>
+    <div dir={isRTL ? `rtl` : `ltr`} style={{ minHeight: `100vh`, paddingTop: 72, paddingBottom: 120, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.10) 0%, transparent 55%), ${COLORS.bg}`, color: COLORS.white }}>
 
       {/* HERO */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 36 : 64, paddingBottom: isMobile ? 28 : 40, textAlign: `center` }}>
@@ -10094,6 +10139,26 @@ function CollagePage({ lang, setPage, goToCollage }) {
         </div>
       </section>
 
+      {/* TRANSFORMATION — your photos → the collage on a tee */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 8 : 16, paddingBottom: isMobile ? 20 : 32 }}>
+        <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(20px,3.8vw,30px)`, textAlign: `center`, margin: `0 0 20px` }}>
+          {t.transformTitle}
+        </h2>
+        <div style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: isMobile ? 10 : 18, maxWidth: 640, margin: `0 auto`, flexDirection: isRTL ? `row-reverse` : `row` }}>
+          <div style={{ flex: 1, background: COLORS.bgCard, border: `1px dashed ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `22px 10px` : `30px 16px`, textAlign: `center`, display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 12 }}>
+            <div style={{ display: `grid`, gridTemplateColumns: `1fr 1fr`, gap: 5, width: 60, height: 60 }}>
+              {[0, 1, 2, 3].map((i) => <div key={i} style={{ background: `#2a2a2a`, borderRadius: 6 }} />)}
+            </div>
+            <span style={{ fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, fontWeight: 600, color: COLORS.gray }}>{t.transformBefore}</span>
+          </div>
+          <div style={{ flexShrink: 0, color: COLORS.accent, fontSize: 30, fontWeight: 800 }}>{isRTL ? `←` : `→`}</div>
+          <div style={{ flex: 1, borderRadius: 16, overflow: `hidden`, border: `1px solid ${COLORS.border}`, aspectRatio: `4 / 5`, position: `relative`, background: COLORS.bgCard }}>
+            <SmartImage src={`/my-crew/mycrew-worn-1.webp`} alt={t.transformAfter} loading="lazy" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
+            <span style={{ position: `absolute`, bottom: 8, insetInlineStart: 0, insetInlineEnd: 0, textAlign: `center`, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 700, color: `#fff`, textShadow: `0 1px 6px rgba(0,0,0,0.75)` }}>{t.transformAfter}</span>
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS — 3 steps */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 28 : 44, paddingBottom: isMobile ? 20 : 36 }}>
         <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(22px,4vw,32px)`, textAlign: `center`, margin: `0 0 24px` }}>
@@ -10132,6 +10197,23 @@ function CollagePage({ lang, setPage, goToCollage }) {
         </div>
       </section>
 
+      {/* VALUE STACK — what's included in ₪169 */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 20 : 32, paddingBottom: 0 }}>
+        <div style={{ background: `linear-gradient(160deg, rgba(255,107,53,0.08), rgba(255,107,53,0.02))`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 18, padding: isMobile ? `22px 18px` : `28px 28px`, maxWidth: 540, margin: `0 auto` }}>
+          <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: 22, margin: `0 0 16px`, textAlign: `center` }}>
+            {t.valueTitle}
+          </h3>
+          <ul role="list" style={{ listStyle: `none`, margin: 0, padding: 0, display: `flex`, flexDirection: `column`, gap: 12 }}>
+            {(t.included || []).map((item, i) => (
+              <li key={i} style={{ display: `flex`, alignItems: `center`, gap: 12, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 15.5, fontWeight: 600 }}>
+                <span style={{ flexShrink: 0, display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 24, height: 24, borderRadius: `50%`, background: COLORS.accentDim, color: COLORS.accent, fontWeight: 800, fontSize: 14 }}>✓</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       {/* PRICE + CTA */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 40, textAlign: `center` }}>
         <p style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: `clamp(20px,4.5vw,28px)`, color: COLORS.accent, margin: `0 0 20px` }}>
@@ -10153,6 +10235,44 @@ function CollagePage({ lang, setPage, goToCollage }) {
           {t.cta}
           {isRTL ? ` ←` : ` →`}
         </button>
+        {/* Trust reassurance — the #1 objection-buster, right at the decision point */}
+        <div style={{ display: `block`, marginTop: 18 }}>
+          <span style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 999, padding: `9px 18px` }}>
+            <span style={{ color: COLORS.accent, fontWeight: 800, fontSize: 15 }}>✓</span>
+            <span style={{ fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, fontWeight: 600, color: COLORS.white }}>{t.trustApprove}</span>
+          </span>
+        </div>
+      </section>
+
+      {/* FULL CREW SET — same design on a mug (awareness upsell) */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 36, paddingBottom: 0 }}>
+        <div style={{ display: `flex`, alignItems: `center`, gap: 14, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `16px 16px` : `20px 24px`, maxWidth: 540, margin: `0 auto`, flexDirection: isRTL ? `row-reverse` : `row` }}>
+          <div style={{ flexShrink: 0, display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 48, height: 48, borderRadius: 12, background: COLORS.accentDim }}>
+            <AboutIcon name="sparkles" size={24} color={COLORS.accent} />
+          </div>
+          <div style={{ textAlign: isRTL ? `right` : `left` }}>
+            <div style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 16, color: COLORS.white, marginBottom: 4 }}>{t.setTitle}</div>
+            <div style={{ fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, color: COLORS.gray, lineHeight: 1.5 }}>{t.setSub}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ — objection-busters */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 28 : 40, paddingBottom: 0 }}>
+        <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(20px,3.8vw,30px)`, textAlign: `center`, margin: `0 0 20px` }}>
+          {t.faqTitle}
+        </h2>
+        <div style={{ maxWidth: 640, margin: `0 auto`, display: `flex`, flexDirection: `column`, gap: 12 }}>
+          {(t.faq || []).map((item, i) => (
+            <div key={i} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? `16px 16px` : `18px 22px`, textAlign: isRTL ? `right` : `left` }}>
+              <div style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 700, fontSize: 15, color: COLORS.white, marginBottom: 6, display: `flex`, alignItems: `flex-start`, gap: 8 }}>
+                <span style={{ color: COLORS.accent, fontWeight: 800, flexShrink: 0 }}>Q</span>
+                <span>{item.q}</span>
+              </div>
+              <div style={{ fontFamily: `'Heebo',sans-serif`, fontSize: 14, color: COLORS.gray, lineHeight: 1.6 }}>{item.a}</div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Sticky CTA bar — always-reachable order action; slides away when the inline CTA is on screen */}
