@@ -10083,6 +10083,29 @@ function CollagePage({ lang, setPage, goToCollage }) {
     return () => io.disconnect();
   }, []);
 
+  // Pull one real testimonial for social proof — prefer a collage/shirt-related
+  // review (Ella's photo-collage shirt fits MY CREW); else the first active one.
+  // Hides itself if the table is empty (no fake/placeholder reviews).
+  const [review, setReview] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from(`testimonials`)
+          .select(`*`)
+          .eq(`is_active`, true)
+          .order(`sort_order`, { ascending: true })
+          .order(`created_at`, { ascending: false });
+        if (error || !data || !data.length) return;
+        const rx = /(קולאז|collage|коллаж|חולצה|shirt|футбол)/i;
+        const pick = data.find(r => rx.test(`${r.product || ``} ${r.body_he || ``} ${r.body_en || ``} ${r.body_ru || ``}`)) || data[0];
+        if (!cancelled) setReview(pick);
+      } catch (_) { /* table empty/missing — just hide */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const t = (LANGS[lang] || LANGS.he).myCrew;
 
   const sectionStyle = { maxWidth: 1080, margin: `0 auto`, paddingLeft: isMobile ? 18 : 32, paddingRight: isMobile ? 18 : 32 };
@@ -10213,6 +10236,31 @@ function CollagePage({ lang, setPage, goToCollage }) {
           </ul>
         </div>
       </section>
+
+      {/* SOCIAL PROOF — one real testimonial (relevant to MY CREW), right before the decision */}
+      {review && (
+        <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 36, paddingBottom: 0 }}>
+          <article style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `22px 20px` : `28px 28px`, maxWidth: 560, margin: `0 auto`, display: `flex`, flexDirection: `column`, gap: 12, alignItems: `center`, textAlign: `center` }}>
+            <ReviewStars rating={review.rating} label={(LANGS[lang]?.reviews || LANGS.he.reviews).aria} />
+            <blockquote style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: isMobile ? 16 : 18, lineHeight: 1.55, margin: 0 }}>
+              {`“${review[`body_${lang}`] || review.body_he || review.body_en || ``}”`}
+            </blockquote>
+            <div style={{ display: `flex`, alignItems: `center`, gap: 10, paddingTop: 8 }}>
+              {review.author_avatar && (
+                <img src={review.author_avatar} alt={review.author_name} loading="lazy" style={{ width: 36, height: 36, borderRadius: `50%`, objectFit: `cover`, border: `1px solid ${COLORS.border}` }} />
+              )}
+              <div style={{ display: `flex`, flexDirection: `column`, lineHeight: 1.3, textAlign: isRTL ? `right` : `left` }}>
+                <span style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{(lang !== `he` && review[`author_name_${lang}`]) || review.author_name}</span>
+                {(review.author_city || review.product) && (
+                  <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif` }}>
+                    {[review.author_city, (lang !== `he` && review[`product_${lang}`]) || localizeProduct(review.product, lang)].filter(Boolean).join(` · `)}
+                  </span>
+                )}
+              </div>
+            </div>
+          </article>
+        </section>
+      )}
 
       {/* PRICE + CTA */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 40, textAlign: `center` }}>
