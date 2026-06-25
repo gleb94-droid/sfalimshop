@@ -2319,7 +2319,7 @@ const LANGS = {
       trustApprove: `אתם מאשרים את העיצוב לפני ההדפסה`,
       valueTitle: `מה כלול ב-₪169`,
       included: [`הדפס קדמי + גב + שרוול`, `עד 12 תמונות אמיתיות`, `שם/שמות החיה`, `אישור עיצוב לפני ההדפסה`, `מודפס בעבודת יד בבאר שבע`],
-      transformTitle: `מהתמונות שלכם → לחבורה על החולצה`,
+      transformTitle: `מהתמונות שלכם ← לחבורה על החולצה`,
       transformBefore: `התמונות שלכם`,
       transformAfter: `הקולאז' על החולצה`,
       setTitle: `Full Crew Set`,
@@ -10200,7 +10200,7 @@ function CollagePage({ lang, setPage, goToCollage }) {
         <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(20px,3.8vw,30px)`, textAlign: `center`, margin: `0 0 20px` }}>
           {t.transformTitle}
         </h2>
-        <div style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: isMobile ? 10 : 18, maxWidth: 640, margin: `0 auto`, flexDirection: isRTL ? `row-reverse` : `row` }}>
+        <div style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: isMobile ? 10 : 18, maxWidth: 640, margin: `0 auto`, flexDirection: `row` }}>
           <div style={{ flex: 1, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `16px 12px` : `22px 18px`, textAlign: `center`, display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 12 }}>
             <div style={{ display: `grid`, gridTemplateColumns: `1fr 1fr`, gap: 5, width: isMobile ? 116 : 150 }}>
               {[`/my-crew/mycrew-src-1.webp`, `/my-crew/mycrew-src-2.webp`, `/my-crew/mycrew-src-3.webp`, `/my-crew/mycrew-src-4.webp`].map((src, i) => (
@@ -10329,7 +10329,7 @@ function CollagePage({ lang, setPage, goToCollage }) {
 
       {/* FULL CREW SET — same design on a mug (awareness upsell) */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 36, paddingBottom: 0 }}>
-        <div style={{ display: `flex`, alignItems: `center`, gap: 14, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `16px 16px` : `20px 24px`, maxWidth: 540, margin: `0 auto`, flexDirection: isRTL ? `row-reverse` : `row` }}>
+        <div style={{ display: `flex`, alignItems: `center`, gap: 14, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `16px 16px` : `20px 24px`, maxWidth: 540, margin: `0 auto`, flexDirection: `row` }}>
           <div style={{ flexShrink: 0, display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 48, height: 48, borderRadius: 12, background: COLORS.accentDim }}>
             <AboutIcon name="sparkles" size={24} color={COLORS.accent} />
           </div>
