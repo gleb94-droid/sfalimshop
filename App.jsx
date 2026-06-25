@@ -2302,6 +2302,9 @@ const LANGS = {
       setUpsellLabel: `+ אותו עיצוב על ספל · +₪49`,
       briefLabel: `הפרטים שבחרתי:`,
       heroPitch: `החיה האמיתית שלך, כקולאז' סטריטוויר על חולצת אוברסייז. 1 מתוך 1.`,
+      homeLine1: `החבורה האמיתית שלך.`,
+      homeLine2: `על חולצה.`,
+      homeSub: `החיות האמיתיות שלכם — קולאז' רחוב על חולצת אוברסייז. 1 מתוך 1.`,
       step1: `בוחרים חולצה ושולחים עד 12 תמונות`,
       step2: `אנחנו בונים קולאז' ושולחים לאישור`,
       step3: `מאשרים → מדפיסים בבאר שבע`,
@@ -2437,6 +2440,9 @@ const LANGS = {
       setUpsellLabel: `+ same design on a mug · +₪49`,
       briefLabel: `My order details:`,
       heroPitch: `Your real pet, as a streetwear collage on an oversize tee. 1 of 1.`,
+      homeLine1: `Your real crew.`,
+      homeLine2: `On a tee.`,
+      homeSub: `Your actual pets — a streetwear collage on an oversize tee. 1 of 1.`,
       step1: `Choose your shirt and send up to 12 photos`,
       step2: `We build the collage and send you a preview`,
       step3: `You approve → we print in Be'er Sheva`,
@@ -2572,6 +2578,9 @@ const LANGS = {
       setUpsellLabel: `+ тот же дизайн на кружке · +₪49`,
       briefLabel: `Мой выбор:`,
       heroPitch: `Ваш настоящий питомец — как стритвир-коллаж на оверсайз-футболке. 1 of 1.`,
+      homeLine1: `Твоя настоящая банда.`,
+      homeLine2: `На футболке.`,
+      homeSub: `Твои реальные питомцы — уличный коллаж на оверсайз-футболке. 1 of 1.`,
       step1: `Выбираете футболку и присылаете до 12 фото`,
       step2: `Мы собираем коллаж и присылаем на согласование`,
       step3: `Вы утверждаете → печатаем в Беэр-Шеве`,
@@ -9782,7 +9791,7 @@ function HomeMugsBanner({ lang, setPage }) {
 // Mirrors HomeMugsBanner styling: eyebrow pill + wordmark + subtitle +
 // pitch copy + placeholder tee image + CTA. Rendered on the home page
 // after HomeMugsBanner (wrapped in ScrollReveal by the call site).
-function HomeMyCrewBand({ lang, setPage }) {
+function HomeMyCrewHero({ lang, setPage }) {
   const isRTL = lang === `he`;
   const [isMobile, setIsMobile] = useState(typeof window !== `undefined` ? window.innerWidth < 768 : false);
   useEffect(() => {
@@ -9791,29 +9800,53 @@ function HomeMyCrewBand({ lang, setPage }) {
     return () => window.removeEventListener(`resize`, h);
   }, []);
   const mc = (LANGS[lang] || LANGS.he).myCrew;
+  const shots = [`/my-crew/mycrew-worn-1.webp`, `/my-crew/mycrew-worn-3.webp`, `/my-crew/mycrew-dog-1.webp`, `/my-crew/mycrew-dog-2.webp`];
+  const go = () => setPage(`collage`);
   return (
-    <section aria-labelledby="home-mycrew-title" dir={isRTL ? `rtl` : `ltr`} style={{ background: COLORS.bg, padding: isMobile ? `0 18px 40px` : `0 32px 56px` }}>
-      <div style={{ maxWidth: 1000, margin: `0 auto`, background: `linear-gradient(135deg, rgba(255,107,53,0.10), rgba(255,107,53,0.02))`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 22, padding: isMobile ? `26px 22px` : `34px 40px`, display: `flex`, flexDirection: isMobile ? `column` : `row`, alignItems: `center`, gap: isMobile ? 22 : 36 }}>
-        <div style={{ flex: 1, textAlign: isMobile ? `center` : (isRTL ? `right` : `left`) }}>
-          <span style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `5px 15px`, marginBottom: 12, color: COLORS.accent, fontSize: 11, fontWeight: 700, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}><AboutIcon name="palette" size={13} color={COLORS.accent} /><span>{mc.name}</span></span>
-          <h2 id="home-mycrew-title" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(24px,4vw,38px)`, lineHeight: 1.1, color: COLORS.white, margin: `0 0 6px` }}>{mc.name}</h2>
-          <div style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 14, fontStyle: `italic`, marginBottom: 12 }}>{mc.subtitle}</div>
-          <p style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 15, lineHeight: 1.65, maxWidth: 460, margin: isMobile ? `0 auto 18px` : `0 0 18px` }}>{mc.bandPitch}</p>
-          <div style={{ display: `flex`, alignItems: `center`, justifyContent: isMobile ? `center` : (isRTL ? `flex-end` : `flex-start`), gap: 7, marginBottom: 20, color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, fontWeight: 600 }}>
-            <AboutIcon name="printer" size={15} color={COLORS.accent} />
-            <span>{mc.trustLine}</span>
+    <section aria-labelledby="home-mycrew-title" dir={isRTL ? `rtl` : `ltr`} style={{ position: `relative`, zIndex: 1, background: `radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 58%), ${COLORS.bg}`, padding: isMobile ? `92px 20px 36px` : `108px 32px 48px` }}>
+      <div style={{ maxWidth: 1120, margin: `0 auto`, display: `flex`, flexDirection: isMobile ? `column` : `row`, alignItems: `center`, gap: isMobile ? 26 : 48 }}>
+        {/* TEXT */}
+        <div style={{ flex: 1, textAlign: isMobile ? `center` : (isRTL ? `right` : `left`), order: isMobile ? 2 : 1 }}>
+          <span className="reveal" style={{ display: `inline-flex`, alignItems: `center`, gap: 6, background: COLORS.accentDim, border: `1px solid rgba(255,107,53,0.3)`, borderRadius: 100, padding: `6px 16px`, marginBottom: 16, color: COLORS.accent, fontSize: 11.5, fontWeight: 700, letterSpacing: `0.12em`, textTransform: `uppercase`, fontFamily: `'Heebo',sans-serif` }}>
+            <AboutIcon name="pawprint" size={13} color={COLORS.accent} /><span>{mc.name}</span>
+          </span>
+          <h1 id="home-mycrew-title" className="reveal" data-delay="1" style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 900, fontSize: `clamp(32px,6vw,60px)`, lineHeight: 1.06, letterSpacing: `-0.5px`, color: COLORS.white, margin: `0 0 16px` }}>
+            {mc.homeLine1}<br /><span style={{ color: COLORS.accent, fontStyle: `italic` }}>{mc.homeLine2}</span>
+          </h1>
+          <p className="reveal" data-delay="2" style={{ color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 15 : 17, lineHeight: 1.6, margin: isMobile ? `0 auto 20px` : `0 0 20px`, maxWidth: 480, fontWeight: 300 }}>{mc.homeSub}</p>
+          {/* 1 OF 1 seal */}
+          <div className="reveal" data-delay="3" style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: `linear-gradient(135deg, rgba(255,107,53,0.18), rgba(255,107,53,0.06))`, border: `1.5px solid rgba(255,107,53,0.45)`, borderRadius: 10, padding: `9px 18px`, marginBottom: 22 }}>
+            <AboutIcon name="sparkles" size={16} color={COLORS.accent} />
+            <span style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 13.5, color: COLORS.white, letterSpacing: `0.06em`, textTransform: `uppercase` }}>{mc.oneOfOne}</span>
           </div>
-          <button type="button" onClick={() => setPage(`collage`)} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 28px`, fontSize: 15, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 6px 22px rgba(255,107,53,0.28)`, transition: `background 0.2s` }}
-            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
-            onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
-            <AboutIcon name="pawprint" size={16} color="#fff" /> {mc.cta} {isRTL ? `←` : `→`}
+          <div className="reveal" data-delay="4" style={{ display: `flex`, flexWrap: `wrap`, alignItems: `center`, justifyContent: isMobile ? `center` : (isRTL ? `flex-end` : `flex-start`), gap: 14 }}>
+            <button type="button" onClick={go} style={{ display: `inline-flex`, alignItems: `center`, gap: 9, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 12, padding: `15px 30px`, fontSize: 16, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, boxShadow: `0 8px 26px rgba(255,107,53,0.32)`, transition: `background 0.2s` }}
+              onMouseOver={e => { e.currentTarget.style.background = COLORS.accentBtnHover; }}
+              onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}>
+              <AboutIcon name="pawprint" size={17} color="#fff" /> {mc.cta} {isRTL ? `←` : `→`}
+            </button>
+            <span style={{ color: COLORS.accent, fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 16 }}>{mc.priceLine}</span>
+          </div>
+          <div className="reveal" data-delay="5" style={{ display: `inline-flex`, alignItems: `center`, gap: 7, marginTop: 16, color: COLORS.gray, fontFamily: `'Heebo',sans-serif`, fontSize: 12.5, lineHeight: 1.5, flexWrap: `wrap` }}>
+            <span style={{ color: COLORS.accent, fontWeight: 800 }}>✓</span>
+            <span>{`${mc.trustApprove} · ${mc.trustLine}`}</span>
+          </div>
+        </div>
+        {/* VISUAL — main worn-tee shot */}
+        <div style={{ flex: 1, order: isMobile ? 1 : 2, display: `flex`, justifyContent: `center`, width: `100%` }}>
+          <div style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 320 : 420 }}>
+            <div aria-hidden="true" style={{ position: `absolute`, inset: `-10%`, background: `radial-gradient(ellipse at 50% 45%, rgba(255,107,53,0.28) 0%, rgba(255,107,53,0) 68%)`, pointerEvents: `none`, zIndex: 0 }} />
+            <img src={shots[0]} alt={mc.name} loading="eager" decoding="async" style={{ position: `relative`, zIndex: 1, width: `100%`, borderRadius: 18, objectFit: `cover`, aspectRatio: `4 / 5`, filter: `drop-shadow(0 18px 36px rgba(0,0,0,0.5))`, display: `block` }} />
+          </div>
+        </div>
+      </div>
+      {/* LOOKBOOK STRIP — 4 real worn examples, all link into /collage */}
+      <div style={{ maxWidth: 1120, margin: `26px auto 0`, display: `grid`, gridTemplateColumns: `repeat(4, 1fr)`, gap: isMobile ? 8 : 14 }}>
+        {shots.map((src, i) => (
+          <button key={i} type="button" onClick={go} aria-label={mc.name} style={{ padding: 0, border: `1px solid ${COLORS.border}`, borderRadius: 12, overflow: `hidden`, background: COLORS.bgCard, cursor: `pointer`, aspectRatio: `4 / 5`, display: `block` }}>
+            <img src={src} alt={mc.name} loading="lazy" decoding="async" style={{ width: `100%`, height: `100%`, objectFit: `cover`, display: `block` }} />
           </button>
-          <div style={{ marginTop: 10, color: COLORS.accent, fontSize: 13, fontWeight: 700, fontFamily: `'Heebo',sans-serif` }}>{mc.priceLine}</div>
-        </div>
-        {/* Real MY CREW example — the design worn on the tee */}
-        <div style={{ flexShrink: 0, width: isMobile ? `100%` : 220, maxWidth: 260, display: `flex`, alignItems: `center`, justifyContent: `center` }}>
-          <img src={`/my-crew/mycrew-worn-1.webp`} alt={mc.name} loading="lazy" decoding="async" style={{ width: `100%`, maxWidth: 220, borderRadius: 14, objectFit: `cover`, filter: `drop-shadow(0 10px 24px rgba(255,107,53,0.22))`, display: `block` }} />
-        </div>
+        ))}
       </div>
     </section>
   );
@@ -12418,7 +12451,7 @@ export default function App() {
               <Nav page={page} setPage={setPage} goToBlog={goToBlog} lang={lang} setLang={setLang} user={user} isAdmin={isAdmin} onLogout={handleLogout} cartCount={cart.reduce((s, it) => s + (it.qty || 1), 0)} onCartClick={openCart} preview={publicPreview} />
             </header>
             <main id="main" ref={mainRef} tabIndex={-1} style={{ outline: "none" }}>
-            {page === "home" && <><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><ScrollReveal><HomeMyCrewBand lang={lang} setPage={setPage} /></ScrollReveal><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
+            {page === "home" && <><HomeMyCrewHero lang={lang} setPage={setPage} /><EmotionalHero lang={lang} setPage={setPage} reduceMotion={reduceMotion} /><HomeFloatingBloomCarousel lang={lang} setPage={setPage} /><HomeMugsBanner lang={lang} setPage={setPage} /><Hero setPage={setPage} lang={lang} compact /><ScrollReveal><PhraseBand lang={lang} reduceMotion={reduceMotion} /></ScrollReveal><ScrollReveal><EventOrdersSection lang={lang} /></ScrollReveal><ScrollReveal><EventMugsSection lang={lang} /></ScrollReveal><ScrollReveal><Reviews lang={lang} /></ScrollReveal></>}
             {page === "about" && <AboutPage lang={lang} setPage={setPage} />}
             {page === "mugs" && <MugsPage lang={lang} setPage={setPage} />}
             {page === `collage` && <CollagePage lang={lang} setPage={setPage} goToCollage={goToCollage} />}
