@@ -10201,9 +10201,11 @@ function CollagePage({ lang, setPage, goToCollage }) {
           {t.transformTitle}
         </h2>
         <div style={{ display: `flex`, alignItems: `center`, justifyContent: `center`, gap: isMobile ? 10 : 18, maxWidth: 640, margin: `0 auto`, flexDirection: isRTL ? `row-reverse` : `row` }}>
-          <div style={{ flex: 1, background: COLORS.bgCard, border: `1px dashed ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `22px 10px` : `30px 16px`, textAlign: `center`, display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 12 }}>
-            <div style={{ display: `grid`, gridTemplateColumns: `1fr 1fr`, gap: 5, width: 60, height: 60 }}>
-              {[0, 1, 2, 3].map((i) => <div key={i} style={{ background: `#2a2a2a`, borderRadius: 6 }} />)}
+          <div style={{ flex: 1, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `16px 12px` : `22px 18px`, textAlign: `center`, display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 12 }}>
+            <div style={{ display: `grid`, gridTemplateColumns: `1fr 1fr`, gap: 5, width: isMobile ? 116 : 150 }}>
+              {[`/my-crew/mycrew-src-1.webp`, `/my-crew/mycrew-src-2.webp`, `/my-crew/mycrew-src-3.webp`, `/my-crew/mycrew-src-4.webp`].map((src, i) => (
+                <img key={i} src={src} alt={t.transformBefore} loading="lazy" decoding="async" style={{ width: `100%`, aspectRatio: `1`, objectFit: `cover`, borderRadius: 6, display: `block` }} />
+              ))}
             </div>
             <span style={{ fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, fontWeight: 600, color: COLORS.gray }}>{t.transformBefore}</span>
           </div>
