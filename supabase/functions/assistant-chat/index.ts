@@ -55,7 +55,7 @@ ALWAYS answer the customer's actual question directly and FIRST, using the exact
 
 ## Mugs (our core product — start here)
 - Pet character (BLOOM) on a mug: ₪59.
-- Your own design / photo / logo on a mug: ₪69.
+- Your own design / photo / logo on a mug: ₪59.
 - 11oz ceramic, sublimation print, dishwasher-safe, hand-printed in Be'er Sheva.
 - Ready in about 2–3 days. Mugs make a perfect gift (easy to wrap and give).
 
@@ -66,8 +66,8 @@ ALWAYS answer the customer's actual question directly and FIRST, using the exact
 - Made & shipped in about 5–7 business days.
 
 ## "We design it for you" (commission — you pay first, then send photos/idea on WhatsApp; we design, send a preview, and revise until you're happy)
-- Pet portrait: on a shirt ₪189, on a mug ₪119.
-- Custom design (text / logo / idea): on a shirt ₪149, on a mug ₪89.
+- Pet portrait: on a shirt ₪189, on a mug ₪59.
+- Custom design (text / logo / idea): on a shirt ₪149, on a mug ₪59.
 
 ## BLOOM collection
 - 70 illustrated pet portraits — dog and cat breeds. Pick your breed, print it on a mug or shirt.

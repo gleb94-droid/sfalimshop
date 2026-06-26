@@ -753,7 +753,7 @@ export default function MugStudio({ lang, setPage, onAddToCart }) {
                   boxShadow: layers.length === 0 ? `none` : `0 6px 18px rgba(255,107,53,0.3)`,
                   transition: `background 0.2s`,
                 }}
-              >{busy ? t.working : (layers.length === 0 ? t.missingDesign : `${t.addToCart} · ₪69`)}</button>
+              >{busy ? t.working : (layers.length === 0 ? t.missingDesign : `${t.addToCart} · ₪59`)}</button>
               <button
                 onClick={onDownload}
                 disabled={layers.length === 0}

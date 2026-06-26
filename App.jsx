@@ -1853,7 +1853,7 @@ const PET_NAME_SURCHARGE = 20;
 // exposed in the UI (the choice box renders for non-mug products only), so there is no
 // live price mismatch today — but sync the edge fn to these values BEFORE ever exposing
 // mug commission, or the server would re-price the mug to the old (higher) amount.
-const COMMISSION_PRICE = { pet: { shirt: 189, mug: 119 }, custom: { shirt: 149, mug: 89 }, collage: { shirt: 169, mug: 49 } };
+const COMMISSION_PRICE = { pet: { shirt: 189, mug: 59 }, custom: { shirt: 149, mug: 59 }, collage: { shirt: 169, mug: 49 } };
 const commissionPrice = (ctype, pid) => {
   const tier = COMMISSION_PRICE[ctype] || COMMISSION_PRICE.pet;
   return pid === `mug` ? tier.mug : tier.shirt;
@@ -2968,7 +2968,7 @@ const localizeVariant = (savedLabel, targetLang) => {
 const SHIRT_COLOR_PALETTE = BLOOM_SHIRT_COLORS.map(c => c.hex);
 
 const PRODUCTS = (t) => [
-  { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 69 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
+  { id: "mug",        name: t.products.mug,       desc: { he: "ספל פורצלן 11oz · הדפסת סובלימציה · עמיד במדיח", en: "11oz porcelain mug · sublimation print · dishwasher-safe", ru: "Фарфоровая кружка 11oz · сублимационная печать · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 59 }], colors: ["#ffffff"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
   { id: "magic_mug",  name: t.products.magic_mug, desc: { he: "ספל שחור משנה צבע בחום · הדפסת סובלימציה · עמיד במדיח", en: "Black heat-reveal mug · sublimation print · dishwasher-safe", ru: "Чёрная кружка, проявляется в тепле · сублимация · можно в посудомойке" }, is_bestseller: true, variants: [{ id: "standard", label: t.variants.standard, price: 75 }], colors: ["#000000"], printArea: { x: 40, y: 40, w: 260, h: 300 } },
   { id: "socks",      name: t.products.socks,     desc: { he: "גרביים · מידה אחת · הדפסה צבעונית מלאה", en: "Socks · one size · full-color print", ru: "Носки · единый размер · полноцветная печать" }, variants: [{ id: "standard", label: t.variants.oneSize, price: 59 }], colors: ["#ffffff"], printArea: { x: 30, y: 80, w: 200, h: 200 } },
   { id: "tshirt",     name: t.products.tshirt,    desc: { he: "100% כותנה סרוקה · רכה ונושמת · גזרה רגילה · הדפסת DTF חדה", en: "100% combed cotton · soft & breathable · regular fit · crisp DTF print", ru: "100% чёсаный хлопок · мягкий и дышащий · обычный крой · чёткая DTF-печать" }, is_bestseller: true, variants: [{ id: "s", label: "S", price: 149 }, { id: "m", label: "M", price: 149 }, { id: "l", label: "L", price: 149 }, { id: "xl", label: "XL", price: 149 }, { id: "xxl", label: "XXL", price: 149 }], colors: colorHexes(["white","black","gray","navy","royal","azure","turquoise","red","wine","orange","yellow","green","darkGreen","sage","beige","brown","purple","pink"]), printArea: { x: 40, y: 40, w: 320, h: 320 } },
@@ -9914,8 +9914,8 @@ function MugsPage({ lang, setPage }) {
       waysTitle: `איך מזמינים ספל`,
       ways: [
         { icon: `paw`, title: `החיה שלכם על ספל`, price: `₪59`, desc: `בחרו דמות מאוסף BLOOM`, cta: `לאוסף`, go: () => setPage(`pets`) },
-        { icon: `upload`, title: `העיצוב שלכם`, price: `₪69`, desc: `העלו תמונה או לוגו משלכם`, cta: `התחילו`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `נעצב לכם`, price: `החל מ-₪89`, desc: `שלחו רעיון או תמונה — ונעצב לכם עיצוב ייחודי`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספל עם עיצוב מותאם אישית`) : null },
+        { icon: `upload`, title: `העיצוב שלכם`, price: `₪59`, desc: `העלו תמונה או לוגו משלכם`, cta: `התחילו`, go: () => setPage(`order`) },
+        { icon: `brush`, title: `נעצב לכם`, price: `₪59`, desc: `שלחו רעיון או תמונה — ונעצב לכם עיצוב ייחודי`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספל עם עיצוב מותאם אישית`) : null },
         { icon: `rings`, title: `חתונה ואירועים`, price: `סט זוגי מ-₪149`, desc: `שמות · תאריך · תמונה · סטים לשולחן`, cta: `וואטסאפ`, href: waValid ? wa(`היי! אני מעוניין/ת בספלים מעוצבים לאירוע (חתונה / חברה)`) : null },
       ],
       whyTitle: `למה הספלים שלנו`,
@@ -9936,8 +9936,8 @@ function MugsPage({ lang, setPage }) {
       waysTitle: `Ways to order a mug`,
       ways: [
         { icon: `paw`, title: `Your pet on a mug`, price: `₪59`, desc: `Choose a BLOOM character`, cta: `Browse`, go: () => setPage(`pets`) },
-        { icon: `upload`, title: `Your own design`, price: `₪69`, desc: `Upload a photo or your logo`, cta: `Start`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `We design it`, price: `from ₪89`, desc: `Send an idea or photo — we'll create a custom design for you`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in a mug with a custom design`) : null },
+        { icon: `upload`, title: `Your own design`, price: `₪59`, desc: `Upload a photo or your logo`, cta: `Start`, go: () => setPage(`order`) },
+        { icon: `brush`, title: `We design it`, price: `₪59`, desc: `Send an idea or photo — we'll create a custom design for you`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in a mug with a custom design`) : null },
         { icon: `rings`, title: `Weddings & events`, price: `pair from ₪149`, desc: `Names · date · photo · table sets`, cta: `WhatsApp`, href: waValid ? wa(`Hi! I'm interested in designed mugs for an event (wedding / company)`) : null },
       ],
       whyTitle: `Why our mugs`,
@@ -9958,8 +9958,8 @@ function MugsPage({ lang, setPage }) {
       waysTitle: `Как заказать кружку`,
       ways: [
         { icon: `paw`, title: `Питомец на кружке`, price: `₪59`, desc: `Выберите персонажа BLOOM`, cta: `В каталог`, go: () => setPage(`pets`) },
-        { icon: `upload`, title: `Свой дизайн`, price: `₪69`, desc: `Загрузите фото или логотип`, cta: `Начать`, go: () => setPage(`order`) },
-        { icon: `brush`, title: `Создадим для вас`, price: `от ₪89`, desc: `Пришлите идею или фото — создадим уникальный дизайн`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересует кружка с индивидуальным дизайном`) : null },
+        { icon: `upload`, title: `Свой дизайн`, price: `₪59`, desc: `Загрузите фото или логотип`, cta: `Начать`, go: () => setPage(`order`) },
+        { icon: `brush`, title: `Создадим для вас`, price: `₪59`, desc: `Пришлите идею или фото — создадим уникальный дизайн`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересует кружка с индивидуальным дизайном`) : null },
         { icon: `rings`, title: `Свадьба и события`, price: `пара от ₪149`, desc: `Имена · дата · фото · наборы на стол`, cta: `WhatsApp`, href: waValid ? wa(`Здравствуйте! Меня интересуют дизайнерские кружки для события (свадьба / компания)`) : null },
       ],
       whyTitle: `Почему наши кружки`,

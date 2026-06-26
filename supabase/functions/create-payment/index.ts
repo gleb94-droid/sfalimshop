@@ -207,7 +207,7 @@ serve(async (req) => {
   // KEEP THIS CATALOG IN SYNC WITH PRODUCTS in App.jsx.
   // ============================================================
   const CATALOG: Record<string, number | Record<string, number>> = {
-    mug: { standard: 69 },
+    mug: { standard: 59 },
     magic_mug: { standard: 75 }, // black heat-reveal mug (custom-upload path)
     socks: { standard: 59 },     // one-size socks (custom-upload path)
     tshirt: 149, lycra: 149, oversized: 149, look: 149, stonewash: 149, dryfit: 149,
@@ -271,8 +271,8 @@ serve(async (req) => {
           // (pet portrait / custom design) × product (shirt / mug).
           // KEEP IN SYNC WITH COMMISSION_PRICE in App.jsx.
           const CPRICE: Record<string, { shirt: number; mug: number }> = {
-            pet: { shirt: 189, mug: 119 },
-            custom: { shirt: 149, mug: 89 },
+            pet: { shirt: 189, mug: 59 },
+            custom: { shirt: 149, mug: 59 },
             collage: { shirt: 169, mug: 49 }, // MY CREW tee=169; mug=49 = "Full Crew Set" add-on (set-only, no standalone collage mug)
           };
           // ctype/pid come from client-set extra_prints. Unknown ctype coerces to
