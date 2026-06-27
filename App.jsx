@@ -5209,6 +5209,26 @@ function AdminPage({ lang }) {
                             <div style={{ color: COLORS.gray, fontSize: 11, fontWeight: 600, textTransform: "uppercase", marginBottom: 10 }}>{t.admin.customer}</div>
                             <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{order.customer_email}</div>
                             {order.customer_phone && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{order.customer_phone}</div>}
+                            {/* Cart recovery — one-tap personal WhatsApp to an UNPAID order's customer.
+                                A one-to-one service message about the customer's own order (legal under
+                                IL Amendment 40; not a bulk marketing send). Localized to order.language. */}
+                            {order.payment_status !== `succeeded` && order.status !== `cancelled` && order.customer_phone && (() => {
+                              const raw = String(order.customer_phone).replace(/\D/g, ``);
+                              const ph = raw.startsWith(`972`) ? raw : (`972` + raw.replace(/^0/, ``));
+                              const first = String(order.customer_name || ``).trim().split(/\s+/)[0] || ``;
+                              const ln = order.language === `ru` ? `ru` : order.language === `en` ? `en` : `he`;
+                              const msg = ln === `ru`
+                                ? `Привет, ${first}! 🐾 Это Глеб из Sfalim Shop. Заметил, что ваш заказ не завершился — всё в порядке? Буду рад помочь его закончить, можно и личная передача в Беэр-Шеве 🙂`
+                                : ln === `en`
+                                ? `Hi ${first}! 🐾 This is Gleb from Sfalim Shop. I noticed your order didn't complete — is everything ok? Happy to help you finish it, and we can also arrange personal handoff in Be'er Sheva 🙂`
+                                : `היי ${first}! 🐾 כאן גלב מספלים שופ. שמתי לב שההזמנה שלך לא הושלמה — הכול בסדר? אשמח לעזור לך לסיים, ואפשר גם מסירה אישית בבאר שבע 🙂`;
+                              return (
+                                <a href={`https://wa.me/${ph}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                                  style={{ display: `inline-flex`, alignItems: `center`, gap: 7, marginTop: 8, marginBottom: 4, background: `#25D366`, color: `#fff`, borderRadius: 8, padding: `8px 14px`, fontSize: 13, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, textDecoration: `none` }}>
+                                  💬 {lang === `he` ? `שחזור עגלה — וואטסאפ ללקוח` : lang === `ru` ? `Вернуть корзину — WhatsApp клиенту` : `Recover — WhatsApp customer`}
+                                </a>
+                              );
+                            })()}
                             {(order.customer_street || order.customer_city) && <div style={{ color: COLORS.white, fontSize: 14, marginBottom: 4 }}>{[order.customer_street, order.customer_city, order.customer_postal_code].filter(Boolean).join(", ")}</div>}
                             {order.delivery_method && (() => {
                               const dm = DELIVERY_BY_ID[order.delivery_method];
