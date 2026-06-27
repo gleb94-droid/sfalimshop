@@ -10321,7 +10321,7 @@ function CollagePage({ lang, setPage, goToCollage }) {
         </h3>
         <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(4, 1fr)`, gap: 10, maxWidth: 720, margin: `0 auto` }}>
           {(t.occasions || []).map((label, i) => {
-            const icon = [`gift`, `pawprint`, `heart`, `sparkles`][i] || `pawprint`;
+            const icon = [`flower2`, `pawprint`, `heart`, `sparkles`][i] || `pawprint`;
             return (
               <div key={i} style={{ display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? `16px 10px` : `18px 14px`, textAlign: `center` }}>
                 <span style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 40, height: 40, borderRadius: 10, background: COLORS.accentDim }}>
