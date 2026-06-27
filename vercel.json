@@ -25,6 +25,18 @@
       "destination": "/api/og?type=collage"
     },
     {
+      "source": "/pets",
+      "destination": "/api/og?type=pets"
+    },
+    {
+      "source": "/about",
+      "destination": "/api/og?type=about"
+    },
+    {
+      "source": "/order",
+      "destination": "/api/og?type=order"
+    },
+    {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }

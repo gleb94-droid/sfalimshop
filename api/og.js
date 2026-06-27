@@ -486,6 +486,69 @@ ${ld}
 </html>`;
 }
 
+// ---- Generic crawler HTML for static SPA pages that have no DB lookup
+// (/pets, /about, /order). Without these, a direct hit on the real path falls
+// through to index.html (home meta) and the hash-router lands on home. Humans
+// are 302'd to the SPA hash route; crawlers get proper per-page
+// title/description/canonical so the path isn't a duplicate of home.
+const PETS_COPY = {
+  he: { title: `BLOOM Collection · אוסף דיוקנאות חיות מחמד · ספלים שופ`, desc: `אוסף BLOOM — 70 דיוקנאות מאוירים של כלבים וחתולים על חולצות, ספלים ומדבקות. מצאו את הגזע שלכם.` },
+  en: { title: `BLOOM Collection · Pet Portraits · Sfalim Shop`, desc: `The BLOOM collection — 70 illustrated dog & cat portraits on shirts, mugs and stickers. Find your breed.` },
+  ru: { title: `Коллекция BLOOM · Портреты питомцев · Sfalim Shop`, desc: `Коллекция BLOOM — 70 рисованных портретов собак и кошек на футболках, кружках и стикерах. Найдите свою породу.` },
+};
+const ABOUT_COPY = {
+  he: { title: `על ספלים שופ · מי אנחנו`, desc: `הסיפור של ספלים שופ — הדפסה מקומית בבאר שבע, באהבה ובדיוק, עם משלוח לכל הארץ.` },
+  en: { title: `About · Sfalim Shop`, desc: `The Sfalim Shop story — printed locally in Be'er Sheva with care, shipped anywhere in Israel.` },
+  ru: { title: `О нас · Sfalim Shop`, desc: `История Sfalim Shop — печатаем в Беэр-Шеве с любовью, доставка по всему Израилю.` },
+};
+const ORDER_COPY = {
+  he: { title: `הזמן עיצוב משלך · ספלים שופ`, desc: `עצבו מוצר משלכם — חולצה, ספל או מדבקה עם העיצוב שלכם. מודפס בעבודת יד בבאר שבע.` },
+  en: { title: `Design Your Order · Sfalim Shop`, desc: `Design your own — a shirt, mug or sticker with your design. Hand-printed in Be'er Sheva.` },
+  ru: { title: `Создать заказ · Sfalim Shop`, desc: `Создайте свой товар — футболку, кружку или стикер с вашим дизайном. Печать вручную в Беэр-Шеве.` },
+};
+function buildSimpleHtml(lang, copyByLang, canonicalPath, opts) {
+  const o = opts || {};
+  const c = copyByLang[lang] || copyByLang.he;
+  const img = o.image || DEFAULT_OG_IMAGE;
+  const imgType = img.endsWith(`.webp`) ? `image/webp` : (img.endsWith(`.jpg`) || img.endsWith(`.jpeg`)) ? `image/jpeg` : `image/png`;
+  const indexable = o.index !== false;
+  const title = escapeHtml(c.title);
+  const description = escapeHtml(c.desc);
+  const canonical = escapeHtml(`${SITE_ORIGIN}${canonicalPath}`);
+  const image = escapeHtml(img);
+  const robots = escapeHtml((MAINTENANCE || !indexable) ? `noindex, nofollow` : `index, follow`);
+  const siteNameAttr = escapeHtml(siteName(lang));
+
+  return `<!DOCTYPE html>
+<html lang="${lang}" dir="${langDir(lang)}">
+<head>
+<meta charset="UTF-8" />
+<title>${title}</title>
+<meta name="description" content="${description}" />
+<meta name="robots" content="${robots}" />
+<link rel="canonical" href="${canonical}" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="${siteNameAttr}" />
+<meta property="og:url" content="${canonical}" />
+<meta property="og:title" content="${title}" />
+<meta property="og:description" content="${description}" />
+<meta property="og:image" content="${image}" />
+<meta property="og:image:secure_url" content="${image}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="${imgType}" />
+<meta property="og:image:alt" content="${title}" />
+<meta property="og:locale" content="${OG_LOCALE[lang]}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="${canonical}" />
+<meta name="twitter:title" content="${title}" />
+<meta name="twitter:description" content="${description}" />
+<meta name="twitter:image" content="${image}" />
+</head>
+<body></body>
+</html>`;
+}
+
 module.exports = async function handler(req, res) {
   // Resolve handle. vercel.json rewrite passes it as ?handle=<slug>; fall back
   // to scraping the path for local dev / direct calls.
@@ -528,7 +591,7 @@ module.exports = async function handler(req, res) {
   // Branch decision is appended below after the lookup so we log it once.
   console.log(`[og] method=${req.method} url=${req.url} handle=${handle} lang=${lang} ua=${String(ua).slice(0, 120)}`);
 
-  if (!handle && type !== `mugs` && type !== `collage`) {
+  if (!handle && ![`mugs`, `collage`, `pets`, `about`, `order`].includes(type)) {
     console.log(`[og] branch=notfound reason=empty-handle`);
     res.statusCode = 302;
     res.setHeader(`Location`, `/${langQS}`);
@@ -572,6 +635,24 @@ module.exports = async function handler(req, res) {
     if (!crawler) { console.log(`[og] branch=human type=collage → /${langQS}#collage`); return redirectHuman(`#collage`); }
     console.log(`[og] branch=crawler type=collage lang=${lang}`);
     return serveHtml(buildCollageHtml(lang));
+  }
+
+  if (type === `pets`) {
+    if (!crawler) { console.log(`[og] branch=human type=pets → /${langQS}#pets`); return redirectHuman(`#pets`); }
+    console.log(`[og] branch=crawler type=pets lang=${lang}`);
+    return serveHtml(buildSimpleHtml(lang, PETS_COPY, `/pets`, {}));
+  }
+
+  if (type === `about`) {
+    if (!crawler) { console.log(`[og] branch=human type=about → /${langQS}#about`); return redirectHuman(`#about`); }
+    console.log(`[og] branch=crawler type=about lang=${lang}`);
+    return serveHtml(buildSimpleHtml(lang, ABOUT_COPY, `/about`, {}));
+  }
+
+  if (type === `order`) {
+    if (!crawler) { console.log(`[og] branch=human type=order → /${langQS}#order`); return redirectHuman(`#order`); }
+    console.log(`[og] branch=crawler type=order lang=${lang}`);
+    return serveHtml(buildSimpleHtml(lang, ORDER_COPY, `/order`, { index: false }));
   }
 
   if (type === `blog`) {
