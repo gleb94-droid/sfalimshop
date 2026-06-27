@@ -2331,6 +2331,18 @@ const LANGS = {
         { q: `מה אם בא לי שינוי?`, a: `נתקן עד שתהיו מרוצים. בלי לחץ.` },
         { q: `כמה זמן זה לוקח?`, a: `2–3 ימי עסקים אחרי האישור. מודפס בעבודת יד בבאר שבע.` },
       ],
+      videoAlt: `MY CREW על החולצה — סרטון`,
+      guaranteeTitle: `ההבטחה שלנו`,
+      guarantee: [
+        `משלמים — ואנחנו מעצבים את הקולאז' מהתמונות שלכם`,
+        `מאשרים את העיצוב לפני ההדפסה — תיקונים עד שתאהבו`,
+        `לא יצא מושלם? מחזירים את הכסף לפני ההדפסה`,
+      ],
+      occasionsTitle: `מתנה מושלמת לכל רגע`,
+      occasions: [`יום הולדת`, `יום האימוץ`, `מתנה לאוהב/ת חיות`, `סתם כי מגיע`],
+      memoryTitle: `לזכר חבר אמיתי 🤍`,
+      memoryText: `הקולאז' שומר אותם קרוב — חולצת מחווה עדינה מהתמונות האהובות. מעצבים בעדינות, ומאשרים יחד לפני ההדפסה.`,
+      memoryCta: `ליצירת חולצת זיכרון`,
     },
     customize: { title: (p) => `התאם: ${p}`, sub: "העלה עיצוב וראה תצוגה מקדימה.", size: "מידה", option: "אפשרות", color: "צבע", design: "העיצוב שלך", uploadTitle: "העלה עיצוב", uploadSub: "PNG, JPG, SVG · רזולוציה גבוהה", uploaded: "עיצוב הועלה ✓", changeFile: "לחץ לשינוי", dragHint: "גרור לשינוי מיקום", designSize: "גודל עיצוב", shipping: "משלוח", total: "סה״כ", back: "← חזרה", continue: "המשך ←" },
     form: { title: "הפרטים שלך", sub: "כמעט סיימנו!", name: "שם מלא *", namePh: "השם שלך", email: "מייל *", emailPh: "your@email.com", phone: "טלפון", phonePh: "1234567", notes: "הערות", notesPh: "בקשות מיוחדות...", qty: "כמות", summary: "סיכום", shipping: "משלוח", total: "סה״כ", paymentNote: "תשלום בשלב הבא", paymentSub: "תשלום מאובטח דרך טרנזילה.", back: "← חזרה", place: "המשך לתשלום ←" },
@@ -2469,6 +2481,18 @@ const LANGS = {
         { q: `What if I want changes?`, a: `We revise until you're happy. No pressure.` },
         { q: `How long does it take?`, a: `2–3 business days after approval. Hand-printed in Be'er Sheva.` },
       ],
+      videoAlt: `MY CREW on the tee — video`,
+      guaranteeTitle: `Our promise`,
+      guarantee: [
+        `You pay — and we design your collage from your photos`,
+        `You approve the design before we print — revisions until you love it`,
+        `Not perfect? Money back before we print`,
+      ],
+      occasionsTitle: `The perfect gift for any moment`,
+      occasions: [`Birthday`, `Gotcha day`, `For a pet-lover`, `Just because`],
+      memoryTitle: `In memory of a true friend 🤍`,
+      memoryText: `Keep them close — a gentle tribute tee from your favourite photos. Designed with care, and approved together before we print.`,
+      memoryCta: `Create a memorial tee`,
     },
     customize: { title: (p) => `Customize: ${p}`, sub: "Upload your design and preview it.", size: "Size", option: "Option", color: "Color", design: "Your Design", uploadTitle: "Upload design", uploadSub: "PNG, JPG, SVG · High resolution", uploaded: "Design uploaded ✓", changeFile: "Click to change", dragHint: "Drag to reposition", designSize: "Design Size", shipping: "Shipping", total: "Total", back: "← Back", continue: "Continue →" },
     form: { title: "Your details", sub: "Almost there!", name: "Full Name *", namePh: "Your name", email: "Email *", emailPh: "your@email.com", phone: "Phone", phonePh: "1234567", notes: "Notes", notesPh: "Special requests...", qty: "Quantity", summary: "Summary", shipping: "Shipping", total: "Total", paymentNote: "Payment on next step", paymentSub: "Secure payment via Tranzila.", back: "← Back", place: "Continue to Payment →" },
@@ -2607,6 +2631,18 @@ const LANGS = {
         { q: `А если захочу правки?`, a: `Правим, пока не понравится. Без давления.` },
         { q: `Сколько времени занимает?`, a: `2–3 рабочих дня после согласования. Печать вручную в Беэр-Шеве.` },
       ],
+      videoAlt: `MY CREW на футболке — видео`,
+      guaranteeTitle: `Наша гарантия`,
+      guarantee: [
+        `Вы платите — и мы создаём коллаж из ваших фото`,
+        `Вы утверждаете дизайн до печати — правки, пока не понравится`,
+        `Не идеально? Вернём деньги до печати`,
+      ],
+      occasionsTitle: `Идеальный подарок на любой повод`,
+      occasions: [`День рождения`, `Из приюта`, `Другу-зооману`, `Просто так`],
+      memoryTitle: `В память о настоящем друге 🤍`,
+      memoryText: `Сохраните их рядом — деликатная футболка-память из любимых фото. Создаём бережно и утверждаем вместе перед печатью.`,
+      memoryCta: `Создать футболку-память`,
     },
     customize: { title: (p) => `Настройте: ${p}`, sub: "Загрузите дизайн и посмотрите превью.", size: "Размер", option: "Вариант", color: "Цвет", design: "Ваш дизайн", uploadTitle: "Загрузить дизайн", uploadSub: "PNG, JPG, SVG · Высокое разрешение", uploaded: "Дизайн загружен ✓", changeFile: "Нажмите для изменения", dragHint: "Перетащите для позиции", designSize: "Размер дизайна", shipping: "Доставка", total: "Итого", back: "← Назад", continue: "Продолжить →" },
     form: { title: "Ваши данные", sub: "Почти готово!", name: "Полное имя *", namePh: "Ваше имя", email: "Email *", emailPh: "your@email.com", phone: "Телефон", phonePh: "1234567", notes: "Заметки", notesPh: "Особые пожелания...", qty: "Количество", summary: "Итог", shipping: "Доставка", total: "Итого", paymentNote: "Оплата на следующем шаге", paymentSub: "Безопасная оплата через Tranzila.", back: "← Назад", place: "Перейти к оплате →" },
@@ -9787,6 +9823,34 @@ function HomeMugsBanner({ lang, setPage }) {
   );
 }
 
+// MyCrewReveal — the reveal video for MY CREW (turn-around in the tee).
+// Graceful: reserves a 4/5 box (no CLS); falls back to the worn-tee POSTER
+// image when the video file is absent/errors or under reduced-motion. The
+// poster image always exists, so something always renders even before the
+// owner uploads /my-crew/reveal.mp4. Muted autoplay is allowed without a gesture.
+function MyCrewReveal({ poster = `/my-crew/reveal-poster.webp`, alt = `MY CREW`, radius = 18, aspect = `4 / 5`, eager = false }) {
+  const [failed, setFailed] = useState(false);
+  const reduce = typeof window !== `undefined` && window.matchMedia
+    ? window.matchMedia(`(prefers-reduced-motion: reduce)`).matches : false;
+  const box = { position: `relative`, width: `100%`, aspectRatio: aspect, borderRadius: radius, overflow: `hidden`, background: COLORS.bgCard, display: `block` };
+  const media = { width: `100%`, height: `100%`, objectFit: `cover`, display: `block` };
+  if (failed || reduce) {
+    return (
+      <div style={box}>
+        <img src={poster} alt={alt} loading={eager ? `eager` : `lazy`} decoding="async" style={media} />
+      </div>
+    );
+  }
+  return (
+    <div style={box}>
+      <video autoPlay loop muted playsInline preload="metadata" poster={poster} aria-label={alt}
+        onError={() => setFailed(true)} style={media}>
+        <source src={`/my-crew/reveal.mp4`} type="video/mp4" />
+      </video>
+    </div>
+  );
+}
+
 // HomeMyCrewBand — compact promo band for the MY CREW /collage page.
 // Mirrors HomeMugsBanner styling: eyebrow pill + wordmark + subtitle +
 // pitch copy + placeholder tee image + CTA. Rendered on the home page
@@ -9834,9 +9898,11 @@ function HomeMyCrewHero({ lang, setPage }) {
         </div>
         {/* VISUAL — main worn-tee shot */}
         <div style={{ flex: 1, order: isMobile ? 1 : 2, display: `flex`, justifyContent: `center`, width: `100%` }}>
-          <div style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 320 : 420 }}>
+          <div style={{ position: `relative`, width: `100%`, maxWidth: isMobile ? 300 : 340 }}>
             <div aria-hidden="true" style={{ position: `absolute`, inset: `-10%`, background: `radial-gradient(ellipse at 50% 45%, rgba(255,107,53,0.28) 0%, rgba(255,107,53,0) 68%)`, pointerEvents: `none`, zIndex: 0 }} />
-            <img src={shots[0]} alt={mc.name} loading="eager" decoding="async" style={{ position: `relative`, zIndex: 1, width: `100%`, borderRadius: 18, objectFit: `cover`, aspectRatio: `4 / 5`, filter: `drop-shadow(0 18px 36px rgba(0,0,0,0.5))`, display: `block` }} />
+            <div style={{ position: `relative`, zIndex: 1, filter: `drop-shadow(0 18px 36px rgba(0,0,0,0.5))` }}>
+              <MyCrewReveal alt={mc.videoAlt} radius={18} aspect={`9 / 16`} eager />
+            </div>
           </div>
         </div>
       </div>
@@ -10119,7 +10185,7 @@ function CollagePage({ lang, setPage, goToCollage }) {
   // Pull one real testimonial for social proof — prefer a collage/shirt-related
   // review (Ella's photo-collage shirt fits MY CREW); else the first active one.
   // Hides itself if the table is empty (no fake/placeholder reviews).
-  const [review, setReview] = useState(null);
+  const [review, setReview] = useState([]);
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -10132,8 +10198,12 @@ function CollagePage({ lang, setPage, goToCollage }) {
           .order(`created_at`, { ascending: false });
         if (error || !data || !data.length) return;
         const rx = /(קולאז|collage|коллаж|חולצה|shirt|футбол)/i;
-        const pick = data.find(r => rx.test(`${r.product || ``} ${r.body_he || ``} ${r.body_en || ``} ${r.body_ru || ``}`)) || data[0];
-        if (!cancelled) setReview(pick);
+        const ranked = [...data].sort((a, b) => {
+          const am = rx.test(`${a.product || ``} ${a.body_he || ``} ${a.body_en || ``} ${a.body_ru || ``}`) ? 0 : 1;
+          const bm = rx.test(`${b.product || ``} ${b.body_he || ``} ${b.body_en || ``} ${b.body_ru || ``}`) ? 0 : 1;
+          return am - bm;
+        });
+        if (!cancelled) setReview(ranked.slice(0, 2));
       } catch (_) { /* table empty/missing — just hide */ }
     })();
     return () => { cancelled = true; };
@@ -10176,6 +10246,13 @@ function CollagePage({ lang, setPage, goToCollage }) {
         <div className="reveal" data-delay="3" style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: `linear-gradient(135deg, rgba(255,107,53,0.18), rgba(255,107,53,0.06))`, border: `1.5px solid rgba(255,107,53,0.45)`, borderRadius: 10, padding: `10px 20px`, marginBottom: 28 }}>
           <AboutIcon name="sparkles" size={18} color={COLORS.accent} />
           <span style={{ fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 14.5, color: COLORS.white, letterSpacing: `0.08em`, textTransform: `uppercase` }}>{t.oneOfOne}</span>
+        </div>
+      </section>
+
+      {/* REVEAL — the strongest proof: the tee in motion (graceful to poster) */}
+      <section style={{ ...sectionStyle, paddingTop: 0, paddingBottom: isMobile ? 18 : 28 }}>
+        <div style={{ maxWidth: 300, margin: `0 auto` }}>
+          <MyCrewReveal alt={t.videoAlt} radius={18} aspect={`9 / 16`} eager />
         </div>
       </section>
 
@@ -10237,6 +10314,26 @@ function CollagePage({ lang, setPage, goToCollage }) {
         </div>
       </section>
 
+      {/* GIFT OCCASIONS — frames MY CREW as THE pet-lover gift */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 8 : 16, paddingBottom: isMobile ? 16 : 28 }}>
+        <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(18px,3.4vw,26px)`, textAlign: `center`, margin: `0 0 18px` }}>
+          {t.occasionsTitle}
+        </h3>
+        <div style={{ display: `grid`, gridTemplateColumns: isMobile ? `repeat(2, 1fr)` : `repeat(4, 1fr)`, gap: 10, maxWidth: 720, margin: `0 auto` }}>
+          {(t.occasions || []).map((label, i) => {
+            const icon = [`gift`, `pawprint`, `heart`, `sparkles`][i] || `pawprint`;
+            return (
+              <div key={i} style={{ display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 8, background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 14, padding: isMobile ? `16px 10px` : `18px 14px`, textAlign: `center` }}>
+                <span style={{ display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 40, height: 40, borderRadius: 10, background: COLORS.accentDim }}>
+                  <AboutIcon name={icon} size={20} color={COLORS.accent} />
+                </span>
+                <span style={{ fontFamily: `'Heebo',sans-serif`, fontSize: 13.5, fontWeight: 600, color: COLORS.white, lineHeight: 1.35 }}>{label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* PHOTO GUIDE */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 20 : 32, paddingBottom: isMobile ? 20 : 36 }}>
         <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 18, padding: isMobile ? `22px 18px` : `28px 28px`, maxWidth: 680, margin: `0 auto` }}>
@@ -10272,30 +10369,65 @@ function CollagePage({ lang, setPage, goToCollage }) {
         </div>
       </section>
 
-      {/* SOCIAL PROOF — one real testimonial (relevant to MY CREW), right before the decision */}
-      {review && (
+      {/* IN MEMORY — the highest-emotion occasion, calm & respectful */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 36, paddingBottom: 0 }}>
+        <div style={{ background: `linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))`, border: `1px solid ${COLORS.border}`, borderRadius: 18, padding: isMobile ? `24px 20px` : `30px 30px`, maxWidth: 560, margin: `0 auto`, textAlign: `center`, display: `flex`, flexDirection: `column`, alignItems: `center`, gap: 12 }}>
+          <h3 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 700, fontSize: `clamp(19px,3.4vw,26px)`, color: COLORS.white, margin: 0 }}>{t.memoryTitle}</h3>
+          <p style={{ fontFamily: `'Heebo',sans-serif`, fontSize: isMobile ? 14.5 : 16, lineHeight: 1.7, color: COLORS.gray, margin: 0, maxWidth: 440 }}>{t.memoryText}</p>
+          <button type="button" onClick={() => (goToCollage ? goToCollage() : setPage(`order`))} style={{ display: `inline-flex`, alignItems: `center`, gap: 8, background: `transparent`, color: COLORS.accent, border: `1.5px solid ${COLORS.accent}`, borderRadius: 10, padding: `11px 22px`, fontSize: 14.5, fontWeight: 700, fontFamily: `'Heebo',sans-serif`, cursor: `pointer`, transition: `all 0.2s` }}
+            onMouseOver={e => { e.currentTarget.style.background = COLORS.accentDim; }}
+            onMouseOut={e => { e.currentTarget.style.background = `transparent`; }}>
+            {t.memoryCta} {isRTL ? `←` : `→`}
+          </button>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF — up to 2 real testimonials (relevant to MY CREW), right before the decision */}
+      {review.length > 0 && (
         <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 36, paddingBottom: 0 }}>
-          <article style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `22px 20px` : `28px 28px`, maxWidth: 560, margin: `0 auto`, display: `flex`, flexDirection: `column`, gap: 12, alignItems: `center`, textAlign: `center` }}>
-            <ReviewStars rating={review.rating} label={(LANGS[lang]?.reviews || LANGS.he.reviews).aria} />
-            <blockquote style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: isMobile ? 16 : 18, lineHeight: 1.55, margin: 0 }}>
-              {`“${review[`body_${lang}`] || review.body_he || review.body_en || ``}”`}
-            </blockquote>
-            <div style={{ display: `flex`, alignItems: `center`, gap: 10, paddingTop: 8 }}>
-              {review.author_avatar && (
-                <img src={review.author_avatar} alt={review.author_name} loading="lazy" style={{ width: 36, height: 36, borderRadius: `50%`, objectFit: `cover`, border: `1px solid ${COLORS.border}` }} />
-              )}
-              <div style={{ display: `flex`, flexDirection: `column`, lineHeight: 1.3, textAlign: isRTL ? `right` : `left` }}>
-                <span style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{(lang !== `he` && review[`author_name_${lang}`]) || review.author_name}</span>
-                {(review.author_city || review.product) && (
-                  <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif` }}>
-                    {[review.author_city, (lang !== `he` && review[`product_${lang}`]) || localizeProduct(review.product, lang)].filter(Boolean).join(` · `)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </article>
+          <div style={{ maxWidth: 560, margin: `0 auto`, display: `flex`, flexDirection: `column`, gap: 14 }}>
+            {review.map((rv, idx) => (
+              <article key={idx} style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: isMobile ? `22px 20px` : `28px 28px`, display: `flex`, flexDirection: `column`, gap: 12, alignItems: `center`, textAlign: `center` }}>
+                <ReviewStars rating={rv.rating} label={(LANGS[lang]?.reviews || LANGS.he.reviews).aria} />
+                <blockquote style={{ color: COLORS.white, fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontStyle: `italic`, fontSize: isMobile ? 16 : 18, lineHeight: 1.55, margin: 0 }}>
+                  {`“${rv[`body_${lang}`] || rv.body_he || rv.body_en || ``}”`}
+                </blockquote>
+                <div style={{ display: `flex`, alignItems: `center`, gap: 10, paddingTop: 8 }}>
+                  {rv.author_avatar && (
+                    <img src={rv.author_avatar} alt={rv.author_name} loading="lazy" style={{ width: 36, height: 36, borderRadius: `50%`, objectFit: `cover`, border: `1px solid ${COLORS.border}` }} />
+                  )}
+                  <div style={{ display: `flex`, flexDirection: `column`, lineHeight: 1.3, textAlign: isRTL ? `right` : `left` }}>
+                    <span style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontWeight: 600, fontSize: 13 }}>{(lang !== `he` && rv[`author_name_${lang}`]) || rv.author_name}</span>
+                    {(rv.author_city || rv.product) && (
+                      <span style={{ color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif` }}>
+                        {[rv.author_city, (lang !== `he` && rv[`product_${lang}`]) || localizeProduct(rv.product, lang)].filter(Boolean).join(` · `)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       )}
+
+      {/* GUARANTEE — the loud objection-buster, right before the price */}
+      <section style={{ ...sectionStyle, paddingTop: isMobile ? 28 : 44, paddingBottom: 0 }}>
+        <div style={{ background: `linear-gradient(160deg, rgba(255,107,53,0.10), rgba(255,107,53,0.02))`, border: `1px solid rgba(255,107,53,0.28)`, borderRadius: 18, padding: isMobile ? `24px 18px` : `30px 28px`, maxWidth: 620, margin: `0 auto` }}>
+          <h2 style={{ fontFamily: `'Playfair Display','Frank Ruhl Libre',serif`, fontWeight: 800, fontSize: `clamp(20px,3.8vw,28px)`, textAlign: `center`, margin: `0 0 18px`, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 10 }}>
+            <AboutIcon name="sparkles" size={22} color={COLORS.accent} />
+            {t.guaranteeTitle}
+          </h2>
+          <ul role="list" style={{ listStyle: `none`, margin: 0, padding: 0, display: `flex`, flexDirection: `column`, gap: 14 }}>
+            {(t.guarantee || []).map((g, i) => (
+              <li key={i} style={{ display: `flex`, alignItems: `flex-start`, gap: 12, color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontSize: 15.5, fontWeight: 600, lineHeight: 1.5 }}>
+                <span style={{ flexShrink: 0, display: `inline-flex`, alignItems: `center`, justifyContent: `center`, width: 26, height: 26, borderRadius: `50%`, background: COLORS.accentDim, color: COLORS.accent, fontWeight: 800, fontSize: 13, fontFamily: `'Heebo',sans-serif` }}>{`0${i + 1}`}</span>
+                {g}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       {/* PRICE + CTA */}
       <section style={{ ...sectionStyle, paddingTop: isMobile ? 24 : 40, textAlign: `center` }}>
@@ -10500,14 +10632,14 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
 
       {/* Nav links - CENTER (desktop only) */}
       {!isMobile && <div style={{ display: "flex", gap: 4, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-        {["home", "mugs", "pets", "collage", "order", "about"].map(p => (
+        {["home", "collage", "mugs", "pets", "order", "about"].map(p => (
           <button key={p} onClick={() => setPage(p)} aria-current={page === p ? "page" : undefined} style={{
             background: page === p ? COLORS.accentDim : "transparent",
             border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent",
             color: page === p ? COLORS.accent : COLORS.gray,
             padding: "8px 18px", borderRadius: 8, cursor: "pointer",
             fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif",
-            fontSize: 13, fontWeight: p === "pets" ? 700 : 500,
+            fontSize: 13, fontWeight: (p === "pets" || p === "collage") ? 700 : 500,
             fontStyle: p === "pets" ? "italic" : "normal",
             letterSpacing: p === "pets" ? "0.5px" : "normal",
             transition: "all 0.2s", position: "relative", overflow: "hidden",
@@ -10571,8 +10703,8 @@ function Nav({ page, setPage, goToBlog, lang, setLang, user, isAdmin, onLogout, 
     {/* Mobile dropdown */}
     {mobileMenu && (
       <div id="mobile-nav-menu" role="navigation" aria-label={lang === "he" ? "תפריט ראשי" : lang === "ru" ? "Главное меню" : "Main menu"} style={{ position: "fixed", top: 72, left: 0, right: 0, zIndex: 99, background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${COLORS.border}`, padding: 20, maxHeight: "calc(100vh - 72px)", overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 8, direction: lang === "he" ? "rtl" : "ltr" }}>
-        {["home", "mugs", "pets", "collage", "order", "about"].map(p => (
-          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: p === "pets" ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
+        {["home", "collage", "mugs", "pets", "order", "about"].map(p => (
+          <button key={p} onClick={() => { setPage(p); setMobileMenu(false); }} aria-current={page === p ? "page" : undefined} style={{ background: page === p ? COLORS.accentDim : "transparent", border: page === p ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === p ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: p === "pets" ? "'Playfair Display','Frank Ruhl Libre',serif" : "'Heebo',sans-serif", fontSize: 16, fontWeight: (p === "pets" || p === "collage") ? 700 : 500, fontStyle: p === "pets" ? "italic" : "normal", textAlign: "start", width: "100%" }}>{t.nav[p]}</button>
         ))}
         <button onClick={() => { if (goToBlog) goToBlog(); setMobileMenu(false); }} aria-current={page === "blog" ? "page" : undefined} style={{ background: page === "blog" ? COLORS.accentDim : "transparent", border: page === "blog" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "blog" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, fontWeight: 500, textAlign: "start", width: "100%" }}>{t.navBlog}</button>
         {user && <button onClick={() => { setPage("track"); setMobileMenu(false); }} aria-current={page === "track" ? "page" : undefined} style={{ background: page === "track" ? COLORS.accentDim : "transparent", border: page === "track" ? `1px solid ${COLORS.accent}` : "1px solid transparent", color: page === "track" ? COLORS.accent : COLORS.white, padding: "14px 20px", borderRadius: 10, cursor: "pointer", fontFamily: "'Heebo',sans-serif", fontSize: 16, textAlign: "start", width: "100%" }}>{t.nav.track}</button>}
@@ -12015,7 +12147,7 @@ export default function App() {
   useEffect(() => {
     const titles = {
       he: {
-        home:     "ספלים שופ | הדפסות מותאמות אישית — חולצות, ספלים, מדבקות",
+        home:     "MY CREW · ספלים שופ | קולאז' מהחיות שלך על חולצה",
         mugs:     "הספלים שלנו | ספלים קרמיים מעוצבים | ספלים שופ",
         order:    "הזמן עיצוב משלך | ספלים שופ",
         pets:     "BLOOM Collection | אוסף דיוקנאות חיות מחמד | ספלים שופ",
@@ -12026,7 +12158,7 @@ export default function App() {
         policies: "מידע משפטי | ספלים שופ",
       },
       en: {
-        home:     "Sfalim Shop | Custom Prints — Shirts, Mugs, Stickers",
+        home:     "MY CREW · Sfalim Shop | Your pets as a streetwear collage tee",
         mugs:     "Our Mugs | Custom Ceramic Mugs | Sfalim Shop",
         order:    "Design Your Order | Sfalim Shop",
         pets:     "BLOOM Collection | Pet Couture by Sfalim Shop",
@@ -12037,7 +12169,7 @@ export default function App() {
         policies: "Legal | Sfalim Shop",
       },
       ru: {
-        home:     "Sfalim Shop | Индивидуальная печать — футболки, кружки, стикеры",
+        home:     "MY CREW · Sfalim Shop | Коллаж с вашими питомцами на футболке",
         mugs:     "Наши кружки | Дизайнерские керамические кружки | Sfalim Shop",
         order:    "Создать заказ | Sfalim Shop",
         pets:     "BLOOM Collection | Pet Couture от Sfalim Shop",
@@ -16286,6 +16418,7 @@ const GENERIC_SEO_DESC = {
 // Falls back to GENERIC_SEO_DESC for any view not listed (home/admin/policies).
 const VIEW_SEO_DESC = {
   he: {
+    home: `MY CREW — קולאז' סטריטוויר מהתמונות האמיתיות של החיות שלכם על חולצת אוברסייז. 1 מתוך 1, אישור עיצוב לפני הדפסה, מודפס בעבודת יד בבאר שבע.`,
     order: `עצבו מוצר משלכם — העלו תמונה, בחרו חולצה/ספל/מדבקה, צבע ומידה, ואנחנו מדפיסים בישראל ושולחים עד הבית.`,
     mugs: `הספלים שלנו — ספל קרמי 11oz עם דיוקן BLOOM, עיצוב משלכם, או ספל מעוצב לחתונה ולאירועים. מודפס בעבודת יד בבאר שבע.`,
     pets: `אוסף BLOOM — 70 דיוקנאות מאוירים של כלבים וחתולים על חולצות, ספלים ומדבקות. מצאו את הגזע שלכם.`,
@@ -16293,6 +16426,7 @@ const VIEW_SEO_DESC = {
     track: `מעקב אחר ההזמנה שלכם בספלים שופ.`,
   },
   en: {
+    home: `MY CREW — a streetwear collage of your real pets on an oversize tee. 1 of 1, you approve the design before we print, hand-printed in Be'er Sheva.`,
     order: `Design your own — upload a photo, pick a shirt/mug/sticker, colour and size; printed in Israel and shipped to your door.`,
     mugs: `Our mugs — an 11oz ceramic mug with a BLOOM portrait, your own design, or a designed mug for weddings & events. Hand-printed in Be'er Sheva.`,
     pets: `The BLOOM collection — 70 illustrated dog & cat portraits on shirts, mugs and stickers. Find your breed.`,
@@ -16300,6 +16434,7 @@ const VIEW_SEO_DESC = {
     track: `Track your Sfalim Shop order.`,
   },
   ru: {
+    home: `MY CREW — уличный коллаж из реальных фото ваших питомцев на оверсайз-футболке. 1 of 1, утверждение дизайна до печати, печать вручную в Беэр-Шеве.`,
     order: `Создайте свой товар — загрузите фото, выберите футболку/кружку/стикер, цвет и размер; печатаем в Израиле с доставкой на дом.`,
     mugs: `Наши кружки — керамическая кружка 11oz с портретом BLOOM, вашим дизайном или дизайнерская кружка на свадьбу и события. Печать вручную в Беэр-Шеве.`,
     pets: `Коллекция BLOOM — 70 рисованных портретов собак и кошек на футболках, кружках и стикерах. Найдите свою породу.`,
