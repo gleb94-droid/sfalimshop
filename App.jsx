@@ -14302,8 +14302,10 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
             <PetNamePreview name={petName} font={petNameFont} color={petNameColor} />
           </div>
 
-          {/* Info */}
-          <div style={{ padding: isMobile ? "28px 24px" : "40px 36px", display: "flex", flexDirection: "column" }}>
+          {/* Info — minWidth:0 so this grid item can shrink to its track; without
+              it the "More characters" marquee's content width (~4000px) forces the
+              whole column (and its centred CTA text) to overflow off-screen. */}
+          <div style={{ padding: isMobile ? "28px 24px" : "40px 36px", display: "flex", flexDirection: "column", minWidth: 0 }}>
             <div style={{ color: COLORS.accent, fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 10, letterSpacing: "2px", marginBottom: 16, textTransform: "uppercase" }}>
               {`BLOOM ${LANGS[lang].bloom.collection}`}
             </div>
