@@ -14032,6 +14032,24 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
     })();
     return () => { cancelled = true; };
   }, [design && design.slug]);
+  // One top testimonial for the desktop sticky buy-box (real social proof at the
+  // buy decision). Hidden when the table is empty — no fake/placeholder reviews.
+  const [modalReview, setModalReview] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from(`testimonials`)
+          .select(`rating,body_he,body_en,body_ru,author_name,author_name_en,author_name_ru`)
+          .eq(`is_active`, true)
+          .order(`sort_order`, { ascending: true })
+          .limit(1);
+        if (!cancelled && data && data.length) setModalReview(data[0]);
+      } catch (_) { /* table empty/missing — just hide */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
   // The image + view nav (arrows / counter / enlarge / swipe) live in the shared
   // <BloomImageCarousel> below — it computes imgSrc from previewProduct/selectedColor.
 
@@ -14291,7 +14309,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               image panel). Flips THIS breed's views (portrait/white/black/mug);
               it no longer browses breeds. Same component the breed page uses.
               The live pet-name preview sits directly under it. */}
-          <div>
+          <div style={{ position: isMobile ? `static` : `sticky`, top: isMobile ? undefined : 0, alignSelf: `start` }}>
             <BloomImageCarousel
               design={design} lang={lang} isMobile={isMobile}
               previewProduct={previewProduct} setPreviewProduct={setPreviewProduct}
@@ -14300,6 +14318,42 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               panel
             />
             <PetNamePreview name={petName} font={petNameFont} color={petNameColor} />
+            {/* Desktop sticky buy-box — fills the column's empty space below the
+                image and keeps price + add-to-cart + trust in view while the long
+                details scroll. Mobile keeps its own bottom-sticky CTA (unchanged). */}
+            {!isMobile && previewProduct && (() => {
+              const sp = (previewProduct === `magic_mug` ? 75 : previewProduct === `socks` ? 59 : previewProduct === `mug` ? Number(design.price_mug) : Number(shirtPrice)) + ((previewProduct === `mug` || previewProduct === `magic_mug` || previewProduct === `socks`) ? 0 : petSurcharge);
+              const rv = modalReview;
+              const rvBody = rv ? (rv[`body_${lang}`] || rv.body_he || rv.body_en || ``) : ``;
+              const rvName = rv ? ((lang !== `he` && rv[`author_name_${lang}`]) || rv.author_name || ``) : ``;
+              return (
+                <div style={{ margin: 16, padding: 16, background: `rgba(255,107,53,0.06)`, border: `1px solid rgba(255,107,53,0.22)`, borderRadius: 12, display: `flex`, flexDirection: `column`, gap: 12 }}>
+                  <div style={{ display: `flex`, alignItems: `baseline`, justifyContent: `space-between`, gap: 8 }}>
+                    <span style={{ color: COLORS.white, fontFamily: `'Heebo',sans-serif`, fontWeight: 800, fontSize: 24 }}>{`₪${sp}`}</span>
+                    <span style={{ color: COLORS.gray, fontSize: 12, fontFamily: `'Heebo',sans-serif` }}>{previewProduct === `shirt` ? (lang === `he` ? `חולצת אוברסייז` : lang === `ru` ? `Оверсайз-футболка` : `Oversize tee`) : (lang === `he` ? `ספל` : lang === `ru` ? `Кружка` : `Mug`)}</span>
+                  </div>
+                  <button
+                    onClick={() => handleOrder(previewProduct)}
+                    disabled={!design.design_url}
+                    onMouseOver={e => { if (design.design_url) e.currentTarget.style.background = COLORS.accentBtnHover; }}
+                    onMouseOut={e => { e.currentTarget.style.background = COLORS.accentBtn; }}
+                    style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 18px`, minHeight: 50, cursor: design.design_url ? `pointer` : `not-allowed`, opacity: design.design_url ? 1 : 0.5, fontFamily: `'Heebo',sans-serif`, fontSize: 16, fontWeight: 700, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, transition: `background 0.2s` }}>
+                    <AboutIcon name="cart" size={18} color="#fff" />{`${lang === `he` ? `הוסף לעגלה` : lang === `ru` ? `В корзину` : `Add to cart`} · ₪${sp}`}
+                  </button>
+                  {rv && rvBody && (
+                    <div style={{ display: `flex`, flexDirection: `column`, gap: 5, paddingTop: 2 }}>
+                      <ReviewStars rating={rv.rating || 5} label={(LANGS[lang]?.reviews || LANGS.he.reviews).aria} />
+                      <span style={{ color: COLORS.gray, fontSize: 12, fontFamily: `'Heebo',sans-serif`, fontStyle: `italic`, lineHeight: 1.5 }}>{`“${rvBody.length > 90 ? `${rvBody.slice(0, 88)}…` : rvBody}”${rvName ? ` — ${rvName}` : ``}`}</span>
+                    </div>
+                  )}
+                  <div style={{ display: `flex`, flexWrap: `wrap`, gap: `6px 14px`, color: COLORS.gray, fontSize: 11, fontFamily: `'Heebo',sans-serif` }}>
+                    <span style={{ display: `inline-flex`, alignItems: `center`, gap: 4 }}><AboutIcon name="lock" size={12} color={COLORS.gray} />{lang === `he` ? `תשלום מאובטח` : lang === `ru` ? `Безопасно` : `Secure`}</span>
+                    <span style={{ display: `inline-flex`, alignItems: `center`, gap: 4 }}><AboutIcon name="sparkles" size={12} color={COLORS.gray} />{lang === `he` ? `אחריות פגם` : lang === `ru` ? `Гарантия` : `Guarantee`}</span>
+                    <span style={{ display: `inline-flex`, alignItems: `center`, gap: 4 }}><AboutIcon name="truck" size={12} color={COLORS.gray} />{previewProduct === `mug` ? (lang === `he` ? `2–3 ימים` : lang === `ru` ? `2–3 дня` : `2–3 days`) : (lang === `he` ? `5–7 ימים` : lang === `ru` ? `5–7 дней` : `5–7 days`)}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Info — minWidth:0 so this grid item can shrink to its track; without
