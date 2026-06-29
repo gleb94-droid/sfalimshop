@@ -21,7 +21,8 @@ _(to fill — has real transformation photos 2013–2016; on-off; cynical food/d
 _(to fill — third year, journey ONLY, never advice/numbers-as-recommendation)_
 
 ## 🛠️ Building with AI
-_(to fill — non-coder, built website + distributors system + trading LMS in ~a month; stay humble with numbers)_
+- Non-coder who **builds real working systems with AI** — website + distributors system + trading LMS + a second-brain, all in ~a month.
+- **⚠️ Positioning (his words, 2026-06-29):** emphasize **what he CAN do** — building with AI is his **strength / superpower**. He **dislikes self-deprecating framing** like "I don't know how to code / I'm not a programmer" ("זה לא נשמע לי טוב, אני רוצה להדגיש מה אני כן יודע"). Frame it as capability: *"this is how I build anything I want — with AI."* Stay **humble on numbers/claims** (real > inflated), but **confident about the skill itself.**
 
 ## 👀 Audience
 - **Now:** mostly **people he personally knows too** — *mutual*, two-way connections (friends, acquaintances, his real-life circle), **not anonymous fans**. The profile was private and recently went public, so the followers are largely personal connections.
