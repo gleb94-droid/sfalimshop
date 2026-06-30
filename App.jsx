@@ -6308,7 +6308,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
   const [accountBusy, setAccountBusy] = useState(false);
   const [accountSent, setAccountSent] = useState(false);
   const [accountError, setAccountError] = useState("");
-  const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "", gift: false, giftMessage: "" });
+  const [form, setForm] = useState({ name: user?.user_metadata?.full_name || "", email: user?.email || "", phonePrefix: "050", phoneNumber: "", street: "", city: "", postalCode: "", notes: "", gift: false, giftMessage: "", marketingConsent: false });
   const [addrSuggestions, setAddrSuggestions] = useState([]);
   const [showAddrSugg, setShowAddrSugg] = useState(false);
   const [addrLoading, setAddrLoading] = useState(false);
@@ -7227,6 +7227,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             back_print: false,
             extra_prints: { kind: `sticker_pack`, pack: it.stickerPack || null, shipping_method: deliveryMethod, src: `pack`, slug: it.stickerPack?.slug || it.variantId || null },
             order_group: orderGroupId,
+            marketing_consent: form.marketingConsent,
           };
           if (user) {
             const { data: orderData, error } = await supabase.from(`orders`).insert(packRow).select().single();
@@ -7268,6 +7269,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
             back_print: false,
             order_group: orderGroupId,
             extra_prints: { shipping_method: deliveryMethod, src: `commission`, ctype: it.commissionType || `pet`, pid: it.productId, vid: it.variantId, slug: null, collage: it.collage || null },
+            marketing_consent: form.marketingConsent,
           };
           if (user) {
             const { data: orderData, error } = await supabase.from(`orders`).insert(commissionRow).select().single();
@@ -7372,6 +7374,7 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
           //   src = custom (fixed catalog) | bloom (pet_designs) ; pid/vid/slug
           //   identify the catalog entry / BLOOM design.
           extra_prints: { shipping_method: deliveryMethod, src: isCustomUpload ? "custom" : "bloom", pid: it.productId, vid: it.variantId, slug: it.bloomSlug || null, mug_shape: (it.productId === `mug` || it.productId === `magic_mug`) ? (it.mugShape || `classic`) : undefined },
+          marketing_consent: form.marketingConsent,
         };
 
         if (user) {
@@ -8195,6 +8198,12 @@ function OrderPage({ lang, user, setPage, pendingBloomItem, clearPendingBloomIte
                 {form.gift && (
                   <input id="order-gift-msg" type="text" maxLength={140} value={form.giftMessage} onChange={e => setForm(p => ({ ...p, giftMessage: e.target.value }))} placeholder={lang === "he" ? "הקדשה אישית (תיכתב על כרטיס)" : lang === "ru" ? "Личное сообщение (напишем на открытке)" : "Personal message (handwritten on a card)"} style={{ ...inputStyle, marginTop: 8 }} onFocus={e => e.target.style.borderColor = COLORS.accent} onBlur={e => e.target.style.borderColor = COLORS.border} />
                 )}
+              </div>
+              <div>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer", fontSize: 13, color: COLORS.gray }}>
+                  <input type="checkbox" checked={form.marketingConsent} onChange={e => setForm(p => ({ ...p, marketingConsent: e.target.checked }))} style={{ width: 16, height: 16, marginTop: 2, accentColor: COLORS.accent, cursor: "pointer", flexShrink: 0 }} />
+                  <span>{lang === "he" ? "אני מסכים/ה לקבל עדכונים ומבצעים מ-Sfalim Shop (ניתן לביטול בכל עת)" : lang === "ru" ? "Я согласен(а) получать обновления и акции от Sfalim Shop (можно отписаться в любое время)" : "I agree to receive updates and promotions from Sfalim Shop (unsubscribe anytime)"}</span>
+                </label>
               </div>
               <div style={{ background: "rgba(255,107,53,0.08)", border: `1px solid rgba(255,107,53,0.2)`, borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600 }}>{t.form.paymentNote}</div>
