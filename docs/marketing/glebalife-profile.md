@@ -42,10 +42,10 @@ His humour is **cynical, crude, deadpan, self-aware** — he reaches for the abs
 
 ## 🎵 Music for content (grounded in his real Spotify, ~2000 saved tracks)
 
-**Pick from his actual taste, never a generic guess.** His lanes: **moody R&B / trapsoul** (comfort zone: Chris Brown, The Weeknd, 6LACK, Bryson Tiller, Jacquees, Santino Le Saint) · **phonk / drift / Brazilian phonk** (his real high-energy: Eternxlkz, Scythermane, DVRST, anime-phonk) · **nu-metal / classic rock / Sleep Token** (SOAD, Linkin Park, A Perfect Circle, Polyphia) · **Hebrew/Mizrahi + Israeli psytrance** (roots) · **Russian/Ukrainian rap** (roots) · **Latin reggaeton** (Maluma, J Balvin) · **EDM/house** (Alesso) · **soul/MJ** · **afrobeats** (Rema, Burna Boy).
+**Pick from his actual taste, never a generic guess.** His lanes: **moody R&B / trapsoul** (comfort zone: Chris Brown, The Weeknd, 6LACK, Bryson Tiller, Jacquees, Santino Le Saint) · **phonk / drift / Brazilian phonk** (his real high-energy: Eternxlkz, Scythermane, DVRST, anime-phonk) · **nu-metal / classic rock / Sleep Token** (SOAD, Linkin Park, A Perfect Circle, Polyphia) · **Hebrew/Mizrahi + Israeli psytrance** (roots) · **Russian/Ukrainian rap** (roots) · **Latin reggaeton + corridos** (Maluma, J Balvin, Peso Pluma) · **EDM/house** (Alesso, slap-house) · **soul/MJ** · **blues / soul-blues** · **lo-fi / anime+game OST / score** · **afrobeats** (Rema, Burna Boy).
 
 **Mood → pick:** defiant/"they laughed"/attack → phonk · nu-metal · **ASAP Rocky** ✓ · cool/building/morning → moody R&B / soul / chill phonk · hype/party/launch → reggaeton or EDM · emotional/payoff → Sleep Token / R&B ballad / MJ · trendy-cool reach → afrobeats (he chose **Rema «Baby»** himself ✓).
-**⚠️ NOT his taste:** stoner/garage rock (Royal Blood, Black Keys, QOTSA) — earlier wrong guess; don't suggest it. *(Full profile in the AI OS brain → `Music/Music taste`.)*
+**⚠️ NOT his taste:** stoner/garage rock (Royal Blood, Black Keys, QOTSA) — earlier wrong guess; don't suggest it. **Note:** a second/shared Spotify playlist (*leonor.arias.acevedo*) leans modern trap/rage — that's her/shared, not Gleb's solo voice. *(Full profile in the AI OS brain → `Music/Music taste`.)*
 
 ## 🗒️ Post log — what worked
 
