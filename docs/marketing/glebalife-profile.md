@@ -50,6 +50,16 @@ His humour is **cynical, crude, deadpan, self-aware** — he reaches for the abs
 **Mood → pick:** defiant/"they laughed"/attack → phonk · nu-metal · **ASAP Rocky** ✓ · cool/building/morning → moody R&B / soul / chill phonk · hype/party/launch → reggaeton or EDM · emotional/payoff → Sleep Token / R&B ballad / MJ · trendy-cool reach → afrobeats (he chose **Rema «Baby»** himself ✓).
 **⚠️ NOT his taste:** stoner/garage rock (Royal Blood, Black Keys, QOTSA) — earlier wrong guess; don't suggest it. **Note:** a second/shared Spotify playlist (*leonor.arias.acevedo*) leans modern trap/rage — that's her/shared, not Gleb's solo voice. *(Full profile in the AI OS brain → `Music/Music taste`.)*
 
+## 📌 Instagram Highlights structure (set up 2026-07-01)
+
+> Gleb wants **every story routed to a Highlight** — so when helping with any story, ALSO tell him which Highlight to save it to. Keep titles short (Highlights truncate). Buckets:
+- **גליטר** — glitter HTV colour palette (cover: a vivid glitter swatch).
+- **MY CREW** — the flagship collage tees (cover: a MY CREW shirt photo, e.g. the cat collage).
+- **מאחורי הקלעים** — behind the scenes / printing / press / process (cover: Epson or the press).
+- **ממליצים** — reviews & customer results (cover: a review screenshot or a ★).
+- **ספלים** — mugs (cover: a mug photo).
+- _(personal glebalife worlds — building-with-AI setup, cats, fitness — can get their own later; keep shop buckets clean for now.)_
+
 ## 🗒️ Post log — what worked
 
 - **2026-06-28 · glebalife reel** — "laugh-not-support" trend. On-screen text shown as a **message/quote someone sent him** (his preferred format), his own final wording (no punctuation = more real): «חחח מסכן מה הוא מנסה חושב שיצא לו מזה משהו» → an **ASAP Rocky** audio clip as the defiant comeback → Gleb spins to reveal a shirt he designed + printed. **He chose this exact line himself** (condescending-pity doubter = the realest, most cutting one for him). _Result: TBD — ask him in a day or two._
