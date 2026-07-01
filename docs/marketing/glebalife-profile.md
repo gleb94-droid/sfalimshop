@@ -59,6 +59,7 @@ His humour is **cynical, crude, deadpan, self-aware** — he reaches for the abs
 - **ממליצים** — reviews & customer results (cover: a review screenshot or a ★).
 - **ספלים** — mugs (cover: a mug photo).
 - _(personal glebalife worlds — building-with-AI setup, cats, fitness — can get their own later; keep shop buckets clean for now.)_
+- **🎨 Branded cover set made 2026-07-01** — 9 cohesive Highlight covers (dark bg + orange icon + warm glow, matches the logo) on Gleb's Desktop `highlight-covers/`: 1-glitter (wand+sparkles) · 2-mycrew (shirt) · 3-mugs (mug) · 4-behind-scenes (printer) · 5-reviews (star) · 6-cats (cat) · 7-building-ai (robot) · 8-fitness (dumbbell) · 9-trading (chart-line). Built via Font-Awesome-on-brand-bg → screenshot → crop pipeline (repeatable). **Don't create empty Highlights** — add one only when there are 1-2 stories for it. ⚠️ **מסחר/trading = journey only, no advice/numbers.**
 
 ## 🗒️ Post log — what worked
 
