@@ -50,6 +50,12 @@ His humour is **cynical, crude, deadpan, self-aware** — he reaches for the abs
 **Mood → pick:** defiant/"they laughed"/attack → phonk · nu-metal · **ASAP Rocky** ✓ · cool/building/morning → moody R&B / soul / chill phonk · hype/party/launch → reggaeton or EDM · emotional/payoff → Sleep Token / R&B ballad / MJ · trendy-cool reach → afrobeats (he chose **Rema «Baby»** himself ✓).
 **⚠️ NOT his taste:** stoner/garage rock (Royal Blood, Black Keys, QOTSA) — earlier wrong guess; don't suggest it. **Note:** a second/shared Spotify playlist (*leonor.arias.acevedo*) leans modern trap/rage — that's her/shared, not Gleb's solo voice. *(Full profile in the AI OS brain → `Music/Music taste`.)*
 
+## 🪪 Profile snapshot (2026-07-01)
+- Handle **@glebalife** (verified ✓), real name shown **Gleb Andrienko**, **~1.67k followers · ~514 posts** (baseline).
+- **Bio (his own words):** *"מייסד ספלים שופ · הדפסות חיות מחמד / בניתי הכל לבד מאפס 🚀 / אבא גאה לשני חתולים · באר שבע / 👇 החנות בקישור"* → link `sfalimshop.com`.
+- ⚠️ **Note on the no-brag rule:** his bio proudly states *"בניתי הכל לבד מאפס"* — so "built it all myself" IS his core identity line **once, in the bio**. The rule is only **don't repeat it on every story/caption** (that's what reads as showing off). Concept = fine as identity; repetition = no.
+- **Highlights live so far:** **Glitter** (branded wand cover ✓) + **Made by Gleba** — his **FIRST** highlight and a **master archive/portfolio of ALL his work** (Cricut cuts, presses, designs, everything, lots of stories). **Plan (his):** keep it as-is = the "everything I've ever made" portfolio; going forward **sort new stories into the focused topic highlights** (Glitter, Reviews, Studio…). Keep the name "Made by Gleba" (distinctive, personal, on-brand) — just wants a matching branded icon.
+
 ## 📌 Instagram Highlights structure (set up 2026-07-01)
 
 > Gleb wants **every story routed to a Highlight** — so when helping with any story, ALSO tell him which Highlight to save it to. Keep titles short (Highlights truncate). Buckets:
