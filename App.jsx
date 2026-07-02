@@ -196,6 +196,44 @@ function WhatsAppFab({ lang }) {
   );
 }
 
+// ============ "Order on WhatsApp" — direct-DM purchase path (PetModal) ============
+// Reality check (2026-07): warm customers (friends-of-friends from the owner's
+// personal socials) buy by DM, not the checkout — this gives them their native
+// path right at the decision point. Secondary style (outline, WhatsApp green) so
+// the add-to-cart CTA stays primary; opens WhatsApp with the character + product
+// prefilled. Pure lead handoff — NO cart/payment/DB change.
+function WaOrderButton({ lang, design, previewProduct, compact }) {
+  if (!/^\d{6,15}$/.test(WHATSAPP_NUMBER || ``)) return null;
+  if (!previewProduct || !design) return null;
+  const petName = (lang === `ru` && design.name_ru) || (lang === `en` && design.name_en) || design.name_he || ``;
+  const isMugLike = previewProduct === `mug` || previewProduct === `magic_mug`;
+  const prodWord = isMugLike
+    ? (lang === `he` ? `ספל` : lang === `ru` ? `кружку` : `a mug`)
+    : previewProduct === `socks`
+    ? (lang === `he` ? `גרביים` : lang === `ru` ? `носки` : `socks`)
+    : (lang === `he` ? `חולצה` : lang === `ru` ? `футболку` : `a tee`);
+  const prefill = lang === `he`
+    ? `היי! אשמח להזמין ${prodWord} עם ${petName} 🧡`
+    : lang === `ru`
+    ? `Здравствуйте! Хочу заказать ${prodWord} с дизайном «${petName}» 🧡`
+    : `Hi! I'd love to order ${prodWord} with the ${petName} design 🧡`;
+  const label = lang === `he` ? `להזמין בוואטסאפ` : lang === `ru` ? `Заказать в WhatsApp` : `Order on WhatsApp`;
+  const hint = lang === `he` ? `עונים מהר, אפשר לשאול הכל` : lang === `ru` ? `отвечаем быстро, можно всё спросить` : `quick replies, ask us anything`;
+  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(prefill)}`;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`${label} — ${petName}`}
+      onMouseOver={e => { e.currentTarget.style.background = `rgba(37,211,102,0.12)`; }}
+      onMouseOut={e => { e.currentTarget.style.background = `transparent`; }}
+      style={{ width: `100%`, boxSizing: `border-box`, display: `flex`, flexDirection: `column`, alignItems: `center`, justifyContent: `center`, gap: 3, background: `transparent`, border: `1.5px solid rgba(37,211,102,0.5)`, color: `#25D366`, borderRadius: 10, padding: compact ? `9px 14px` : `11px 18px`, minHeight: compact ? 44 : 50, textDecoration: `none`, fontFamily: `'Heebo',sans-serif`, fontSize: compact ? 13.5 : 14.5, fontWeight: 700, transition: `background 0.2s`, marginBottom: compact ? 0 : 16 }}>
+      <span style={{ display: `inline-flex`, alignItems: `center`, gap: 8 }}>
+        <svg width={compact ? 16 : 18} height={compact ? 16 : 18} viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.892c0 2.096.549 4.142 1.595 5.945L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.582 0 11.94-5.335 11.944-11.893a11.821 11.821 0 0 0-3.487-8.46z" /></svg>
+        <span>{label}</span>
+      </span>
+      <span style={{ color: `rgba(255,255,255,0.45)`, fontWeight: 400, fontSize: compact ? 10.5 : 11 }}>{hint}</span>
+    </a>
+  );
+}
+
 // ============ Sfali — the on-site AI assistant widget ============
 // A friendly BLOOM-pup helper. FAB (above the WhatsApp button) → chat panel.
 // Trilingual, RTL-aware, portaled to <body> so the a11y CSS zoom on #root can't
@@ -14369,6 +14407,7 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
                     style={{ width: `100%`, background: COLORS.accentBtn, color: `#fff`, border: `none`, borderRadius: 10, padding: `14px 18px`, minHeight: 50, cursor: design.design_url ? `pointer` : `not-allowed`, opacity: design.design_url ? 1 : 0.5, fontFamily: `'Heebo',sans-serif`, fontSize: 16, fontWeight: 700, display: `flex`, alignItems: `center`, justifyContent: `center`, gap: 8, transition: `background 0.2s` }}>
                     <AboutIcon name="cart" size={18} color="#fff" />{`${lang === `he` ? `הוסף לעגלה` : lang === `ru` ? `В корзину` : `Add to cart`} · ₪${sp}`}
                   </button>
+                  <WaOrderButton lang={lang} design={design} previewProduct={previewProduct} compact />
                   {rv && rvBody && (
                     <div style={{ display: `flex`, flexDirection: `column`, gap: 5, paddingTop: 2 }}>
                       <ReviewStars rating={rv.rating || 5} label={(LANGS[lang]?.reviews || LANGS.he.reviews).aria} />
@@ -14513,6 +14552,8 @@ function PetModal({ design, lang, name, animal, tagline, t, preview = false, goT
               </button>
               </div>
             )}
+            {/* WhatsApp order path — how the warm audience actually buys (DM > checkout). */}
+            {previewProduct && <WaOrderButton lang={lang} design={design} previewProduct={previewProduct} />}
             {/* Made-to-order caption. Reassures the customer that delivery
                 isn't same-day and sets expectations on production lead time. */}
             {(t.madeToOrder || t.shipFlat) && (
